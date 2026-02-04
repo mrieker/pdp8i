@@ -1,4 +1,18 @@
 
+# assemble the given opcode and deposit in memory
+proc assem {addr args} {
+    wrmem $addr [asmop $addr $args]
+}
+
+# disassemble the given range of memory
+proc disas {loaddr {hiaddr ""}} {
+    if {$hiaddr == ""} {set hiaddr $loaddr}
+    for {set addr $loaddr} {$addr <= $hiaddr} {incr addr} {
+        set opcd [rdmem $addr]
+        puts [format "  %04o:  %s" $addr [disop $addr $opcd]]
+    }
+}
+
 # reset to power-up state
 proc hardreset {} {
     res 1
@@ -6,11 +20,16 @@ proc hardreset {} {
     res 0
 }
 
+# deposit simple test program in memory
+# followed with 'runloop' command to run it
 proc isztest {} {
-    wrmem 0100 02110    ;# ISZ 0110
-    wrmem 0101 05100    ;# JMP 0100
-    wrmem 0102 07001    ;# IAC
-    wrmem 0103 05100    ;# JMP 0100
+    hardreset
+    assem 0100 ISZ 0110
+    assem 0101 JMP 0100
+    assem 0102 IAC
+    assem 0103 JMP 0100
+    disas 0100 0103
+    startat 0100
 }
 
 # read a light bulb
@@ -107,6 +126,28 @@ proc light {args} {
     return $retval
 }
 
+# get all lights in formatted string
+proc lights {} {
+    set deco [light pc ma mb ac mq ir st ion pau run sc df if l]
+    set pctr [octal [lindex $deco 0]]
+    set madr [octal [lindex $deco 1]]
+    set mbuf [octal [lindex $deco 2]]
+    set acum [octal [lindex $deco 3]]
+    set mquo [octal [lindex $deco 4]]
+    set opcd [lindex $deco 5]
+    set stat [lindex $deco 6]
+    set ion  [lindex $deco 7]
+    set pau  [lindex $deco 8]
+    set run  [lindex $deco 9]
+    set sc   [format "%02o" [lindex $deco 10]]
+    set dfld [lindex $deco 11]
+    set ifld [lindex $deco 12]
+    set link [lindex $deco 13]
+    if {$opcd == ""} {set opcd "---"}
+    if {$stat == ""} {set stat "---"}
+    return "PC=$pctr MA=$madr MB=$mbuf L=$link AC=$acum MQ=$mquo IR=$opcd ST=$stat ION=$ion PAU=$pau RUN=$run SC=$sc DF=$dfld IF=$ifld"
+}
+
 proc octal {n} {
     return [format "%04o" $n]
 }
@@ -157,26 +198,7 @@ proc runstep {} {
     if {$lightrows != $newlbrows} {     ;# see if any change in lb row contents
         set lightrows $newlbrows
         if {! $runquiet} {
-            set deco [light pc ma mb ac mq ir st ion pau run sc df if l]
-            set pctr [octal [lindex $deco 0]]
-            set madr [octal [lindex $deco 1]]
-            set mbuf [octal [lindex $deco 2]]
-            set acum [octal [lindex $deco 3]]
-            set mquo [octal [lindex $deco 4]]
-            set opcd [lindex $deco 5]
-            set stat [lindex $deco 6]
-            set ion  [lindex $deco 7]
-            set pau  [lindex $deco 8]
-            set run  [lindex $deco 9]
-            set sc   [format "%02o" [lindex $deco 10]]
-            set dfld [lindex $deco 11]
-            set ifld [lindex $deco 12]
-            set link [lindex $deco 13]
-            if {$opcd == ""} {set opcd "---"}
-            if {$stat == ""} {set stat "---"}
-            puts [format \
-                "%12d: PC=%s MA=%s MB=%s L=%s AC=%s MQ=%s IR=%s ST=%s ION=%s PAUSE=%s RUN=%s SC=%s DF=%s IF=%s" \
-                $c $pctr $madr $mbuf $link $acum $mquo $opcd $stat $ion $pau $run $sc $dfld $ifld]
+            puts [format "%12d: %s" $c [lights]]
         }
     }
 }

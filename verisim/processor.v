@@ -10,7 +10,7 @@ module processor (
     input iBRKWRM,              // break cycle writes memory
     input iCAINC,               // curad cycle increments address word
     input iHOLD,                // hold internal clocking (stretch cycle)
-    input iINTINHIB,            // inhibit interrupt processing
+    input iINTINH,              // inhibit interrupt processing
     input iINTRQST,             // request interrupt
     input iIOSKIP,              // increment PC at end of IO pulse
     input[11:00] iDMAADDR,      // break cycle address
@@ -89,7 +89,7 @@ module processor (
     reg hgnt, ts1, ts2, ts3, iop1, iop2, iop4, ts4;
     reg tp1, tp2, tp3, iog1, iog2, iog4, ioge, tp4;
     reg hreq;
-    wire ioinst = (ireg[11:10] == 3);
+    wire ioinst = (ireg[11:09] == 6);
 
     wire newhgnt = (ts4 | hgnt) & hreq;
 
@@ -200,7 +200,7 @@ module processor (
         (iINTRQST &                                                     // some device is requesting an interrupt
                     intenabled &                                        // 6001 was executed at least one instruction ago
                     ~ ((ireg == 6) & (mbuf[08:00] == 9'o002)) &         // not blocked by current 6002 (IOF) instruction
-                    (~ iINTINHIB | oJMPJMS) &                           // not blocked by prior 62x2/62x3 until jump or currently jumping
+                    (~ iINTINH | oJMPJMS) &                             // not blocked by prior 62x2/62x3 until jump or currently jumping
                     ~ ((ireg == 6) & ((mbuf[08:00] & 9'o706) == 9'o202))) ? // not blocked by 62x2/62x3 currently executing
             MS_INTAK :
 
@@ -267,7 +267,6 @@ module processor (
                     oFLDSEL <= FS_INST;
                 end
                 if (lastswstart & ~ swSTART) begin
-                    $display ("processor*: start at %04o", madr);
                     hreq <= 0;
                 end
             end
@@ -278,7 +277,6 @@ module processor (
 
             // clock in memory data on posedge TP1
             if (~ lasttp1 & tp1) begin
-                if (majstate == MS_FETCH) $display ("processor*: fetched %04o from %04o", iMEMBUS, madr);
                 mbuf <= iMEMBUS;
             end
 
@@ -301,10 +299,10 @@ module processor (
                         4: mbuf <= pctr;        // jms
                     endcase
                     MS_WRDCT: begin
-                        mbuf <= mbuf + 1;
                         // middle of wc with count just read, detect count overflow
                         // PDP-8/L clocks it with TP2 (vol 2, p5 D-5)
                         oBWCOV <= (mbuf == 12'o7777);
+                        mbuf <= mbuf + 1;
                     end
                     MS_CURAD: if (iCAINC) begin
                         mbuf <= mbuf + 1;
@@ -428,7 +426,7 @@ module processor (
                 if (mbuf[08:00] == 1) begin     // 06001 = ION
                     intdelayed <= 1;
                 end
-                if (mbuf[08:00] == 2) begin     // 06002 = ION
+                if (mbuf[08:00] == 2) begin     // 06002 = IOF
                     intdelayed <= 0;
                     intenabled <= 0;
                 end

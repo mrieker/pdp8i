@@ -9,15 +9,26 @@ VFILES := \
 	memory.v \
 	processor.v \
 
+OFILES := \
+	verimain.$(MACH).o \
+	assemble.$(MACH).o \
+	disassemble.$(MACH).o \
+	readprompt.$(MACH).o \
+	verilated.$(MACH).o 
 
 default: verimain.$(MACH)
 
-verimain.$(MACH): verimain.$(MACH).o readprompt.$(MACH).o verilated.$(MACH).o obj_dir/Vbackplane__ALL.a
-	$(GPP) -g -o verimain.$(MACH) readprompt.$(MACH).o verimain.$(MACH).o \
-		verilated.$(MACH).o obj_dir/Vbackplane__ALL.a -lreadline -ltcl8.6
+verimain.$(MACH): $(OFILES) obj_dir/Vbackplane__ALL.a
+	$(GPP) -g -o verimain.$(MACH) $(OFILES) obj_dir/Vbackplane__ALL.a -lreadline -ltcl8.6
 
 verimain.$(MACH).o: verimain.cc obj_dir/Vbackplane.h
 	$(GPP) -g -fPIC -c -o verimain.$(MACH).o -I/usr/share/verilator/include/ verimain.cc
+
+assemble.$(MACH).o: assemble.cc
+	$(GPP) -g -fPIC -c -o assemble.$(MACH).o assemble.cc
+
+disassemble.$(MACH).o: disassemble.cc
+	$(GPP) -g -fPIC -c -o disassemble.$(MACH).o disassemble.cc
 
 readprompt.$(MACH).o: readprompt.cc
 	$(GPP) -g -fPIC -c -o readprompt.$(MACH).o readprompt.cc

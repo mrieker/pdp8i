@@ -51,10 +51,12 @@ char const *readprompt (char const *prompt)
 
     // suppress control-C while reading
     struct termios oldattrs;
-    if (tcgetattr (STDIN_FILENO, &oldattrs) < 0) abort ();
-    struct termios newattrs = oldattrs;
-    newattrs.c_cc[VINTR] = 0;
-    if (tcsetattr (STDIN_FILENO, TCSANOW, &newattrs) < 0) abort ();
+    if (isatty (STDIN_FILENO) > 0) {
+        if (tcgetattr (STDIN_FILENO, &oldattrs) < 0) abort ();
+        struct termios newattrs = oldattrs;
+        newattrs.c_cc[VINTR] = 0;
+        if (tcsetattr (STDIN_FILENO, TCSANOW, &newattrs) < 0) abort ();
+    }
 
 readit:
     line = readline (prompt);
@@ -73,6 +75,8 @@ readit:
     }
     if (lastline != NULL) free (lastline);
     lastline = line;
-    if (tcsetattr (STDIN_FILENO, TCSANOW, &oldattrs) < 0) abort ();
+    if (isatty (STDIN_FILENO) > 0) {
+        if (tcsetattr (STDIN_FILENO, TCSANOW, &oldattrs) < 0) abort ();
+    }
     return lastline;
 }

@@ -1,16 +1,37 @@
 
 module backplane (
-    input zclock,       // fpga 100MHz clock
-    input zreset,       // fpga reset
+    input zclock,                   // fpga 100MHz clock
+    input zreset,                   // fpga reset
 
-    input[27:04] gpin,  // gpio connector
-    output[27:04] gpout
+    input[27:04] gpin,              // gpio connector
+    output[27:04] gpout,
+
+    input i3CYCLE,                  // do 3-cycle break
+    input iACCLEAR,                 // io pulse clears AC
+    input iBRKRQST,                 // requesting break
+    input iBRKWRM,                  // break cycle writes memory
+    input iCAINC,                   // curad cycle increments address word
+    input iHOLD,                    // hold internal clocking (stretch cycle)
+    input iINTINH,                  // inhibit interrupt processing
+    input iINTRQST,                 // request interrupt
+    input iIOSKIP,                  // increment PC at end of IO pulse
+    input[14:00] iDMAADDR,          // device sending address for DMA
+    input[11:00] iDMADATA,          // device sending write data for DMA
+    input[11:00] iINBUS,            // device sending data for PIO
+    output oBREAK,                  // currently doing BREAK (DMA) cycle
+    output oBWCOV,                  // 3-cycle DMA wordcount overflowed
+    output oIOP1, oIOP2, oIOP4,     // io instruction pulses
+    output oTP1, oTP2, oTP3, oTP4, oTS1, oTS2, oTS3, oTS4,
+    output[11:00] oMADR, oMBUF, oACUM,
+
+    wire[11:00] pctr,
+    output[3:0] majst,
+    output link
 );
 
-    wire[11:00] pctr, madr, mbuf, acum, mquo;
+    wire[11:00] mquo;
     wire[11:09] ireg;
-    wire[3:0] majst;
-    wire intenabd, link, paused, running;
+    wire intenabd, paused, running;
     wire[4:0] shcnt;
     wire[2:0] dfield, ifield;
 
@@ -20,9 +41,7 @@ module backplane (
     wire swcont, swstop, swsstep, swsinst;
 
     wire[11:00] membus;
-
-    wire oBREAK, oBWCOV, oINTACK, oIOP1, oIOP2, oIOP4, oJMPJMS;
-    wire oTP1, oTP2, oTP3, oTP4, oTS1, oTS2, oTS3, oTS4;
+    wire oINTACK, oJMPJMS;
     wire[1:0] oFLDSEL;
 
     console coninst (
@@ -33,9 +52,9 @@ module backplane (
         .gpout (gpout),
 
         .lbpctr (pctr),
-        .lbmadr (madr),
-        .lbmbuf (mbuf),
-        .lbacum (acum),
+        .lbmadr (oMADR),
+        .lbmbuf (oMBUF),
+        .lbacum (oACUM),
         .lbmquo (mquo),
         .lbireg (ireg),
         .lbmajst (majst),
@@ -66,8 +85,8 @@ module backplane (
 
         .ts1  (oTS1),
         .ts3  (oTS3),
-        .xadr ({ 3'b0, madr }),
-        .mbuf (mbuf),
+        .xadr ({ 3'b0, oMADR }),
+        .mbuf (oMBUF),
         .mbus (membus)
     );
 
@@ -76,18 +95,18 @@ module backplane (
         .zreset (zreset),
 
         // bus signals
-        .i3CYCLE (0),           // do 3-cycle break
-        .iACCLEAR (0),          // io pulse clears AC
-        .iBRKRQST (0),          // requesting break
-        .iBRKWRM (0),           // break cycle writes memory
-        .iCAINC (0),            // curad cycle increments address word
-        .iHOLD (0),             // hold internal clocking (stretch cycle)
-        .iINTINHIB (0),         // inhibit interrupt processing
-        .iINTRQST (0),          // request interrupt
-        .iIOSKIP (0),           // increment PC at end of IO pulse
-        .iDMAADDR (0),          // break cycle address
-        .iDMADATA (0),          // break cycle write data
-        .iINBUS (0),            // IO data being read from device
+        .i3CYCLE (i3CYCLE),     // do 3-cycle break
+        .iACCLEAR (iACCLEAR),   // io pulse clears AC
+        .iBRKRQST (iBRKRQST),   // requesting break
+        .iBRKWRM (iBRKWRM),     // break cycle writes memory
+        .iCAINC (iCAINC),       // curad cycle increments address word
+        .iHOLD (iHOLD),         // hold internal clocking (stretch cycle)
+        .iINTINH (iINTINH),     // inhibit interrupt processing
+        .iINTRQST (iINTRQST),   // request interrupt
+        .iIOSKIP (iIOSKIP),     // increment PC at end of IO pulse
+        .iDMAADDR (iDMAADDR[11:00]),  // break cycle address
+        .iDMADATA (iDMADATA),   // break cycle write data
+        .iINBUS (iINBUS),       // IO data being read from device
         .iMEMBUS (membus),      // data being read from memory
         .oBREAK (oBREAK),       // doing BREAK cycle
         .oBWCOV (oBWCOV),       // break wordcount overflowed
@@ -107,9 +126,9 @@ module backplane (
                                 // ...except when IO pulses wedged in here
         .oTS4 (oTS4),
         .oFLDSEL (oFLDSEL),     // field select (0=inst; 1=data; 2=zero; 3=break)
-        .oACUM (acum),          // IO data being written to device
-        .oMADR (madr),          // memory address being accessed
-        .oMBUF (mbuf),          // data being written to memory
+        .oACUM (oACUM),         // IO data being written to device
+        .oMADR (oMADR),         // memory address being accessed
+        .oMBUF (oMBUF),         // data being written to memory
 
         // lights
         .lbPCTR (pctr),
