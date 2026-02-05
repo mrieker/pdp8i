@@ -19,7 +19,8 @@ module processor (
     input[11:00] iMEMBUS,       // data being read from memory
     output oBREAK,              // doing BREAK cycle
     output reg oBWCOV,          // break wordcount overflowed
-    output oINTACK,             // doing INTACK cycle
+    output oEXEFET,             // about to do EXEC or FETCH cycle
+    output oINTACK,             // about to do INTACK cycle
     output oIOP1,               // IO pulses
     output oIOP2,               // ...400nS each
     output oIOP4,               // ...300nS spacing
@@ -456,7 +457,7 @@ module processor (
                     //                  else FETCH, use effective address from instr space
                     MS_EXEC: begin
                         madr    <= (majstate == MS_DEFER) ? mbuf : effaddr;
-                        oFLDSEL <= (majstate == MS_DEFER) ? FS_DATA : FS_INST;
+                        oFLDSEL <= (majstate == MS_DEFER) & ~ ireg[11] ? FS_DATA : FS_INST;
                     end
 
                     // wordcount/current address: read values from page 0
@@ -517,8 +518,9 @@ module processor (
     //  output connections  //
     //////////////////////////
 
-    assign oBREAK = (majstate == MS_BREAK);
-    assign oINTACK = (majstate == MS_INTAK);
+    assign oBREAK  = (majstate == MS_BREAK);
+    assign oEXEFET = (nxtmajst == MS_EXEC) | (nxtmajst == MS_FETCH);
+    assign oINTACK = (nxtmajst == MS_INTAK);    // valid from just after posedge TS3 of INTACK cycle to posedge TS3 of INTACK cycle
     assign oIOP1 = iop1;
     assign oIOP2 = iop2;
     assign oIOP4 = iop4;

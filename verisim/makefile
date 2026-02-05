@@ -6,6 +6,7 @@ GPP    := g++ $(CFLAGS) -std=c++11 -g -Wall
 VFILES := \
 	backplane.v \
 	console.v \
+	memext.v \
 	memory.v \
 	processor.v \
 
@@ -19,7 +20,7 @@ OFILES := \
 default: verimain.$(MACH)
 
 verimain.$(MACH): $(OFILES) obj_dir/Vbackplane__ALL.a
-	$(GPP) -g -o verimain.$(MACH) $(OFILES) obj_dir/Vbackplane__ALL.a -lreadline -ltcl8.6
+	$(GPP) -g -o verimain.$(MACH) $(OFILES) obj_dir/Vbackplane__ALL.a /home/mrieker/nfs/tcl8.6.17/install/lib/libtcl8.6.so -lreadline
 
 verimain.$(MACH).o: verimain.cc obj_dir/Vbackplane.h
 	$(GPP) -g -fPIC -c -o verimain.$(MACH).o -I/usr/share/verilator/include/ verimain.cc

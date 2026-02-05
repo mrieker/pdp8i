@@ -203,7 +203,8 @@ proc simtest {} {
                     if {($opcode & 07000) != 06000} break
                     if {$opcode == 06001} break
                     if {$opcode == 06002} break
-                    ;#if {($opcode & 07700) == 06200} break
+                    if {($opcode & 07704) == 06200} break
+                    if {($opcode & 07707) == 06204} break
                 }
                 puts -nonewline [format "OP=%04o  %s" $opcode [disop $pctr $opcode]]
 
@@ -319,7 +320,7 @@ proc simtest {} {
                                             set acbits [expr {($xmem_savedifld << 3) | $xmem_saveddfld}]
                                         }
                                         4 {             ;# 6244
-                                            puts -nonewline [format " [ifaj=%o dfld=%o]" $xmem_savedifld $xmem_saveddfld]
+                                            puts -nonewline [format " (ifaj=%o dfld=%o)" $xmem_savedifld $xmem_saveddfld]
                                             set xmem_dfld          $xmem_saveddfld
                                             set xmem_ifldafterjump $xmem_savedifld
                                         }
@@ -567,7 +568,7 @@ proc memorycyclx {state field addr rdata rdbkdata wtbkdata vfywaddr vfywdata} {
         }
 
         ;# cpu should be outputting address we expect
-        verify15 [bus oMADR] [expr {($field << 12) | $addr}] "XMA bad at beginning of mem cycle"
+        verify15 [expr {([bus memfield] << 12) | [bus oMADR]}] [expr {($field << 12) | $addr}] "XMA bad at beginning of mem cycle"
 
         ;# should now be fully transitioned to the major state
         verify12 [bus majst] $state "bad state during mem cycle"
@@ -631,7 +632,7 @@ proc requestdmaorint {state rdata} {
     } elseif {! $brkrequest} {
         set brkrequest [expr {[randbits 8] == 0}]
         if {$brkrequest} {
-            set dmafield  0;#????[randbits 3]
+            set dmafield  [randbits 3]
             set dmaaddr   [randbits 12]
             set dmadatain [randbits 1]          ;# 0=read memory; 1=write memory
             set dmawdata  [randbits 12]

@@ -12,7 +12,6 @@ module backplane (
     input iBRKWRM,                  // break cycle writes memory
     input iCAINC,                   // curad cycle increments address word
     input iHOLD,                    // hold internal clocking (stretch cycle)
-    input iINTINH,                  // inhibit interrupt processing
     input iINTRQST,                 // request interrupt
     input iIOSKIP,                  // increment PC at end of IO pulse
     input[14:00] iDMAADDR,          // device sending address for DMA
@@ -24,7 +23,8 @@ module backplane (
     output oTP1, oTP2, oTP3, oTP4, oTS1, oTS2, oTS3, oTS4,
     output[11:00] oMADR, oMBUF, oACUM,
 
-    wire[11:00] pctr,
+    output[11:00] pctr,
+    output[2:0] memfield,
     output[3:0] majst,
     output link
 );
@@ -41,7 +41,7 @@ module backplane (
     wire swcont, swstop, swsstep, swsinst;
 
     wire[11:00] membus;
-    wire oINTACK, oJMPJMS;
+    wire oEXEFET, oINTACK, oJMPJMS;
     wire[1:0] oFLDSEL;
 
     console coninst (
@@ -66,17 +66,46 @@ module backplane (
         .lbif (ifield),
         .lblink (link),
 
-        .swreg (swreg),
-        .swdfld (swdfld),
-        .swifld (swifld),
-        .swstart (swstart),
-        .swldad (swldad),
-        .swdep (swdep),
-        .swexam (swexam),
-        .swcont (swcont),
-        .swstop (swstop),
-        .swsstep (swsstep),
-        .swsinst (swsinst)
+        .swreg (swreg),         //toggle switch register
+        .swdfld (swdfld),       //toggle data field
+        .swifld (swifld),       //toggle inst field
+        .swstart (swstart),     //button start (debounced)
+        .swldad (swldad),       //button load address
+        .swdep (swdep),         //button deposit (debounced)
+        .swexam (swexam),       //button examine (debounced)
+        .swcont (swcont),       //button continue (debounced)
+        .swstop (swstop),       //button stop
+        .swsstep (swsstep),     //toggle single cycle
+        .swsinst (swsinst)      //toggle single instruction
+    );
+
+    wire iINTINH;
+    wire[11:00] mexinbus;
+
+    memext mexinst (
+        .zclock (zclock),
+        .zreset (zreset),
+
+        .businit (swstart),
+        .iop1 (oIOP1),
+        .iop2 (oIOP2),
+        .iop4 (oIOP4),
+        .ldaddrsw (swldad),
+        .tp3 (oTP3),
+        .exefet (oEXEFET),
+        .intack (oINTACK),
+        .jmpjms (oJMPJMS),
+
+        .dmafield (iDMAADDR[14:12]),
+        .dfldsw (swdfld),
+        .ifldsw (swifld),
+        .fldsel (oFLDSEL),
+        .acum (oACUM),
+        .mbuf (oMBUF),
+
+        .intinh (iINTINH),
+        .field (memfield),
+        .inbus (mexinbus)
     );
 
     memory meminst (
@@ -85,7 +114,7 @@ module backplane (
 
         .ts1  (oTS1),
         .ts3  (oTS3),
-        .xadr ({ 3'b0, oMADR }),
+        .xadr ({ memfield, oMADR }),
         .mbuf (oMBUF),
         .mbus (membus)
     );
@@ -106,10 +135,11 @@ module backplane (
         .iIOSKIP (iIOSKIP),     // increment PC at end of IO pulse
         .iDMAADDR (iDMAADDR[11:00]),  // break cycle address
         .iDMADATA (iDMADATA),   // break cycle write data
-        .iINBUS (iINBUS),       // IO data being read from device
+        .iINBUS (iINBUS | mexinbus),  // IO data being read from device
         .iMEMBUS (membus),      // data being read from memory
         .oBREAK (oBREAK),       // doing BREAK cycle
         .oBWCOV (oBWCOV),       // break wordcount overflowed
+        .oEXEFET (oEXEFET),     // doing EXEC or FETCH cycle
         .oINTACK (oINTACK),     // doing INTACK cycle
         .oIOP1 (oIOP1),         // IO pulses
         .oIOP2 (oIOP2),         // ...400nS each

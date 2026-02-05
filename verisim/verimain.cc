@@ -148,7 +148,6 @@ static int cmd_bus (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj
         {  1, OFFS (iBRKWRM),  "iBRKWRM"  },   // break cycle writes memory
         {  1, OFFS (iCAINC),   "iCAINC"   },   // curad cycle increments address word
         {  1, OFFS (iHOLD),    "iHOLD"    },   // hold internal clocking (stretch cycle)
-        {  1, OFFS (iINTINH),  "iINTINH"  },   // inhibit interrupt processing
         {  1, OFFS (iINTRQST), "iINTRQST" },   // request interrupt
         {  1, OFFS (iIOSKIP),  "iIOSKIP"  },   // increment PC at end of IO pulse
         { 15, OFFS (iDMAADDR), "iDMAADDR" },   // device sending address for DMA
@@ -157,15 +156,16 @@ static int cmd_bus (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj
 
         {  1, OFFS (link),     "link"     },
         {  4, OFFS (majst),    "majst"    },
+        {  3, OFFS (memfield), "memfield" },
         { 12, OFFS (pctr),     "pctr"     },
 
         { 12, OFFS (oACUM),    "oACUM"    },
         {  1, OFFS (oBREAK),   "oBREAK"   },   // currently doing BREAK (DMA) cycle
         {  1, OFFS (oBWCOV),   "oBWCOV"   },   // 3-cycle DMA wordcount overflowed
-        {  1, OFFS (oIOP1),    "oIOP1"    },
+        {  1, OFFS (oIOP1),    "oIOP1"    },   // io instruction pulses
         {  1, OFFS (oIOP2),    "oIOP2"    },
-        {  1, OFFS (oIOP4),    "oIOP4"    },   // io instruction pulses
-        { 15, OFFS (oMADR),    "oMADR"    },
+        {  1, OFFS (oIOP4),    "oIOP4"    },
+        { 12, OFFS (oMADR),    "oMADR"    },
         { 12, OFFS (oMBUF),    "oMBUF"    },
         {  1, OFFS (oTP1),     "oTP1"     },
         {  1, OFFS (oTP2),     "oTP2"     },
