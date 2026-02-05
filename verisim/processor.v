@@ -77,7 +77,7 @@ module processor (
     reg[11:00] acum, madr, mbuf, pctr;
     reg[11:09] ireg;
     reg[3:0] majstate, nxtmajst;
-    reg intdelayed, intenabled, irusedf, link;
+    reg intdelayed, intenabled, link;
     reg lastswcont, lastswdep, lastswexam, lastswldad, lastswstart;
 
     ///////////////////
@@ -229,7 +229,7 @@ module processor (
                 // load address - get address from switches and read memory location
                 if (~ lastswldad & swLDAD) begin
                     madr <= swREG;
-                    oFLDSEL <= FS_INST;
+                    oFLDSEL  <= FS_INST;
                     majstate <= MS_EXAM;
                 end
                 if (lastswldad & ~ swLDAD) begin
@@ -239,7 +239,7 @@ module processor (
                 // examine - read next location
                 if (~ lastswexam & swEXAM) begin
                     if (majstate == MS_EXAM) madr <= madr + 1;
-                    oFLDSEL <= FS_INST;
+                    oFLDSEL  <= FS_INST;
                     majstate <= MS_EXAM;
                 end
                 if (lastswexam & ~ swEXAM) begin
@@ -249,7 +249,7 @@ module processor (
                 // deposit - write next location
                 if (~ lastswdep & swDEP) begin
                     if (majstate == MS_DEPOS) madr <= madr + 1;
-                    oFLDSEL <= FS_INST;
+                    oFLDSEL  <= FS_INST;
                     majstate <= MS_DEPOS;
                 end
                 if (lastswdep & ~ swDEP) begin
@@ -263,8 +263,8 @@ module processor (
 
                 // start - begin execution at current address
                 if (~ lastswstart & swSTART) begin
+                    oFLDSEL  <= FS_INST;
                     majstate <= MS_FETCH;
-                    oFLDSEL <= FS_INST;
                 end
                 if (lastswstart & ~ swSTART) begin
                     hreq <= 0;
@@ -289,7 +289,6 @@ module processor (
                     MS_FETCH: begin
                         intenabled <= intdelayed;
                         ireg       <= mbuf[11:09];
-                        irusedf    <= ~ mbuf[11] & mbuf[08];
                         pctr       <= madr + 1;
                     end
                     MS_DEFER: if (madr[11:03] == 1) mbuf <= mbuf + 1;
@@ -440,32 +439,48 @@ module processor (
 
             if (~ lasttp4 & tp4) begin
                 case (nxtmajst)
-                    MS_FETCH: madr <= pctr;
-                    MS_WRDCT: madr <= iDMAADDR;
-                    MS_BREAK: madr <= (majstate == MS_CURAD) ? mbuf : iDMAADDR;
+
+                    // FETCH next: use PC for next memory address, instruction space
+                    MS_FETCH: begin
+                        madr    <= pctr;
+                        oFLDSEL <= FS_INST;
+                    end
+
+                    // DEFER next: use effective address for next address, instruction space
+                    MS_DEFER: begin
+                        madr    <= effaddr;
+                        oFLDSEL <= FS_INST;
+                    end
+
+                    // EXEC next: if currently DEFER, use indirect address from data space
+                    //                  else FETCH, use effective address from instr space
+                    MS_EXEC: begin
+                        madr    <= (majstate == MS_DEFER) ? mbuf : effaddr;
+                        oFLDSEL <= (majstate == MS_DEFER) ? FS_DATA : FS_INST;
+                    end
+
+                    // wordcount/current address: read values from page 0
+                    MS_WRDCT: begin madr <= iDMAADDR; oFLDSEL <= FS_ZERO; end
+                    MS_CURAD: begin madr <= madr + 1; oFLDSEL <= FS_ZERO; end
+
+                    // BREAK next: read from DMA page
+                    MS_BREAK: begin
+                        madr    <= (majstate == MS_CURAD) ? mbuf : iDMAADDR;
+                        oFLDSEL <= FS_BREAK;
+                    end
+
+                    // INTAK next: write return address to address 0 of instr space
+                    //             memory extension will clear to page 0
                     MS_INTAK: begin
                         intdelayed <= 0;
                         intenabled <= 0;
                         ireg       <= 4;
                         madr       <= 0;
+                        oFLDSEL    <= FS_INST;
                     end
-                    default: begin
-                        case (majstate)
 
-                            // FETCH to be followed by DEFER or EXEC
-                            // address for next cycle is EFFADDR
-                            MS_FETCH: madr <= effaddr;
-
-                            // DEFER to be followed by EXEC
-                            // - it is not JMP cuz that has nxtmajst == MS_FETCH
-                            MS_DEFER: madr <= mbuf;
-
-                            // WRDCT is always followed by CURAD
-                            MS_WRDCT: madr <= madr + 1;
-
-                            default: begin end
-                        endcase
-                    end
+                    // unknown, halt
+                    default: hreq <= 1;
                 endcase
 
                 // update to next state
