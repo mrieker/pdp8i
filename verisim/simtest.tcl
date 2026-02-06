@@ -175,10 +175,12 @@ proc simtest {} {
                         if {($opcode & 014) == 014} continue    ;# 6,7
                     }
                     if {($opcode & 07000) != 06000} break
-                    if {$opcode == 06001} break
-                    if {$opcode == 06002} break
-                    if {($opcode & 07704) == 06200} break
-                    if {($opcode & 07707) == 06204} break
+                    if {$opcode == 06001} break                 ;# ION
+                    if {$opcode == 06002} break                 ;# IOF
+                    if {$intdelayed == $intenabled} {           ;# don't do memext opcodes if instruction after ION
+                        if {($opcode & 07704) == 06200} break
+                        if {($opcode & 07707) == 06204} break
+                    }
                 }
                 puts -nonewline [format "OP=%04o  %s" $opcode [disop $pctr $opcode]]
 
