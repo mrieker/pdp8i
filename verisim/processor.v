@@ -90,7 +90,7 @@ module processor (
     reg hgnt, ts1, ts2, ts3, iop1, iop2, iop4, ts4;
     reg tp1, tp2, tp3, iog1, iog2, iog4, ioge, tp4;
     reg hreq;
-    wire ioinst = (ireg[11:09] == 6);
+    wire ioinst = (ireg[11:09] == 6) & (majstate == MS_FETCH);
 
     wire newhgnt = (ts4 | hgnt) & hreq;
 
@@ -183,12 +183,6 @@ module processor (
 
     // calculate accumulator for group 2 instruction
     wire[11:00] g2acum = (mbuf[07] ? 12'd0 : acum) | (mbuf[02] ? swREG : 12'd0);
-
-    // this memory cycle does io
-    wire withio = (majstate == MS_FETCH) & (ireg == 6);
-
-    // get incoming ac bits from io bus
-    wire[11:00] ioac = (iACCLEAR ? 0 : acum) | iINBUS;
 
     // major state following last cycle of current instruction
     wire[3:0] brkintfet =
@@ -345,17 +339,14 @@ module processor (
                     // nearing end of DEFER cycle
                     MS_DEFER: nxtmajst <= (ireg == 5) ? brkintfet : MS_EXEC;
 
-                    // nearing end of EXEC cycle
-                    MS_EXEC, MS_INTAK: nxtmajst <= brkintfet;
+                    // nearing end of EXEC, INTAK, BREAK cycle
+                    MS_EXEC, MS_INTAK, MS_BREAK: nxtmajst <= brkintfet;
 
                     // nearing end of wordcount
                     MS_WRDCT: nxtmajst <= MS_CURAD;
 
                     // nearing end of currentaddress
                     MS_CURAD: nxtmajst <= MS_BREAK;
-
-                    // nearing end of break-while-running
-                    MS_BREAK: nxtmajst <= brkintfet;
 
                     // something else, halt next
                     default: hreq <= 1;
@@ -430,7 +421,7 @@ module processor (
                     intdelayed <= 0;
                     intenabled <= 0;
                 end
-                acum <= ioac;
+                acum <= (iACCLEAR ? 0 : acum) | iINBUS;
                 if (iIOSKIP) pctr <= pctr + 1;
             end
 

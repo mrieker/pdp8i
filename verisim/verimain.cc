@@ -29,6 +29,7 @@ static Tcl_ObjCmdProc cmd_ctrlcflag;
 static Tcl_ObjCmdProc cmd_disop;
 static Tcl_ObjCmdProc cmd_gpio;
 static Tcl_ObjCmdProc cmd_mem;
+static Tcl_ObjCmdProc cmd_randbits;
 static Tcl_ObjCmdProc cmd_res;
 
 static void kerchunk ();
@@ -60,6 +61,7 @@ int main (int argc, char **argv)
     if (Tcl_CreateObjCommand (interp, "disop", cmd_disop, NULL, NULL) == NULL) ABORT ();
     if (Tcl_CreateObjCommand (interp, "gpio", cmd_gpio, NULL, NULL) == NULL) ABORT ();
     if (Tcl_CreateObjCommand (interp, "mem",  cmd_mem,  NULL, NULL) == NULL) ABORT ();
+    if (Tcl_CreateObjCommand (interp, "randbits",  cmd_randbits,  NULL, NULL) == NULL) ABORT ();
     if (Tcl_CreateObjCommand (interp, "res",  cmd_res,  NULL, NULL) == NULL) ABORT ();
 
     signal (SIGINT, siginthand);
@@ -97,8 +99,8 @@ int main (int argc, char **argv)
         Tcl_EvalEx (interp, "flush stderr", -1, TCL_EVAL_GLOBAL);
 
         if (rc != TCL_OK) {
-            if (rer[0] == 0) fprintf (stderr, "error %d evaluating command\n", rc);
-               else fprintf (stderr, "error %d evaluating command: %s\n", rc, rer);
+            if (rer[0] == 0) fprintf (stderr, "\nerror %d evaluating command\n", rc);
+               else fprintf (stderr, "\nerror %d evaluating command: %s\n", rc, rer);
             if (err[0] != 0) fprintf (stderr, "%s\n", err);
         }
         else if (rer[0] != 0) puts (rer);
@@ -364,6 +366,40 @@ static int cmd_mem (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj
             return TCL_ERROR;
         }
     }
+}
+
+// randbits nbits
+// returns random value
+static int cmd_randbits (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
+{
+    if (objc != 2) {
+        Tcl_SetResultF (interp, "missing/extra arguments");
+        return TCL_ERROR;
+    }
+
+    int nbits;
+    int rc = Tcl_GetIntFromObj (interp, objv[1], &nbits);
+    if (rc != TCL_OK) return rc;
+    if ((nbits < 0) || (nbits > 31)) {
+        Tcl_SetResultF (interp, "nbits %d must be in range 0..31", nbits);
+        return TCL_ERROR;
+    }
+
+    static uint64_t seed = 0x123456789ABCDEF0ULL;
+
+    int randval = 0;
+
+    while (-- nbits >= 0) {
+
+        // https://www.xilinx.com/support/documentation/application_notes/xapp052.pdf
+        uint64_t xnor = ~ ((seed >> 63) ^ (seed >> 62) ^ (seed >> 60) ^ (seed >> 59));
+        seed = (seed << 1) | (xnor & 1);
+
+        randval += randval + (seed & 1);
+    }
+
+    Tcl_SetObjResult (interp, Tcl_NewIntObj (randval));
+    return TCL_OK;
 }
 
 // res 0 or 1

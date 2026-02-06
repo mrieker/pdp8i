@@ -84,11 +84,7 @@ proc simtest {} {
     set linc [bus link]
 
     ;# run random instructions, verifying the cycles
-    set lastiszptr -1
-    set lastwasisz -1
     set instrno 0
-
-    set TESTOS8ZAP 0
 
     while true {
 
@@ -137,15 +133,9 @@ proc simtest {} {
 
             puts -nonewline [format "  BRK:%o%04o / %04o => %04o" $dmafield $dmaaddr $dmardata $dmawdata]
             memorycycle $MS_BREAK $dmafield $dmaaddr $dmardata $dmawdata
-
-            set lastiszptr -1
-            set lastwasisz -1
         } else {
 
-            set os8stepbeforefetch -1 ;#???? [expr {($xmemat[3] & XM3_OS8STEP) / XM3_OS8STEP0}]
-
             ;# maybe interrupt request is next
-            set extfetaddr -1
             set datafield $xmem_ifld
             if {$intrequest && ! $xmem_intdisableduntiljump && $intenabled} {
                 puts -nonewline "interrupt acknowledge"
@@ -196,24 +186,13 @@ proc simtest {} {
                 if {(($opcode & 07401) == 07400) && ($opcode & 0004)} {
                     set randsr [randbits 12]
                     swtch set reg $randsr
+                    ;# - takes too long to soak through console.v
                 }
 
                 ;# perform fetch memory cycle
-                set extfetaddr [expr {($xmem_ifld << 12) | $pctr}]
-                if {$TESTOS8ZAP && (($lastwasisz + 1) == (($xmem_ifld << 12) | $pctr)) && ($opcode == (05200 | ($lastwasisz & 00177)))} {
-                    ;# pdp8lxmem.v is changing the fetch JMP .-1 to fetch NOP, writeback ISZ value with 0
-                    puts -nonewline " os8zapped"
-                    memorycyclx $MS_FETCH \
-                        $xmem_ifld $pctr \  ;# pdp8lxmem.v reads opcode from usual ifld:pctr
-                        $opcode,         \  ;# it gets the the JMP .-1 opcode from memory
-                        07000,           \  ;# it sends a NOP to the processor
-                        07000,           \  ;# the processor sends a NOP as writeback for the fetch
-                        $lastiszptr 0       ;# pdp8lxmem.v writes a zero to the ISZs counter
-                    set opcode 07000        ;# process the NOP just like the processor is
-                } else {
-                    ;# anything else, fetch from ifld/pctr
-                    memorycycle $MS_FETCH $xmem_ifld $pctr $opcode $opcode
-                }
+                memorycycle $MS_FETCH $xmem_ifld $pctr $opcode $opcode
+
+                ;# compute effective address then increment program counter
                 set effaddr [expr {(($opcode & 00200) ? ($pctr & 07600) : 0) | ($opcode & 00177)}]
                 set pctr [expr {($pctr + 1) & 07777}]
 
@@ -232,8 +211,6 @@ proc simtest {} {
             }
 
             ;# do the exec cycle
-            set lastiszptr -1
-            set lastwasisz -1
             switch [expr {$opcode >> 9}] {
 
                 4 {             ;# jms
@@ -399,22 +376,6 @@ proc simtest {} {
                             puts -nonewline [format " => %04o" $incd]
                             memorycycle $MS_EXEC $datafield $effaddr $operand $incd
                             if {$incd == 0} {set pctr [expr {($pctr + 1) & 07777}]}
-
-                            ;# if ISZ direct page, save operand 15-bit address and opcode 15-bit address
-                            ;# but if last instruction had an exec cycle that read something that looked like an ISZ instruction,
-                            ;# ...pdp8lxmem.v won't detect this ISZ so skip this test in that case
-                            ;#   TAD xxxx ; last instruction, xxxx contained 2347 so it sets os8step=1 cuz it thinks 2347 might be an ISZ opcode
-                            ;#   ISZ yyyy ; this instruction, the fetch doesn't do read/modify+1/write so it knows the 2347 isn't an opcode and sets os8step=0
-                            ;#   JMP .-1  ; next instruction, will be processed as normal cuz os8step=0
-                            ;# the TAD could be an ISZ in which case we get os8step=2 with the same result
-                            ;#   ISZ xxxx ; last instruction, sets os8step=2 cuz it is an ISZ and looking for JMP next
-                            ;#   ISZ yyyy ; this instruction, not a JMP so it sets os8step=0
-                            ;#   JMP .-1  ; next instruction, will be processed as normal cuz os8step=0
-                            ;# in either case, it should successfully zap after JMP .-1 is taken cuz the JMP .-1 leaves os8step=0
-                            if {($os8stepbeforefetch == 0) && (($opcode & 07600) == 02200) && (($extfetaddr & 0177) != 0177)} {
-                                set lastiszptr [expr {($datafield << 12) | $effaddr}]
-                                set lastwasisz $extfetaddr
-                            }
                         }
                         3 {
                             puts -nonewline [format " <= %04o" $acum]
@@ -475,11 +436,11 @@ proc memorycyclx {state field addr rdata rdbkdata wtbkdata vfywaddr vfywdata} {
     ;# clock until we see TS1
     waitassert TS1
 
-    ;# cpu should be outputting address we expect
-    verify15 [expr {([bus memfield] << 12) | [bus oMADR]}] [expr {($field << 12) | $addr}] "XMA bad at beginning of mem cycle"
-
     ;# should now be fully transitioned to the major state
     verify12 [bus majst] $state "bad state during mem cycle"
+
+    ;# cpu should be outputting address we expect
+    verify15 [expr {([bus memfield] << 12) | [bus oMADR]}] [expr {($field << 12) | $addr}] "XMA bad at beginning of mem cycle"
 
     ;# write the read data to the given address so cpu can read it
     set xaddr [expr {($field << 12) | $addr}]
@@ -573,19 +534,6 @@ proc g2skip {opcode} {
     if {($opcode & 0020) &&           $linc} {set skip 1}                   ;# SNL
     if  {$opcode & 0010}                     {set skip [expr {$skip ^ 1}]}  ;# reverse
     return $skip
-}
-
-set randseed 0x123456789ABCDEF
-proc randbits {nbits} {
-    global randseed
-
-    set randval 0
-    while {[incr nbits -1] >= 0} {
-        set xnor [expr {~ (($randseed >> 63) ^ ($randseed >> 62) ^ ($randseed >> 60) ^ ($randseed >> 59))}]
-        set randseed [expr {($randseed << 1) | ($xnor & 1)}]
-        incr randval [expr {$randval + ($randseed & 1)}]
-    }
-    return $randval
 }
 
 ;# see if actual matches expected
