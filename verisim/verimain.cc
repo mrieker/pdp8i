@@ -167,6 +167,7 @@ static int cmd_bus (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj
         {  1, OFFS (oIOP4),    "oIOP4"    },
         { 12, OFFS (oMADR),    "oMADR"    },
         { 12, OFFS (oMBUF),    "oMBUF"    },
+        {  1, OFFS (oRUN),     "oRUN"     },
         {  1, OFFS (oTP1),     "oTP1"     },
         {  1, OFFS (oTP2),     "oTP2"     },
         {  1, OFFS (oTP3),     "oTP3"     },

@@ -20,7 +20,6 @@ set intrequest   0
 set linc         0
 set memcycwcover 0
 set perclock     0
-set realmode     0
 set pctr         0
 
 set xmem_dfld                 0
@@ -30,17 +29,17 @@ set xmem_intdisableduntiljump 0
 set xmem_saveddfld            0
 set xmem_savedifld            0
 
-set MS_FETCH 1   ;# memory cycle is fetching instruction
-set MS_DEFER 2   ;# memory cycle is reading pointer
-set MS_EXEC  3   ;# memory cycle is for executing instruction
-set MS_WRDCT 4   ;# memory cycle is for incrementing dma word count
-set MS_CURAD 5   ;# memory cycle is for reading dma address
-set MS_BREAK 6   ;# memory cycle is for dma data word transfer
-set MS_INTAK 7   ;# memory cycle is for interrupt acknowledge
-set MS_DEPOS 8   ;# memory cycle is for deposit switch
-set MS_EXAM  9   ;# memory cycle is for examine switch
+set MS_FETCH 1  ;# memory cycle is fetching instruction
+set MS_DEFER 2  ;# memory cycle is reading pointer
+set MS_EXEC  3  ;# memory cycle is for executing instruction
+set MS_WRDCT 4  ;# memory cycle is for incrementing dma word count
+set MS_CURAD 5  ;# memory cycle is for reading dma address
+set MS_BREAK 6  ;# memory cycle is for dma data word transfer
+set MS_INTAK 7  ;# memory cycle is for interrupt acknowledge
+set MS_DEPOS 8  ;# memory cycle is for deposit switch
+set MS_EXAM  9  ;# memory cycle is for examine switch
 
-set runquiet 1
+set runquiet 1  ;# tell runstep command to keep quiet
 
 proc simtest {} {
     global acum
@@ -59,7 +58,6 @@ proc simtest {} {
     global linc
     global memcycwcover
     global perclock
-    global realmode
     global pctr
     global xmem_dfld
     global xmem_ifld
@@ -80,16 +78,12 @@ proc simtest {} {
     ;# reset then start processor
     hardreset
     startat 0
-    for {set i 0} {! [bus oTS1]} {incr i} {
-        if {$i > 1000} {error "timed out clocking to TS1"}
-        runstep
-    }
+    waitassert TS1
     verify12 [bus oMADR] 0 "bad start PC"
     set acum [bus oACUM]
     set linc [bus link]
 
     ;# run random instructions, verifying the cycles
-    set contforcesfetch 0
     set lastiszptr -1
     set lastwasisz -1
     set instrno 0
@@ -111,9 +105,7 @@ proc simtest {} {
         set execst $MS_EXEC
 
         ;# maybe do a dma cycle
-        if {$brkrequest && ! $contforcesfetch &&
-            (! $realmode || ($dma3cycle ? ! [bus o_SP_CYC_NEXT] :
-                                        ! [bus o_BF_ENABLE]))} {
+        if {$brkrequest} {
 
             puts -nonewline [format "DMA %d-cycle" [expr {($dma3cycle ? 3 : 1)}]]
             if {$dma3cycle} {
@@ -126,12 +118,8 @@ proc simtest {} {
                 puts -nonewline [format "  WC:%04o / %04o => %04o" $dmaaddr $oldwordcount $newwordcount]
                 memorycycle $MS_WRDCT 0 $dmaaddr $oldwordcount $newwordcount
 
-                if {! $realmode} {
-                    set wcshouldover [expr {$newwordcount == 0}]
-                    if {$memcycwcover != $wcshouldover} {
-                        error [format "BWC OVERFLOW is %o should be %o" $memcycwcover $wcshouldover]
-                    }
-                }
+                set wcshouldover [expr {$newwordcount == 0}]
+                verifybit $memcycwcover $wcshouldover "BWC OVERFLOW mismatch"
 
                 ;# CA state reads pointer from dmaaddr + 1, increments it and writes it back
                 ;# then we use the incremented pointer for the transfer address
@@ -159,8 +147,7 @@ proc simtest {} {
             ;# maybe interrupt request is next
             set extfetaddr -1
             set datafield $xmem_ifld
-            if {$intrequest && ! $xmem_intdisableduntiljump && $intenabled && ! $contforcesfetch &&
-                (! $realmode || ! [bus o_LOAD_SF])} {
+            if {$intrequest && ! $xmem_intdisableduntiljump && $intenabled} {
                 puts -nonewline "interrupt acknowledge"
 
                 set intrequest 0        ;#TODO: drop request random number of cycles later
@@ -183,9 +170,6 @@ proc simtest {} {
                 ;# stop when processor is ready to fetch
                 if [ctrlcflag] break
 
-                ;# we are about to do the fetch after the cont switch
-                set contforcesfetch 0
-
                 ;# delayed ION active now that we are about to do a fetch
                 set intenabled $intdelayed
 
@@ -194,7 +178,7 @@ proc simtest {} {
                 while true {
                     set opcode [randbits 12]
                     if {($opcode & 07400) == 07400} {
-                        set opcode [expr {$opcode & 07770}]     ;# don't do OSR,HLT,Group 3
+                        set opcode [expr {$opcode & 07772}]     ;# don't do OSR,Group 3
                     }
                     if {($opcode & 07400) == 07000} {
                         if {($opcode & 016) == 002} continue    ;# bsw
@@ -273,20 +257,11 @@ proc simtest {} {
                     for {set m 1} {$m <= 4} {incr m $m} {
                         if {$opcode & $m} {
 
-                            ;# if -half or -real, the processor is waiting just before TP4 so has already performed the I/O instruction
-                            ;#    so we can't wait for the IOPm pulses because they have already gone by
-                            ;# for full simulator mode, we manually clock it so will see the IOPm pulses
-                            if {! $realmode} {
+                            ;# wait for processor to assert IOPm
+                            waitassert IOP$m
 
-                                ;# wait for processor to assert IOPm
-                                for {set i 0} {! [bus oIOP$m]} {incr i} {
-                                    if {$i > 1000} {error [format "timed out waiting for IOP%u asserted" $m]}
-                                    runstep
-                                }
-
-                                ;# it should be sending the accumulator out
-                                verify12 [bus oACUM] $acum "AC invalid going out during IOP"
-                            }
+                            ;# it should be sending the accumulator out
+                            verify12 [bus oACUM] $acum "AC invalid going out during IOP"
 
                             ;# maybe it is an io opcode that some fpga device we have enabled processes
                             set acclear 0
@@ -334,17 +309,11 @@ proc simtest {} {
 
                             puts -nonewline [format " => IOP%o => %s%s%04o" $m [expr {$acclear ? "C" : " "}] [expr {$ioskip ? "S" : " "}] $acbits]
 
-                            if {! $realmode} {
+                            ;# wait for processor to drop IOPm
+                            waitnegate IOP$m
 
-                                ;# wait for processor to drop IOPm
-                                for {set i 0} {[bus oIOP$m]} {incr i} {
-                                    if {$i > 1000} {error "timed out waiting for IOP$m negated"}
-                                    runstep
-                                }
-
-                                ;# clear the random bits so it won't clock them again during nulled-out io pulses
-                                bus set iACCLEAR 0 iIOSKIP 0 iINBUS 0
-                            }
+                            ;# clear the random bits so it won't clock them again during nulled-out io pulses
+                            bus set iACCLEAR 0 iIOSKIP 0 iINBUS 0
 
                             ;# update our shadow registers
                             if {$acclear} {set acum 0}
@@ -399,14 +368,12 @@ proc simtest {} {
                         if {$opcode & 0004} {set acum [expr {$acum | randsr}]}
                         puts -nonewline [format " => %04o" $acum]
                         if {$opcode & 0002} {
-                            for {set i 0} {bus oB_RUN} {incr i} {
-                                if {$i > 1000} {error "timed out waiting for RUN negated after HLT instruction"}
-                                runstep
-                            }
+                            waitnegate RUN
                             puts -nonewline " cont"
-                            docont
-                            set contforcesfetch 1   ;# cont switch in pdp8lsim.v always does fetch next (no brk, irq, etc)
-                            ASSERT [expr {! $realmode}]
+                            swtch set cont 1
+                            runloop 2000
+                            swtch set cont 0
+                            waitassert RUN
                         }
                     }
                 }
@@ -460,47 +427,20 @@ proc simtest {} {
             }
         }
 
-        if {$realmode} {
-            puts ""
-        } else {
+        ;# step to TS1 so we know everything has been updated
+        waitassert TS1
 
-            ;# step to TS1 so we know everything has been updated
-            for {set i 0} {! [bus oTS1]} {incr i} {
-                if {$i > 1000} {error "timed out clocking to TS1"}
-                runstep
-            }
+        ;# the accumulator and link should be up to date
+        verify12  [bus pctr] $pctr "PC mismatch at end of instruction"
+        verify12  [bus oACUM] $acum "AC mismatch at end of instruction"
+        verifybit [bus link] $linc "LINK mismatch at end of instruction"
 
-            ;# the accumulator and link should be up to date
-            verify12  [bus pctr] $pctr "PC mismatch at end of instruction"
-            verify12  [bus oACUM] $acum "AC mismatch at end of instruction"
-            verifybit [bus link] $linc "LINK mismatch at end of instruction"
-
-            ;# print how many cycles it took (each clock is 10nS)
-            set clocks [expr {[clk 0] - $startclockno}]
-            puts [format "  (%u.%02u uS)" [expr {$clocks / 100}] [expr {$clocks % 100}]]
-        }
+        ;# print how many cycles it took (each clock is 10nS)
+        set clocks [expr {[clk 0] - $startclockno}]
+        puts [format "  (%u.%02u uS)" [expr {$clocks / 100}] [expr {$clocks % 100}]]
     }
 
     puts "stopping for control-C"
-}
-
-;# do a 'continue' operation
-proc docont {} {
-
-    ;# press continue switch
-    swtch set cont 1
-
-    ;# clock some cycles to arm the debounce circuit
-    runloop 2000
-
-    ;# release continue switch
-    swtch set cont 0
-
-    ;# clock until the run flipflop sets
-    for {set i 0} {! [bus oB_RUN]} {incr i} {
-        if {$i > 1000} {error "timed out waiting for RUN after flicking CONT switch"}
-        runstep
-    }
 }
 
 ;# clock through a memory cycle, verifying the address and data
@@ -530,94 +470,62 @@ proc memorycycle {state field addr rdata wdata} {
 ;# - vfywaddr = address in extmem[] to verify the write happened
 ;# - vfywdata = data that should be at vfywaddr
 proc memorycyclx {state field addr rdata rdbkdata wtbkdata vfywaddr vfywdata} {
-    global memcycwcover realmode
+    global memcycwcover
 
-    if {$realmode} {
+    ;# clock until we see TS1
+    waitassert TS1
 
-        ;# holding just before TP4 of previous cycle
+    ;# cpu should be outputting address we expect
+    verify15 [expr {([bus memfield] << 12) | [bus oMADR]}] [expr {($field << 12) | $addr}] "XMA bad at beginning of mem cycle"
 
-        requestdmaorint $state $rdata
+    ;# should now be fully transitioned to the major state
+    verify12 [bus majst] $state "bad state during mem cycle"
 
-        ;# write the read data to the given address so PDP can read it
-        set xaddr [expr {($field << 12) | addr}]
-        mem $xaddr $rdata
+    ;# write the read data to the given address so cpu can read it
+    set xaddr [expr {($field << 12) | $addr}]
+    mem $xaddr $rdata
 
-        ;# let the PDP execute TP4 of the previous cycle up to just before TP4 of this cycle
-        for {set i 0} {[bus oTS4]} {incr i} {
-            if {$i > 1000} {error "timed out waiting for TS4 to clear"}
-            runstep
-        }
-        for {set i 0} {[bus oTP3 oTS4] != "0 1"} {incr i} {
-            if {$i > 1000} {error "timed out waiting for TS4 to set"}
-            runstep
-        }
+    ;# end of TS1 means it finished reading that memory location into MB
+    waitnegate TS1
 
-        ;# holding just before TP4 of this cycle
+    ;# MB should now have the value we wrote to the memory location
+    verify12 [bus oMBUF] $rdbkdata "MB during read"
 
-        ;# verify the memory contents after writeback
-        set vdata [mem $vfywaddr]
-        if {$vdata != $vfywdata} {
-            error [format "address %05o contained %04o at end of cycle, should be %04o" $vfywaddr $vdata $vfywdata]
-        }
-    } else {
+    requestdmaorint $state $rdata
 
-        ;# clock until we see TS1
-        for {set i 0} {! [bus oTS1]} {incr i} {
-            if {$i > 1000} {error "timed out waiting for TS1 asserted"}
-            runstep
-        }
+    ;# wait for it to enter TS3, meanwhile cpu should possibly be modifying
+    ;# the value and sending the value (modified or not) back to the memory
+    waitassert TS3
 
-        ;# cpu should be outputting address we expect
-        verify15 [expr {([bus memfield] << 12) | [bus oMADR]}] [expr {($field << 12) | $addr}] "XMA bad at beginning of mem cycle"
+    ;# beginning of TS3, MB should now have the possibly modified value
+    verify12 [bus oMBUF] $wtbkdata "MB during writeback"
 
-        ;# should now be fully transitioned to the major state
-        verify12 [bus majst] $state "bad state during mem cycle"
+    ;# BWC_OVERFLOW is valid
+    ;# - clocked with TP2 (vol 2, p5 D-5)
+    ;# - cleared with TP3
+    set memcycwcover [bus oBWCOV]
 
-        ;# write the read data to the given address so cpu can read it
-        set xaddr [expr {($field << 12) | $addr}]
-        mem $xaddr $rdata
+    ;# wait for TP3 asserted then negated indicating value written to memory
+    waitassert TP3
+    waitnegate TP3
 
-        ;# end of TS1 means it finished reading that memory location into MB
-        for {set i 0} {[bus oTS1]} {incr i} {
-            if {$i > 1000} {error "timed out waiting for TS1 negated"}
-            runstep
-        }
+    ;# verify the memory contents
+    verify12 [mem $vfywaddr] $vfywdata [format "address %05o mismatch" $vfywaddr]
+}
 
-        ;# MB should now have the value we wrote to the memory location
-        verify12 [bus oMBUF] $rdbkdata "MB during read"
+;# wait up to 10uS for signal to assert
+proc waitassert {sig} {
+    for {set i 0} {! [bus o$sig]} {incr i} {
+        if {$i > 1000} {error "timed out waiting for $sig asserted"}
+        runstep
+    }
+}
 
-        requestdmaorint $state $rdata
-
-        ;# wait for it to enter TS3, meanwhile cpu should possibly be modifying
-        ;# the value and sending the value (modified or not) back to the memory
-        for {set i 0} {! [bus oTS3]} {incr i} {
-            if {$i > 1000} {error "timed out waiting for TS3 asserted"}
-            runstep
-        }
-
-        ;# beginning of TS3, MB should now have the possibly modified value
-        verify12 [bus oMBUF] $wtbkdata "MB during writeback"
-
-        ;# BWC_OVERFLOW is valid
-        ;# - clocked with TP2 (vol 2, p5 D-5)
-        ;# - cleared with TP3
-        set memcycwcover [bus oBWCOV]
-
-        ;# wait for TP3 asserted then negated indicating value written to memory
-        for {set i 0} {! [bus oTP3]} {incr i} {
-            if {$i > 1000} {error "timed out waiting for TP3 asserted"}
-            runstep
-        }
-        for {set i 0} {[bus oTP3]} {incr i} {
-            if {$i > 1000} {error "timed out waiting for TP3 negated"}
-            runstep
-        }
-
-        ;# verify the memory contents
-        set vdata [mem $vfywaddr]
-        if {$vdata != $vfywdata} {
-            error [format "address %05o contained %04o at end of cycle, should be %04o" $vfywaddr $vdata $vfywdata]
-        }
+;# wait up to 10uS for signal to negate
+proc waitnegate {sig} {
+    for {set i 0} {[bus o$sig]} {incr i} {
+        if {$i > 1000} {error "timed out waiting for $sig negated"}
+        runstep
     }
 }
 

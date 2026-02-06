@@ -20,6 +20,7 @@ module backplane (
     output oBREAK,                  // currently doing BREAK (DMA) cycle
     output oBWCOV,                  // 3-cycle DMA wordcount overflowed
     output oIOP1, oIOP2, oIOP4,     // io instruction pulses
+    output oRUN,
     output oTP1, oTP2, oTP3, oTP4, oTS1, oTS2, oTS3, oTS4,
     output[11:00] oMADR, oMBUF, oACUM,
 
@@ -31,7 +32,7 @@ module backplane (
 
     wire[11:00] mquo;
     wire[11:09] ireg;
-    wire intenabd, paused, running;
+    wire intenabd, paused;
     wire[4:0] shcnt;
     wire[2:0] dfield, ifield;
 
@@ -60,7 +61,7 @@ module backplane (
         .lbmajst (majst),
         .lbion (intenabd),
         .lbpause (paused),
-        .lbrun (running),
+        .lbrun (oRUN),
         .lbsc (shcnt),
         .lbdf (dfield),
         .lbif (ifield),
@@ -145,7 +146,7 @@ module backplane (
         .oIOP2 (oIOP2),         // ...400nS each
         .oIOP4 (oIOP4),         // ...300nS spacing
         .oJMPJMS (oJMPJMS),     // JMP/JMS instruction in instruction register
-        .oRUN (running),        // processing instructions
+        .oRUN (oRUN),           // processing instructions
         .oTP1 (oTP1),           // time pulses, 200nS each
         .oTP2 (oTP2),           // ...starting so as to overlap last 100nS of corresponding TSn
         .oTP3 (oTP3),           // ...usually overlapping first 100nS of subsequent TS(n+1)

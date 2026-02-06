@@ -120,7 +120,7 @@ module processor (
                     iop1 <= iog1;                   // start IOP1 at end of IOG1
                     iog2 <= iop1;                   // start IOG2 at end of IOP1 (gap between IOP1 and IOP2)
                     iop2 <= iog2;                   // start IOP2 at end of IOG2
-                    iog4 <= iop1;                   // start IOG4 at end of IOP2 (gap between IOP2 and IOP4)
+                    iog4 <= iop2;                   // start IOG4 at end of IOP2 (gap between IOP2 and IOP4)
                     iop4 <= iog4;                   // start IOP4 at end of IOG4
                     ioge <= iop4;                   // start IOGE at end of IOP4 (gap between IOP4 and TS4)
                     ts4  <= ts3 & ~ ioinst | ioge;  // start TS4 at end of IOGE or end of TS3 with no ioinst
@@ -258,7 +258,7 @@ module processor (
                 end
 
                 // continue - resume execution where left off
-                if (~ lastswcont & swCONT) begin
+                if (lastswcont & ~ swCONT) begin
                     hreq <= 0;
                 end
 
