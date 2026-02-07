@@ -77,9 +77,10 @@ module processor (
 
     reg[11:00] acum, madr, mbuf, pctr;
     reg[11:09] ireg;
-    reg[3:0] majstate, nxtmajst;
+    reg[3:0] brkintfet, majstate, nxtmajst;
     reg intdelayed, intenabled, link;
     reg lastswcont, lastswdep, lastswexam, lastswldad, lastswstart;
+    reg syncbrkrq, syncintrq;
 
     ///////////////////
     //  TIME STATES  //
@@ -184,28 +185,66 @@ module processor (
     // calculate accumulator for group 2 instruction
     wire[11:00] g2acum = (mbuf[07] ? 12'd0 : acum) | (mbuf[02] ? swREG : 12'd0);
 
-    // major state following last cycle of current instruction
-    // this is used at posedge TP3, before any possible IOPs of current instruction
-    wire[3:0] brkintfet =
-
-        // if there is a dma request pending, start doing the dma
-        iBRKRQST ? (i3CYCLE ? MS_WRDCT : MS_BREAK) :
-
-        // if interrupt requested, interrupts are enabled via 6001 (ION),
-        // and they aren't inhibited via 62x2/62x3 (CIF), next is int ack
-        (iINTRQST &                                                     // some device is requesting an interrupt
-                    intenabled &                                        // 6001 was executed at least one instruction ago
-                    ~ ((ireg == 6) & (mbuf[08:00] == 9'o002)) &         // not blocked by current 6002 (IOF) instruction
-                    (~ iINTINH | oJMPJMS) &                             // not blocked by prior 62x2/62x3 until jump or currently jumping
-                    ~ ((ireg == 6) & ((mbuf[08:00] & 9'o706) == 9'o202))) ? // not blocked by 62x2/62x3 currently executing
-            MS_INTAK :
-
-        // otherwise, fetch next instruction
-        MS_FETCH;
-
     ////////////////////
     //  MAJOR STATES  //
     ////////////////////
+
+    // major state following the current major state cycle
+    // this is used at posedge TP4, after any possible IOPs of current instruction
+    always @(*) begin
+
+        // major state following last cycle of current instruction
+        if (iBRKRQST) begin
+            brkintfet = i3CYCLE ? MS_WRDCT : MS_BREAK;
+        end
+
+        else if (iINTRQST &                         // some device is requesting an interrupt
+                 intenabled &                       // 6001 was executed at least one instruction ago
+                 (~ iINTINH | oJMPJMS)) begin       // not blocked by prior 62x2/62x3 until jump or currently jumping
+            brkintfet = MS_INTAK;
+        end
+
+        else brkintfet = MS_FETCH;                  // nothing special, fetch next instruction
+
+        // major state following the current major state cycle
+        case (majstate)
+
+            // end of FETCH cycle
+            MS_FETCH: begin
+                case (ireg)
+
+                    // add, tad, isz, dca, jms
+                    0, 1, 2, 3, 4: nxtmajst = mbuf[08] ? MS_DEFER : MS_EXEC;
+
+                    // jmp
+                    5: nxtmajst = mbuf[08] ? MS_DEFER : brkintfet;
+
+                    // iot, opr
+                    6, 7: nxtmajst = brkintfet;
+                endcase
+            end
+
+            // end of DEFER cycle
+            MS_DEFER: begin
+                nxtmajst = (ireg == 5) ? brkintfet : MS_EXEC;
+            end
+
+            // end of EXEC cycle
+            // end of BREAK
+            MS_EXEC, MS_INTAK, MS_BREAK: begin
+                nxtmajst = brkintfet;
+            end
+
+            // end of wordcount
+            MS_WRDCT: nxtmajst = MS_CURAD;
+
+            // end of currentaddress
+            MS_CURAD: nxtmajst = MS_BREAK;
+
+            // EXAM, DEPOS: stay in that state
+            default: nxtmajst = majstate;
+        endcase
+    end
 
     reg lasthgnt, lastts1, lastts2, lastts3, lastiop1, lastiop2, lastiop4, lastts4;
     reg lasttp1, lasttp2, lasttp3, lastiog1, lastiog2, lastiog4, lastioge, lasttp4;
@@ -213,7 +252,6 @@ module processor (
     always @(posedge zclock) begin
         if (zreset) begin
             majstate <= MS_EXAM;
-            nxtmajst <= MS_EXAM;
         end else begin
 
             ///////////////////////////////////////////
@@ -312,15 +350,11 @@ module processor (
             //  TS2: modify MB according to major state  //
             ///////////////////////////////////////////////
 
-            // give the increments and whatnot from posedge TS2 to
-            // posedge TP3 (300nS) to soak through circuits
-
             if (~ lasttp2 & tp2) begin
                 case (majstate)
                     MS_FETCH: begin
-                        intenabled <= intdelayed;
-                        ireg       <= mbuf[11:09];
-                        pctr       <= madr + 1;
+                        ireg <= mbuf[11:09];
+                        pctr <= madr + 1;
                     end
                     MS_DEFER: if (madr[11:03] == 1) mbuf <= mbuf + 1;
                     MS_EXEC, MS_INTAK: case (ireg)
@@ -351,25 +385,21 @@ module processor (
             //  TS3: write MB back to memory location  //
             /////////////////////////////////////////////
 
+            // memory being written throughout TS3
+
             if (~ lasttp3 & tp3) begin
 
+                // update acum (computation), link (computation), pctr (jumps & skips)
                 case (majstate)
 
                     // end of FETCH cycle
                     MS_FETCH: begin
                         case (ireg)
 
-                            // add, tad, isz, dca, jms
-                            0, 1, 2, 3, 4: nxtmajst <= mbuf[08] ? MS_DEFER : MS_EXEC;
-
                             // jmp
                             5: begin
                                 if (~ mbuf[08]) pctr <= effaddr;
-                                nxtmajst <= mbuf[08] ? MS_DEFER : brkintfet;
                             end
-
-                            // iot
-                            6: nxtmajst <= brkintfet;
 
                             // opr - perform operation
                             7: begin
@@ -381,15 +411,15 @@ module processor (
                                     if (g2skip) pctr <= pctr + 1;
                                     if (mbuf[01]) hreq <= 1;
                                 end
-                                nxtmajst <= brkintfet;
                             end
+
+                            default: begin end
                         endcase
                     end
 
                     // end of DEFER cycle
                     MS_DEFER: begin
                         if (ireg == 5) pctr <= mbuf;
-                        nxtmajst <= (ireg == 5) ? brkintfet : MS_EXEC;
                     end
 
                     // end of EXEC cycle
@@ -401,21 +431,15 @@ module processor (
                             3: acum <= 0;                                   // dca
                             4: pctr <= madr + 1;                            // jms
                         endcase
-                        nxtmajst <= brkintfet;
                     end
 
-                    // nearing end of wordcount
-                    MS_WRDCT: nxtmajst <= MS_CURAD;
-
-                    // nearing end of currentaddress
-                    MS_CURAD: nxtmajst <= MS_BREAK;
-
-                    // nearing end of break
-                    MS_BREAK: nxtmajst <= brkintfet;
-
-                    // something else, halt next
-                    default: hreq <= 1;
+                    // something else, do nothing
+                    default: begin end
                 endcase
+
+                // sync external async inputs
+                syncbrkrq <= iBRKRQST;
+                syncintrq <= iINTRQST;
             end
 
             ////////////////////////////////////////
@@ -494,6 +518,9 @@ module processor (
 
                 // update to next state
                 majstate <= nxtmajst;
+
+                // update delayed interrupt enable
+                intenabled <= intdelayed;
             end
         end
 
