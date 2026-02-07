@@ -3,6 +3,8 @@ module backplane (
     input zclock,                   // fpga 100MHz clock
     input zreset,                   // fpga reset
 
+    input preset,                   // power-on reset
+
     input[27:04] gpin,              // gpio connector
     output[27:04] gpout,
 
@@ -18,6 +20,7 @@ module backplane (
     input[11:00] iDMADATA,          // device sending write data for DMA
     input[11:00] iINBUS,            // device sending data for PIO
     output oBREAK,                  // currently doing BREAK (DMA) cycle
+    output oBUSINI,                 // initialize bus devices
     output oBWCOV,                  // 3-cycle DMA wordcount overflowed
     output oIOP1, oIOP2, oIOP4,     // io instruction pulses
     output oRUN,
@@ -38,7 +41,7 @@ module backplane (
 
     wire[11:00] swreg;
     wire[2:0] swdfld, swifld;
-    wire swstart, swldad, swdep, swexam;
+    wire swstart, swldad, swdepos, swexam;
     wire swcont, swstop, swsstep, swsinst;
 
     wire[11:00] membus;
@@ -48,6 +51,8 @@ module backplane (
     console coninst (
         .zclock (zclock),
         .zreset (zreset),
+
+        .preset (preset),
 
         .gpin  (gpin),
         .gpout (gpout),
@@ -72,7 +77,7 @@ module backplane (
         .swifld (swifld),       //toggle inst field
         .swstart (swstart),     //button start (debounced)
         .swldad (swldad),       //button load address
-        .swdep (swdep),         //button deposit (debounced)
+        .swdepos (swdepos),     //button deposit (debounced)
         .swexam (swexam),       //button examine (debounced)
         .swcont (swcont),       //button continue (debounced)
         .swstop (swstop),       //button stop
@@ -87,7 +92,8 @@ module backplane (
         .zclock (zclock),
         .zreset (zreset),
 
-        .businit (swstart),
+        .preset (preset),
+        .businit (oBUSINI),
         .iop1 (oIOP1),
         .iop2 (oIOP2),
         .iop4 (oIOP4),
@@ -124,6 +130,8 @@ module backplane (
         .zclock (zclock),
         .zreset (zreset),
 
+        .preset (preset),
+
         // bus signals
         .i3CYCLE (i3CYCLE),     // do 3-cycle break
         .iACCLEAR (iACCLEAR),   // io pulse clears AC
@@ -139,6 +147,7 @@ module backplane (
         .iINBUS (iINBUS | mexinbus),  // IO data being read from device
         .iMEMBUS (membus),      // data being read from memory
         .oBREAK (oBREAK),       // doing BREAK cycle
+        .oBUSINI (oBUSINI),     // initialize bus devices
         .oBWCOV (oBWCOV),       // break wordcount overflowed
         .oEXEFET (oEXEFET),     // doing EXEC or FETCH cycle
         .oINTACK (oINTACK),     // doing INTACK cycle
@@ -172,7 +181,7 @@ module backplane (
         // switches
         .swLDAD (swldad),       // button (idempotent)
         .swEXAM (swexam),       // button (debounced)
-        .swDEP (swdep),         // button (debounced)
+        .swDEPOS (swdepos),     // button (debounced)
         .swCONT (swcont),       // button (debounced)
         .swSTOP (swstop),       // button (idempotent)
         .swSTART (swstart),     // button (debounced)

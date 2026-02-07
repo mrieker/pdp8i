@@ -16,8 +16,11 @@ proc disas {loaddr {hiaddr ""}} {
 # reset to power-up state
 proc hardreset {} {
     res 1
+    bus set preset 1
     clk 100000
     res 0
+    clk 100000
+    bus set preset 0
 }
 
 # deposit simple test program in memory

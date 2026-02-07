@@ -171,6 +171,7 @@ proc simtest {} {
                     if {($opcode & 06000) != 06000} break       ;# and,tad,isz,dca,jms,jmp
                     if {$opcode == 06001} break                 ;# ION
                     if {$opcode == 06002} break                 ;# IOF
+                    if {$opcode == 06004} break                 ;# used to test skip/acclr
                     if {$lastopc != 06001} {                    ;# don't do memext opcodes if instruction after ION
                         if {($opcode & 07704) == 06200} break
                         if {($opcode & 07707) == 06204} break
@@ -244,22 +245,27 @@ proc simtest {} {
                             waitassert IOP$m
 
                             ;# it should be sending the accumulator out
-                            verify12 [bus oACUM] $acum "AC invalid going out during IOP"
+                            verify12 [bus oACUM] $acum "AC invalid going out during IOP$m"
 
                             ;# maybe it is an io opcode that some fpga device we have enabled processes
                             set acclear 0
                             set ioskip  0
                             set acbits  0
 
-                            ;# - pdp8lsim.v itself processes these io opcodes
+                            ;# - processor.v itself processes these io opcodes
                             if {$opcode == 06001} {
                                 set intdelayed 1
                             } elseif {$opcode == 06002} {
                                 set intdelayed 0
                                 set intenabled 0
+                            } elseif {($opcode == 06004) && ($m == 4)} {
+                                set acclear [randbits 1]    ;# supply random values
+                                set ioskip  [randbits 1]
+                                set acbits [randbits 12]
+                                bus set iACCLEAR $acclear iIOSKIP $ioskip iINBUS $acbits
                             } elseif {($opcode & 07700) == 06200} {
 
-                                ;# - pdp8lxmem.v processes these io opcodes (manipulate memory field bits)
+                                ;# - memext.v processes these io opcodes (manipulate memory field bits)
                                 if {! ($opcode & 4)} {
                                     if {$opcode & 1} {set xmem_dfld [expr {($opcode >> 3) & 7}]}
                                     if {$opcode & 2} {
@@ -290,10 +296,11 @@ proc simtest {} {
                                 error [format "unknown IO opcode %04o" $opcode]
                             }
 
-                            puts -nonewline [format " => IOP%o => %s%s%04o" $m [expr {$acclear ? "C" : " "}] [expr {$ioskip ? "S" : " "}] $acbits]
+                            puts -nonewline [format " => IOP%o => %s%04o%s" $m [expr {$acclear ? "=" : "|"}] $acbits [expr {$ioskip ? "+" : " "}]]
 
                             ;# wait for processor to drop IOPm
                             waitnegate IOP$m
+                            runstep
 
                             ;# clear the random bits so it won't clock them again during nulled-out io pulses
                             bus set iACCLEAR 0 iIOSKIP 0 iINBUS 0
@@ -443,14 +450,15 @@ proc memorycyclx {state field addr rdata rdbkdata wtbkdata vfywaddr vfywdata} {
     waitassert TS1
 
     ;# should now be fully transitioned to the major state
-    verify12 [bus majst] $state "bad state during mem cycle"
+    verify12 [bus majst] $state "bad state at start of mem cycle"
 
     ;# cpu should be outputting address we expect
-    verify15 [expr {([bus memfield] << 12) | [bus oMADR]}] [expr {($field << 12) | $addr}] "XMA bad at beginning of $state cycle"
+    set actaddr [expr {([bus memfield] << 12) | [bus oMADR]}]
+    set expaddr [expr {($field << 12) | $addr}]
+    verify15 $actaddr $expaddr "XMA bad at beginning of $state cycle"
 
     ;# write the read data to the given address so cpu can read it
-    set xaddr [expr {($field << 12) | $addr}]
-    mem $xaddr $rdata
+    mem $expaddr $rdata
 
     ;# end of TS1 means it finished reading that memory location into MB
     waitnegate TS1

@@ -3,6 +3,8 @@ module processor (
     input zclock,               // fpga 100MHz clock
     input zreset,               // fpga reset
 
+    input preset,               // power-on reset
+
     // bus signals
     input i3CYCLE,              // do 3-cycle break
     input iACCLEAR,             // io pulse clears AC
@@ -18,6 +20,7 @@ module processor (
     input[11:00] iINBUS,        // IO data being read from device
     input[11:00] iMEMBUS,       // data being read from memory
     output oBREAK,              // doing BREAK cycle
+    output oBUSINI,             // initialize devices
     output reg oBWCOV,          // break wordcount overflowed
     output oEXEFET,             // about to do EXEC or FETCH cycle
     output oINTACK,             // about to do INTACK cycle
@@ -51,7 +54,7 @@ module processor (
     // switches
     input swLDAD,               // button (idempotent)
     input swEXAM,               // button (debounced)
-    input swDEP,                // button (debounced)
+    input swDEPOS,              // button (debounced)
     input swCONT,               // button (debounced)
     input swSTOP,               // button (idempotent)
     input swSTART,              // button (debounced)
@@ -65,6 +68,7 @@ module processor (
     localparam[1:0] FS_ZERO  = 2;
     localparam[1:0] FS_BREAK = 3;
 
+    localparam[3:0] MS_PWRON = 0;   // power-on reset
     localparam[3:0] MS_FETCH = 1;   // memory cycle is fetching instruction
     localparam[3:0] MS_DEFER = 2;   // memory cycle is reading pointer
     localparam[3:0] MS_EXEC  = 3;   // memory cycle is for executing instruction
@@ -78,9 +82,8 @@ module processor (
     reg[11:00] acum, madr, mbuf, pctr;
     reg[11:09] ireg;
     reg[3:0] brkintfet, majstate, nxtmajst;
-    reg intdelayed, intenabled, link;
-    reg lastswcont, lastswdep, lastswexam, lastswldad, lastswstart;
-    reg syncbrkrq, syncintrq;
+    reg intdelayed, intenabled, link, syncbrkrq, syncintrq;
+    reg lastswcont, lastswdepos, lastswexam, lastswldad, lastswstart;
 
     ///////////////////
     //  TIME STATES  //
@@ -91,51 +94,54 @@ module processor (
     reg hgnt, ts1, ts2, ts3, iop1, iop2, iop4, ts4;
     reg tp1, tp2, tp3, iog1, iog2, iog4, ioge, tp4;
     reg hreq;
-    wire ioinst = (ireg[11:09] == 6) & (majstate == MS_FETCH);
 
+    // tick off every 100nS
+    wire tenmhz  = (zdiv == 9);
+
+    // indicate when to step on to next time state
+    //  TS1,2,3,4,IOP1,2,4 - 400nS
+    //  IOG1,2,4,E - 300nS
+    wire clockts = tenmhz & tsct[1] & (tsct[0] | iog1 | iog2 | iog4 | ioge);
+
+    // decide to halt at end of TS4
+    // - halting: transitions to HGNT until HREQ released
+    // - continuing: transitions to TS1
     wire newhgnt = (ts4 | hgnt) & hreq;
 
+    // current cycle is an io instruction so includes io gaps and pulses
+    wire ioinst  = (ireg[11:09] == 6) & (majstate == MS_FETCH);
+
     always @(posedge zclock) begin
-        if (zreset) begin
-            hgnt <= 1;
-            hreq <= 1;
-            tsct <= 0;
-            zdiv <= 0;
-        end else begin
-            if (zdiv != 9) begin
-                zdiv <= zdiv + 1;
-            end else begin
-                zdiv <= 0;
 
-                // runs every 100nS
+        zdiv <= preset | tenmhz ? 0 : zdiv + 1;         // divide out the 10MHz
 
-                // IOG1,2,4,E get 300nS
-                // all others get 400nS
-                if (tsct[1] & (tsct[0] | iog1 | iog2 | iog4 | ioge)) begin
-                    tsct <= 0;
-                    hgnt <= newhgnt;                // if end of TS4 or already halted and halt requested, halt
-                    ts1  <= (ts4 | hgnt) & ~ hreq;  // if end of TS4 or halted and halt not requested, start TS1
-                    ts2  <= ts1;                    // start TS2 at end of TS1
-                    ts3  <= ts2;                    // start TS3 at end of TS2
-                    iog1 <= ts3 &   ioinst;         // start IOG1 at end of TS3 with ioinst (gap bewteen TS3 and IOP1)
-                    iop1 <= iog1;                   // start IOP1 at end of IOG1
-                    iog2 <= iop1;                   // start IOG2 at end of IOP1 (gap between IOP1 and IOP2)
-                    iop2 <= iog2;                   // start IOP2 at end of IOG2
-                    iog4 <= iop2;                   // start IOG4 at end of IOP2 (gap between IOP2 and IOP4)
-                    iop4 <= iog4;                   // start IOP4 at end of IOG4
-                    ioge <= iop4;                   // start IOGE at end of IOP4 (gap between IOP4 and TS4)
-                    ts4  <= ts3 & ~ ioinst | ioge;  // start TS4 at end of IOGE or end of TS3 with no ioinst
-                end else begin
-                    tsct <= tsct + 1;
-                end
+        tsct <=
+            preset ? 0 :
+            tenmhz ? (clockts ? 0 : tsct + 1) :         // count the 400nS or 300nS interval
+            tsct;
 
-                // TPn start in last 100nS of corresponding TSn and continue for 200nS
-                tp1 <= ts1 & tsct[1];
-                tp2 <= ts2 & tsct[1];
-                tp3 <= ts3 & tsct[1];
-                tp4 <= ts4 & tsct[1];
-            end
-        end
+        // ring counter for the time states
+        hgnt <=
+            preset ? 1 :
+            tenmhz & clockts ? newhgnt :                // if end of TS4 or already halted and halt requested, halt
+            hgnt;
+        ts1  <= clockts ? (ts4 | hgnt) & ~ hreq : ts1;  // if end of TS4 or halted and halt not requested, start TS1
+        ts2  <= clockts ? ts1 : ts2;                    // start TS2 at end of TS1
+        ts3  <= clockts ? ts2 : ts3;                    // start TS3 at end of TS2
+        iog1 <= clockts ? ts3 &   ioinst : iog1;        // start IOG1 at end of TS3 with ioinst (gap bewteen TS3 and IOP1)
+        iop1 <= clockts ? iog1 : iop1;                  // start IOP1 at end of IOG1
+        iog2 <= clockts ? iop1 : iog2;                  // start IOG2 at end of IOP1 (gap between IOP1 and IOP2)
+        iop2 <= clockts ? iog2 : iop2;                  // start IOP2 at end of IOG2
+        iog4 <= clockts ? iop2 : iog4;                  // start IOG4 at end of IOP2 (gap between IOP2 and IOP4)
+        iop4 <= clockts ? iog4 : iop4;                  // start IOP4 at end of IOG4
+        ioge <= clockts ? iop4 : ioge;                  // start IOGE at end of IOP4 (gap between IOP4 and TS4)
+        ts4  <= clockts ? ts3 & ~ ioinst | ioge : ts4;  // start TS4 at end of IOGE or end of TS3 with no ioinst
+
+        // TPn start in last 100nS of corresponding TSn and continue for 200nS
+        tp1 <= tenmhz ? ts1 & tsct[1] : tp1;
+        tp2 <= tenmhz ? ts2 & tsct[1] : tp2;
+        tp3 <= tenmhz ? ts3 & tsct[1] : tp3;
+        tp4 <= tenmhz ? ts4 & tsct[1] : tp4;
     end
 
     ///////////////////
@@ -194,11 +200,11 @@ module processor (
     always @(*) begin
 
         // major state following last cycle of current instruction
-        if (iBRKRQST) begin
+        if (syncbrkrq) begin
             brkintfet = i3CYCLE ? MS_WRDCT : MS_BREAK;
         end
 
-        else if (iINTRQST &                         // some device is requesting an interrupt
+        else if (syncintrq &                        // some device is requesting an interrupt
                  intenabled &                       // 6001 was executed at least one instruction ago
                  (~ iINTINH | oJMPJMS)) begin       // not blocked by prior 62x2/62x3 until jump or currently jumping
             brkintfet = MS_INTAK;
@@ -249,280 +255,260 @@ module processor (
     reg lasthgnt, lastts1, lastts2, lastts3, lastiop1, lastiop2, lastiop4, lastts4;
     reg lasttp1, lasttp2, lasttp3, lastiog1, lastiog2, lastiog4, lastioge, lasttp4;
 
+    wire posedgeldad  = hgnt & ~ lastswldad  & swLDAD;
+    wire posedgeexam  = hgnt & ~ lastswexam  & swEXAM;
+    wire posedgedepos = hgnt & ~ lastswdepos & swDEPOS;
+    wire posedgecontx = hgnt & ~ lastswcont  & swCONT & ((majstate == MS_EXAM) | (majstate == MS_DEPOS));
+    wire posedgestart = hgnt & ~ lastswstart & swSTART;
+
+    wire negedgeldad  = hgnt & lastswldad  & ~ swLDAD;
+    wire negedgeexam  = hgnt & lastswexam  & ~ swEXAM;
+    wire negedgedepos = hgnt & lastswdepos & ~ swDEPOS;
+    wire negedgecont  = hgnt & lastswcont  & ~ swCONT;
+    wire negedgestart = hgnt & lastswstart & ~ swSTART;
+
+    wire posedgetp1 = ~ lasttp1 & tp1;
+    wire posedgetp2 = ~ lasttp2 & tp2;
+    wire posedgetp3 = ~ lasttp3 & tp3;
+    wire posedgetp4 = ~ lasttp4 & tp4;
+
+    wire iopnegedge = (lastiop1 & ~ iop1 | lastiop2 & ~ iop2 | lastiop4 & ~ iop4);
+
     always @(posedge zclock) begin
-        if (zreset) begin
-            majstate <= MS_EXAM;
-        end else begin
 
-            ///////////////////////////////////////////
-            //  if halted, process console switches  //
-            ///////////////////////////////////////////
+        // maintain major state
+        majstate <=
 
-            if (hgnt) begin
+            // power-on reset
+            preset ? MS_PWRON :
 
-                // if freshly halted, registers (mbuf, majstare, etc) will be set for next cycle
-                // ...so pressing swCONT will pick up where it left off
-                // doing an intervening ldad/exam/dep will wipe that state
-                // ...so pressing swCONT in that case assumes FETCH should be next
+            // various console switches being pressed set state to process the switch
+            posedgeldad  ? MS_EXAM  :
+            posedgeexam  ? MS_EXAM  :
+            posedgedepos ? MS_DEPOS :
+            posedgecontx ? MS_FETCH :
+            posedgestart ? MS_FETCH :
 
-                // generally, registers are set when switch is pressed
-                //  then TS1 is started when switch is released
+            // processor running, load from nxtmajst on posedge TP4
+            posedgetp4 ? nxtmajst :
 
-                // only swCONT, swDEP, swEXAM, swSTART are debounced
-                // the other functions are idempotent so don't need debouncing
+            // none of the above, maintain current state
+            majstate;
 
-                // load address - get address from switches then read memory location
-                if (~ lastswldad & swLDAD) begin
-                    madr     <= swREG;
-                    oFLDSEL  <= FS_INST;
-                    majstate <= MS_EXAM;
-                end
-                // start a memory cycle
-                // processor will halt with majstate still set to MS_EXAM
-                if (lastswldad & ~ swLDAD) begin
-                    hreq <= 0;
-                end
+        // maintain memory address register
+        madr <=
 
-                // examine - read next location
-                if (~ lastswexam & swEXAM) begin
-                    if (majstate == MS_EXAM) madr <= madr + 1;
-                    oFLDSEL  <= FS_INST;
-                    majstate <= MS_EXAM;
-                end
-                // start a memory cycle
-                // processor will halt with majstate still set to MS_EXAM
-                if (lastswexam & ~ swEXAM) begin
-                    hreq <= 0;
-                end
+            // load address switch
+            posedgeldad ? swREG :
 
-                // deposit - write next location
-                if (~ lastswdep & swDEP) begin
-                    if (majstate == MS_DEPOS) madr <= madr + 1;
-                    oFLDSEL  <= FS_INST;
-                    majstate <= MS_DEPOS;
-                end
-                // start a memory cycle
-                // processor will halt with majstate still set to MS_DEPOS
-                if (lastswdep & ~ swDEP) begin
-                    hreq <= 0;
-                end
+            // consecutive examine and deposit switches
+            posedgeexam  & (majstate == MS_EXAM)  ? madr + 1 :
+            posedgedepos & (majstate == MS_DEPOS) ? madr + 1 :
 
-                // continue - resume execution where left off
-                // if did ldad/exam/depos since halt, assume fetch is next
-                if (~ lastswcont & swCONT) begin
-                    if ((majstate == MS_EXAM) || (majstate == MS_DEPOS)) begin
-                        oFLDSEL  <= FS_INST;
-                        majstate <= MS_FETCH;
-                    end
-                end
-                // start a memory cycle
-                // processor will keep going until halted again
-                if (lastswcont & ~ swCONT) begin
-                    hreq <= 0;
-                end
+            // clocking at posedge TP4 based on next state
+            posedgetp4 & (nxtmajst == MS_FETCH) ? pctr     :
+            posedgetp4 & (nxtmajst == MS_DEFER) ? effaddr  :
+            posedgetp4 & (nxtmajst == MS_EXEC)  ? (majstate == MS_DEFER ? mbuf : effaddr) :
+            posedgetp4 & (nxtmajst == MS_WRDCT) ? iDMAADDR :
+            posedgetp4 & (nxtmajst == MS_CURAD) ? madr + 1 :
+            posedgetp4 & (nxtmajst == MS_BREAK) ? (i3CYCLE ? mbuf : iDMAADDR) :
+            posedgetp4 & (nxtmajst == MS_INTAK) ? 0 :
 
-                // start - begin execution at current address
-                // external circuit (backplane) is asserting businit while switch is pressed
-                if (~ lastswstart & swSTART) begin
-                    oFLDSEL  <= FS_INST;
-                    majstate <= MS_FETCH;
-                end
-                // start a memory cycle
-                // processor will keep going until halted again
-                if (lastswstart & ~ swSTART) begin
-                    hreq <= 0;
-                end
-            end
+            // none of the above, keep existing value
+            madr;
 
-            ///////////////////////////////////////////////////
-            //  TS1: read memory from address EA,MA into MB  //
-            ///////////////////////////////////////////////////
+        // maintain field select register
+        oFLDSEL <=
 
-            // memory starts reading location at beginning of TS1
-            // TP1 happens 300nS later
+            // pressing console switch while halted
+            posedgeldad  ? FS_INST :
+            posedgeexam  ? FS_INST :
+            posedgedepos ? FS_INST :
+            posedgecontx ? FS_INST :
+            posedgestart ? FS_INST :
+
+            // running updates at posedge TP4
+            posedgetp4 & (nxtmajst == MS_FETCH) ? FS_INST  :
+            posedgetp4 & (nxtmajst == MS_DEFER) ? FS_INST  :
+            posedgetp4 & (nxtmajst == MS_EXEC)  ? (majstate == MS_DEFER & ~ ireg[11] ? FS_DATA : FS_INST) :
+            posedgetp4 & (nxtmajst == MS_WRDCT) ? FS_ZERO  :
+            posedgetp4 & (nxtmajst == MS_CURAD) ? FS_ZERO  :
+            posedgetp4 & (nxtmajst == MS_BREAK) ? FS_BREAK :
+            posedgetp4 & (nxtmajst == MS_INTAK) ? FS_INST  :
+
+            // otherwise maintain existing value
+            oFLDSEL;
+
+        // maintain halt request register
+        hreq <=
+
+            // power-on reset
+            preset ? 1 :
+
+            // releasing console switch
+            negedgeldad  ? 0 :
+            negedgeexam  ? 0 :
+            negedgedepos ? 0 :
+            negedgecont  ? 0 :
+            negedgestart ? 0 :
+
+            // HLT instruction bit
+            posedgetp3 & (majstate == MS_FETCH) & (ireg == 7) & mbuf[08] & ~ mbuf[00] & mbuf[01] ? 1 :
+
+            // console single-stepping, single-cycling, stop switch
+            posedgetp4 & swSINST & (nxtmajst == MS_FETCH) | swSSTEP | swSTOP ? 1 :
+
+            // exam, deposit cycles cause an halt
+            posedgetp4 & (nxtmajst == MS_EXAM | nxtmajst == MS_DEPOS) ? 1 :
+
+            // otherwise maintain value
+            hreq;
+
+        // maintain memory buffer register
+        mbuf <=
 
             // clock in memory data on posedge TP1
-            if (~ lasttp1 & tp1) begin
-                mbuf <= iMEMBUS;
-            end
+            posedgetp1 ? iMEMBUS :
 
-            ///////////////////////////////////////////////
-            //  TS2: modify MB according to major state  //
-            ///////////////////////////////////////////////
+            // increment at posedge TP2 and in DEFER state and autoincrement pointer
+            posedgetp2 & (majstate == MS_DEFER) & (madr[11:03] == 1) ? mbuf + 1 :
 
-            if (~ lasttp2 & tp2) begin
-                case (majstate)
-                    MS_FETCH: begin
-                        ireg <= mbuf[11:09];
-                        pctr <= madr + 1;
-                    end
-                    MS_DEFER: if (madr[11:03] == 1) mbuf <= mbuf + 1;
-                    MS_EXEC, MS_INTAK: case (ireg)
-                        2: mbuf <= mbuf + 1;    // isz
-                        3: mbuf <= acum;        // dca
-                        4: mbuf <= pctr;        // jms
-                    endcase
-                    MS_WRDCT: begin
-                        // middle of wc with count just read, detect count overflow
-                        oBWCOV <= (mbuf == 12'o7777);
-                        mbuf <= mbuf + 1;
-                    end
-                    MS_CURAD: if (iCAINC) begin
-                        mbuf <= mbuf + 1;
-                    end
-                    MS_BREAK: if (iBRKWRM) begin
-                        // data must be ready in time for TS3 so it can be written to memory
-                        mbuf <= iDMADATA;
-                    end
-                    MS_DEPOS: begin
-                        mbuf <= swREG;
-                    end
-                    default: begin end
-                endcase
-            end
+            // increment at posedge TP2 and in EXEC state for ISZ instruction
+            posedgetp2 & (majstate == MS_EXEC) & (ireg == 2) ? mbuf + 1 :
 
-            /////////////////////////////////////////////
-            //  TS3: write MB back to memory location  //
-            /////////////////////////////////////////////
+            // load from ACUM at posedge TP2 and in EXEC state for DCA instruction
+            posedgetp2 & (majstate == MS_EXEC) & (ireg == 3) ? acum :
 
-            // memory being written throughout TS3
+            // load from PCTR at posedge TP2 and in EXEC or INTAK state for JMS instruction
+            posedgetp2 & ((majstate == MS_EXEC) | (majstate == MS_INTAK)) & (ireg == 4) ? pctr :
 
-            if (~ lasttp3 & tp3) begin
+            // increment at posedge TP2 and in WRDCT state
+            posedgetp2 & (majstate == MS_WRDCT) ? mbuf + 1 :
 
-                // update acum (computation), link (computation), pctr (jumps & skips)
-                case (majstate)
+            // increment at posedge TP2 and in CURAD state with iCAINC
+            posedgetp2 & (majstate == MS_CURAD) & iCAINC ? mbuf + 1 :
 
-                    // end of FETCH cycle
-                    MS_FETCH: begin
-                        case (ireg)
+            // load from DMA data at posedge TP2 and in BREAK state with iBRKWRM
+            posedgetp2 & (majstate == MS_BREAK) & iBRKWRM ? iDMADATA :
 
-                            // jmp
-                            5: begin
-                                if (~ mbuf[08]) pctr <= effaddr;
-                            end
+            // load from switches at posedge TP2 and in DEPOS state
+            posedgetp2 & (majstate == MS_DEPOS) ? swREG :
 
-                            // opr - perform operation
-                            7: begin
-                                if (~ mbuf[08]) begin
-                                    acum <= g1acum;
-                                    link <= g1link;
-                                end else if (~ mbuf[00]) begin
-                                    acum <= g2acum;
-                                    if (g2skip) pctr <= pctr + 1;
-                                    if (mbuf[01]) hreq <= 1;
-                                end
-                            end
+            mbuf;
 
-                            default: begin end
-                        endcase
-                    end
+        // maintain instruction register
+        ireg <=
 
-                    // end of DEFER cycle
-                    MS_DEFER: begin
-                        if (ireg == 5) pctr <= mbuf;
-                    end
+            // load at posedge TP2 when in FETCH state
+            posedgetp2 & (majstate == MS_FETCH) ? mbuf[11:09] :
 
-                    // end of EXEC cycle
-                    MS_EXEC, MS_INTAK: begin
-                        case (ireg)
-                            0: acum <= acum & mbuf;                         // and
-                            1: begin link <= tadlink; acum <= tadacum; end  // tad
-                            2: if (mbuf == 0) pctr <= pctr + 1;             // isz
-                            3: acum <= 0;                                   // dca
-                            4: pctr <= madr + 1;                            // jms
-                        endcase
-                    end
+            // load at posedge TP4 when going into MS_INTAK state
+            posedgetp4 & (nxtmajst == MS_INTAK) ? 4 :
 
-                    // something else, do nothing
-                    default: begin end
-                endcase
+            ireg;
 
-                // sync external async inputs
-                syncbrkrq <= iBRKRQST;
-                syncintrq <= iINTRQST;
-            end
+        // maintain program counter register
+        pctr <=
 
-            ////////////////////////////////////////
-            //  update AC,PC at end of IO pulses  //
-            ////////////////////////////////////////
+            // get from madr for CONTx and START switches
+            posedgecontx ? madr :
+            posedgestart ? madr :
 
-            if (lastiop1 & ~ iop1 | lastiop2 & ~ iop2 | lastiop4 & ~ iop4) begin
-                if (mbuf[08:00] == 1) begin     // 06001 = ION
-                    intdelayed <= 1;
-                end
-                if (mbuf[08:00] == 2) begin     // 06002 = IOF
-                    intdelayed <= 0;
-                    intenabled <= 0;
-                end
-                acum <= (iACCLEAR ? 0 : acum) | iINBUS;
-                if (iIOSKIP) pctr <= pctr + 1;
-            end
+            // increment after instruction fetched
+            // leave madr pointing to instruction so effaddr will be correct
+            posedgetp2 & (majstate == MS_FETCH) ? pctr + 1 :
 
-            /////////////////////////////
-            //  TS4: final processing  //
-            /////////////////////////////
+            // load effective address for direct JMP
+            posedgetp3 & (majstate == MS_FETCH) & (ireg == 5) & ~ mbuf[08] ? effaddr :
 
-            if (~ lasttp4 & tp4) begin
+            // increment PC for Group 2 skip condition
+            posedgetp3 & (majstate == MS_FETCH) & (ireg == 7) & mbuf[08] & ~ mbuf[00] & g2skip ? pctr + 1 :
 
-                // maybe single-stepping or single-cycling or stopping
-                if (swSINST & (nxtmajst == MS_FETCH) | swSSTEP | swSTOP) hreq <= 1;
+            // load pointer contents for indirect JMP
+            posedgetp3 & (majstate == MS_DEFER) & (ireg == 5) ? mbuf :
 
-                // set up address for next cycle
-                // note: memext is updating field registers now too
-                case (nxtmajst)
+            // increment PC for ISZ instruction if now zero
+            posedgetp3 & (majstate == MS_EXEC) & (ireg == 2) & (mbuf == 0) ? pctr + 1 :
 
-                    // FETCH next: use PC for next memory address, instruction space
-                    MS_FETCH: begin
-                        madr    <= pctr;
-                        oFLDSEL <= FS_INST;
-                    end
+            // load from where return address was saved + 1 for JMS instruction
+            posedgetp3 & ((majstate == MS_EXEC) | (majstate == MS_INTAK)) & (ireg == 4) ? madr + 1 :
 
-                    // DEFER next: use effective address for next address, instruction space
-                    MS_DEFER: begin
-                        madr    <= effaddr;
-                        oFLDSEL <= FS_INST;
-                    end
+            // increment PC for IOP skips
+            iopnegedge & iIOSKIP ? pctr + 1 :
 
-                    // EXEC next: if currently DEFER, use indirect address from data space
-                    //                  else FETCH, use effective address from instr space
-                    MS_EXEC: begin
-                        madr    <= (majstate == MS_DEFER) ? mbuf : effaddr;
-                        oFLDSEL <= (majstate == MS_DEFER) & ~ ireg[11] ? FS_DATA : FS_INST;
-                    end
+            // otherwise maintain current value
+            pctr;
 
-                    // wordcount/current address: read values from page 0
-                    MS_WRDCT: begin madr <= iDMAADDR; oFLDSEL <= FS_ZERO; end
-                    MS_CURAD: begin madr <= madr + 1; oFLDSEL <= FS_ZERO; end
+        // wordcount cycle overflow
+        oBWCOV <= posedgetp2 & (majstate == MS_WRDCT) ? (mbuf == 12'o7777) : oBWCOV;
 
-                    // BREAK next:
-                    //  if in CURAD, address comes from MB (the incremented pointer of a 3-cycle DMA)
-                    //  otherwise, it is a single-cycle DMA so get address from the device
-                    MS_BREAK: begin
-                        madr    <= (majstate == MS_CURAD) ? mbuf : iDMAADDR;
-                        oFLDSEL <= FS_BREAK;
-                    end
+        // maintain accumulator register
+        acum <=
 
-                    // INTAK next: write return address to address 0 of instr space
-                    //             memory extension is clearing to page 0
-                    MS_INTAK: begin
-                        intdelayed <= 0;
-                        intenabled <= 0;
-                        ireg       <= 4;
-                        madr       <= 0;
-                        oFLDSEL    <= FS_INST;
-                    end
+            // Group 1 computation result
+            posedgetp3 & (majstate == MS_FETCH) & (ireg == 7) & ~ mbuf[08] ? g1acum :
 
-                    // EXAM, DEPOS or unknown, halt
-                    default: hreq <= 1;
-                endcase
+            // Group 2 computation result
+            posedgetp3 & (majstate == MS_FETCH) & (ireg == 7) & mbuf[08] & ~ mbuf[00] ? g2acum :
 
-                // update to next state
-                majstate <= nxtmajst;
+            // AND, TAD and DCA instructions
+            posedgetp3 & (majstate == MS_EXEC) & (ireg == 0) ? acum & mbuf :
+            posedgetp3 & (majstate == MS_EXEC) & (ireg == 1) ? tadacum :
+            posedgetp3 & (majstate == MS_EXEC) & (ireg == 3) ? 0 :
 
-                // update delayed interrupt enable
-                intenabled <= intdelayed;
-            end
-        end
+            // accumulator updates at end of IO pulse
+            iopnegedge ? (iACCLEAR ? 0 : acum) | iINBUS :
+
+            // otherwise maintain value
+            acum;
+
+        // maintain link register
+        link <=
+
+            // Group 1
+            posedgetp3 & (majstate == MS_FETCH) & (ireg == 7) & ~ mbuf[08] ? g1link :
+
+            // TAD instruction
+            posedgetp3 & (majstate == MS_EXEC) & (ireg == 1) ? tadlink :
+
+            // otherwise maintain value
+            link;
+
+        // synchronize external async inputs
+        syncbrkrq <= posedgetp3 ? iBRKRQST : syncbrkrq;
+        syncintrq <= posedgetp3 ? iINTRQST : syncintrq;
+
+        // maintain interrupt enable register
+        intdelayed <=
+
+            // disable for acknowledge interrupt cycle
+            posedgetp2 & (majstate == MS_INTAK) ? 0 :
+
+            // enable during IOP1 if IOF (6001) instruction
+            // the enable will be delayed until fetch of next instruction
+            iop1 & (mbuf[08:00] == 1) ? 1 :
+
+            // disable during IOP2 if IOF (6002) instruction
+            // the disable will be in effect by the time TP4 processes interrupt request at end of IOF instruction
+            iop2 & (mbuf[08:00] == 2) ? 0 :
+
+            // maintain value otherwise
+            intdelayed;
+
+        intenabled <=
+
+            // get delayed enable when fetching instruction
+            posedgetp2 & (majstate == MS_FETCH) ? intdelayed :
+
+            // disable for acknowledge interrupt cycle
+            posedgetp2 & (majstate == MS_INTAK) ? 0 :
+
+            // disable interrupts during IOP2 if IOF (6002) instruction
+            // the disable will be in effect by the time TP4 processes interrupt request at end of IOF instruction
+            iop2 & (mbuf[08:00] == 2) ? 0 :
+
+            // maintain value otherwise
+            intenabled;
 
         // edge detection
         lasthgnt <= hgnt;
@@ -544,7 +530,7 @@ module processor (
 
         lastswstart <= swSTART;
         lastswldad  <= swLDAD;
-        lastswdep   <= swDEP;
+        lastswdepos <= swDEPOS;
         lastswexam  <= swEXAM;
         lastswcont  <= swCONT;
     end
@@ -554,6 +540,7 @@ module processor (
     //////////////////////////
 
     assign oBREAK  = (majstate == MS_BREAK);
+    assign oBUSINI = zreset | preset | swSTART;
     assign oEXEFET = (nxtmajst == MS_EXEC) | (nxtmajst == MS_FETCH);
     assign oINTACK = (nxtmajst == MS_INTAK);    // valid from just after posedge TS3 of INTACK cycle to posedge TS3 of INTACK cycle
     assign oIOP1 = iop1;

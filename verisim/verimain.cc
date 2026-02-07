@@ -136,6 +136,7 @@ struct Pin {
     int bits;
     int size;
     void *offs;
+    bool writ;
     char const *name;
 };
 #define OFFS(x) sizeof (vbkpl->x), &vbkpl->x
@@ -144,41 +145,42 @@ struct Pin {
 static int cmd_bus (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
     Pin const pintable[] = {
-        {  1, OFFS (i3CYCLE),  "i3CYCLE"  },   // do 3-cycle break
-        {  1, OFFS (iACCLEAR), "iACCLEAR" },   // io pulse clears AC
-        {  1, OFFS (iBRKRQST), "iBRKRQST" },   // requesting break
-        {  1, OFFS (iBRKWRM),  "iBRKWRM"  },   // break cycle writes memory
-        {  1, OFFS (iCAINC),   "iCAINC"   },   // curad cycle increments address word
-        {  1, OFFS (iHOLD),    "iHOLD"    },   // hold internal clocking (stretch cycle)
-        {  1, OFFS (iINTRQST), "iINTRQST" },   // request interrupt
-        {  1, OFFS (iIOSKIP),  "iIOSKIP"  },   // increment PC at end of IO pulse
-        { 15, OFFS (iDMAADDR), "iDMAADDR" },   // device sending address for DMA
-        { 12, OFFS (iDMADATA), "iDMADATA" },   // device sending write data for DMA
-        { 12, OFFS (iINBUS),   "iINBUS"   },   // device sending data for PIO
+        {  1, OFFS (i3CYCLE),  true,  "i3CYCLE"  },   // do 3-cycle break
+        {  1, OFFS (iACCLEAR), true,  "iACCLEAR" },   // io pulse clears AC
+        {  1, OFFS (iBRKRQST), true,  "iBRKRQST" },   // requesting break
+        {  1, OFFS (iBRKWRM),  true,  "iBRKWRM"  },   // break cycle writes memory
+        {  1, OFFS (iCAINC),   true,  "iCAINC"   },   // curad cycle increments address word
+        {  1, OFFS (iHOLD),    true,  "iHOLD"    },   // hold internal clocking (stretch cycle)
+        {  1, OFFS (iINTRQST), true,  "iINTRQST" },   // request interrupt
+        {  1, OFFS (iIOSKIP),  true,  "iIOSKIP"  },   // increment PC at end of IO pulse
+        { 15, OFFS (iDMAADDR), true,  "iDMAADDR" },   // device sending address for DMA
+        { 12, OFFS (iDMADATA), true,  "iDMADATA" },   // device sending write data for DMA
+        { 12, OFFS (iINBUS),   true,  "iINBUS"   },   // device sending data for PIO
 
-        {  1, OFFS (link),     "link"     },
-        {  4, OFFS (majst),    "majst"    },
-        {  3, OFFS (memfield), "memfield" },
-        { 12, OFFS (pctr),     "pctr"     },
+        {  1, OFFS (link),     false, "link"     },
+        {  4, OFFS (majst),    false, "majst"    },
+        {  3, OFFS (memfield), false, "memfield" },
+        { 12, OFFS (pctr),     false, "pctr"     },
+        {  1, OFFS (preset),   true,  "preset"   },
 
-        { 12, OFFS (oACUM),    "oACUM"    },
-        {  1, OFFS (oBREAK),   "oBREAK"   },   // currently doing BREAK (DMA) cycle
-        {  1, OFFS (oBWCOV),   "oBWCOV"   },   // 3-cycle DMA wordcount overflowed
-        {  1, OFFS (oIOP1),    "oIOP1"    },   // io instruction pulses
-        {  1, OFFS (oIOP2),    "oIOP2"    },
-        {  1, OFFS (oIOP4),    "oIOP4"    },
-        { 12, OFFS (oMADR),    "oMADR"    },
-        { 12, OFFS (oMBUF),    "oMBUF"    },
-        {  1, OFFS (oRUN),     "oRUN"     },
-        {  1, OFFS (oTP1),     "oTP1"     },
-        {  1, OFFS (oTP2),     "oTP2"     },
-        {  1, OFFS (oTP3),     "oTP3"     },
-        {  1, OFFS (oTP4),     "oTP4"     },
-        {  1, OFFS (oTS1),     "oTS1"     },
-        {  1, OFFS (oTS2),     "oTS2"     },
-        {  1, OFFS (oTS3),     "oTS3"     },
-        {  1, OFFS (oTS4),     "oTS4"     },
-        {  0, 0, 0, NULL }
+        { 12, OFFS (oACUM),    false, "oACUM"    },
+        {  1, OFFS (oBREAK),   false, "oBREAK"   },   // currently doing BREAK (DMA) cycle
+        {  1, OFFS (oBWCOV),   false, "oBWCOV"   },   // 3-cycle DMA wordcount overflowed
+        {  1, OFFS (oIOP1),    false, "oIOP1"    },   // io instruction pulses
+        {  1, OFFS (oIOP2),    false, "oIOP2"    },
+        {  1, OFFS (oIOP4),    false, "oIOP4"    },
+        { 12, OFFS (oMADR),    false, "oMADR"    },
+        { 12, OFFS (oMBUF),    false, "oMBUF"    },
+        {  1, OFFS (oRUN),     false, "oRUN"     },
+        {  1, OFFS (oTP1),     false, "oTP1"     },
+        {  1, OFFS (oTP2),     false, "oTP2"     },
+        {  1, OFFS (oTP3),     false, "oTP3"     },
+        {  1, OFFS (oTP4),     false, "oTP4"     },
+        {  1, OFFS (oTS1),     false, "oTS1"     },
+        {  1, OFFS (oTS2),     false, "oTS2"     },
+        {  1, OFFS (oTS3),     false, "oTS3"     },
+        {  1, OFFS (oTS4),     false, "oTS4"     },
+        {  0, 0, 0, 0, NULL }
     };
 
     bool setmode = false;
@@ -203,7 +205,7 @@ static int cmd_bus (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj
             }
             if (strcasecmp (arg, pin->name) == 0) {
                 if (setmode) {
-                    if (pin->name[0] != 'i') {
+                    if (! pin->writ) {
                         Tcl_SetResultF (interp, "pin not settable %s", arg);
                         return TCL_ERROR;
                     }

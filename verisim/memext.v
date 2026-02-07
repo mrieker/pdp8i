@@ -48,6 +48,7 @@ module memext (
     input zclock,               // fpga 100MHz clock
     input zreset,               // fpga reset
 
+    input preset,               // power-on reset
     input businit,              // start switch being pressed
     input iop1, iop2, iop4,     // IO instuction pulses
     input ldaddrsw,             // console LOAD ADDRESS switch
@@ -72,16 +73,6 @@ module memext (
     localparam[1:0] FS_ZERO  = 2;
     localparam[1:0] FS_BREAK = 3;
 
-    localparam[3:0] MS_FETCH = 1;   // memory cycle is fetching instruction
-    localparam[3:0] MS_DEFER = 2;   // memory cycle is reading pointer
-    localparam[3:0] MS_EXEC  = 3;   // memory cycle is for executing instruction
-    localparam[3:0] MS_WRDCT = 4;   // memory cycle is for incrementing dma word count
-    localparam[3:0] MS_CURAD = 5;   // memory cycle is for reading dma address
-    localparam[3:0] MS_BREAK = 6;   // memory cycle is for dma data word transfer
-    localparam[3:0] MS_INTAK = 7;   // memory cycle is for interrupt acknowledge
-    localparam[3:0] MS_DEPOS = 8;   // memory cycle is for deposit switch
-    localparam[3:0] MS_EXAM  = 9;   // memory cycle is for examine switch
-
     reg lasttp4;
     reg[2:0] dfld, ifld, ifldaj, saveddfld, savedifld;
 
@@ -98,7 +89,7 @@ module memext (
         //  bus init  //
         ////////////////
 
-        if (zreset) begin
+        if (preset) begin
 
             // these get cleared on power up
             // they remain as is when start switch is pressed

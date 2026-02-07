@@ -3,6 +3,8 @@ module console (
     input zclock,
     input zreset,
 
+    input preset,
+
 //  inout[27:04] gpio,
     input[27:04] gpin,
     output[27:04] gpout,
@@ -27,7 +29,7 @@ module console (
     output reg[2:0] swifld,
     output reg swstart,
     output reg swldad,
-    output reg swdep,
+    output reg swdepos,
     output reg swexam,
     output reg swcont,
     output reg swstop,
@@ -35,7 +37,7 @@ module console (
     output reg swsinst
 );
 
-    localparam[3:0] MS_HALT  = 0;   // waiting for console
+    localparam[3:0] MS_PWRON = 0;   // power-on reset
     localparam[3:0] MS_FETCH = 1;   // memory cycle is fetching instruction
     localparam[3:0] MS_DEFER = 2;   // memory cycle is reading pointer
     localparam[3:0] MS_EXEC  = 3;   // memory cycle is for executing instruction
@@ -50,7 +52,7 @@ module console (
     // gpio lbus rn0 rn1 rn2 rn3 rn4 rn5 rn6 rn7 rn8 rn9 rn10
     //  14   11  pc1 ma1 mb1 ac1 mq1 and cad df1 sw1 df1 start  [MSB]
     //  15   10  pc2 ma2 mb2 ac2 mq2 tad brk df2 sw2 df2 ldad
-    //   4    9  pc3 ma3 mb3 ac3 mq3 isz ion df3 sw3 df3 dep
+    //   4    9  pc3 ma3 mb3 ac3 mq3 isz ion df3 sw3 df3 depos
     //   5    8   .   .   .   .   .  dca pau if1  .  if1 exam
     //   6    7   .   .   .   .   .  jms run if2  .  if2 cont
     //   7    6   .   .   .   .   .  jmp sc1 if3  .  if3 stop
@@ -75,7 +77,7 @@ module console (
 //  assign gpio[15:04] = rownum[3] ? 12'hZZZ : gpout[15:04];    // columns
 
     always @(posedge zclock) begin
-        if (zreset) begin
+        if (preset) begin
             debounce <= 0;
             rownum   <= 0;
             timer    <= 0;
@@ -122,7 +124,7 @@ module console (
                         // SSTEP, SINST are toggles
                         swstart   <= gpin[14] & debounce[2];//5
                         swldad    <= gpin[15];
-                        swdep     <= gpin[04] & debounce[2];//5
+                        swdepos   <= gpin[04] & debounce[2];//5
                         swexam    <= gpin[05] & debounce[2];//5
                         swcont    <= gpin[06] & debounce[2];//5
                         swstop    <= gpin[07];
