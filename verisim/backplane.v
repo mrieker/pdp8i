@@ -92,7 +92,7 @@ module backplane (
         .iop2 (oIOP2),
         .iop4 (oIOP4),
         .ldaddrsw (swldad),
-        .tp3 (oTP3),
+        .tp4 (oTP4),
         .exefet (oEXEFET),
         .intack (oINTACK),
         .jmpjms (oJMPJMS),

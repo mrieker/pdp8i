@@ -96,6 +96,7 @@ proc simtest {} {
         set startclockno [clk 0]
 
         set effaddr 0
+        set lastopc -1
         set opcode  0
         set randsr  0
         set execst $MS_EXEC
@@ -167,22 +168,25 @@ proc simtest {} {
                 ;# for IOs, only allow processor (600x) and xmem (62xx)
                 while true {
                     set opcode [randbits 12]
-                    if {($opcode & 07400) == 07400} {
-                        set opcode [expr {$opcode & 07772}]     ;# don't do OSR,Group 3
-                    }
-                    if {($opcode & 07400) == 07000} {
-                        if {($opcode & 016) == 002} continue    ;# bsw
-                        if {($opcode & 014) == 014} continue    ;# 6,7
-                    }
-                    if {($opcode & 07000) != 06000} break
+                    if {($opcode & 06000) != 06000} break       ;# and,tad,isz,dca,jms,jmp
                     if {$opcode == 06001} break                 ;# ION
                     if {$opcode == 06002} break                 ;# IOF
-                    if {$intdelayed == $intenabled} {           ;# don't do memext opcodes if instruction after ION
+                    if {$lastopc != 06001} {                    ;# don't do memext opcodes if instruction after ION
                         if {($opcode & 07704) == 06200} break
                         if {($opcode & 07707) == 06204} break
                     }
+                    if {($opcode & 07400) == 07000} {           ;# group 1
+                        if {($opcode & 016) == 002} continue    ;# bsw
+                        if {($opcode & 014) == 014} continue    ;# 6,7
+                        break
+                    }
+                    if {($opcode & 07401) == 07400} {           ;# group 2
+                        set opcode [expr {$opcode & 07772}]     ;# don't do OSR
+                        break
+                    }
                 }
                 puts -nonewline [format "OP=%04o  %s" $opcode [disop $pctr $opcode]]
+                set lastopc $opcode
 
                 ;# set random switch register contents if about to do an OSR instruction
                 if {(($opcode & 07401) == 07400) && ($opcode & 0004)} {
@@ -442,7 +446,7 @@ proc memorycyclx {state field addr rdata rdbkdata wtbkdata vfywaddr vfywdata} {
     verify12 [bus majst] $state "bad state during mem cycle"
 
     ;# cpu should be outputting address we expect
-    verify15 [expr {([bus memfield] << 12) | [bus oMADR]}] [expr {($field << 12) | $addr}] "XMA bad at beginning of mem cycle"
+    verify15 [expr {([bus memfield] << 12) | [bus oMADR]}] [expr {($field << 12) | $addr}] "XMA bad at beginning of $state cycle"
 
     ;# write the read data to the given address so cpu can read it
     set xaddr [expr {($field << 12) | $addr}]

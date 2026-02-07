@@ -185,6 +185,7 @@ module processor (
     wire[11:00] g2acum = (mbuf[07] ? 12'd0 : acum) | (mbuf[02] ? swREG : 12'd0);
 
     // major state following last cycle of current instruction
+    // this is used at posedge TP3, before any possible IOPs of current instruction
     wire[3:0] brkintfet =
 
         // if there is a dma request pending, start doing the dma
@@ -221,12 +222,25 @@ module processor (
 
             if (hgnt) begin
 
-                // load address - get address from switches and read memory location
+                // if freshly halted, registers (mbuf, majstare, etc) will be set for next cycle
+                // ...so pressing swCONT will pick up where it left off
+                // doing an intervening ldad/exam/dep will wipe that state
+                // ...so pressing swCONT in that case assumes FETCH should be next
+
+                // generally, registers are set when switch is pressed
+                //  then TS1 is started when switch is released
+
+                // only swCONT, swDEP, swEXAM, swSTART are debounced
+                // the other functions are idempotent so don't need debouncing
+
+                // load address - get address from switches then read memory location
                 if (~ lastswldad & swLDAD) begin
-                    madr <= swREG;
+                    madr     <= swREG;
                     oFLDSEL  <= FS_INST;
                     majstate <= MS_EXAM;
                 end
+                // start a memory cycle
+                // processor will halt with majstate still set to MS_EXAM
                 if (lastswldad & ~ swLDAD) begin
                     hreq <= 0;
                 end
@@ -237,6 +251,8 @@ module processor (
                     oFLDSEL  <= FS_INST;
                     majstate <= MS_EXAM;
                 end
+                // start a memory cycle
+                // processor will halt with majstate still set to MS_EXAM
                 if (lastswexam & ~ swEXAM) begin
                     hreq <= 0;
                 end
@@ -247,20 +263,34 @@ module processor (
                     oFLDSEL  <= FS_INST;
                     majstate <= MS_DEPOS;
                 end
+                // start a memory cycle
+                // processor will halt with majstate still set to MS_DEPOS
                 if (lastswdep & ~ swDEP) begin
                     hreq <= 0;
                 end
 
                 // continue - resume execution where left off
+                // if did ldad/exam/depos since halt, assume fetch is next
+                if (~ lastswcont & swCONT) begin
+                    if ((majstate == MS_EXAM) || (majstate == MS_DEPOS)) begin
+                        oFLDSEL  <= FS_INST;
+                        majstate <= MS_FETCH;
+                    end
+                end
+                // start a memory cycle
+                // processor will keep going until halted again
                 if (lastswcont & ~ swCONT) begin
                     hreq <= 0;
                 end
 
                 // start - begin execution at current address
+                // external circuit (backplane) is asserting businit while switch is pressed
                 if (~ lastswstart & swSTART) begin
                     oFLDSEL  <= FS_INST;
                     majstate <= MS_FETCH;
                 end
+                // start a memory cycle
+                // processor will keep going until halted again
                 if (lastswstart & ~ swSTART) begin
                     hreq <= 0;
                 end
@@ -270,6 +300,9 @@ module processor (
             //  TS1: read memory from address EA,MA into MB  //
             ///////////////////////////////////////////////////
 
+            // memory starts reading location at beginning of TS1
+            // TP1 happens 300nS later
+
             // clock in memory data on posedge TP1
             if (~ lasttp1 & tp1) begin
                 mbuf <= iMEMBUS;
@@ -278,6 +311,9 @@ module processor (
             ///////////////////////////////////////////////
             //  TS2: modify MB according to major state  //
             ///////////////////////////////////////////////
+
+            // give the increments and whatnot from posedge TS2 to
+            // posedge TP3 (300nS) to soak through circuits
 
             if (~ lasttp2 & tp2) begin
                 case (majstate)
@@ -294,7 +330,6 @@ module processor (
                     endcase
                     MS_WRDCT: begin
                         // middle of wc with count just read, detect count overflow
-                        // PDP-8/L clocks it with TP2 (vol 2, p5 D-5)
                         oBWCOV <= (mbuf == 12'o7777);
                         mbuf <= mbuf + 1;
                     end
@@ -302,7 +337,7 @@ module processor (
                         mbuf <= mbuf + 1;
                     end
                     MS_BREAK: if (iBRKWRM) begin
-                        // data must be ready in time for TS3 (pdp-8/l user's handbook p39)
+                        // data must be ready in time for TS3 so it can be written to memory
                         mbuf <= iDMADATA;
                     end
                     MS_DEPOS: begin
@@ -316,50 +351,7 @@ module processor (
             //  TS3: write MB back to memory location  //
             /////////////////////////////////////////////
 
-            // like a real PDP, compute next major state in time for TP3
-            // - check for start of TS3
-            if (~ lastts3 & ts3) begin
-                case (majstate)
-
-                    // nearing end of FETCH cycle
-                    MS_FETCH: begin
-                        case (ireg)
-
-                            // add, tad, isz, dca, jms
-                            0, 1, 2, 3, 4: nxtmajst <= mbuf[08] ? MS_DEFER : MS_EXEC;
-
-                            // jmp
-                            5: nxtmajst <= mbuf[08] ? MS_DEFER : brkintfet;
-
-                            // iot, opr
-                            6, 7: nxtmajst <= brkintfet;
-                        endcase
-                    end
-
-                    // nearing end of DEFER cycle
-                    MS_DEFER: nxtmajst <= (ireg == 5) ? brkintfet : MS_EXEC;
-
-                    // nearing end of EXEC, INTAK, BREAK cycle
-                    MS_EXEC, MS_INTAK, MS_BREAK: nxtmajst <= brkintfet;
-
-                    // nearing end of wordcount
-                    MS_WRDCT: nxtmajst <= MS_CURAD;
-
-                    // nearing end of currentaddress
-                    MS_CURAD: nxtmajst <= MS_BREAK;
-
-                    // something else, halt next
-                    default: hreq <= 1;
-                endcase
-            end
-
             if (~ lasttp3 & tp3) begin
-
-                // PDP-8/L clears BWC_OVERFLOW at end of TS3 (vol 2, p9 D-5)
-                oBWCOV <= 0;
-
-                // real PDP-8/L updates AC via TP3
-                // also compute new MA to be loaded at TP4 like real PDP-8/L
 
                 case (majstate)
 
@@ -367,10 +359,17 @@ module processor (
                     MS_FETCH: begin
                         case (ireg)
 
+                            // add, tad, isz, dca, jms
+                            0, 1, 2, 3, 4: nxtmajst <= mbuf[08] ? MS_DEFER : MS_EXEC;
+
                             // jmp
                             5: begin
                                 if (~ mbuf[08]) pctr <= effaddr;
+                                nxtmajst <= mbuf[08] ? MS_DEFER : brkintfet;
                             end
+
+                            // iot
+                            6: nxtmajst <= brkintfet;
 
                             // opr - perform operation
                             7: begin
@@ -382,6 +381,7 @@ module processor (
                                     if (g2skip) pctr <= pctr + 1;
                                     if (mbuf[01]) hreq <= 1;
                                 end
+                                nxtmajst <= brkintfet;
                             end
                         endcase
                     end
@@ -389,6 +389,7 @@ module processor (
                     // end of DEFER cycle
                     MS_DEFER: begin
                         if (ireg == 5) pctr <= mbuf;
+                        nxtmajst <= (ireg == 5) ? brkintfet : MS_EXEC;
                     end
 
                     // end of EXEC cycle
@@ -400,13 +401,21 @@ module processor (
                             3: acum <= 0;                                   // dca
                             4: pctr <= madr + 1;                            // jms
                         endcase
+                        nxtmajst <= brkintfet;
                     end
 
-                    default: begin end
-                endcase
+                    // nearing end of wordcount
+                    MS_WRDCT: nxtmajst <= MS_CURAD;
 
-                // maybe single-stepping or single-cycling or stopping
-                if (swSINST & (nxtmajst == MS_FETCH) | swSSTEP | swSTOP) hreq <= 1;
+                    // nearing end of currentaddress
+                    MS_CURAD: nxtmajst <= MS_BREAK;
+
+                    // nearing end of break
+                    MS_BREAK: nxtmajst <= brkintfet;
+
+                    // something else, halt next
+                    default: hreq <= 1;
+                endcase
             end
 
             ////////////////////////////////////////
@@ -426,10 +435,16 @@ module processor (
             end
 
             /////////////////////////////
-            //  TP4: final processing  //
+            //  TS4: final processing  //
             /////////////////////////////
 
             if (~ lasttp4 & tp4) begin
+
+                // maybe single-stepping or single-cycling or stopping
+                if (swSINST & (nxtmajst == MS_FETCH) | swSSTEP | swSTOP) hreq <= 1;
+
+                // set up address for next cycle
+                // note: memext is updating field registers now too
                 case (nxtmajst)
 
                     // FETCH next: use PC for next memory address, instruction space
@@ -455,14 +470,16 @@ module processor (
                     MS_WRDCT: begin madr <= iDMAADDR; oFLDSEL <= FS_ZERO; end
                     MS_CURAD: begin madr <= madr + 1; oFLDSEL <= FS_ZERO; end
 
-                    // BREAK next: read from DMA page
+                    // BREAK next:
+                    //  if in CURAD, address comes from MB (the incremented pointer of a 3-cycle DMA)
+                    //  otherwise, it is a single-cycle DMA so get address from the device
                     MS_BREAK: begin
                         madr    <= (majstate == MS_CURAD) ? mbuf : iDMAADDR;
                         oFLDSEL <= FS_BREAK;
                     end
 
                     // INTAK next: write return address to address 0 of instr space
-                    //             memory extension will clear to page 0
+                    //             memory extension is clearing to page 0
                     MS_INTAK: begin
                         intdelayed <= 0;
                         intenabled <= 0;
@@ -471,7 +488,7 @@ module processor (
                         oFLDSEL    <= FS_INST;
                     end
 
-                    // unknown, halt
+                    // EXAM, DEPOS or unknown, halt
                     default: hreq <= 1;
                 endcase
 
