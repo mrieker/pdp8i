@@ -300,7 +300,6 @@ proc simtest {} {
 
                             ;# wait for processor to drop IOPm
                             waitnegate IOP$m
-                            runstep
 
                             ;# clear the random bits so it won't clock them again during nulled-out io pulses
                             bus set iACCLEAR 0 iIOSKIP 0 iINBUS 0
@@ -363,7 +362,7 @@ proc simtest {} {
                             swtch set cont 1
                             runloop 2000
                             swtch set cont 0
-                            waitassert RUN
+                            waitassert RUN 500
                         }
                     }
                 }
@@ -411,7 +410,7 @@ proc simtest {} {
 
         ;# print how many cycles it took (each clock is 10nS)
         set clocks [expr {[clk 0] - $startclockno}]
-        puts [format "  (%u.%02u uS)" [expr {$clocks / 100}] [expr {$clocks % 100}]]
+        puts [format "  (%u.%u uS)" [expr {$clocks / 10}] [expr {$clocks % 10}]]
     }
 
     puts "stopping for control-C"
@@ -489,17 +488,17 @@ proc memorycyclx {state field addr rdata rdbkdata wtbkdata vfywaddr vfywdata} {
 }
 
 ;# wait up to 10uS for signal to assert
-proc waitassert {sig} {
+proc waitassert {sig {n 100}} {
     for {set i 0} {! [bus o$sig]} {incr i} {
-        if {$i > 1000} {error "timed out waiting for $sig asserted"}
+        if {$i > $n} {error "timed out waiting for $sig asserted"}
         runstep
     }
 }
 
 ;# wait up to 10uS for signal to negate
-proc waitnegate {sig} {
+proc waitnegate {sig {n 100}} {
     for {set i 0} {[bus o$sig]} {incr i} {
-        if {$i > 1000} {error "timed out waiting for $sig negated"}
+        if {$i > $n} {error "timed out waiting for $sig negated"}
         runstep
     }
 }

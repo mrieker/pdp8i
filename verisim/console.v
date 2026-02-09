@@ -65,7 +65,7 @@ module console (
 
     reg[3:0] rownum;
     reg[5:0] debounce;
-    reg[15:00] timer;
+    reg[11:00] timer;
 //  wire[27:04] gpout;
 
     wire[3:0] nextrow = (rownum == 10) ? 0 : rownum + 1;
@@ -84,7 +84,7 @@ module console (
         end else begin
             // let switch sensing soak for 10uS
             // let light driving soak for 200uS
-            //if (timer == (rownum[3] ? 999 : 19999)) begin
+            //if (timer == (rownum[3] ? 99 : 1999)) begin
             if (timer == 9) begin
                 // save switch contents
                 case (rownum)

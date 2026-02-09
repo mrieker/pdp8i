@@ -45,7 +45,7 @@
 //  writedonewid  = width of MEMDONE pulse
 
 module memext (
-    input zclock,               // fpga 100MHz clock
+    input zclock,               // fpga 10MHz clock
     input zreset,               // fpga reset
 
     input preset,               // power-on reset

@@ -1,6 +1,6 @@
 
 module processor (
-    input zclock,               // fpga 100MHz clock
+    input zclock,               // fpga 10MHz clock
     input zreset,               // fpga reset
 
     input preset,               // power-on reset
@@ -89,19 +89,15 @@ module processor (
     //  TIME STATES  //
     ///////////////////
 
-    reg[3:0] zdiv;
     reg[1:0] tsct;
     reg hgnt, ts1, ts2, ts3, iop1, iop2, iop4, ts4;
     reg tp1, tp2, tp3, iog1, iog2, iog4, ioge, tp4;
     reg hreq;
 
-    // tick off every 100nS
-    wire tenmhz  = (zdiv == 9);
-
     // indicate when to step on to next time state
     //  TS1,2,3,4,IOP1,2,4 - 400nS
     //  IOG1,2,4,E - 300nS
-    wire clockts = tenmhz & tsct[1] & (tsct[0] | iog1 | iog2 | iog4 | ioge);
+    wire clockts = tsct[1] & (tsct[0] | iog1 | iog2 | iog4 | ioge);
 
     // decide to halt at end of TS4
     // - halting: transitions to HGNT until HREQ released
@@ -113,17 +109,14 @@ module processor (
 
     always @(posedge zclock) begin
 
-        zdiv <= preset | tenmhz ? 0 : zdiv + 1;         // divide out the 10MHz
-
         tsct <=
-            preset ? 0 :
-            tenmhz ? (clockts ? 0 : tsct + 1) :         // count the 400nS or 300nS interval
-            tsct;
+            preset  ? 0 :
+            clockts ? 0 : tsct + 1;                     // count the 400nS or 300nS interval
 
         // ring counter for the time states
         hgnt <=
             preset ? 1 :
-            tenmhz & clockts ? newhgnt :                // if end of TS4 or already halted and halt requested, halt
+            clockts ? newhgnt :                         // if end of TS4 or already halted and halt requested, halt
             hgnt;
         ts1  <= clockts ? (ts4 | hgnt) & ~ hreq : ts1;  // if end of TS4 or halted and halt not requested, start TS1
         ts2  <= clockts ? ts1 : ts2;                    // start TS2 at end of TS1
@@ -138,10 +131,10 @@ module processor (
         ts4  <= clockts ? ts3 & ~ ioinst | ioge : ts4;  // start TS4 at end of IOGE or end of TS3 with no ioinst
 
         // TPn start in last 100nS of corresponding TSn and continue for 200nS
-        tp1 <= tenmhz ? ts1 & tsct[1] : tp1;
-        tp2 <= tenmhz ? ts2 & tsct[1] : tp2;
-        tp3 <= tenmhz ? ts3 & tsct[1] : tp3;
-        tp4 <= tenmhz ? ts4 & tsct[1] : tp4;
+        tp1 <= ts1 & tsct[1];
+        tp2 <= ts2 & tsct[1];
+        tp3 <= ts3 & tsct[1];
+        tp4 <= ts4 & tsct[1];
     end
 
     ///////////////////
@@ -252,27 +245,32 @@ module processor (
         endcase
     end
 
-    reg lasthgnt, lastts1, lastts2, lastts3, lastiop1, lastiop2, lastiop4, lastts4;
-    reg lasttp1, lasttp2, lasttp3, lastiog1, lastiog2, lastiog4, lastioge, lasttp4;
+    reg lasthgnt, lastts1, lastts2, lastts3, lastts4;
+    reg lasttp1, lasttp2, lasttp3, lasttp4;
 
+    // asserted for single 100nS clock cycle after button pressed
     wire posedgeldad  = hgnt & ~ lastswldad  & swLDAD;
     wire posedgeexam  = hgnt & ~ lastswexam  & swEXAM;
     wire posedgedepos = hgnt & ~ lastswdepos & swDEPOS;
     wire posedgecontx = hgnt & ~ lastswcont  & swCONT & ((majstate == MS_EXAM) | (majstate == MS_DEPOS));
     wire posedgestart = hgnt & ~ lastswstart & swSTART;
 
-    wire negedgeldad  = hgnt & lastswldad  & ~ swLDAD;
-    wire negedgeexam  = hgnt & lastswexam  & ~ swEXAM;
-    wire negedgedepos = hgnt & lastswdepos & ~ swDEPOS;
-    wire negedgecont  = hgnt & lastswcont  & ~ swCONT;
-    wire negedgestart = hgnt & lastswstart & ~ swSTART;
+    // asserted for single 100nS clock cycle after button released
+    wire negedgeldad  = lastswldad  & ~ swLDAD;
+    wire negedgeexam  = lastswexam  & ~ swEXAM;
+    wire negedgedepos = lastswdepos & ~ swDEPOS;
+    wire negedgecont  = lastswcont  & ~ swCONT;
+    wire negedgestart = lastswstart & ~ swSTART;
 
+    // asserted during last 100nS clock cycle of TSn
     wire posedgetp1 = ~ lasttp1 & tp1;
     wire posedgetp2 = ~ lasttp2 & tp2;
     wire posedgetp3 = ~ lasttp3 & tp3;
     wire posedgetp4 = ~ lasttp4 & tp4;
 
-    wire iopnegedge = (lastiop1 & ~ iop1 | lastiop2 & ~ iop2 | lastiop4 & ~ iop4);
+    // asserted during last 100nS clock cycle of IOPn
+    // accumulator and ioskip updated at the end of the cycle
+    wire negedgeiop = clockts & (iop1 | iop2 | iop4);
 
     always @(posedge zclock) begin
 
@@ -434,7 +432,7 @@ module processor (
             posedgetp3 & ((majstate == MS_EXEC) | (majstate == MS_INTAK)) & (ireg == 4) ? madr + 1 :
 
             // increment PC for IOP skips
-            iopnegedge & iIOSKIP ? pctr + 1 :
+            negedgeiop & iIOSKIP ? pctr + 1 :
 
             // otherwise maintain current value
             pctr;
@@ -457,7 +455,7 @@ module processor (
             posedgetp3 & (majstate == MS_EXEC) & (ireg == 3) ? 0 :
 
             // accumulator updates at end of IO pulse
-            iopnegedge ? (iACCLEAR ? 0 : acum) | iINBUS :
+            negedgeiop ? (iACCLEAR ? 0 : acum) | iINBUS :
 
             // otherwise maintain value
             acum;
@@ -518,13 +516,6 @@ module processor (
         lasttp2  <= tp2;
         lastts3  <= ts3;
         lasttp3  <= tp3;
-        lastiog1 <= iog1;
-        lastiop1 <= iop1;
-        lastiog2 <= iog2;
-        lastiop2 <= iop2;
-        lastiog4 <= iog4;
-        lastiop4 <= iop4;
-        lastioge <= ioge;
         lastts4  <= ts4;
         lasttp4  <= tp4;
 
