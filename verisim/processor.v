@@ -27,7 +27,7 @@ module processor (
     output oINTACK,             // about to do INTACK cycle
     output oIOP1,               // IO pulses
     output oIOP2,               // ...400nS each
-    output oIOP4,               // ...300nS spacing
+    output oIOP4,               // ...200nS spacing
     output oJMPJMS,             // JMP/JMS instruction in instruction register
     output oLINK,               // link register
     output oRUN,                // processing instructions
@@ -77,54 +77,78 @@ module processor (
     //  TIME STATES  //
     ///////////////////
 
-    reg[1:0] tsct;
-    reg hgnt, ts1, ts2, ts3, iop1, iop2, iop4, ts4;
-    reg tp1, tp2, tp3, iog1, iog2, iog4, ioge, tp4;
-    reg hreq;
-
-    // indicate when to step on to next time state
-    //  TS1,2,3,4,IOP1,2,4 - 400nS
-    //  IOG1,2,4,E - 300nS
-    wire clockts = tsct[1] & (tsct[0] | iog1 | iog2 | iog4 | ioge);
-
-    // decide to halt at end of TS4
-    // - halting: transitions to HGNT until HREQ released
-    // - continuing: transitions to TS1
-    wire newhgnt = (ts4 | hgnt) & hreq;
+    reg[1:0] tsct, _tsct;
+    reg hgnt, hreq, _hgnt;
+    reg ts1, ts2, ts3, iop1, iop2, iop4, ts4;
+    reg tp1, tp2, tp3, iog1, iog2, tp4;
+    reg _ts1, _ts2, _ts3, _iop1, _iop2, _iop4, _ts4;
+    reg _tp1, _tp2, _tp3, _iog1, _iog2, _tp4;
 
     // current cycle is an io instruction so includes io gaps and pulses
-    wire ioinst  = (ireg[11:09] == 6) & (majstate == MS_FETCH);
+    wire ioinst = (ireg[11:09] == 6) & (majstate == MS_FETCH);
 
-    always @(posedge zclock) begin
+    // count the 400nS or 200nS interval
+    wire shorts = iog1 | iog2;
+    wire tsct0j = ~ iHOLD;
+    wire tsct0k = ~ iHOLD;
+    wire tsct1j = ~ iHOLD & tsct[0] & ~ shorts;
+    wire tsct1k = ~ iHOLD & tsct[0];
+    JKFF tsct0ff (.PC (preset), .PS (0), .J (tsct0j), .K (tsct0k), .T (zclock), .Q (tsct[0]), ._Q (_tsct[0]));
+    JKFF tsct1ff (.PC (preset), .PS (0), .J (tsct1j), .K (tsct1k), .T (zclock), .Q (tsct[1]), ._Q (_tsct[1]));
+    wire clock2ts = tsct[0];            // last 100nS of 200nS cycle
+    wire clock4ts = tsct[0] & tsct[1];  // last 100nS of 400nS cycle
 
-        tsct <=
-            preset  ? 0 :
-            iHOLD   ? tsct :                            // stop counting while being held
-            clockts ? 0 : tsct + 1;                     // count the 400nS or 300nS interval
+    // halt grant - spliced in between previous cycle TS4 and next cycle TS1
+    // - these can occur mid-instruction such as when single cycling
+    //   majstate indicates what state will be executed when hgnt is cleared and TS1 begins
+    wire hgntj = ts4k & hreq;                       // begin HGNT when TS4 ends and halt being requested
+    wire hgntk = clock4ts & ~ hreq;                 // end HGNT when halt no longer being requested
+    JKFF hgntff (.PC (0), .PS (preset), .J (hgntj), .K (hgntk), .T (zclock), .Q (hgnt), ._Q (_hgnt));
 
-        // ring counter for the time states
-        hgnt <=
-            preset ? 1 :
-            clockts ? newhgnt :                         // if end of TS4 or already halted and halt requested, halt
-            hgnt;
-        ts1  <= clockts ? (ts4 | hgnt) & ~ hreq : ts1;  // if end of TS4 or halted and halt not requested, start TS1
-        ts2  <= clockts ? ts1 : ts2;                    // start TS2 at end of TS1
-        ts3  <= clockts ? ts2 : ts3;                    // start TS3 at end of TS2
-        iog1 <= clockts ? ts3 &   ioinst : iog1;        // start IOG1 at end of TS3 with ioinst (gap bewteen TS3 and IOP1)
-        iop1 <= clockts ? iog1 : iop1;                  // start IOP1 at end of IOG1
-        iog2 <= clockts ? iop1 : iog2;                  // start IOG2 at end of IOP1 (gap between IOP1 and IOP2)
-        iop2 <= clockts ? iog2 : iop2;                  // start IOP2 at end of IOG2
-        iog4 <= clockts ? iop2 : iog4;                  // start IOG4 at end of IOP2 (gap between IOP2 and IOP4)
-        iop4 <= clockts ? iog4 : iop4;                  // start IOP4 at end of IOG4
-        ioge <= clockts ? iop4 : ioge;                  // start IOGE at end of IOP4 (gap between IOP4 and TS4)
-        ts4  <= clockts ? ts3 & ~ ioinst | ioge : ts4;  // start TS4 at end of IOGE or end of TS3 with no ioinst
+    // non I/O instruction : [HGNT] TS1 TS2 TS3 TS4  (1.6 uS + halt time)
+    //     I/O instruction : [HGNT] TS1 TS2 TS3 IOP1 IOG1 IOP2 IOG2 IOP4 TS4  (3.4 uS + halt time)
+    // all states 400nS except IOGx which are 200nS
+    wire ts1j = clock4ts & ~ hreq & (ts4 | hgnt);   // begin TS1 when halt not requested and ending TS4 or HGNT
+    wire ts1k = clock4ts & ts1;                     // end TS1 when it has been on for 400nS
+    JKFF ts1ff (.PC (preset), .PS (0), .J (ts1j), .K (ts1k), .T (zclock), .Q (ts1), ._Q (_ts1));
 
-        // TPn start in last 100nS of corresponding TSn and continue for 200nS
-        tp1 <= ts1 & tsct[1];
-        tp2 <= ts2 & tsct[1];
-        tp3 <= ts3 & tsct[1];
-        tp4 <= ts4 & tsct[1];
-    end
+    wire ts2j = ts1k;                               // begin TS2 when TS1 ends (no gap or overlap)
+    wire ts2k = clock4ts & ts2;                     // end TS2 when it has been on for 400nS
+    JKFF ts2ff (.PC (preset), .PS (0), .J (ts2j), .K (ts2k), .T (zclock), .Q (ts2), ._Q (_ts2));
+
+    wire ts3j = ts2k;
+    wire ts3k = clock4ts & ts3;
+    JKFF ts3ff (.PC (preset), .PS (0), .J (ts3j), .K (ts3k), .T (zclock), .Q (ts3), ._Q (_ts3));
+
+    wire iop1j = ts3k & ioinst;                     // begin IOP1 when TS3 ends and doing IO instruction
+    wire iop1k = clock4ts & iop1;                   // IOP1 lasts 400nS
+    JKFF iop1ff (.PC (preset), .PS (0), .J (iop1j), .K (iop1k), .T (zclock), .Q (iop1), ._Q (_iop1));
+
+    wire iog1j = iop1k;
+    wire iog1k = clock2ts & iog1;
+    JKFF iog1ff (.PC (preset), .PS (0), .J (iog1j), .K (iog1k), .T (zclock), .Q (iog1), ._Q (_iog1));
+
+    wire iop2j = iog1k;
+    wire iop2k = clock4ts & iop2;
+    JKFF iop2ff (.PC (preset), .PS (0), .J (iop2j), .K (iop2k), .T (zclock), .Q (iop2), ._Q (_iop2));
+
+    wire iog2j = iop2k;
+    wire iog2k = clock2ts & iog2;
+    JKFF iog2ff (.PC (preset), .PS (0), .J (iog2j), .K (iog2k), .T (zclock), .Q (iog2), ._Q (_iog2));
+
+    wire iop4j = iog2k;
+    wire iop4k = clock4ts & iop4;
+    JKFF iop4ff (.PC (preset), .PS (0), .J (iop4j), .K (iop4k), .T (zclock), .Q (iop4), ._Q (_iop4));
+
+    wire ts4j = ts3k & ~ ioinst | iop4k;
+    wire ts4k = clock4ts & ts4;
+    JKFF ts4ff (.PC (preset), .PS (0), .J (ts4j), .K (ts4k), .T (zclock), .Q (ts4), ._Q (_ts4));
+
+    // TPn asserted for last 100nS of corresponding TSn
+    JKFF tp1ff (.PC (preset), .PS (0), .J (ts1 & tsct[1]), .K (clock4ts), .T (zclock), .Q (tp1), ._Q (_tp1));
+    JKFF tp2ff (.PC (preset), .PS (0), .J (ts2 & tsct[1]), .K (clock4ts), .T (zclock), .Q (tp2), ._Q (_tp2));
+    JKFF tp3ff (.PC (preset), .PS (0), .J (ts3 & tsct[1]), .K (clock4ts), .T (zclock), .Q (tp3), ._Q (_tp3));
+    JKFF tp4ff (.PC (preset), .PS (0), .J (ts4 & tsct[1]), .K (clock4ts), .T (zclock), .Q (tp4), ._Q (_tp4));
 
     ///////////////////
     //  BUS SIGNALS  //
@@ -237,9 +261,7 @@ module processor (
         endcase
     end
 
-    reg lasthgnt, lasttp1, lasttp2, lasttp3, lasttp4;
-
-    // asserted for single 100nS clock cycle after button pressed
+    // asserted for single 100nS clock cycle after button pressed and processor is halted
     wire posedgeldad  = hgnt & ~ lastswldad  & swLDAD;
     wire posedgeexam  = hgnt & ~ lastswexam  & swEXAM;
     wire posedgedepos = hgnt & ~ lastswdepos & swDEPOS;
@@ -253,15 +275,9 @@ module processor (
     wire negedgecont  = lastswcont  & ~ swCONT;
     wire negedgestart = lastswstart & ~ swSTART;
 
-    // asserted during last 100nS clock cycle of TSn
-    wire posedgetp1 = ~ lasttp1 & tp1;
-    wire posedgetp2 = ~ lasttp2 & tp2;
-    wire posedgetp3 = ~ lasttp3 & tp3;
-    wire posedgetp4 = ~ lasttp4 & tp4;
-
     // asserted during last 100nS clock cycle of IOPn
     // accumulator and ioskip updated at the end of the cycle
-    wire negedgeiop = clockts & (iop1 | iop2 | iop4);
+    wire negedgeiop = clock4ts & (iop1 | iop2 | iop4);
 
     // accumulator data being read from a pio device or extended arithmetic board
     wire[11:00] ioindata = (iACCLEAR ? 0 : acum) | iINBUS;
@@ -280,15 +296,15 @@ module processor (
             // power-on reset
             preset ? MS_PWRON :
 
-            // various console switches being pressed set state to process the switch
+            // various console switches being pressed while halted set state to process the switch
             posedgeldad  ? MS_EXAM  :
             posedgeexam  ? MS_EXAM  :
             posedgedepos ? MS_DEPOS :
             posedgecontx ? MS_FETCH :
             posedgestart ? MS_FETCH :
 
-            // processor running, load from nxtmajst on posedge TP4
-            posedgetp4 ? nxtmajst :
+            // TP4 happens only when processor running, load from nxtmajst
+            tp4 ? nxtmajst :
 
             // none of the above, maintain current state
             majstate;
@@ -304,18 +320,18 @@ module processor (
             posedgedepos & (majstate == MS_DEPOS) ? madr + 1 :
 
             // clocking at posedge TP4 based on next state
-            posedgetp4 & (nxtmajst == MS_FETCH) ? pctr     :    // fetch reads instruction from PC
-            posedgetp4 & (nxtmajst == MS_DEFER) ? effaddr  :    // defer reads pointer from effaddr
-            posedgetp4 & (nxtmajst == MS_EXEC)  ? (
-                           ireg == 7 ? pctr  :                  // extended arithmetic with memory operand
-                majstate == MS_DEFER ? mbuf  :                  // indirect address, read from indirect pointer
-                                    effaddr) :                  // direct address, read from effective address
-            posedgetp4 & (nxtmajst == MS_WRDCT) ? iDMAADDR :    // word count reads count from DMAADDR
-            posedgetp4 & (nxtmajst == MS_CURAD) ? madr + 1 :    // current address reads pointer from address after WRDCT address
-            posedgetp4 & (nxtmajst == MS_BREAK) ? (
-                             i3CYCLE ? mbuf  :                  // 3-cycle dma gets address from incremented CURAD pointer
-                                   iDMAADDR) :                  // 1-cycle dma gets address from DMAADDR
-            posedgetp4 & (nxtmajst == MS_INTAK) ? 0 :           // interrupt acknowledge writes return address to location 00000
+            tp4 & (nxtmajst == MS_FETCH) ? pctr     :   // fetch reads instruction from PC
+            tp4 & (nxtmajst == MS_DEFER) ? effaddr  :   // defer reads pointer from effaddr
+            tp4 & (nxtmajst == MS_EXEC)  ? (
+                           ireg == 7 ? pctr  :          // extended arithmetic with memory operand
+                majstate == MS_DEFER ? mbuf  :          // indirect address, read from indirect pointer
+                                    effaddr) :          // direct address, read from effective address
+            tp4 & (nxtmajst == MS_WRDCT) ? iDMAADDR :   // word count reads count from DMAADDR
+            tp4 & (nxtmajst == MS_CURAD) ? madr + 1 :   // current address reads pointer from address after WRDCT address
+            tp4 & (nxtmajst == MS_BREAK) ? (
+                             i3CYCLE ? mbuf  :          // 3-cycle dma gets address from incremented CURAD pointer
+                                   iDMAADDR) :          // 1-cycle dma gets address from DMAADDR
+            tp4 & (nxtmajst == MS_INTAK) ? 0 :          // interrupt acknowledge writes return address to location 00000
 
             // none of the above, keep existing value
             madr;
@@ -331,13 +347,13 @@ module processor (
             posedgestart ? FS_INST :
 
             // running updates at posedge TP4
-            posedgetp4 & (nxtmajst == MS_FETCH) ? FS_INST  :
-            posedgetp4 & (nxtmajst == MS_DEFER) ? FS_INST  :
-            posedgetp4 & (nxtmajst == MS_EXEC)  ? (majstate == MS_DEFER & ~ ireg[11] ? FS_DATA : FS_INST) :
-            posedgetp4 & (nxtmajst == MS_WRDCT) ? FS_ZERO  :
-            posedgetp4 & (nxtmajst == MS_CURAD) ? FS_ZERO  :
-            posedgetp4 & (nxtmajst == MS_BREAK) ? FS_BREAK :
-            posedgetp4 & (nxtmajst == MS_INTAK) ? FS_INST  :
+            tp4 & (nxtmajst == MS_FETCH) ? FS_INST  :
+            tp4 & (nxtmajst == MS_DEFER) ? FS_INST  :
+            tp4 & (nxtmajst == MS_EXEC)  ? (majstate == MS_DEFER & ~ ireg[11] ? FS_DATA : FS_INST) :
+            tp4 & (nxtmajst == MS_WRDCT) ? FS_ZERO  :
+            tp4 & (nxtmajst == MS_CURAD) ? FS_ZERO  :
+            tp4 & (nxtmajst == MS_BREAK) ? FS_BREAK :
+            tp4 & (nxtmajst == MS_INTAK) ? FS_INST  :
 
             // otherwise maintain existing value
             oFLDSEL;
@@ -356,13 +372,13 @@ module processor (
             negedgestart ? 0 :
 
             // HLT instruction bit
-            posedgetp3 & (majstate == MS_FETCH) & (ireg == 7) & mbuf[08] & ~ mbuf[00] & mbuf[01] ? 1 :
+            tp3 & (majstate == MS_FETCH) & (ireg == 7) & mbuf[08] & ~ mbuf[00] & mbuf[01] ? 1 :
 
             // console single-stepping, single-cycling, stop switch
-            posedgetp4 & swSINST & (nxtmajst == MS_FETCH) | swSSTEP | swSTOP ? 1 :
+            tp4 & swSINST & (nxtmajst == MS_FETCH) | swSSTEP | swSTOP ? 1 :
 
             // exam, deposit cycles cause an halt
-            posedgetp4 & (nxtmajst == MS_EXAM | nxtmajst == MS_DEPOS) ? 1 :
+            tp4 & (nxtmajst == MS_EXAM | nxtmajst == MS_DEPOS) ? 1 :
 
             // otherwise maintain value
             hreq;
@@ -371,31 +387,31 @@ module processor (
         mbuf <=
 
             // clock in memory data on posedge TP1
-            posedgetp1 ? iMEMBUS :
+            tp1 ? iMEMBUS :
 
             // increment at posedge TP2 and in DEFER state and autoincrement pointer
-            posedgetp2 & (majstate == MS_DEFER) & (madr[11:03] == 1) ? mbuf + 1 :
+            tp2 & (majstate == MS_DEFER) & (madr[11:03] == 1) ? mbuf + 1 :
 
             // increment at posedge TP2 and in EXEC state for ISZ instruction
-            posedgetp2 & (majstate == MS_EXEC) & (ireg == 2) ? mbuf + 1 :
+            tp2 & (majstate == MS_EXEC) & (ireg == 2) ? mbuf + 1 :
 
             // load from ACUM at posedge TP2 and in EXEC state for DCA instruction
-            posedgetp2 & (majstate == MS_EXEC) & (ireg == 3) ? acum :
+            tp2 & (majstate == MS_EXEC) & (ireg == 3) ? acum :
 
             // load from PCTR at posedge TP2 and in EXEC or INTAK state for JMS instruction
-            posedgetp2 & ((majstate == MS_EXEC) | (majstate == MS_INTAK)) & (ireg == 4) ? pctr :
+            tp2 & ((majstate == MS_EXEC) | (majstate == MS_INTAK)) & (ireg == 4) ? pctr :
 
             // increment at posedge TP2 and in WRDCT state
-            posedgetp2 & (majstate == MS_WRDCT) ? mbuf + 1 :
+            tp2 & (majstate == MS_WRDCT) ? mbuf + 1 :
 
             // increment at posedge TP2 and in CURAD state with iCAINC
-            posedgetp2 & (majstate == MS_CURAD) & iCAINC ? mbuf + 1 :
+            tp2 & (majstate == MS_CURAD) & iCAINC ? mbuf + 1 :
 
             // load from DMA data at posedge TP2 and in BREAK state with iBRKWRM
-            posedgetp2 & (majstate == MS_BREAK) & iBRKWRM ? iDMADATA :
+            tp2 & (majstate == MS_BREAK) & iBRKWRM ? iDMADATA :
 
             // load from switches at posedge TP2 and in DEPOS state
-            posedgetp2 & (majstate == MS_DEPOS) ? swREG :
+            tp2 & (majstate == MS_DEPOS) ? swREG :
 
             mbuf;
 
@@ -403,10 +419,10 @@ module processor (
         ireg <=
 
             // load at posedge TP2 when in FETCH state
-            posedgetp2 & (majstate == MS_FETCH) ? mbuf[11:09] :
+            tp2 & (majstate == MS_FETCH) ? mbuf[11:09] :
 
             // load at posedge TP4 when going into MS_INTAK state
-            posedgetp4 & (nxtmajst == MS_INTAK) ? 4 :
+            tp4 & (nxtmajst == MS_INTAK) ? 4 :
 
             ireg;
 
@@ -419,25 +435,25 @@ module processor (
 
             // increment after instruction fetched
             // leave madr pointing to instruction so effaddr will be correct
-            posedgetp2 & (majstate == MS_FETCH) ? pctr + 1 :
+            tp2 & (majstate == MS_FETCH) ? pctr + 1 :
 
             // load effective address for direct JMP
-            posedgetp3 & (majstate == MS_FETCH) & (ireg == 5) & ~ mbuf[08] ? effaddr :
+            tp3 & (majstate == MS_FETCH) & (ireg == 5) & ~ mbuf[08] ? effaddr :
 
             // increment PC for Group 2 skip condition
-            posedgetp3 & (majstate == MS_FETCH) & (ireg == 7) & mbuf[08] & ~ mbuf[00] & g2skip ? pctr + 1 :
+            tp3 & (majstate == MS_FETCH) & (ireg == 7) & mbuf[08] & ~ mbuf[00] & g2skip ? pctr + 1 :
 
             // load pointer contents for indirect JMP
-            posedgetp3 & (majstate == MS_DEFER) & (ireg == 5) ? mbuf :
+            tp3 & (majstate == MS_DEFER) & (ireg == 5) ? mbuf :
 
             // increment PC for ISZ instruction if now zero
-            posedgetp3 & (majstate == MS_EXEC) & (ireg == 2) & (mbuf == 0) ? pctr + 1 :
+            tp3 & (majstate == MS_EXEC) & (ireg == 2) & (mbuf == 0) ? pctr + 1 :
 
             // load from where return address was saved + 1 for JMS instruction
-            posedgetp3 & ((majstate == MS_EXEC) | (majstate == MS_INTAK)) & (ireg == 4) ? madr + 1 :
+            tp3 & ((majstate == MS_EXEC) | (majstate == MS_INTAK)) & (ireg == 4) ? madr + 1 :
 
             // increment PC for extended arithmetic with memory operand
-            posedgetp3 & (majstate == MS_EXEC) & (ireg == 7) ? pctr + 1 :
+            tp3 & (majstate == MS_EXEC) & (ireg == 7) ? pctr + 1 :
 
             // increment PC for IOP skips
             negedgeiop & iIOSKIP ? pctr + 1 :
@@ -446,24 +462,24 @@ module processor (
             pctr;
 
         // wordcount cycle overflow
-        oBWCOV <= posedgetp2 & (majstate == MS_WRDCT) ? (mbuf == 12'o7777) : oBWCOV;
+        oBWCOV <= tp2 & (majstate == MS_WRDCT) ? (mbuf == 12'o7777) : oBWCOV;
 
         // maintain accumulator register
         acum <=
 
             // Group 1 computation result
-            posedgetp3 & (majstate == MS_FETCH) & (ireg == 7) & ~ mbuf[08] ? g1acum :
+            tp3 & (majstate == MS_FETCH) & (ireg == 7) & ~ mbuf[08] ? g1acum :
 
             // Group 2 computation result
-            posedgetp3 & (majstate == MS_FETCH) & (ireg == 7) & mbuf[08] & ~ mbuf[00] ? g2acum :
+            tp3 & (majstate == MS_FETCH) & (ireg == 7) & mbuf[08] & ~ mbuf[00] ? g2acum :
 
             // AND, TAD and DCA instructions
-            posedgetp3 & (majstate == MS_EXEC) & (ireg == 0) ? acum & mbuf :
-            posedgetp3 & (majstate == MS_EXEC) & (ireg == 1) ? tadacum :
-            posedgetp3 & (majstate == MS_EXEC) & (ireg == 3) ? 0 :
+            tp3 & (majstate == MS_EXEC) & (ireg == 0) ? acum & mbuf :
+            tp3 & (majstate == MS_EXEC) & (ireg == 1) ? tadacum :
+            tp3 & (majstate == MS_EXEC) & (ireg == 3) ? 0 :
 
             // extended arithmetic
-            posedgetp3 & extarithexec ? ioindata :
+            tp3 & extarithexec ? ioindata :
 
             // accumulator updates at end of IO pulse
             negedgeiop ? ioindata :
@@ -475,26 +491,26 @@ module processor (
         link <=
 
             // Group 1
-            posedgetp3 & (majstate == MS_FETCH) & (ireg == 7) & ~ mbuf[08] ? g1link :
+            tp3 & (majstate == MS_FETCH) & (ireg == 7) & ~ mbuf[08] ? g1link :
 
             // TAD instruction
-            posedgetp3 & (majstate == MS_EXEC) & (ireg == 1) ? tadlink :
+            tp3 & (majstate == MS_EXEC) & (ireg == 1) ? tadlink :
 
             // extended arithmetic
-            posedgetp3 & extarithexec & iLNKTOG ? ~ link :
+            tp3 & extarithexec & iLNKTOG ? ~ link :
 
             // otherwise maintain value
             link;
 
         // synchronize external async inputs
-        syncbrkrq <= posedgetp3 ? iBRKRQST : syncbrkrq;
-        syncintrq <= posedgetp3 ? iINTRQST : syncintrq;
+        syncbrkrq <= tp3 ? iBRKRQST : syncbrkrq;
+        syncintrq <= tp3 ? iINTRQST : syncintrq;
 
         // maintain interrupt enable register
         intdelayed <=
 
             // disable for acknowledge interrupt cycle
-            posedgetp2 & (majstate == MS_INTAK) ? 0 :
+            tp2 & (majstate == MS_INTAK) ? 0 :
 
             // enable during IOP1 if IOF (6001) instruction
             // the enable will be delayed until fetch of next instruction
@@ -510,10 +526,10 @@ module processor (
         intenabled <=
 
             // get delayed enable when fetching instruction
-            posedgetp2 & (majstate == MS_FETCH) ? intdelayed :
+            tp2 & (majstate == MS_FETCH) ? intdelayed :
 
             // disable for acknowledge interrupt cycle
-            posedgetp2 & (majstate == MS_INTAK) ? 0 :
+            tp2 & (majstate == MS_INTAK) ? 0 :
 
             // disable interrupts during IOP2 if IOF (6002) instruction
             // the disable will be in effect by the time TP4 processes interrupt request at end of IOF instruction
@@ -523,12 +539,6 @@ module processor (
             intenabled;
 
         // edge detection
-        lasthgnt <= hgnt;
-        lasttp1  <= tp1;
-        lasttp2  <= tp2;
-        lasttp3  <= tp3;
-        lasttp4  <= tp4;
-
         lastswstart <= swSTART;
         lastswldad  <= swLDAD;
         lastswdepos <= swDEPOS;

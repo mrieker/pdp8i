@@ -7,6 +7,7 @@ VFILES := \
 	backplane.v \
 	console.v \
 	extarith.v \
+	flipflops.v \
 	memext.v \
 	memory.v \
 	processor.v \
