@@ -15,6 +15,7 @@ module processor (
     input iINTINH,              // inhibit interrupt processing
     input iINTRQST,             // request interrupt
     input iIOSKIP,              // increment PC at end of IO pulse
+    input iLNKTOG,              // toggle link register
     input[11:00] iDMAADDR,      // break cycle address
     input[11:00] iDMADATA,      // break cycle write data
     input[11:00] iINBUS,        // IO data being read from device
@@ -28,6 +29,7 @@ module processor (
     output oIOP2,               // ...400nS each
     output oIOP4,               // ...300nS spacing
     output oJMPJMS,             // JMP/JMS instruction in instruction register
+    output oLINK,               // link register
     output oRUN,                // processing instructions
     output oTP1,                // time pulses, 200nS each
     output oTP2,                // ...starting so as to overlap last 100nS of corresponding TSn
@@ -49,7 +51,6 @@ module processor (
     output[3:0] lbMAJST,
     output lbION,
     output lbPAUSE,
-    output lbLINK,
 
     // switches
     input swLDAD,               // button (idempotent)
@@ -111,6 +112,7 @@ module processor (
 
         tsct <=
             preset  ? 0 :
+            iHOLD   ? tsct :                            // stop counting while being held
             clockts ? 0 : tsct + 1;                     // count the 400nS or 300nS interval
 
         // ring counter for the time states
@@ -192,7 +194,7 @@ module processor (
     // this is used at posedge TP4, after any possible IOPs of current instruction
     always @(*) begin
 
-        // major state following last cycle of current instruction
+        // compute major state following last cycle of current instruction
         if (syncbrkrq) begin
             brkintfet = i3CYCLE ? MS_WRDCT : MS_BREAK;
         end
@@ -205,7 +207,7 @@ module processor (
 
         else brkintfet = MS_FETCH;                  // nothing special, fetch next instruction
 
-        // major state following the current major state cycle
+        // compute major state following the current major state cycle
         case (majstate)
 
             // end of FETCH cycle
@@ -218,8 +220,11 @@ module processor (
                     // jmp
                     5: nxtmajst = mbuf[08] ? MS_DEFER : brkintfet;
 
-                    // iot, opr
-                    6, 7: nxtmajst = brkintfet;
+                    // iot
+                    6: nxtmajst = brkintfet;
+
+                    // opr
+                    7: nxtmajst = mbuf[08] & (mbuf[02] | mbuf[01]) & mbuf[00] ? MS_EXEC : brkintfet;
                 endcase
             end
 
@@ -245,8 +250,7 @@ module processor (
         endcase
     end
 
-    reg lasthgnt, lastts1, lastts2, lastts3, lastts4;
-    reg lasttp1, lasttp2, lasttp3, lasttp4;
+    reg lasthgnt, lasttp1, lasttp2, lasttp3, lasttp4;
 
     // asserted for single 100nS clock cycle after button pressed
     wire posedgeldad  = hgnt & ~ lastswldad  & swLDAD;
@@ -271,6 +275,15 @@ module processor (
     // asserted during last 100nS clock cycle of IOPn
     // accumulator and ioskip updated at the end of the cycle
     wire negedgeiop = clockts & (iop1 | iop2 | iop4);
+
+    // accumulator data being read from a pio device or extended arithmetic board
+    wire[11:00] ioindata = (iACCLEAR ? 0 : acum) | iINBUS;
+
+    // current cycle is performing extended arithmetic
+    // accumulator and link get clocked at TP3 in these cycles
+    //  FETCH: must have opcode 111 1xx xxx xx1
+    //   EXEC: must have opcode 111 xxx xxx xxx  it is only 7 opcode that uses EXEC state
+    wire extarithexec = (ireg == 7) & ((majstate == MS_FETCH) & mbuf[08] & mbuf[00] | (majstate == MS_EXEC));
 
     always @(posedge zclock) begin
 
@@ -304,13 +317,18 @@ module processor (
             posedgedepos & (majstate == MS_DEPOS) ? madr + 1 :
 
             // clocking at posedge TP4 based on next state
-            posedgetp4 & (nxtmajst == MS_FETCH) ? pctr     :
-            posedgetp4 & (nxtmajst == MS_DEFER) ? effaddr  :
-            posedgetp4 & (nxtmajst == MS_EXEC)  ? (majstate == MS_DEFER ? mbuf : effaddr) :
-            posedgetp4 & (nxtmajst == MS_WRDCT) ? iDMAADDR :
-            posedgetp4 & (nxtmajst == MS_CURAD) ? madr + 1 :
-            posedgetp4 & (nxtmajst == MS_BREAK) ? (i3CYCLE ? mbuf : iDMAADDR) :
-            posedgetp4 & (nxtmajst == MS_INTAK) ? 0 :
+            posedgetp4 & (nxtmajst == MS_FETCH) ? pctr     :    // fetch reads instruction from PC
+            posedgetp4 & (nxtmajst == MS_DEFER) ? effaddr  :    // defer reads pointer from effaddr
+            posedgetp4 & (nxtmajst == MS_EXEC)  ? (
+                           ireg == 7 ? pctr  :                  // extended arithmetic with memory operand
+                majstate == MS_DEFER ? mbuf  :                  // indirect address, read from indirect pointer
+                                    effaddr) :                  // direct address, read from effective address
+            posedgetp4 & (nxtmajst == MS_WRDCT) ? iDMAADDR :    // word count reads count from DMAADDR
+            posedgetp4 & (nxtmajst == MS_CURAD) ? madr + 1 :    // current address reads pointer from address after WRDCT address
+            posedgetp4 & (nxtmajst == MS_BREAK) ? (
+                             i3CYCLE ? mbuf  :                  // 3-cycle dma gets address from incremented CURAD pointer
+                                   iDMAADDR) :                  // 1-cycle dma gets address from DMAADDR
+            posedgetp4 & (nxtmajst == MS_INTAK) ? 0 :           // interrupt acknowledge writes return address to location 00000
 
             // none of the above, keep existing value
             madr;
@@ -431,6 +449,9 @@ module processor (
             // load from where return address was saved + 1 for JMS instruction
             posedgetp3 & ((majstate == MS_EXEC) | (majstate == MS_INTAK)) & (ireg == 4) ? madr + 1 :
 
+            // increment PC for extended arithmetic with memory operand
+            posedgetp3 & (majstate == MS_EXEC) & (ireg == 7) ? pctr + 1 :
+
             // increment PC for IOP skips
             negedgeiop & iIOSKIP ? pctr + 1 :
 
@@ -454,8 +475,11 @@ module processor (
             posedgetp3 & (majstate == MS_EXEC) & (ireg == 1) ? tadacum :
             posedgetp3 & (majstate == MS_EXEC) & (ireg == 3) ? 0 :
 
+            // extended arithmetic
+            posedgetp3 & extarithexec ? ioindata :
+
             // accumulator updates at end of IO pulse
-            negedgeiop ? (iACCLEAR ? 0 : acum) | iINBUS :
+            negedgeiop ? ioindata :
 
             // otherwise maintain value
             acum;
@@ -468,6 +492,9 @@ module processor (
 
             // TAD instruction
             posedgetp3 & (majstate == MS_EXEC) & (ireg == 1) ? tadlink :
+
+            // extended arithmetic
+            posedgetp3 & extarithexec & iLNKTOG ? ~ link :
 
             // otherwise maintain value
             link;
@@ -510,13 +537,9 @@ module processor (
 
         // edge detection
         lasthgnt <= hgnt;
-        lastts1  <= ts1;
         lasttp1  <= tp1;
-        lastts2  <= ts2;
         lasttp2  <= tp2;
-        lastts3  <= ts3;
         lasttp3  <= tp3;
-        lastts4  <= ts4;
         lasttp4  <= tp4;
 
         lastswstart <= swSTART;
@@ -534,28 +557,28 @@ module processor (
     assign oBUSINI = zreset | preset | swSTART;
     assign oEXEFET = (nxtmajst == MS_EXEC) | (nxtmajst == MS_FETCH);
     assign oINTACK = (nxtmajst == MS_INTAK);    // valid from just after posedge TS3 of INTACK cycle to posedge TS3 of INTACK cycle
-    assign oIOP1 = iop1;
-    assign oIOP2 = iop2;
-    assign oIOP4 = iop4;
+    assign oIOP1   = iop1;
+    assign oIOP2   = iop2;
+    assign oIOP4   = iop4;
     assign oJMPJMS = (ireg[11:10] == 2);
-    assign oRUN = ~ hgnt;
-    assign oTP1 = tp1;
-    assign oTP2 = tp2;
-    assign oTP3 = tp3;
-    assign oTP4 = tp4;
-    assign oTS1 = ts1;
-    assign oTS2 = ts2;
-    assign oTS3 = ts3;
-    assign oTS4 = ts4;
-    assign oACUM = acum;
-    assign oMADR = madr;
-    assign oMBUF = mbuf;
+    assign oLINK   = link;
+    assign oRUN    = ~ hgnt;
+    assign oTP1    = tp1;
+    assign oTP2    = tp2;
+    assign oTP3    = tp3;
+    assign oTP4    = tp4;
+    assign oTS1    = ts1;
+    assign oTS2    = ts2;
+    assign oTS3    = ts3;
+    assign oTS4    = ts4;
+    assign oACUM   = acum;
+    assign oMADR   = madr;
+    assign oMBUF   = mbuf;
 
     assign lbPCTR  = pctr;
     assign lbIREG  = ireg;
     assign lbMAJST = majstate;
     assign lbION   = intenabled;
     assign lbPAUSE = 0;
-    assign lbLINK  = link;
 
 endmodule

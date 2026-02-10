@@ -153,11 +153,11 @@ static int cmd_bus (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj
         {  1, OFFS (iHOLD),    true,  "iHOLD"    },   // hold internal clocking (stretch cycle)
         {  1, OFFS (iINTRQST), true,  "iINTRQST" },   // request interrupt
         {  1, OFFS (iIOSKIP),  true,  "iIOSKIP"  },   // increment PC at end of IO pulse
+        {  1, OFFS (iLNKTOG),  true,  "iLNKTOG"  },   // toggle link register
         { 15, OFFS (iDMAADDR), true,  "iDMAADDR" },   // device sending address for DMA
         { 12, OFFS (iDMADATA), true,  "iDMADATA" },   // device sending write data for DMA
         { 12, OFFS (iINBUS),   true,  "iINBUS"   },   // device sending data for PIO
 
-        {  1, OFFS (link),     false, "link"     },
         {  4, OFFS (majst),    false, "majst"    },
         {  3, OFFS (memfield), false, "memfield" },
         { 12, OFFS (pctr),     false, "pctr"     },
@@ -169,6 +169,7 @@ static int cmd_bus (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj
         {  1, OFFS (oIOP1),    false, "oIOP1"    },   // io instruction pulses
         {  1, OFFS (oIOP2),    false, "oIOP2"    },
         {  1, OFFS (oIOP4),    false, "oIOP4"    },
+        {  1, OFFS (oLINK),    false, "oLINK"    },
         { 12, OFFS (oMADR),    false, "oMADR"    },
         { 12, OFFS (oMBUF),    false, "oMBUF"    },
         {  1, OFFS (oRUN),     false, "oRUN"     },

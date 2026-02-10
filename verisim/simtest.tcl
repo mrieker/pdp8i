@@ -19,6 +19,7 @@ set intenabled   0
 set intrequest   0
 set linc         0
 set memcycwcover 0
+set opcode       0
 set perclock     0
 set pctr         0
 
@@ -57,6 +58,7 @@ proc simtest {} {
     global intrequest
     global linc
     global memcycwcover
+    global opcode
     global perclock
     global pctr
     global xmem_dfld
@@ -81,10 +83,11 @@ proc simtest {} {
     waitassert TS1
     verify12 [bus oMADR] 0 "bad start PC"
     set acum [bus oACUM]
-    set linc [bus link]
+    set linc [bus oLINK]
 
     ;# run random instructions, verifying the cycles
     set instrno 0
+    set lastopc -1
 
     while true {
 
@@ -96,8 +99,6 @@ proc simtest {} {
         set startclockno [clk 0]
 
         set effaddr 0
-        set lastopc -1
-        set opcode  0
         set randsr  0
         set execst $MS_EXEC
 
@@ -185,6 +186,7 @@ proc simtest {} {
                         set opcode [expr {$opcode & 07772}]     ;# don't do OSR
                         break
                     }
+                    if {($opcode & 07401) == 07401} break       ;# group 3 (extended arithmetic)
                 }
                 puts -nonewline [format "OP=%04o  %s" $opcode [disop $pctr $opcode]]
                 set lastopc $opcode
@@ -238,82 +240,12 @@ proc simtest {} {
 
                 6 {             ;# iot
                     puts -nonewline [format " / %04o" $acum]
-                    for {set m 1} {$m <= 4} {incr m $m} {
-                        if {$opcode & $m} {
-
-                            ;# wait for processor to assert IOPm
-                            waitassert IOP$m
-
-                            ;# it should be sending the accumulator out
-                            verify12 [bus oACUM] $acum "AC invalid going out during IOP$m"
-
-                            ;# maybe it is an io opcode that some fpga device we have enabled processes
-                            set acclear 0
-                            set ioskip  0
-                            set acbits  0
-
-                            ;# - processor.v itself processes these io opcodes
-                            if {$opcode == 06001} {
-                                set intdelayed 1
-                            } elseif {$opcode == 06002} {
-                                set intdelayed 0
-                                set intenabled 0
-                            } elseif {($opcode == 06004) && ($m == 4)} {
-                                set acclear [randbits 1]    ;# supply random values
-                                set ioskip  [randbits 1]
-                                set acbits [randbits 12]
-                                bus set iACCLEAR $acclear iIOSKIP $ioskip iINBUS $acbits
-                            } elseif {($opcode & 07700) == 06200} {
-
-                                ;# - memext.v processes these io opcodes (manipulate memory field bits)
-                                if {! ($opcode & 4)} {
-                                    if {$opcode & 1} {set xmem_dfld [expr {($opcode >> 3) & 7}]}
-                                    if {$opcode & 2} {
-                                        set xmem_ifldafterjump [expr {($opcode >> 3) & 7}]
-                                        set xmem_intdisableduntiljump 1
-                                    }
-                                } elseif {($opcode & 7) == 4} {
-                                    switch [expr {($opcode >> 3) & 7}] {
-                                        1 {             ;# 6214
-                                            set acbits [expr {$xmem_dfld << 3}]
-                                        }
-                                        2 {             ;# 6224
-                                            set acbits [expr {$xmem_ifld << 3}]
-                                        }
-                                        3 {             ;# 6234
-                                            set acbits [expr {($xmem_savedifld << 3) | $xmem_saveddfld}]
-                                        }
-                                        4 {             ;# 6244
-                                            puts -nonewline [format " (ifaj=%o dfld=%o)" $xmem_savedifld $xmem_saveddfld]
-                                            set xmem_dfld          $xmem_saveddfld
-                                            set xmem_ifldafterjump $xmem_savedifld
-                                        }
-                                    }
-                                }
-                            } else {
-
-                                ;# those are the only I/O instructions we know how to process
-                                error [format "unknown IO opcode %04o" $opcode]
-                            }
-
-                            puts -nonewline [format " => IOP%o => %s%04o%s" $m [expr {$acclear ? "=" : "|"}] $acbits [expr {$ioskip ? "+" : " "}]]
-
-                            ;# wait for processor to drop IOPm
-                            waitnegate IOP$m
-
-                            ;# clear the random bits so it won't clock them again during nulled-out io pulses
-                            bus set iACCLEAR 0 iIOSKIP 0 iINBUS 0
-
-                            ;# update our shadow registers
-                            if {$acclear} {set acum 0}
-                            if {$ioskip}  {set pctr [expr {($pctr + 1) & 07777}]}
-                            set acum [expr {$acum | $acbits}]
-                        }
-                    }
+                    doiopulses $opcode
                 }
 
                 7 {             ;# opr
                     if {! ($opcode & 0400)} {
+                        ;# group 1
                         if {$opcode & 00200} {set acum 0}
                         if {$opcode & 00100} {set linc 0}
                         if {$opcode & 00040} {set acum [expr {$acum ^ 07777}]}
@@ -349,6 +281,7 @@ proc simtest {} {
                         }
                         puts -nonewline [format " => %o.%04o" $linc $acum]
                     } elseif {! ($opcode & 0001)} {
+                        ;# group 2
                         if {[g2skip $opcode]} {
                             puts -nonewline " skip"
                             set pctr [expr {($pctr + 1) & 07777}]
@@ -364,6 +297,19 @@ proc simtest {} {
                             swtch set cont 0
                             waitassert RUN 500
                         }
+                    } else {
+                        ;# group 3 (extended arithmetic)
+                        if {$opcode & 6} {
+                            ;# group 3 with memory operand
+                            ;# supply a random value for value fetched from (PC)+
+                            ;# then perform the extended arithmetic as part of the EXEC cycle
+                            set operand [randbits 12]
+                            memorycycle $MS_EXEC $xmem_ifld $pctr $operand $operand
+                            set pctr [expr {($pctr + 1) & 07777}]
+                        }
+                        ;# for non-memory operand instructions, the arithmetic was done as part of the FETCH
+                        ;# in any case, we are now past TP3 and so can drop the extended arithmetic results
+                        bus set iACCLEAR 0 iINBUS 0 iLNKTOG 0
                     }
                 }
 
@@ -404,9 +350,9 @@ proc simtest {} {
         waitassert TS1
 
         ;# the accumulator and link should be up to date
-        verify12  [bus pctr] $pctr "PC mismatch at end of instruction"
+        verify12  [bus pctr]  $pctr "PC mismatch at end of instruction"
         verify12  [bus oACUM] $acum "AC mismatch at end of instruction"
-        verifybit [bus link] $linc "LINK mismatch at end of instruction"
+        verifybit [bus oLINK] $linc "LINK mismatch at end of instruction"
 
         ;# print how many cycles it took (each clock is 10nS)
         set clocks [expr {[clk 0] - $startclockno}]
@@ -443,7 +389,8 @@ proc memorycycle {state field addr rdata wdata} {
 ;# - vfywaddr = address in extmem[] to verify the write happened
 ;# - vfywdata = data that should be at vfywaddr
 proc memorycyclx {state field addr rdata rdbkdata wtbkdata vfywaddr vfywdata} {
-    global memcycwcover
+    global memcycwcover opcode
+    global MS_EXEC MS_FETCH
 
     ;# clock until we see TS1
     waitassert TS1
@@ -467,6 +414,12 @@ proc memorycyclx {state field addr rdata rdbkdata wtbkdata vfywaddr vfywdata} {
 
     requestdmaorint $state $rdata
 
+    ;# maybe perform extended arithmetic
+    if {(($state == $MS_FETCH) && (($opcode & 07407) == 07401)) ||
+        (($state == $MS_EXEC)  && (($opcode & 07401) == 07401))} {
+        extendedarithmetic
+    }
+
     ;# wait for it to enter TS3, meanwhile cpu should possibly be modifying
     ;# the value and sending the value (modified or not) back to the memory
     waitassert TS3
@@ -485,6 +438,113 @@ proc memorycyclx {state field addr rdata rdbkdata wtbkdata vfywaddr vfywdata} {
 
     ;# verify the memory contents
     verify12 [mem $vfywaddr] $vfywdata [format "address %05o mismatch" $vfywaddr]
+}
+
+;# process IOPn pulses
+;# they are spliced between the TS3 and TS4 timestates
+proc doiopulses {opcode} {
+    global acum intdelayed intenabled linc pctr
+    global xmem_dfld xmem_ifld xmem_savedifld xmem_saveddfld xmem_ifldafterjump
+    global xmem_intdisableduntiljump
+
+    for {set m 1} {$m <= 4} {incr m $m} {
+        if {$opcode & $m} {
+
+            ;# wait for processor to assert IOPm
+            waitassert IOP$m
+
+            ;# it should be sending the accumulator out
+            verify12 [bus oACUM] $acum "AC invalid going out during IOP$m"
+
+            ;# maybe it is an io opcode that some fpga device we have enabled processes
+            set acclear 0
+            set ioskip  0
+            set acbits  0
+            set lnktog  0
+
+            ;# - processor.v itself processes these io opcodes
+            if {$opcode == 06001} {
+                set intdelayed 1
+            } elseif {$opcode == 06002} {
+                set intdelayed 0
+                set intenabled 0
+            } elseif {$opcode == 06004} {
+                set acclear [randbits 1]    ;# supply random values
+                set ioskip  [randbits 1]
+                set acbits [randbits 12]
+                bus set iACCLEAR $acclear iIOSKIP $ioskip iINBUS $acbits iLNKTOG $lnktog
+            } elseif {($opcode & 07700) == 06200} {
+
+                ;# - memext.v processes these io opcodes (manipulate memory field bits)
+                if {! ($opcode & 4)} {
+                    if {$opcode & 1} {set xmem_dfld [expr {($opcode >> 3) & 7}]}
+                    if {$opcode & 2} {
+                        set xmem_ifldafterjump [expr {($opcode >> 3) & 7}]
+                        set xmem_intdisableduntiljump 1
+                    }
+                } elseif {($opcode & 7) == 4} {
+                    switch [expr {($opcode >> 3) & 7}] {
+                        1 {             ;# 6214
+                            set acbits [expr {$xmem_dfld << 3}]
+                        }
+                        2 {             ;# 6224
+                            set acbits [expr {$xmem_ifld << 3}]
+                        }
+                        3 {             ;# 6234
+                            set acbits [expr {($xmem_savedifld << 3) | $xmem_saveddfld}]
+                        }
+                        4 {             ;# 6244
+                            puts -nonewline [format " (ifaj=%o dfld=%o)" $xmem_savedifld $xmem_saveddfld]
+                            set xmem_dfld          $xmem_saveddfld
+                            set xmem_ifldafterjump $xmem_savedifld
+                        }
+                    }
+                }
+            } else {
+
+                ;# those are the only I/O instructions we know how to process
+                error [format "unknown IO opcode %04o" $opcode]
+            }
+
+            puts -nonewline [format " => IOP%o => %s%s%04o%s" $m [expr {$lnktog ? "^" : " "}] [expr {$acclear ? "=" : "|"}] $acbits [expr {$ioskip ? "+" : " "}]]
+
+            ;# wait for processor to drop IOPm
+            waitnegate IOP$m
+
+            ;# clear the random bits so it won't clock them again during nulled-out io pulses
+            bus set iACCLEAR 0 iIOSKIP 0 iINBUS 0 iLNKTOG 0
+
+            ;# update our shadow registers
+            if {$acclear} {set acum 0}
+            if {$ioskip}  {set pctr [expr {($pctr + 1) & 07777}]}
+            set linc [expr {$linc ^ $lnktog}]
+            set acum [expr {$acum | $acbits}]
+        }
+    }
+}
+
+;# perform extended arithmetic
+;# - just supply random results
+proc extendedarithmetic {} {
+    global acum linc
+
+    ;# delay for 10uS while supposedly doing arithmetic
+    runstep                     ;# step a couple cycles before asserting iHOLD
+    runstep
+    bus set iHOLD 1             ;# keep us in same TSn state
+    for {set i 0} {$i < 98} {incr i} runstep
+
+    ;# get random numbers for the results
+    set acclear [randbits 1]
+    set inbus   [randbits 12]
+    set lnktog  [randbits 1]
+
+    ;# put the results on the bus
+    bus set iHOLD 0 iINBUS $inbus iACCLEAR $acclear iLNKTOG $lnktog
+
+    ;# update shadow copies of the registers
+    set acum [expr {($acclear ? 0 : $acum) | $inbus}]
+    set linc [expr {$linc ^ $lnktog}]
 }
 
 ;# wait up to 10uS for signal to assert

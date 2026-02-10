@@ -16,6 +16,7 @@ module backplane (
     input iHOLD,                    // hold internal clocking (stretch cycle)
     input iINTRQST,                 // request interrupt
     input iIOSKIP,                  // increment PC at end of IO pulse
+    input iLNKTOG,                  // toggle link register
     input[14:00] iDMAADDR,          // device sending address for DMA
     input[11:00] iDMADATA,          // device sending write data for DMA
     input[11:00] iINBUS,            // device sending data for PIO
@@ -23,14 +24,14 @@ module backplane (
     output oBUSINI,                 // initialize bus devices
     output oBWCOV,                  // 3-cycle DMA wordcount overflowed
     output oIOP1, oIOP2, oIOP4,     // io instruction pulses
+    output oLINK,                   // link register
     output oRUN,
     output oTP1, oTP2, oTP3, oTP4, oTS1, oTS2, oTS3, oTS4,
     output[11:00] oMADR, oMBUF, oACUM,
 
     output[11:00] pctr,
     output[2:0] memfield,
-    output[3:0] majst,
-    output link
+    output[3:0] majst
 );
 
     wire[11:00] mquo;
@@ -70,7 +71,7 @@ module backplane (
         .lbsc (shcnt),
         .lbdf (dfield),
         .lbif (ifield),
-        .lblink (link),
+        .lblink (oLINK),
 
         .swreg (swreg),         //toggle switch register
         .swdfld (swdfld),       //toggle data field
@@ -145,6 +146,7 @@ module backplane (
         .iDMAADDR (iDMAADDR[11:00]),  // break cycle address
         .iDMADATA (iDMADATA),   // break cycle write data
         .iINBUS (iINBUS | mexinbus),  // IO data being read from device
+        .iLNKTOG (iLNKTOG),     // toggle link register
         .iMEMBUS (membus),      // data being read from memory
         .oBREAK (oBREAK),       // doing BREAK cycle
         .oBUSINI (oBUSINI),     // initialize bus devices
@@ -155,6 +157,7 @@ module backplane (
         .oIOP2 (oIOP2),         // ...400nS each
         .oIOP4 (oIOP4),         // ...300nS spacing
         .oJMPJMS (oJMPJMS),     // JMP/JMS instruction in instruction register
+        .oLINK (oLINK),         // link register
         .oRUN (oRUN),           // processing instructions
         .oTP1 (oTP1),           // time pulses, 200nS each
         .oTP2 (oTP2),           // ...starting so as to overlap last 100nS of corresponding TSn
@@ -176,7 +179,6 @@ module backplane (
         .lbMAJST (majst),
         .lbION (intenabd),
         .lbPAUSE (paused),
-        .lbLINK (link),
 
         // switches
         .swLDAD (swldad),       // button (idempotent)
