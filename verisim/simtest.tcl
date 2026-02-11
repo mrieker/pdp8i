@@ -19,9 +19,11 @@ set intenabled   0
 set intrequest   0
 set linc         0
 set memcycwcover 0
+set mulq         0
 set opcode       0
 set perclock     0
 set pctr         0
+set sctr         0
 
 set xmem_dfld                 0
 set xmem_ifld                 0
@@ -58,9 +60,11 @@ proc simtest {} {
     global intrequest
     global linc
     global memcycwcover
+    global mulq
     global opcode
     global perclock
     global pctr
+    global sctr
     global xmem_dfld
     global xmem_ifld
     global xmem_ifldafterjump
@@ -94,7 +98,8 @@ proc simtest {} {
         ;# once through this loop per instruction, dma transfer or interrupt acknowledge
         ;# processor should be at beginning of TS1 in FETCH, WDCNT, BREAK or INTAK cycle
 
-        puts -nonewline [format "%10u : L.AC=%o.%04o PC=%o%04o : " [incr instrno] $linc $acum $xmem_ifld $pctr]
+        puts -nonewline [format "%10u : L.AC=%o.%04o MQ=%04o PC=%o%04o SC=%02o : " \
+            [incr instrno] $linc $acum $mulq $xmem_ifld $pctr $sctr]
 
         set startclockno [clk 0]
 
@@ -304,6 +309,7 @@ proc simtest {} {
                             ;# supply a random value for value fetched from (PC)+
                             ;# then perform the extended arithmetic as part of the EXEC cycle
                             set operand [randbits 12]
+                            puts -nonewline [format " %o%04o / %04o" $xmem_ifld $pctr $operand]
                             memorycycle $MS_EXEC $xmem_ifld $pctr $operand $operand
                             set pctr [expr {($pctr + 1) & 07777}]
                         }
@@ -353,6 +359,8 @@ proc simtest {} {
         verify12  [bus pctr]  $pctr "PC mismatch at end of instruction"
         verify12  [bus oACUM] $acum "AC mismatch at end of instruction"
         verifybit [bus oLINK] $linc "LINK mismatch at end of instruction"
+        verify12  [bus mulq]  $mulq "MQ mismatch at end of instruction"
+        verify12  [bus sctr]  $sctr "SC mismatch at end of instruction"
 
         ;# print how many cycles it took (each clock is 10nS)
         set clocks [expr {[clk 0] - $startclockno}]
@@ -417,7 +425,7 @@ proc memorycyclx {state field addr rdata rdbkdata wtbkdata vfywaddr vfywdata} {
     ;# maybe perform extended arithmetic
     if {(($state == $MS_FETCH) && (($opcode & 07407) == 07401)) ||
         (($state == $MS_EXEC)  && (($opcode & 07401) == 07401))} {
-        extendedarithmetic
+        extendedarithmetic $rdata
     }
 
     ;# wait for it to enter TS3, meanwhile cpu should possibly be modifying
@@ -524,27 +532,83 @@ proc doiopulses {opcode} {
 }
 
 ;# perform extended arithmetic
-;# - just supply random results
-proc extendedarithmetic {} {
-    global acum linc
+proc extendedarithmetic {yreg} {
+    global acum linc mulq opcode sctr
 
-    ;# delay for 10uS while supposedly doing arithmetic
-    runstep                     ;# step a couple cycles before asserting iHOLD
-    runstep
-    bus set iHOLD 1             ;# keep us in same TSn state
-    for {set i 0} {$i < 98} {incr i} runstep
+    ;# step 1
+    if {$opcode & 0200} {set acum 0}                        ;# 0200 CLA - clear accumulator
 
-    ;# get random numbers for the results
-    set acclear [randbits 1]
-    set inbus   [randbits 12]
-    set lnktog  [randbits 1]
+    ;# step 2
+    set mqxx $mulq
+    if {$opcode & 0020} {set mulq $acum}                    ;# 0020 MQL - load multiplier quotient from accumulator
+    if {$opcode & 0020} {set acum 0}
+    if {$opcode & 0040} {set acum [expr {$acum | $sctr}]}   ;# 0040 SCA - step counter load into accumulator
+    if {$opcode & 0100} {set acum [expr {$acum | $mqxx}]}   ;# 0100 MQA - multiplier quotient load into accumulator
 
-    ;# put the results on the bus
-    bus set iHOLD 0 iINBUS $inbus iACCLEAR $acclear iLNKTOG $lnktog
+    ;# step 3
+    switch [expr {($opcode >> 1) & 7}] {
 
-    ;# update shadow copies of the registers
-    set acum [expr {($acclear ? 0 : $acum) | $inbus}]
-    set linc [expr {$linc ^ $lnktog}]
+        1 {     ;# 7403 SCL - step counter load from memory
+            set sctr [expr {037 & ~ $yreg}]
+        }
+
+        2 {     ;# 7405 MUY - multiply: Y * MQ => AC,MQ
+            set prod [expr {$yreg * $mulq}]
+            set acum [expr {$prod >> 12}]
+            set mulq [expr {$prod & 07777}]
+            set linc 0
+        }
+
+        3 {     ;# 7407 DVI - divide: AC,MQ / Y => MQ r AC
+            if {$acum >= $yreg} {
+                set linc 1
+            } else {
+                set acmq [expr {($acum << 12) | $mulq}]
+                set acum [expr {$acmq % $yreg}]
+                set mulq [expr {($acmq - $acum) / $yreg}]
+                set linc 0
+            }
+        }
+
+        4 {     ;# 7411 NMI - normalize
+            set acmq [expr {($acum << 12) | $mulq}]
+            for {set sctr 0} {$sctr < 31} {incr sctr} {
+                if {$acmq == 000000000} break
+                if {$acmq == 060000000} break
+                if {($acmq & 060000000) == 040000000} break
+                if {($acmq & 060000000) == 020000000} break
+                set linc [expr {$acmq >> 23}]
+                set acmq [expr {($acmq << 1) & 077777777}]
+            }
+            set acum [expr {$acmq >> 12}]
+            set mulq [expr {$acmq & 07777}]
+        }
+
+        5 {     ;# 7413 SHL - shift left
+            set acmq [expr {($acum << 12) | $mulq}]
+            set acmq [expr {$acmq << (($yreg & 31) + 1)}]
+            set linc [expr {($acmq >> 24) & 1}]
+            set acum [expr {($acmq >> 12) & 07777}]
+            set mulq [expr {$acmq & 07777}]
+        }
+
+        6 {     ;# 7415 ASR - arithmetic shift right
+            set acmq [expr {($acum << 12) | $mulq}]
+            set linc [expr {$acmq >> 23}]
+            set acmq [expr {($acmq ^ 040000000) - 040000000}]
+            set acmq [expr {$acmq >> (($yreg & 31) + 1)}]
+            set acum [expr {($acmq >> 12) & 07777}]
+            set mulq [expr {$acmq & 07777}]
+        }
+
+        7 {     ;# 7417 LSR - logical shift right
+            set acmq [expr {($acum << 12) | $mulq}]
+            set linc 0
+            set acmq [expr {$acmq >> (($yreg & 31) + 1)}]
+            set acum [expr {$acmq >> 12}]
+            set mulq [expr {$acmq & 07777}]
+        }
+    }
 }
 
 ;# wait up to 10uS for signal to assert

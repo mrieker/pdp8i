@@ -13,7 +13,7 @@ module console (
     input[11:00] lbmadr,
     input[11:00] lbmbuf,
     input[11:00] lbacum,
-    input[11:00] lbmquo,
+    input[11:00] lbmulq,
     input[11:09] lbireg,
     input[3:0]   lbmajst,
     input        lbion,
@@ -37,16 +37,7 @@ module console (
     output reg swsinst
 );
 
-    localparam[3:0] MS_PWRON = 0;   // power-on reset
-    localparam[3:0] MS_FETCH = 1;   // memory cycle is fetching instruction
-    localparam[3:0] MS_DEFER = 2;   // memory cycle is reading pointer
-    localparam[3:0] MS_EXEC  = 3;   // memory cycle is for executing instruction
-    localparam[3:0] MS_WRDCT = 4;   // memory cycle is for incrementing dma word count
-    localparam[3:0] MS_CURAD = 5;   // memory cycle is for reading dma address
-    localparam[3:0] MS_BREAK = 6;   // memory cycle is for dma data word transfer
-    localparam[3:0] MS_INTAK = 7;   // memory cycle is for interrupt acknowledge
-    localparam[3:0] MS_DEPOS = 8;   // memory cycle is for deposit switch
-    localparam[3:0] MS_EXAM  = 9;   // memory cycle is for examine switch
+`include "msdef.v"
 
     //           LR1 LR2 LR3 LR4 LR5 LR6 LR7 LR8 SR1 SR2 SR3
     // gpio lbus rn0 rn1 rn2 rn3 rn4 rn5 rn6 rn7 rn8 rn9 rn10
@@ -199,18 +190,18 @@ module console (
                             gpout[13] <= ~ lbacum[00];
                         end
                         4: begin
-                            gpout[14] <= ~ lbmquo[11];
-                            gpout[15] <= ~ lbmquo[10];
-                            gpout[04] <= ~ lbmquo[09];
-                            gpout[05] <= ~ lbmquo[08];
-                            gpout[06] <= ~ lbmquo[07];
-                            gpout[07] <= ~ lbmquo[06];
-                            gpout[08] <= ~ lbmquo[05];
-                            gpout[09] <= ~ lbmquo[04];
-                            gpout[10] <= ~ lbmquo[03];
-                            gpout[11] <= ~ lbmquo[02];
-                            gpout[12] <= ~ lbmquo[01];
-                            gpout[13] <= ~ lbmquo[00];
+                            gpout[14] <= ~ lbmulq[11];
+                            gpout[15] <= ~ lbmulq[10];
+                            gpout[04] <= ~ lbmulq[09];
+                            gpout[05] <= ~ lbmulq[08];
+                            gpout[06] <= ~ lbmulq[07];
+                            gpout[07] <= ~ lbmulq[06];
+                            gpout[08] <= ~ lbmulq[05];
+                            gpout[09] <= ~ lbmulq[04];
+                            gpout[10] <= ~ lbmulq[03];
+                            gpout[11] <= ~ lbmulq[02];
+                            gpout[12] <= ~ lbmulq[01];
+                            gpout[13] <= ~ lbmulq[00];
                         end
                         5: begin
                             gpout[14] <= ~ (lbireg == 0);

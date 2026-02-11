@@ -68,10 +68,7 @@ module memext (
     output reg[11:00] inbus     // IO instruction read data
 );
 
-    localparam[1:0] FS_INST  = 0;
-    localparam[1:0] FS_DATA  = 1;
-    localparam[1:0] FS_ZERO  = 2;
-    localparam[1:0] FS_BREAK = 3;
+`include "fsdef.v"
 
     reg lasttp4;
     reg[2:0] dfld, ifld, ifldaj, saveddfld, savedifld;

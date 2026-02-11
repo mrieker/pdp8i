@@ -29,15 +29,14 @@ module backplane (
     output oTP1, oTP2, oTP3, oTP4, oTS1, oTS2, oTS3, oTS4,
     output[11:00] oMADR, oMBUF, oACUM,
 
-    output[11:00] pctr,
+    output[11:00] mulq, pctr,
     output[2:0] memfield,
-    output[3:0] majst
+    output[3:0] majst,
+    output[4:0] sctr
 );
 
-    wire[11:00] mquo;
     wire[11:09] ireg;
     wire intenabd, paused;
-    wire[4:0] shcnt;
     wire[2:0] dfield, ifield;
 
     wire[11:00] swreg;
@@ -62,13 +61,13 @@ module backplane (
         .lbmadr (oMADR),
         .lbmbuf (oMBUF),
         .lbacum (oACUM),
-        .lbmquo (mquo),
+        .lbmulq (mulq),
         .lbireg (ireg),
         .lbmajst (majst),
         .lbion (intenabd),
         .lbpause (paused),
         .lbrun (oRUN),
-        .lbsc (shcnt),
+        .lbsc (sctr),
         .lbdf (dfield),
         .lbif (ifield),
         .lblink (oLINK),
@@ -86,8 +85,38 @@ module backplane (
         .swsinst (swsinst)      //toggle single instruction
     );
 
+    wire eaeACCLEAR, eaeHOLD, eaeIOSKIP, eaeLNKTOG;
+    wire[11:00] eaeINBUS;
+
+    extarith eaeinst (
+        .zclock (zclock),
+        .zreset (zreset),
+
+        .preset (preset),
+
+        .iACCLEAR (eaeACCLEAR),
+        .iHOLD (eaeHOLD),
+        .iIOSKIP (eaeIOSKIP),
+        .iLNKTOG (eaeLNKTOG),
+        .iINBUS (eaeINBUS),
+
+        .iMEMBUS (membus),
+        .oLINK (oLINK),
+        .oTP1 (oTP1),
+        .oTP2 (oTP2),
+        .oTP3 (oTP3),
+        .oTP4 (oTP4),
+        .oACUM (oACUM),
+        .oMBUF (oMBUF),
+
+        .lbMAJST (majst),
+
+        .mulq (mulq),
+        .sctr (sctr)
+    );
+
     wire iINTINH;
-    wire[11:00] mexinbus;
+    wire[11:00] mexINBUS;
 
     memext mexinst (
         .zclock (zclock),
@@ -113,7 +142,7 @@ module backplane (
 
         .intinh (iINTINH),
         .field (memfield),
-        .inbus (mexinbus)
+        .inbus (mexINBUS)
     );
 
     memory meminst (
@@ -134,44 +163,44 @@ module backplane (
         .preset (preset),
 
         // bus signals
-        .i3CYCLE (i3CYCLE),     // do 3-cycle break
-        .iACCLEAR (iACCLEAR),   // io pulse clears AC
-        .iBRKRQST (iBRKRQST),   // requesting break
-        .iBRKWRM (iBRKWRM),     // break cycle writes memory
-        .iCAINC (iCAINC),       // curad cycle increments address word
-        .iHOLD (iHOLD),         // hold internal clocking (stretch cycle)
-        .iINTINH (iINTINH),     // inhibit interrupt processing
-        .iINTRQST (iINTRQST),   // request interrupt
-        .iIOSKIP (iIOSKIP),     // increment PC at end of IO pulse
-        .iDMAADDR (iDMAADDR[11:00]),  // break cycle address
-        .iDMADATA (iDMADATA),   // break cycle write data
-        .iINBUS (iINBUS | mexinbus),  // IO data being read from device
-        .iLNKTOG (iLNKTOG),     // toggle link register
-        .iMEMBUS (membus),      // data being read from memory
-        .oBREAK (oBREAK),       // doing BREAK cycle
-        .oBUSINI (oBUSINI),     // initialize bus devices
-        .oBWCOV (oBWCOV),       // break wordcount overflowed
-        .oEXEFET (oEXEFET),     // doing EXEC or FETCH cycle
-        .oINTACK (oINTACK),     // doing INTACK cycle
-        .oIOP1 (oIOP1),         // IO pulses
-        .oIOP2 (oIOP2),         // ...400nS each
-        .oIOP4 (oIOP4),         // ...300nS spacing
-        .oJMPJMS (oJMPJMS),     // JMP/JMS instruction in instruction register
-        .oLINK (oLINK),         // link register
-        .oRUN (oRUN),           // processing instructions
-        .oTP1 (oTP1),           // time pulses, 200nS each
-        .oTP2 (oTP2),           // ...starting so as to overlap last 100nS of corresponding TSn
-        .oTP3 (oTP3),           // ...usually overlapping first 100nS of subsequent TS(n+1)
+        .i3CYCLE (i3CYCLE),
+        .iACCLEAR (iACCLEAR | eaeACCLEAR),
+        .iBRKRQST (iBRKRQST),
+        .iBRKWRM (iBRKWRM),
+        .iCAINC (iCAINC),
+        .iHOLD (iHOLD | eaeHOLD),
+        .iINTINH (iINTINH),
+        .iINTRQST (iINTRQST),
+        .iIOSKIP (iIOSKIP | eaeIOSKIP),
+        .iDMAADDR (iDMAADDR[11:00]),
+        .iDMADATA (iDMADATA),
+        .iINBUS (iINBUS | eaeINBUS | mexINBUS),
+        .iLNKTOG (iLNKTOG | eaeLNKTOG),
+        .iMEMBUS (membus),
+
+        .oBREAK (oBREAK),
+        .oBUSINI (oBUSINI),
+        .oBWCOV (oBWCOV),
+        .oEXEFET (oEXEFET),
+        .oINTACK (oINTACK),
+        .oIOP1 (oIOP1),
+        .oIOP2 (oIOP2),
+        .oIOP4 (oIOP4),
+        .oJMPJMS (oJMPJMS),
+        .oLINK (oLINK),
+        .oRUN (oRUN),
+        .oTP1 (oTP1),
+        .oTP2 (oTP2),
+        .oTP3 (oTP3),
         .oTP4 (oTP4),
-        .oTS1 (oTS1),           // time states
-        .oTS2 (oTS2),           // ...400nS each
-        .oTS3 (oTS3),           // ...no spacing
-                                // ...except when IO pulses wedged in here
+        .oTS1 (oTS1),
+        .oTS2 (oTS2),
+        .oTS3 (oTS3),
         .oTS4 (oTS4),
-        .oFLDSEL (oFLDSEL),     // field select (0=inst; 1=data; 2=zero; 3=break)
-        .oACUM (oACUM),         // IO data being written to device
-        .oMADR (oMADR),         // memory address being accessed
-        .oMBUF (oMBUF),         // data being written to memory
+        .oFLDSEL (oFLDSEL),
+        .oACUM (oACUM),
+        .oMADR (oMADR),
+        .oMBUF (oMBUF),
 
         // lights
         .lbPCTR (pctr),

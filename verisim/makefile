@@ -6,6 +6,7 @@ GPP    := g++ $(CFLAGS) -std=c++11 -g -Wall
 VFILES := \
 	backplane.v \
 	console.v \
+	extarith.v \
 	memext.v \
 	memory.v \
 	processor.v \

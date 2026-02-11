@@ -160,8 +160,10 @@ static int cmd_bus (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj
 
         {  4, OFFS (majst),    false, "majst"    },
         {  3, OFFS (memfield), false, "memfield" },
+        { 12, OFFS (mulq),     false, "mulq"     },
         { 12, OFFS (pctr),     false, "pctr"     },
         {  1, OFFS (preset),   true,  "preset"   },
+        {  5, OFFS (sctr),     false, "sctr"     },
 
         { 12, OFFS (oACUM),    false, "oACUM"    },
         {  1, OFFS (oBREAK),   false, "oBREAK"   },   // currently doing BREAK (DMA) cycle
