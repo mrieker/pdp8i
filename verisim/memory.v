@@ -1,18 +1,17 @@
 
 module memory (
-    input zclock,               // fpga 100MHz clock
-    input zreset,               // fpga reset
+    input clok2,                // 10MHz clock
 
-    input ts1,
-    input ts3,
-    input[14:00] xadr,
-    input[11:00] mbuf,
-    output reg[11:00] mbus
+    input ts1,                  // read onto mbus
+    input ts3,                  // write from mbuf
+    input[14:00] xadr,          // 15-bit address
+    input[11:00] mbuf,          // write data
+    output reg[11:00] mbus      // read data
 );
 
     reg[11:00] memarray[32767:0];
 
-    always @(posedge zclock) begin
+    always @(posedge clok2) begin
         if (ts1) begin
             mbus <= memarray[xadr];
         end

@@ -30,7 +30,6 @@ static Tcl_ObjCmdProc cmd_disop;
 static Tcl_ObjCmdProc cmd_gpio;
 static Tcl_ObjCmdProc cmd_mem;
 static Tcl_ObjCmdProc cmd_randbits;
-static Tcl_ObjCmdProc cmd_res;
 
 static void kerchunk ();
 static void Tcl_SetResultF (Tcl_Interp *interp, char const *fmt, ...);
@@ -62,7 +61,6 @@ int main (int argc, char **argv)
     if (Tcl_CreateObjCommand (interp, "gpio", cmd_gpio, NULL, NULL) == NULL) ABORT ();
     if (Tcl_CreateObjCommand (interp, "mem",  cmd_mem,  NULL, NULL) == NULL) ABORT ();
     if (Tcl_CreateObjCommand (interp, "randbits",  cmd_randbits,  NULL, NULL) == NULL) ABORT ();
-    if (Tcl_CreateObjCommand (interp, "res",  cmd_res,  NULL, NULL) == NULL) ABORT ();
 
     signal (SIGINT, siginthand);
 
@@ -162,7 +160,7 @@ static int cmd_bus (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj
         {  3, OFFS (memfield), false, "memfield" },
         { 12, OFFS (mulq),     false, "mulq"     },
         { 12, OFFS (pctr),     false, "pctr"     },
-        {  1, OFFS (preset),   true,  "preset"   },
+        {  1, OFFS (reset),    true,  "reset"    },
         {  5, OFFS (sctr),     false, "sctr"     },
 
         { 12, OFFS (oACUM),    false, "oACUM"    },
@@ -407,29 +405,14 @@ static int cmd_randbits (ClientData clientdata, Tcl_Interp *interp, int objc, Tc
     return TCL_OK;
 }
 
-// res 0 or 1
-// no return value
-static int cmd_res (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
-{
-    if (objc != 2) {
-        Tcl_SetResultF (interp, "missing/extra arguments");
-        return TCL_ERROR;
-    }
-    int num = 1;
-    int rc = Tcl_GetIntFromObj (interp, objv[1], &num);
-    if (rc != TCL_OK) return rc;
-    vbkpl->zreset = num;
-    return TCL_OK;
-}
-
 // call with clock still low and input signals just changed
 // returns with output signals updated and clock just set low
 static void kerchunk ()
 {
     vbkpl->eval ();     // let input signals soak in
-    vbkpl->zclock = 1;  // clock the state
+    vbkpl->clok2 = 1;   // clock the state
     vbkpl->eval ();     // let new state settle in
-    vbkpl->zclock = 0;  // get ready for more input changes
+    vbkpl->clok2 = 0;   // get ready for more input changes
     ++ cyclenum;        // one more clock cycle done
 }
 

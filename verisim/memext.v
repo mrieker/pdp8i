@@ -21,10 +21,9 @@
 // PDP-8/L extended memory
 
 module memext (
-    input zclock,               // fpga 10MHz clock
-    input zreset,               // fpga reset
+    input clok2,                // 10MHz clock
+    input reset,                // power-on reset
 
-    input preset,               // power-on reset
     input businit,              // start switch being pressed
     input iop1, iop2, iop4,     // IO instuction pulses
     input ldaddrsw,             // console LOAD ADDRESS switch
@@ -55,13 +54,13 @@ module memext (
                    (fldsel == FS_DATA) ? dfld :
                   (fldsel == FS_BREAK) ? dmafield : 0;
 
-    always @(posedge zclock) begin
+    always @(posedge clok2) begin
 
         ////////////////
         //  bus init  //
         ////////////////
 
-        if (preset) begin
+        if (reset) begin
 
             // these get cleared on power up
             // they remain as is when start switch is pressed

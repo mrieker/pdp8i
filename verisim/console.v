@@ -1,9 +1,7 @@
 
 module console (
-    input zclock,
-    input zreset,
-
-    input preset,
+    input clok2,
+    input reset,
 
 //  inout[27:04] gpio,
     input[27:04] gpin,
@@ -67,8 +65,8 @@ module console (
 //  assign gpio[18:16] = gpout[18:16];                          // switch row select
 //  assign gpio[15:04] = rownum[3] ? 12'hZZZ : gpout[15:04];    // columns
 
-    always @(posedge zclock) begin
-        if (preset) begin
+    always @(posedge clok2) begin
+        if (reset) begin
             debounce <= 0;
             rownum   <= 0;
             timer    <= 0;

@@ -3,10 +3,8 @@
 // pages p73/v59
 
 module extarith (
-    input zclock,               // fpga 10MHz clock
-    input zreset,               // fpga reset
-
-    input preset,               // power-on reset
+    input clok2,                // 10MHz clock
+    input reset,                // power-on reset
 
     // bus signals
     output reg iACCLEAR,        // io pulse clears AC
@@ -37,9 +35,9 @@ module extarith (
     reg[11:00] myac, yreg;
     reg[23:00] prod;
 
-    always @(posedge zclock) begin
+    always @(posedge clok2) begin
 
-        if (preset) begin
+        if (reset) begin
             isextar <= 0;
             mulq    <= 0;
             sctr    <= 0;

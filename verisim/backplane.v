@@ -1,9 +1,7 @@
 
 module backplane (
-    input zclock,                   // fpga 100MHz clock
-    input zreset,                   // fpga reset
-
-    input preset,                   // power-on reset
+    input clok2,                    // 10MHz clock
+    input reset,                    // power-on reset
 
     input[27:04] gpin,              // gpio connector
     output[27:04] gpout,
@@ -49,10 +47,8 @@ module backplane (
     wire[1:0] oFLDSEL;
 
     console coninst (
-        .zclock (zclock),
-        .zreset (zreset),
-
-        .preset (preset),
+        .clok2 (clok2),
+        .reset (reset),
 
         .gpin  (gpin),
         .gpout (gpout),
@@ -89,10 +85,8 @@ module backplane (
     wire[11:00] eaeINBUS;
 
     extarith eaeinst (
-        .zclock (zclock),
-        .zreset (zreset),
-
-        .preset (preset),
+        .clok2 (clok2),
+        .reset (reset),
 
         .iACCLEAR (eaeACCLEAR),
         .iHOLD (eaeHOLD),
@@ -119,10 +113,9 @@ module backplane (
     wire[11:00] mexINBUS;
 
     memext mexinst (
-        .zclock (zclock),
-        .zreset (zreset),
+        .clok2 (clok2),
+        .reset (reset),
 
-        .preset (preset),
         .businit (oBUSINI),
         .iop1 (oIOP1),
         .iop2 (oIOP2),
@@ -146,8 +139,7 @@ module backplane (
     );
 
     memory meminst (
-        .zclock (zclock),
-        .zreset (zreset),
+        .clok2 (clok2),
 
         .ts1  (oTS1),
         .ts3  (oTS3),
@@ -157,10 +149,8 @@ module backplane (
     );
 
     processor procinst (
-        .zclock (zclock),
-        .zreset (zreset),
-
-        .preset (preset),
+        .clok2 (clok2),
+        .reset (reset),
 
         // bus signals
         .i3CYCLE (i3CYCLE),

@@ -1,9 +1,7 @@
 
 module processor (
-    input zclock,               // fpga 10MHz clock
-    input zreset,               // fpga reset
-
-    input preset,               // power-on reset
+    input clok2,                // 10MHz clock
+    input reset,                // power-on reset
 
     // bus signals
     input i3CYCLE,              // do 3-cycle break
@@ -73,6 +71,9 @@ module processor (
     reg intdelayed, intenabled, link, syncbrkrq, syncintrq;
     reg lastswcont, lastswdepos, lastswexam, lastswldad, lastswstart;
 
+    wire _clok1 = ~ clok2;
+    wire clok0 = ~ _clok1;
+
     ///////////////////
     //  TIME STATES  //
     ///////////////////
@@ -93,62 +94,62 @@ module processor (
     wire tsct0k = ~ iHOLD;
     wire tsct1j = ~ iHOLD & tsct[0] & ~ shorts;
     wire tsct1k = ~ iHOLD & tsct[0];
-    JKFF tsct0ff (.PC (preset), .PS (0), .J (tsct0j), .K (tsct0k), .T (zclock), .Q (tsct[0]), ._Q (_tsct[0]));
-    JKFF tsct1ff (.PC (preset), .PS (0), .J (tsct1j), .K (tsct1k), .T (zclock), .Q (tsct[1]), ._Q (_tsct[1]));
-    wire clock2ts = tsct[0];            // last 100nS of 200nS cycle
-    wire clock4ts = tsct[0] & tsct[1];  // last 100nS of 400nS cycle
+    JKFF tsct0ff (.PC (reset), .PS (0), .J (tsct0j), .K (tsct0k), .T (clok0), .Q (tsct[0]), ._Q (_tsct[0]));
+    JKFF tsct1ff (.PC (reset), .PS (0), .J (tsct1j), .K (tsct1k), .T (clok0), .Q (tsct[1]), ._Q (_tsct[1]));
+    wire ts200 = tsct[0];               // last 100nS of 200nS cycle
+    wire ts400 = tsct[0] & tsct[1];     // last 100nS of 400nS cycle
 
     // halt grant - spliced in between previous cycle TS4 and next cycle TS1
     // - these can occur mid-instruction such as when single cycling
     //   majstate indicates what state will be executed when hgnt is cleared and TS1 begins
     wire hgntj = ts4k & hreq;                       // begin HGNT when TS4 ends and halt being requested
-    wire hgntk = clock4ts & ~ hreq;                 // end HGNT when halt no longer being requested
-    JKFF hgntff (.PC (0), .PS (preset), .J (hgntj), .K (hgntk), .T (zclock), .Q (hgnt), ._Q (_hgnt));
+    wire hgntk = ts400 & ~ hreq;                    // end HGNT when halt no longer being requested
+    JKFF hgntff (.PC (0), .PS (reset), .J (hgntj), .K (hgntk), .T (clok0), .Q (hgnt), ._Q (_hgnt));
 
     // non I/O instruction : [HGNT] TS1 TS2 TS3 TS4  (1.6 uS + halt time)
     //     I/O instruction : [HGNT] TS1 TS2 TS3 IOP1 IOG1 IOP2 IOG2 IOP4 TS4  (3.4 uS + halt time)
     // all states 400nS except IOGx which are 200nS
-    wire ts1j = clock4ts & ~ hreq & (ts4 | hgnt);   // begin TS1 when halt not requested and ending TS4 or HGNT
-    wire ts1k = clock4ts & ts1;                     // end TS1 when it has been on for 400nS
-    JKFF ts1ff (.PC (preset), .PS (0), .J (ts1j), .K (ts1k), .T (zclock), .Q (ts1), ._Q (_ts1));
+    wire ts1j = ts400 & ~ hreq & (ts4 | hgnt);      // begin TS1 when halt not requested and ending TS4 or HGNT
+    wire ts1k = ts400 & ts1;                        // end TS1 when it has been on for 400nS
+    JKFF ts1ff (.PC (reset), .PS (0), .J (ts1j), .K (ts1k), .T (clok0), .Q (ts1), ._Q (_ts1));
 
     wire ts2j = ts1k;                               // begin TS2 when TS1 ends (no gap or overlap)
-    wire ts2k = clock4ts & ts2;                     // end TS2 when it has been on for 400nS
-    JKFF ts2ff (.PC (preset), .PS (0), .J (ts2j), .K (ts2k), .T (zclock), .Q (ts2), ._Q (_ts2));
+    wire ts2k = ts400 & ts2;                        // end TS2 when it has been on for 400nS
+    JKFF ts2ff (.PC (reset), .PS (0), .J (ts2j), .K (ts2k), .T (clok0), .Q (ts2), ._Q (_ts2));
 
     wire ts3j = ts2k;
-    wire ts3k = clock4ts & ts3;
-    JKFF ts3ff (.PC (preset), .PS (0), .J (ts3j), .K (ts3k), .T (zclock), .Q (ts3), ._Q (_ts3));
+    wire ts3k = ts400 & ts3;
+    JKFF ts3ff (.PC (reset), .PS (0), .J (ts3j), .K (ts3k), .T (clok0), .Q (ts3), ._Q (_ts3));
 
     wire iop1j = ts3k & ioinst;                     // begin IOP1 when TS3 ends and doing IO instruction
-    wire iop1k = clock4ts & iop1;                   // IOP1 lasts 400nS
-    JKFF iop1ff (.PC (preset), .PS (0), .J (iop1j), .K (iop1k), .T (zclock), .Q (iop1), ._Q (_iop1));
+    wire iop1k = ts400 & iop1;                      // IOP1 lasts 400nS
+    JKFF iop1ff (.PC (reset), .PS (0), .J (iop1j), .K (iop1k), .T (clok0), .Q (iop1), ._Q (_iop1));
 
     wire iog1j = iop1k;
-    wire iog1k = clock2ts & iog1;
-    JKFF iog1ff (.PC (preset), .PS (0), .J (iog1j), .K (iog1k), .T (zclock), .Q (iog1), ._Q (_iog1));
+    wire iog1k = ts200 & iog1;
+    JKFF iog1ff (.PC (reset), .PS (0), .J (iog1j), .K (iog1k), .T (clok0), .Q (iog1), ._Q (_iog1));
 
     wire iop2j = iog1k;
-    wire iop2k = clock4ts & iop2;
-    JKFF iop2ff (.PC (preset), .PS (0), .J (iop2j), .K (iop2k), .T (zclock), .Q (iop2), ._Q (_iop2));
+    wire iop2k = ts400 & iop2;
+    JKFF iop2ff (.PC (reset), .PS (0), .J (iop2j), .K (iop2k), .T (clok0), .Q (iop2), ._Q (_iop2));
 
     wire iog2j = iop2k;
-    wire iog2k = clock2ts & iog2;
-    JKFF iog2ff (.PC (preset), .PS (0), .J (iog2j), .K (iog2k), .T (zclock), .Q (iog2), ._Q (_iog2));
+    wire iog2k = ts200 & iog2;
+    JKFF iog2ff (.PC (reset), .PS (0), .J (iog2j), .K (iog2k), .T (clok0), .Q (iog2), ._Q (_iog2));
 
     wire iop4j = iog2k;
-    wire iop4k = clock4ts & iop4;
-    JKFF iop4ff (.PC (preset), .PS (0), .J (iop4j), .K (iop4k), .T (zclock), .Q (iop4), ._Q (_iop4));
+    wire iop4k = ts400 & iop4;
+    JKFF iop4ff (.PC (reset), .PS (0), .J (iop4j), .K (iop4k), .T (clok0), .Q (iop4), ._Q (_iop4));
 
     wire ts4j = ts3k & ~ ioinst | iop4k;
-    wire ts4k = clock4ts & ts4;
-    JKFF ts4ff (.PC (preset), .PS (0), .J (ts4j), .K (ts4k), .T (zclock), .Q (ts4), ._Q (_ts4));
+    wire ts4k = ts400 & ts4;
+    JKFF ts4ff (.PC (reset), .PS (0), .J (ts4j), .K (ts4k), .T (clok0), .Q (ts4), ._Q (_ts4));
 
     // TPn asserted for last 100nS of corresponding TSn
-    JKFF tp1ff (.PC (preset), .PS (0), .J (ts1 & tsct[1]), .K (clock4ts), .T (zclock), .Q (tp1), ._Q (_tp1));
-    JKFF tp2ff (.PC (preset), .PS (0), .J (ts2 & tsct[1]), .K (clock4ts), .T (zclock), .Q (tp2), ._Q (_tp2));
-    JKFF tp3ff (.PC (preset), .PS (0), .J (ts3 & tsct[1]), .K (clock4ts), .T (zclock), .Q (tp3), ._Q (_tp3));
-    JKFF tp4ff (.PC (preset), .PS (0), .J (ts4 & tsct[1]), .K (clock4ts), .T (zclock), .Q (tp4), ._Q (_tp4));
+    JKFF tp1ff (.PC (reset), .PS (0), .J (ts1 & tsct[1]), .K (ts400), .T (clok0), .Q (tp1), ._Q (_tp1));
+    JKFF tp2ff (.PC (reset), .PS (0), .J (ts2 & tsct[1]), .K (ts400), .T (clok0), .Q (tp2), ._Q (_tp2));
+    JKFF tp3ff (.PC (reset), .PS (0), .J (ts3 & tsct[1]), .K (ts400), .T (clok0), .Q (tp3), ._Q (_tp3));
+    JKFF tp4ff (.PC (reset), .PS (0), .J (ts4 & tsct[1]), .K (ts400), .T (clok0), .Q (tp4), ._Q (_tp4));
 
     ///////////////////
     //  BUS SIGNALS  //
@@ -277,7 +278,7 @@ module processor (
 
     // asserted during last 100nS clock cycle of IOPn
     // accumulator and ioskip updated at the end of the cycle
-    wire negedgeiop = clock4ts & (iop1 | iop2 | iop4);
+    wire negedgeiop = ts400 & (iop1 | iop2 | iop4);
 
     // accumulator data being read from a pio device or extended arithmetic board
     wire[11:00] ioindata = (iACCLEAR ? 0 : acum) | iINBUS;
@@ -288,13 +289,13 @@ module processor (
     //   EXEC: must have opcode 111 xxx xxx xxx  it is only 7 opcode that uses EXEC state
     wire extarithexec = (ireg == 7) & ((majstate == MS_FETCH) & mbuf[08] & mbuf[00] | (majstate == MS_EXEC));
 
-    always @(posedge zclock) begin
+    always @(posedge clok0) begin
 
         // maintain major state
         majstate <=
 
             // power-on reset
-            preset ? MS_PWRON :
+            reset ? MS_PWRON :
 
             // various console switches being pressed while halted set state to process the switch
             posedgeldad  ? MS_EXAM  :
@@ -362,7 +363,7 @@ module processor (
         hreq <=
 
             // power-on reset
-            preset ? 1 :
+            reset ? 1 :
 
             // releasing console switch
             negedgeldad  ? 0 :
@@ -551,7 +552,7 @@ module processor (
     //////////////////////////
 
     assign oBREAK  = (majstate == MS_BREAK);
-    assign oBUSINI = zreset | preset | swSTART;
+    assign oBUSINI = reset | swSTART;
     assign oEXEFET = (nxtmajst == MS_EXEC) | (nxtmajst == MS_FETCH);
     assign oINTACK = (nxtmajst == MS_INTAK);    // valid from just after posedge TS3 of INTACK cycle to posedge TS3 of INTACK cycle
     assign oIOP1   = iop1;
