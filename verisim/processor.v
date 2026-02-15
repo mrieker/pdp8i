@@ -151,14 +151,6 @@ module processor (
     JKFF tp3ff (.PC (reset), .PS (0), .J (ts3 & tsct[1]), .K (ts400), .T (clok0), .Q (tp3), ._Q (_tp3));
     JKFF tp4ff (.PC (reset), .PS (0), .J (ts4 & tsct[1]), .K (ts400), .T (clok0), .Q (tp4), ._Q (_tp4));
 
-    ///////////////////
-    //  BUS SIGNALS  //
-    ///////////////////
-
-    assign oIOP1 = iop1 & mbuf[00];
-    assign oIOP2 = iop2 & mbuf[01];
-    assign oIOP4 = iop4 & mbuf[02];
-
     /////////////////////////////////
     //  INTERMEDIATE COMPUTATIONS  //
     /////////////////////////////////
@@ -555,9 +547,9 @@ module processor (
     assign oBUSINI = reset | swSTART;
     assign oEXEFET = (nxtmajst == MS_EXEC) | (nxtmajst == MS_FETCH);
     assign oINTACK = (nxtmajst == MS_INTAK);    // valid from just after posedge TS3 of INTACK cycle to posedge TS3 of INTACK cycle
-    assign oIOP1   = iop1;
-    assign oIOP2   = iop2;
-    assign oIOP4   = iop4;
+    assign oIOP1   = iop1 & mbuf[00];
+    assign oIOP2   = iop2 & mbuf[01];
+    assign oIOP4   = iop4 & mbuf[02];
     assign oJMPJMS = (ireg[11:10] == 2);
     assign oLINK   = link;
     assign oRUN    = ~ hgnt;
