@@ -368,10 +368,10 @@ module processor (
             tp3 & (majstate == MS_FETCH) & (ireg == 7) & mbuf[08] & ~ mbuf[00] & mbuf[01] ? 1 :
 
             // console single-stepping, single-cycling, stop switch
-            tp4 & swSINST & (nxtmajst == MS_FETCH) | swSSTEP | swSTOP ? 1 :
+            tp3 & (swSINST & (nxtmajst == MS_FETCH) | swSSTEP | swSTOP) ? 1 :
 
             // exam, deposit cycles cause an halt
-            tp4 & (nxtmajst == MS_EXAM | nxtmajst == MS_DEPOS) ? 1 :
+            tp3 & (nxtmajst == MS_EXAM | nxtmajst == MS_DEPOS) ? 1 :
 
             // otherwise maintain value
             hreq;
