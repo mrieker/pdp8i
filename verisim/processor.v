@@ -23,20 +23,17 @@ module processor (
     output reg oBWCOV,          // break wordcount overflowed
     output oEXEFET,             // about to do EXEC or FETCH cycle
     output oINTACK,             // about to do INTACK cycle
-    output oIOP1,               // IO pulses
-    output oIOP2,               // ...400nS each
-    output oIOP4,               // ...200nS spacing
+    output oIOP,                // IO pulse - 700nS
     output oJMPJMS,             // JMP/JMS instruction in instruction register
     output oLINK,               // link register
     output oRUN,                // processing instructions
-    output oTP1,                // time pulses, 200nS each
-    output oTP2,                // ...starting so as to overlap last 100nS of corresponding TSn
-    output oTP3,                // ...usually overlapping first 100nS of subsequent TS(n+1)
+    output oTP1,                // time pulses, 100nS each
+    output oTP2,                // ...overlap last 100nS of corresponding TSn
+    output oTP3,
     output oTP4,
     output oTS1,                // time states
     output oTS2,                // ...400nS each
     output oTS3,                // ...no spacing
-                                // ...except when IO pulses wedged in here
     output oTS4,
     output reg[1:0] oFLDSEL,    // field select (0=inst; 1=data; 2=zero; 3=break)
     output[11:00] oACUM,        // IO data being written to device
@@ -80,76 +77,45 @@ module processor (
 
     reg[1:0] tsct, _tsct;
     reg hgnt, hreq, _hgnt;
-    reg ts1, ts2, ts3, iop1, iop2, iop4, ts4;
-    reg tp1, tp2, tp3, iog1, iog2, tp4;
-    reg _ts1, _ts2, _ts3, _iop1, _iop2, _iop4, _ts4;
-    reg _tp1, _tp2, _tp3, _iog1, _iog2, _tp4;
+    reg ts1, ts2, ts3, ts4, iop;
+    reg tp1, tp2, tp3, tp4;
+    reg _ts1, _ts2, _ts3, _ts4, _iop;
+    reg _tp1, _tp2, _tp3, _tp4;
 
-    // current cycle is an io instruction so includes io gaps and pulses
-    wire ioinst = (ireg[11:09] == 6) & (majstate == MS_FETCH);
-
-    // count the 400nS or 200nS interval
-    wire shorts = iog1 | iog2;
+    // count the 400nS interval
     wire tsct0j = ~ iHOLD;
     wire tsct0k = ~ iHOLD;
-    wire tsct1j = ~ iHOLD & tsct[0] & ~ shorts;
+    wire tsct1j = ~ iHOLD & tsct[0];
     wire tsct1k = ~ iHOLD & tsct[0];
     JKFF tsct0ff (.PC (reset), .PS (0), .J (tsct0j), .K (tsct0k), .T (clok0), .Q (tsct[0]), ._Q (_tsct[0]));
     JKFF tsct1ff (.PC (reset), .PS (0), .J (tsct1j), .K (tsct1k), .T (clok0), .Q (tsct[1]), ._Q (_tsct[1]));
-    wire ts200 = tsct[0];               // last 100nS of 200nS cycle
     wire ts400 = tsct[0] & tsct[1];     // last 100nS of 400nS cycle
 
     // halt grant - spliced in between previous cycle TS4 and next cycle TS1
     // - these can occur mid-instruction such as when single cycling
     //   majstate indicates what state will be executed when hgnt is cleared and TS1 begins
-    wire hgntj = ts4k & hreq;                       // begin HGNT when TS4 ends and halt being requested
+    wire hgntj = tp4 & hreq;                        // begin HGNT when TS4 ends and halt being requested
     wire hgntk = ts400 & ~ hreq;                    // end HGNT when halt no longer being requested
     JKFF hgntff (.PC (0), .PS (reset), .J (hgntj), .K (hgntk), .T (clok0), .Q (hgnt), ._Q (_hgnt));
 
-    // non I/O instruction : [HGNT] TS1 TS2 TS3 TS4  (1.6 uS + halt time)
-    //     I/O instruction : [HGNT] TS1 TS2 TS3 IOP1 IOG1 IOP2 IOG2 IOP4 TS4  (3.4 uS + halt time)
-    // all states 400nS except IOGx which are 200nS
-    wire ts1j = ts400 & ~ hreq & (ts4 | hgnt);      // begin TS1 when halt not requested and ending TS4 or HGNT
-    wire ts1k = ts400 & ts1;                        // end TS1 when it has been on for 400nS
-    JKFF ts1ff (.PC (reset), .PS (0), .J (ts1j), .K (ts1k), .T (clok0), .Q (ts1), ._Q (_ts1));
-
-    wire ts2j = ts1k;                               // begin TS2 when TS1 ends (no gap or overlap)
-    wire ts2k = ts400 & ts2;                        // end TS2 when it has been on for 400nS
-    JKFF ts2ff (.PC (reset), .PS (0), .J (ts2j), .K (ts2k), .T (clok0), .Q (ts2), ._Q (_ts2));
-
-    wire ts3j = ts2k;
-    wire ts3k = ts400 & ts3;
-    JKFF ts3ff (.PC (reset), .PS (0), .J (ts3j), .K (ts3k), .T (clok0), .Q (ts3), ._Q (_ts3));
-
-    wire iop1j = ts3k & ioinst;                     // begin IOP1 when TS3 ends and doing IO instruction
-    wire iop1k = ts400 & iop1;                      // IOP1 lasts 400nS
-    JKFF iop1ff (.PC (reset), .PS (0), .J (iop1j), .K (iop1k), .T (clok0), .Q (iop1), ._Q (_iop1));
-
-    wire iog1j = iop1k;
-    wire iog1k = ts200 & iog1;
-    JKFF iog1ff (.PC (reset), .PS (0), .J (iog1j), .K (iog1k), .T (clok0), .Q (iog1), ._Q (_iog1));
-
-    wire iop2j = iog1k;
-    wire iop2k = ts400 & iop2;
-    JKFF iop2ff (.PC (reset), .PS (0), .J (iop2j), .K (iop2k), .T (clok0), .Q (iop2), ._Q (_iop2));
-
-    wire iog2j = iop2k;
-    wire iog2k = ts200 & iog2;
-    JKFF iog2ff (.PC (reset), .PS (0), .J (iog2j), .K (iog2k), .T (clok0), .Q (iog2), ._Q (_iog2));
-
-    wire iop4j = iog2k;
-    wire iop4k = ts400 & iop4;
-    JKFF iop4ff (.PC (reset), .PS (0), .J (iop4j), .K (iop4k), .T (clok0), .Q (iop4), ._Q (_iop4));
-
-    wire ts4j = ts3k & ~ ioinst | iop4k;
-    wire ts4k = ts400 & ts4;
-    JKFF ts4ff (.PC (reset), .PS (0), .J (ts4j), .K (ts4k), .T (clok0), .Q (ts4), ._Q (_ts4));
+    // [HGNT] TS1 TS2 TS3 TS4  (1.6 uS + halt time)
+    // all states last 400nS
+    wire ts1j = (tp4 | hgnt) & ts400 & ~ hreq;      // begin TS1 when halt not requested and ending TS4 or HGNT
+    JKFF ts1ff (.PC (reset), .PS (0), .J (ts1j), .K (tp1), .T (clok0), .Q (ts1), ._Q (_ts1));
+    JKFF ts2ff (.PC (reset), .PS (0), .J (tp1),  .K (tp2), .T (clok0), .Q (ts2), ._Q (_ts2));
+    JKFF ts3ff (.PC (reset), .PS (0), .J (tp2),  .K (tp3), .T (clok0), .Q (ts3), ._Q (_ts3));
+    JKFF ts4ff (.PC (reset), .PS (0), .J (tp3),  .K (tp4), .T (clok0), .Q (ts4), ._Q (_ts4));
 
     // TPn asserted for last 100nS of corresponding TSn
     JKFF tp1ff (.PC (reset), .PS (0), .J (ts1 & tsct[1]), .K (ts400), .T (clok0), .Q (tp1), ._Q (_tp1));
     JKFF tp2ff (.PC (reset), .PS (0), .J (ts2 & tsct[1]), .K (ts400), .T (clok0), .Q (tp2), ._Q (_tp2));
     JKFF tp3ff (.PC (reset), .PS (0), .J (ts3 & tsct[1]), .K (ts400), .T (clok0), .Q (tp3), ._Q (_tp3));
     JKFF tp4ff (.PC (reset), .PS (0), .J (ts4 & tsct[1]), .K (ts400), .T (clok0), .Q (tp4), ._Q (_tp4));
+
+    // IOP asserted 100nS into TS2 and negated when TS3 negated (total 700nS)
+    // accumulator mods and ioskip clocked on posedge TP3 (ie 600nS into IOP)
+    wire iopj = ts2 & (ireg[11:09] == 6) & (majstate == MS_FETCH);
+    JKFF iopff (.PC (reset), .PS (0), .J (iopj), .K (tp3), .T (clok0), .Q (iop), ._Q (_iop));
 
     /////////////////////////////////
     //  INTERMEDIATE COMPUTATIONS  //
@@ -195,7 +161,7 @@ module processor (
     ////////////////////
 
     // major state following the current major state cycle
-    // this is used at posedge TP4, after any possible IOPs of current instruction
+    // this is used at posedge TP4
     always @(*) begin
 
         // compute major state following last cycle of current instruction
@@ -268,10 +234,6 @@ module processor (
     wire negedgecont  = lastswcont  & ~ swCONT;
     wire negedgestart = lastswstart & ~ swSTART;
 
-    // asserted during last 100nS clock cycle of IOPn
-    // accumulator and ioskip updated at the end of the cycle
-    wire negedgeiop = ts400 & (iop1 | iop2 | iop4);
-
     // accumulator data being read from a pio device or extended arithmetic board
     wire[11:00] ioindata = (iACCLEAR ? 0 : acum) | iINBUS;
 
@@ -280,6 +242,8 @@ module processor (
     //  FETCH: must have opcode 111 1xx xxx xx1
     //   EXEC: must have opcode 111 xxx xxx xxx  it is only 7 opcode that uses EXEC state
     wire extarithexec = (ireg == 7) & ((majstate == MS_FETCH) & mbuf[08] & mbuf[00] | (majstate == MS_EXEC));
+
+    wire breakwrite = tp2 & (majstate == MS_BREAK) & iBRKWRM;
 
     always @(posedge clok0) begin
 
@@ -401,7 +365,7 @@ module processor (
             tp2 & (majstate == MS_CURAD) & iCAINC ? mbuf + 1 :
 
             // load from DMA data at posedge TP2 and in BREAK state with iBRKWRM
-            tp2 & (majstate == MS_BREAK) & iBRKWRM ? iDMADATA :
+            breakwrite ? iDMADATA :
 
             // load from switches at posedge TP2 and in DEPOS state
             tp2 & (majstate == MS_DEPOS) ? swREG :
@@ -411,8 +375,8 @@ module processor (
         // maintain instruction register
         ireg <=
 
-            // load at posedge TP2 when in FETCH state
-            tp2 & (majstate == MS_FETCH) ? mbuf[11:09] :
+            // load at posedge TP1 when in FETCH state
+            tp1 & (majstate == MS_FETCH) ? iMEMBUS[11:09] :
 
             // load at posedge TP4 when going into MS_INTAK state
             tp4 & (nxtmajst == MS_INTAK) ? 4 :
@@ -449,7 +413,7 @@ module processor (
             tp3 & (majstate == MS_EXEC) & (ireg == 7) ? pctr + 1 :
 
             // increment PC for IOP skips
-            negedgeiop & iIOSKIP ? pctr + 1 :
+            tp3 & iop & iIOSKIP ? pctr + 1 :
 
             // otherwise maintain current value
             pctr;
@@ -475,7 +439,7 @@ module processor (
             tp3 & extarithexec ? ioindata :
 
             // accumulator updates at end of IO pulse
-            negedgeiop ? ioindata :
+            tp3 & iop ? ioindata :
 
             // otherwise maintain value
             acum;
@@ -503,30 +467,30 @@ module processor (
         intdelayed <=
 
             // disable for acknowledge interrupt cycle
-            tp2 & (majstate == MS_INTAK) ? 0 :
+            tp3 & (majstate == MS_INTAK) ? 0 :
 
-            // enable during IOP1 if IOF (6001) instruction
+            // enable during IOP if IOF (6001) instruction
             // the enable will be delayed until fetch of next instruction
-            iop1 & (mbuf[08:00] == 1) ? 1 :
+            tp3 & iop & (mbuf[08:00] == 1) ? 1 :
 
-            // disable during IOP2 if IOF (6002) instruction
+            // disable during IOP if IOF (6002) instruction
             // the disable will be in effect by the time TP4 processes interrupt request at end of IOF instruction
-            iop2 & (mbuf[08:00] == 2) ? 0 :
+            tp3 & iop & (mbuf[08:00] == 2) ? 0 :
 
             // maintain value otherwise
             intdelayed;
 
         intenabled <=
 
+            // disable interrupts during IOP if IOF (6002) instruction
+            // the disable will be in effect by the time TP4 processes interrupt request at end of IOF instruction
+            tp3 & iop & (mbuf[08:00] == 2) ? 0 :
+
             // get delayed enable when fetching instruction
-            tp2 & (majstate == MS_FETCH) ? intdelayed :
+            tp3 & (majstate == MS_FETCH) ? intdelayed :
 
             // disable for acknowledge interrupt cycle
-            tp2 & (majstate == MS_INTAK) ? 0 :
-
-            // disable interrupts during IOP2 if IOF (6002) instruction
-            // the disable will be in effect by the time TP4 processes interrupt request at end of IOF instruction
-            iop2 & (mbuf[08:00] == 2) ? 0 :
+            tp3 & (majstate == MS_INTAK) ? 0 :
 
             // maintain value otherwise
             intenabled;
@@ -547,9 +511,7 @@ module processor (
     assign oBUSINI = reset | swSTART;
     assign oEXEFET = (nxtmajst == MS_EXEC) | (nxtmajst == MS_FETCH);
     assign oINTACK = (nxtmajst == MS_INTAK);    // valid from just after posedge TS3 of INTACK cycle to posedge TS3 of INTACK cycle
-    assign oIOP1   = iop1 & mbuf[00];
-    assign oIOP2   = iop2 & mbuf[01];
-    assign oIOP4   = iop4 & mbuf[02];
+    assign oIOP    = iop;
     assign oJMPJMS = (ireg[11:10] == 2);
     assign oLINK   = link;
     assign oRUN    = ~ hgnt;

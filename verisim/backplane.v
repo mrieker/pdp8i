@@ -21,7 +21,7 @@ module backplane (
     output oBREAK,                  // currently doing BREAK (DMA) cycle
     output oBUSINI,                 // initialize bus devices
     output oBWCOV,                  // 3-cycle DMA wordcount overflowed
-    output oIOP1, oIOP2, oIOP4,     // io instruction pulses
+    output oIOP,                    // io instruction pulse
     output oLINK,                   // link register
     output oRUN,
     output oTP1, oTP2, oTP3, oTP4, oTS1, oTS2, oTS3, oTS4,
@@ -117,9 +117,7 @@ module backplane (
         .reset (reset),
 
         .businit (oBUSINI),
-        .iop1 (oIOP1),
-        .iop2 (oIOP2),
-        .iop4 (oIOP4),
+        .iop (oIOP),
         .ldaddrsw (swldad),
         .tp4 (oTP4),
         .exefet (oEXEFET),
@@ -173,9 +171,7 @@ module backplane (
         .oBWCOV (oBWCOV),
         .oEXEFET (oEXEFET),
         .oINTACK (oINTACK),
-        .oIOP1 (oIOP1),
-        .oIOP2 (oIOP2),
-        .oIOP4 (oIOP4),
+        .oIOP (oIOP),
         .oJMPJMS (oJMPJMS),
         .oLINK (oLINK),
         .oRUN (oRUN),

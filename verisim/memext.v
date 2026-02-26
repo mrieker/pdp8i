@@ -25,7 +25,7 @@ module memext (
     input reset,                // power-on reset
 
     input businit,              // start switch being pressed
-    input iop1, iop2, iop4,     // IO instuction pulses
+    input iop,                  // IO instuction pulse
     input ldaddrsw,             // console LOAD ADDRESS switch
     input tp4,                  // processor end-of-TS4 pulse
     input exefet,               // EXEC or FETCH cycle next
@@ -89,18 +89,18 @@ module memext (
 
             // 62x1 : CDFn instruction
             // won't be followed by intack, just set the field
-            if (iop1) begin
+            if (iop & mbuf[00]) begin
                 dfld   <= mbuf[05:03];
             end
 
             // 62x2 : CIFn instruction
             // won't be followed by intack cuz it blocks interrupts
-            if (iop2) begin
+            if (iop & mbuf[01]) begin
                 ifldaj <= mbuf[05:03];
                 intinh <= 1;
             end
 
-            if (iop4) begin
+            if (iop & mbuf[02]) begin
                 case (mbuf[05:03])
                     1: begin    // 6214 RDF
                         inbus[05:03] <= dfld;
@@ -123,7 +123,7 @@ module memext (
             end
         end
 
-        if (~ iop4) begin
+        if (~ iop) begin
             inbus <= 0;
         end
 

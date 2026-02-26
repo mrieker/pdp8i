@@ -245,7 +245,6 @@ proc simtest {} {
 
                 6 {             ;# iot
                     puts -nonewline [format " / %04o" $acum]
-                    doiopulses $opcode
                 }
 
                 7 {             ;# opr
@@ -432,7 +431,16 @@ proc memorycyclx {state field addr rdata rdbkdata wtbkdata vfywaddr vfywdata} {
     ;# the value and sending the value (modified or not) back to the memory
     waitassert TS3
 
+    ;# maybe perform i/o
+    set doesio [expr {($state == $MS_FETCH) && (($opcode & 07000) == 06000)}]
+    verifybit [bus oIOP] $doesio "IOP during IO instruction"
+    if $doesio {
+        doioinstr $rdata
+    }
+
     ;# beginning of TS3, MB should now have the possibly modified value
+    runstep
+    runstep
     verify12 [bus oMBUF] $wtbkdata "MB during writeback"
 
     ;# BWC_OVERFLOW is valid
@@ -441,94 +449,88 @@ proc memorycyclx {state field addr rdata rdbkdata wtbkdata vfywaddr vfywdata} {
     set memcycwcover [bus oBWCOV]
 
     ;# wait for TP3 asserted then negated indicating value written to memory
+    ;# also clocks in any io instruction result
     waitassert TP3
     waitnegate TP3
+
+    ;# clear any bits being output by io instruction
+    if $doesio {
+        verifybit [bus oIOP] 0 "IOP after IO instruction"
+        bus set iACCLEAR 0 iIOSKIP 0 iINBUS 0 iLNKTOG 0
+    }
 
     ;# verify the memory contents
     verify12 [mem $vfywaddr] $vfywdata [format "address %05o mismatch" $vfywaddr]
 }
 
-;# process IOPn pulses
-;# they are spliced between the TS3 and TS4 timestates
-proc doiopulses {opcode} {
+;# process IOP pulse
+;# it starts 100nS into TS2 and ends at end of TS3
+;# acum and pctr mods are clocked at posedge TP3
+proc doioinstr {opcode} {
     global acum intdelayed intenabled linc pctr
     global xmem_dfld xmem_ifld xmem_savedifld xmem_saveddfld xmem_ifldafterjump
     global xmem_intdisableduntiljump
 
-    for {set m 1} {$m <= 4} {incr m $m} {
-        if {$opcode & $m} {
+    ;# it should be sending the accumulator out
+    verify12 [bus oACUM] $acum "AC invalid going out during IOP"
 
-            ;# wait for processor to assert IOPm
-            waitassert IOP$m
+    ;# maybe it is an io opcode that some fpga device we have enabled processes
+    set acclear 0
+    set ioskip  0
+    set acbits  0
+    set lnktog  0
 
-            ;# it should be sending the accumulator out
-            verify12 [bus oACUM] $acum "AC invalid going out during IOP$m"
+    ;# - processor.v itself processes these io opcodes
+    if {$opcode == 06001} {
+        set intdelayed 1
+    } elseif {$opcode == 06002} {
+        set intdelayed 0
+        set intenabled 0
+    } elseif {$opcode == 06004} {
+        set acclear [randbits 1]    ;# supply random values
+        set ioskip  [randbits 1]
+        set acbits [randbits 12]
+        bus set iACCLEAR $acclear iIOSKIP $ioskip iINBUS $acbits iLNKTOG $lnktog
+    } elseif {($opcode & 07700) == 06200} {
 
-            ;# maybe it is an io opcode that some fpga device we have enabled processes
-            set acclear 0
-            set ioskip  0
-            set acbits  0
-            set lnktog  0
-
-            ;# - processor.v itself processes these io opcodes
-            if {$opcode == 06001} {
-                set intdelayed 1
-            } elseif {$opcode == 06002} {
-                set intdelayed 0
-                set intenabled 0
-            } elseif {$opcode == 06004} {
-                set acclear [randbits 1]    ;# supply random values
-                set ioskip  [randbits 1]
-                set acbits [randbits 12]
-                bus set iACCLEAR $acclear iIOSKIP $ioskip iINBUS $acbits iLNKTOG $lnktog
-            } elseif {($opcode & 07700) == 06200} {
-
-                ;# - memext.v processes these io opcodes (manipulate memory field bits)
-                if {! ($opcode & 4)} {
-                    if {$opcode & 1} {set xmem_dfld [expr {($opcode >> 3) & 7}]}
-                    if {$opcode & 2} {
-                        set xmem_ifldafterjump [expr {($opcode >> 3) & 7}]
-                        set xmem_intdisableduntiljump 1
-                    }
-                } elseif {($opcode & 7) == 4} {
-                    switch [expr {($opcode >> 3) & 7}] {
-                        1 {             ;# 6214
-                            set acbits [expr {$xmem_dfld << 3}]
-                        }
-                        2 {             ;# 6224
-                            set acbits [expr {$xmem_ifld << 3}]
-                        }
-                        3 {             ;# 6234
-                            set acbits [expr {($xmem_savedifld << 3) | $xmem_saveddfld}]
-                        }
-                        4 {             ;# 6244
-                            puts -nonewline [format " (ifaj=%o dfld=%o)" $xmem_savedifld $xmem_saveddfld]
-                            set xmem_dfld          $xmem_saveddfld
-                            set xmem_ifldafterjump $xmem_savedifld
-                        }
-                    }
-                }
-            } else {
-
-                ;# those are the only I/O instructions we know how to process
-                error [format "unknown IO opcode %04o" $opcode]
+        ;# - memext.v processes these io opcodes (manipulate memory field bits)
+        if {! ($opcode & 4)} {
+            if {$opcode & 1} {set xmem_dfld [expr {($opcode >> 3) & 7}]}
+            if {$opcode & 2} {
+                set xmem_ifldafterjump [expr {($opcode >> 3) & 7}]
+                set xmem_intdisableduntiljump 1
             }
-
-            puts -nonewline [format " => IOP%o => %s%s%04o%s" $m [expr {$lnktog ? "^" : " "}] [expr {$acclear ? "=" : "|"}] $acbits [expr {$ioskip ? "+" : " "}]]
-
-            ;# wait for processor to drop IOPm
-            waitnegate IOP$m
-
-            ;# clear the random bits so it won't clock them again during nulled-out io pulses
-            bus set iACCLEAR 0 iIOSKIP 0 iINBUS 0 iLNKTOG 0
-
-            ;# update our shadow registers
-            if {$acclear} {set acum 0}
-            if {$ioskip}  {set pctr [expr {($pctr + 1) & 07777}]}
-            set linc [expr {$linc ^ $lnktog}]
-            set acum [expr {$acum | $acbits}]
+        } elseif {($opcode & 7) == 4} {
+            switch [expr {($opcode >> 3) & 7}] {
+                1 {             ;# 6214
+                    set acbits [expr {$xmem_dfld << 3}]
+                }
+                2 {             ;# 6224
+                    set acbits [expr {$xmem_ifld << 3}]
+                }
+                3 {             ;# 6234
+                    set acbits [expr {($xmem_savedifld << 3) | $xmem_saveddfld}]
+                }
+                4 {             ;# 6244
+                    puts -nonewline [format " (ifaj=%o dfld=%o)" $xmem_savedifld $xmem_saveddfld]
+                    set xmem_dfld          $xmem_saveddfld
+                    set xmem_ifldafterjump $xmem_savedifld
+                }
+            }
         }
+    } else {
+
+        ;# those are the only I/O instructions we know how to process
+        error [format "unknown IO opcode %04o" $opcode]
     }
+
+    puts -nonewline [format " => IOP => %s%s%04o%s" [expr {$lnktog ? "^" : " "}] [expr {$acclear ? "=" : "|"}] $acbits [expr {$ioskip ? "+" : " "}]]
+
+    ;# update our shadow registers
+    if {$acclear} {set acum 0}
+    if {$ioskip}  {set pctr [expr {($pctr + 1) & 07777}]}
+    set linc [expr {$linc ^ $lnktog}]
+    set acum [expr {$acum | $acbits}]
 }
 
 ;# perform extended arithmetic
