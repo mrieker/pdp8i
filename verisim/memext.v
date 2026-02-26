@@ -27,6 +27,7 @@ module memext (
     input businit,              // start switch being pressed
     input iop,                  // IO instuction pulse
     input ldaddrsw,             // console LOAD ADDRESS switch
+    input tp3,                  // processor end-of-TS3 pulse
     input tp4,                  // processor end-of-TS4 pulse
     input exefet,               // EXEC or FETCH cycle next
     input intack,               // INTACK cycle next
@@ -141,105 +142,28 @@ module memext (
             ifldaj <= ifldsw;
         end
 
+        // if doing a JMP instruction, stop blocking interrupts
+        // do this at TP3 in time for new state to be calculated for TP4
+        if (tp3 & jmpjms) begin
+            intinh <= 0;
+        end
+
         // change fields just after TP4 pulse starts
         // don't change field during TS3 cuz memory is being written
-        if (tp4) begin
+        if (tp4 & jmpjms & exefet) begin
+            ifld <= ifldaj;
+        end
 
-            // near end of of jmp/jms, don't inhibit interrupts any more
-            //  tp3    = blip near end of writing memory
-            //  jmpjms = JMP or JMS opcode currently in instruction register
-            //  exefet = EXEC or FETCH state is next
-            //
-            // cases:
-            //  direct JMP:
-            //                      <- here with jmpjms = 0
-            //   jmp fetch:  old IF
-            //                      <- here with jmpjms = 1, exefet = 1
-            //   next fetch: new IF
-            //
-            //  indirect JMP (the usual case, return-from-interrupt):
-            //                      <- here with jmpjms = 0
-            //   jmp fetch:  old IF
-            //                      <- here with jmpjms = 1, exefet = 0
-            //   jmp defer:  old IF
-            //                      <- here with jmpjms = 1, exefet = 1
-            //   next fetch: new IF
-            //
-            //  direct JMS:
-            //                      <- here with jmpjms = 0
-            //   jms fetch:  old IF
-            //                      <- here with jmpjms = 1, exefet = 1
-            //   jms exec:   new IF
-            //                      <- here with jmpjms = 1, exefet = 1
-            //   next fetch: new IF
-            //
-            //  indirect JMS:
-            //                      <- here with jmpjms = 0
-            //   jms fetch:  old IF
-            //                      <- here with jmpjms = 1, exefet = 0
-            //   jms defer:  old IF
-            //                      <- here with jmpjms = 1, exefet = 1
-            //   jms exec:   new IF
-            //                      <- here with jmpjms = 1, exefet = 1
-            //   next fetch: new IF
-            //
-            if (jmpjms & exefet) begin
-
-                // exefet is dependent on TP3* for interrupt requests so can change during the beginning of TS4
-                // then by the time the PDP clocks the major state at TP4 it is different than what we have here
-                // but the MC-8/L clocks it at TP3 so we do the same here
-
-                // since this changes things only when intinh is set, exefet should be steady
-                // at this point and reflect FETCH/EXEC is next assuming no interrupt pending
-
-                // note: TP3* indicates TP3 but delayed to end of io pulses for IOT instructions, ie, beginning of TS4
-
-                //  esetfset = eset | fset
-                //  TP2,3*,4,intinhibit
-
-                //  eset     = intok | defer & ~ jmp | fetch & ~ mb03 & ~ jmp & ~ iot & ~ opr
-                //  TP2,3*,4   TP2,3*  TP4       TP2   TP4       TP2      TP2     TP2     TP2
-
-                //  fset = ~ dset & ~ eset & ~ breakok & ~ specialcycle
-                //  TP2,3*,4 TP2,3*,4 TP2,3*,4 TP4         TP4
-
-                //  dset = fetch & mb03 & ~ iot & ~ opr
-                //  TP2,4  TP4     TP2      TP2     TP2
-
-                //  intok = intsync & intdelay & ~ intinhibit & (irmb != 600x)
-                //  TP2,3*  TP3*      TP3*                       TP2
-
-                //  breakok = ~ eset & ~ fset & ~ specialcycle & brksync
-                //                                TP4            TP1
-
-                //  specialcycle = wordcount | currentaddress
-                //  TP4            TP4         TP4
-
-                //  intstrobe = ioend | tp3 & ~ iot
-                //  TP3* = start of TS4
-
-                // MC-8/L
-                //   INT_INH clock = posedge (LOAD_IF | KEY_CLEAR)  (p11 C-4)
-                //   LOAD_IF       = jmpjms & tp3 & exefet  (p11 C-4)
-                intinh <= 0;
-
-                // MC-8/L
-                //   IF clock = posedge LOAD_IF  (p11 C-7)
-                //   LOAD_IF  = jmpjms & tp3 & exefet  (p11 C-4)
-                ifld <= ifldaj;
-            end
-
-            // near end of instruction to be followed by jms 0 for an interrupt
-            //  intack = next cycle will be the exec of the jms 0 for calling interrupt service routine
-            //           valid in time for posedge TP4
-            // the interrupt service routine always starts in field 0
-            if (intack) begin
-                saveddfld <= dfld;      // save data & instruction fields
-                savedifld <= jmpjms ? ifldaj : ifld;
-                dfld   <= 0;            // interrupt routine starts in field 0
-                ifld   <= 0;
-                ifldaj <= 0;
-            end
+        // near end of instruction to be followed by jms 0 for an interrupt
+        //  intack = next cycle will be the exec of the jms 0 for calling interrupt service routine
+        //           valid in time for posedge TP4
+        // the interrupt service routine always starts in field 0
+        if (tp4 & intack) begin
+            saveddfld <= dfld;      // save data & instruction fields
+            savedifld <= jmpjms ? ifldaj : ifld;
+            dfld   <= 0;            // interrupt routine starts in field 0
+            ifld   <= 0;
+            ifldaj <= 0;
         end
     end
 endmodule

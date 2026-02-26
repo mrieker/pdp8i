@@ -119,6 +119,7 @@ module backplane (
         .businit (oBUSINI),
         .iop (oIOP),
         .ldaddrsw (swldad),
+        .tp3 (oTP3),
         .tp4 (oTP4),
         .exefet (oEXEFET),
         .intack (oINTACK),

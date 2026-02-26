@@ -171,7 +171,7 @@ module processor (
 
         else if (syncintrq &                        // some device is requesting an interrupt
                  intenabled &                       // 6001 was executed at least one instruction ago
-                 (~ iINTINH | oJMPJMS)) begin       // not blocked by prior 62x2/62x3 until jump or currently jumping
+                 ~ iINTINH) begin                   // not blocked by prior 62x2/62x3 until jump
             brkintfet = MS_INTAK;
         end
 
@@ -469,7 +469,7 @@ module processor (
             // disable for acknowledge interrupt cycle
             tp3 & (majstate == MS_INTAK) ? 0 :
 
-            // enable during IOP if IOF (6001) instruction
+            // enable during IOP if ION (6001) instruction
             // the enable will be delayed until fetch of next instruction
             tp3 & iop & (mbuf[08:00] == 1) ? 1 :
 
