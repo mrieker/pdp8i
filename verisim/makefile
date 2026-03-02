@@ -5,12 +5,14 @@ GPP    := g++ $(CFLAGS) -std=c++11 -g -Wall
 
 VFILES := \
 	backplane.v \
+	chips.v \
 	console.v \
 	extarith.v \
 	flipflops.v \
 	memext.v \
 	memory.v \
-	processor.v \
+	../kicads/processor/processor.v \
+	../kicads/registers/registers.v \
 
 OFILES := \
 	verimain.$(MACH).o \

@@ -12,9 +12,8 @@ module memory (
     reg[11:00] memarray[32767:0];
 
     always @(posedge clok2) begin
-        if (ts1) begin
-            mbus <= memarray[xadr];
-        end
+        //$display ("memory*: ts1=%b xadr=%05o", ts1, xadr);
+        mbus <= ts1 ? memarray[xadr] : 0;
         if (ts3) begin
             memarray[xadr] <= mbuf;
         end

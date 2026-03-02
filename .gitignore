@@ -1,4 +1,11 @@
 *~
+*.jar
+*.log
 *.x86_64*
 .nfs*
 obj_dir
+kicads/*/fp-info-cache
+kicads/*/*-backups
+kicads/*/*.e
+kicads/*/*.v
+kicads/*/*.x
