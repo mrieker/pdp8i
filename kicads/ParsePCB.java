@@ -145,7 +145,7 @@ public class ParsePCB {
         for (Network network : netsbyname.values ()) {
             if (! network.netport && ! network.netname.equals ("")) {
                 System.out.println (String.format ("    wire %s;", network.netname));
-                if (network.netrefs == 0) {
+                if ((network.netrefs == 0) && ! network.netname.startsWith ("unconnected__")) {
                     System.err.println ("nothing drives " + network.netname);
                     error = true;
                 }

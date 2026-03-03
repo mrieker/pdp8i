@@ -11,5 +11,4 @@ then
 fi
 export CLASSPATH=`pwd`/ParsePCB.jar
 cd $p
-java ParsePCB $1 < $1.kicad_pcb > $1.v 2> $1.x
-truesort < $1.x > $1.e
+exec java ParsePCB $1 < $1.kicad_pcb > $1.v

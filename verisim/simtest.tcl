@@ -42,6 +42,7 @@ set MS_INTAK 7  ;# memory cycle is for interrupt acknowledge
 set MS_DEPOS 8  ;# memory cycle is for deposit switch
 set MS_EXAM  9  ;# memory cycle is for examine switch
 
+set testexar 0  ;# test extended arithmetic
 set runquiet 1  ;# tell runstep command to keep quiet
 
 proc simtest {} {
@@ -65,6 +66,7 @@ proc simtest {} {
     global perclock
     global pctr
     global sctr
+    global testexar
     global xmem_dfld
     global xmem_ifld
     global xmem_ifldafterjump
@@ -191,7 +193,7 @@ proc simtest {} {
                         set opcode [expr {$opcode & 07772}]     ;# don't do OSR
                         break
                     }
-                    if {($opcode & 07401) == 07401} break       ;# group 3 (extended arithmetic)
+                    if {$testexar && (($opcode & 07401) == 07401)} break  ;# group 3 (extended arithmetic)
                 }
                 puts -nonewline [format "OP=%04o  %s" $opcode [disop $pctr $opcode]]
                 set lastopc $opcode

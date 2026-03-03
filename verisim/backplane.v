@@ -152,6 +152,7 @@ module backplane (
     wire[11:00] inbus = iINBUS | eaeINBUS | memINBUS | mexINBUS;
     wire ioskip = iIOSKIP | eaeIOSKIP;
     wire lnktog = iLNKTOG | eaeLNKTOG;
+    wire[3:0] nxtms;
 
     processor procboard (
           .ACCLEAR  (acclear)
@@ -283,6 +284,10 @@ module backplane (
         , .MAJST_1  (majst[1])
         , .MAJST_2  (majst[2])
         , .MAJST_3  (majst[3])
+        , .NXTMS_0  (nxtms[0])
+        , .NXTMS_1  (nxtms[1])
+        , .NXTMS_2  (nxtms[2])
+        , .NXTMS_3  (nxtms[3])
         , .NXTMSBRK ()
         , .NXTMSIAK ()
         , .RUN      (oRUN)
@@ -347,6 +352,10 @@ module backplane (
         , .MAJST_1  (majst[1])
         , .MAJST_2  (majst[2])
         , .MAJST_3  (majst[3])
+        , .NXTMS_0  (nxtms[0])
+        , .NXTMS_1  (nxtms[1])
+        , .NXTMS_2  (nxtms[2])
+        , .NXTMS_3  (nxtms[3])
         , .MQUO_0   ()
         , .MQUO_1   ()
         , .MQUO_10  ()
@@ -383,6 +392,7 @@ module backplane (
         , .swSINST  (swsinst)
         , .swSSTEP  (swsstep)
         , .swSTART  (swstart)
+        , .swSTOP   (swstop)
 
         , .ACUM_0   (oACUM[00])
         , .ACUM_1   (oACUM[01])

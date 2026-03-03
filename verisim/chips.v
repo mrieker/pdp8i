@@ -830,3 +830,26 @@ module X74LS283 (
     assign { p9, p10, p13, p1, p4 } = { 1'b0, a } + { 1'b0, b } + { 4'b0, p7 };
 
 endmodule;
+
+module X74HC4075 (
+          input  p1
+        , input  p2
+        , input  p3
+        , input  p4
+        , input  p5
+        , output p6
+        , input  p7
+        , input  p8
+        , output p9
+        , output p10
+        , input  p11
+        , input  p12
+        , input  p13
+        , input  p14
+);
+
+    assign p6  = p3  | p4  | p5;
+    assign p9  = p1  | p2  | p8;
+    assign p10 = p13 | p12 | p11;
+
+endmodule;
