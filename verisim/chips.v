@@ -21,7 +21,7 @@ module X74HC00 (
     assign p8  = ~ (p9  & p10);
     assign p11 = ~ (p12 & p13);
 
-endmodule;
+endmodule
 
 module X74LS00 (
           input  p1
@@ -45,7 +45,7 @@ module X74LS00 (
     assign p8  = ~ (p9  & p10);
     assign p11 = ~ (p12 & p13);
 
-endmodule;
+endmodule
 
 module X74HC02 (
           output p1
@@ -69,7 +69,7 @@ module X74HC02 (
     assign p10 = ~ (p8  | p9);
     assign p13 = ~ (p11 | p12);
 
-endmodule;
+endmodule
 
 module X74LS02 (
           output p1
@@ -93,7 +93,7 @@ module X74LS02 (
     assign p10 = ~ (p8  | p9);
     assign p13 = ~ (p11 | p12);
 
-endmodule;
+endmodule
 
 module X74HC04 (
           input  p1
@@ -119,7 +119,7 @@ module X74HC04 (
     assign p10 = ~ p11;
     assign p12 = ~ p13;
 
-endmodule;
+endmodule
 
 module X74LS04 (
           input  p1
@@ -145,7 +145,7 @@ module X74LS04 (
     assign p10 = ~ p11;
     assign p12 = ~ p13;
 
-endmodule;
+endmodule
 
 module X74LS08 (
           input  p1
@@ -169,7 +169,7 @@ module X74LS08 (
     assign p8  = p9  & p10;
     assign p11 = p12 & p13;
 
-endmodule;
+endmodule
 
 module X74LS10 (
           input  p1
@@ -192,7 +192,7 @@ module X74LS10 (
     assign p8  = ~ (p9 & p10 & p11);
     assign p12 = ~ (p1 & p2  & p13);
 
-endmodule;
+endmodule
 
 module X74LS11 (
           input  p1
@@ -215,7 +215,7 @@ module X74LS11 (
     assign p8  = p9 & p10 & p11;
     assign p12 = p1 & p2  & p13;
 
-endmodule;
+endmodule
 
 module X74LS20 (
           input  p1
@@ -235,7 +235,7 @@ module X74LS20 (
     assign p6  = ~ (p1 & p2  & p4  & p5);
     assign p8  = ~ (p9 & p10 & p12 & p13);
 
-endmodule;
+endmodule
 
 module X74LS21 (
           input  p1
@@ -255,7 +255,7 @@ module X74LS21 (
     assign p6  = p1 & p2  & p4  & p5;
     assign p8  = p9 & p10 & p12 & p13;
 
-endmodule;
+endmodule
 
 module X74HC27 (
           input  p1
@@ -278,7 +278,7 @@ module X74HC27 (
     assign p8  = ~ (p9 | p10 | p11);
     assign p12 = ~ (p1 | p2  | p13);
 
-endmodule;
+endmodule
 
 module X74LS27 (
           input  p1
@@ -301,7 +301,7 @@ module X74LS27 (
     assign p8  = ~ (p9 | p10 | p11);
     assign p12 = ~ (p1 | p2  | p13);
 
-endmodule;
+endmodule
 
 module X74LS30 (
           input  p1
@@ -319,7 +319,7 @@ module X74LS30 (
 
     assign p8  = ~ (p1 & p2 & p3 & p4 & p5 & p6 & p11 & p12);
 
-endmodule;
+endmodule
 
 module X74LS32 (
           input  p1
@@ -343,7 +343,7 @@ module X74LS32 (
     assign p8  = p9  | p10;
     assign p11 = p12 | p13;
 
-endmodule;
+endmodule
 
 module X74LS42 (
           output p1
@@ -377,7 +377,7 @@ module X74LS42 (
     assign p10 = (n != 8);
     assign p11 = (n != 9);
 
-endmodule;
+endmodule
 
 module X74HC74 (
           input  p1
@@ -416,7 +416,7 @@ module X74HC74 (
         end
     end
 
-endmodule;
+endmodule
 
 module X74HC86 (
           input  p1
@@ -440,7 +440,7 @@ module X74HC86 (
     assign p8  = p9  ^ p10;
     assign p11 = p12 ^ p13;
 
-endmodule;
+endmodule
 
 module X74LS109 (
           input  p1         // 1 _Pc
@@ -501,7 +501,7 @@ module X74LS109 (
         end
     end
 
-endmodule;
+endmodule
 
 module X74HC138 (
           input  p1     // A2
@@ -534,7 +534,7 @@ module X74HC138 (
     assign p9  = ~ g | (n != 6);
     assign p7  = ~ g | (n != 7);
 
-endmodule;
+endmodule
 
 module X74LS139 (
           input  p1     // 1 _E
@@ -558,17 +558,17 @@ module X74LS139 (
     wire[1:0] n1 = { p3,  p2  };
     wire[1:0] n2 = { p13, p14 };
 
-    assign p4  = ~ p1  | (n1 != 0);
-    assign p5  = ~ p1  | (n1 != 1);
-    assign p6  = ~ p1  | (n1 != 2);
-    assign p7  = ~ p1  | (n1 != 3);
+    assign p4  = p1  | (n1 != 0);
+    assign p5  = p1  | (n1 != 1);
+    assign p6  = p1  | (n1 != 2);
+    assign p7  = p1  | (n1 != 3);
 
-    assign p12 = ~ p15 | (n2 != 0);
-    assign p11 = ~ p15 | (n2 != 1);
-    assign p10 = ~ p15 | (n2 != 2);
-    assign p9  = ~ p15 | (n2 != 3);
+    assign p12 = p15 | (n2 != 0);
+    assign p11 = p15 | (n2 != 1);
+    assign p10 = p15 | (n2 != 2);
+    assign p9  = p15 | (n2 != 3);
 
-endmodule;
+endmodule
 
 module X74LS151 (
           input  p1     // d3
@@ -595,7 +595,7 @@ module X74LS151 (
                          (s == 4) & p15 | (s == 5) & p14 | (s == 6) & p13 | (s == 7) & p12);
     assign p6 = ~ p5;
 
-endmodule;
+endmodule
 
 module X74LS153 (
           input  p1
@@ -621,7 +621,7 @@ module X74LS153 (
     assign p7 = ~ p1  & ((s == 0) & p6  | (s == 1) & p5  | (s == 2) & p4  | (s == 3) & p3);
     assign p9 = ~ p15 & ((s == 0) & p10 | (s == 1) & p11 | (s == 2) & p12 | (s == 3) & p13);
 
-endmodule;
+endmodule
 
 module X74LS157 (
           input  p1     // 0=A; 1=B
@@ -647,7 +647,7 @@ module X74LS157 (
     assign p9  = ~ p15 & (p1 ? p10 : p11);
     assign p12 = ~ p15 & (p1 ? p13 : p14);
 
-endmodule;
+endmodule
 
 module X74LS161 (
           input      p1     // _clr
@@ -672,18 +672,15 @@ module X74LS161 (
 
     always @(posedge p2 or negedge p1) begin
         if (~ p1) begin
-            p11 <= 0;
-            p12 <= 0;
-            p13 <= 0;
-            p14 <= 0;
+            { p11, p12, p13, p14 } <= 0;
+        end else if (~ p9) begin
+            { p11, p12, p13, p14 } <= { p6, p5, p4, p3 };
         end else if (p7 & p10) begin
-            { p11, p12, p13, p14 } <=
-                p9 ? ({ p11, p12, p13, p14 } + 1) :
-                      { p6, p5, p4, p3 };
+            { p11, p12, p13, p14 } <= { p11, p12, p13, p14 } + 1;
         end
     end
 
-endmodule;
+endmodule
 
 module X74LS174 (
           input      p1
@@ -722,7 +719,7 @@ module X74LS174 (
         end
     end
 
-endmodule;
+endmodule
 
 module V74LS174 (
           input      p1
@@ -763,7 +760,7 @@ module V74LS174 (
         end
     end
 
-endmodule;
+endmodule
 
 module X74LS175 (
           input      p1
@@ -803,7 +800,7 @@ module X74LS175 (
         end
     end
 
-endmodule;
+endmodule
 
 module X74LS283 (
           output p1
@@ -829,7 +826,7 @@ module X74LS283 (
 
     assign { p9, p10, p13, p1, p4 } = { 1'b0, a } + { 1'b0, b } + { 4'b0, p7 };
 
-endmodule;
+endmodule
 
 module X74HC4075 (
           input  p1
@@ -852,4 +849,67 @@ module X74HC4075 (
     assign p9  = p1  | p2  | p8;
     assign p10 = p13 | p12 | p11;
 
-endmodule;
+endmodule
+
+module IS61C3216AL (
+    input  p1,  // NC
+    input  p2,  // A14
+    input  p3,  // A13
+    input  p4,  // A12
+    input  p5,  // A11
+    input  p6,  // _CE
+    inout  p7,  // IO0
+    inout  p8,  // IO1
+    inout  p9,  // IO2
+    inout  p10, // IO3
+    input  p11, // VDD
+    input  p12, // GND
+    inout  p13, // IO4
+    inout  p14, // IO5
+    inout  p15, // IO6
+    inout  p16, // IO7
+    input  p17, // _WE
+    input  p18, // A10
+    input  p19, // A9
+    input  p20, // A8
+    input  p21, // A7
+    input  p22, // NC
+    input  p23, // NC
+    input  p24, // A6
+    input  p25, // A5
+    input  p26, // A4
+    input  p27, // A3
+    input  p28, // NC
+    inout  p29, // IO8
+    inout  p30, // IO9
+    inout  p31, // IO10
+    inout  p32, // IO11
+    input  p33, // VDD
+    input  p34, // GND
+    inout  p35, // IO12
+    inout  p36, // IO13
+    inout  p37, // IO14
+    inout  p38, // IO15
+    input  p39, // _LB
+    input  p40, // _UB
+    input  p41, // _OE
+    input  p42, // A2
+    input  p43, // A1
+    input  p44  // A0
+);
+
+    wire[14:00] a = { p2, p3, p4, p5, p18, p19, p20, p21, p24, p25, p26, p27, p42, p43, p44 };
+    reg[7:0] loarray[32767:0];
+    reg[7:0] uparray[32767:0];
+
+    assign { p16, p15, p14, p13, p10, p9,  p8,  p7  } = (~ p6 & p17 & ~ p41 & ~ _p39) ? loarray[a] : 8'hZZ;
+    assign { p38, p37, p36, p35, p32, p31, p30, p29 } = (~ p6 & p17 & ~ p41 & ~ _p40) ? hiarray[a] : 8'hZZ;
+
+    always @(*) begin
+        if (~ p6 & ~ p17) begin
+            if (~ p39) loarray[a] = { p16, p15, p14, p13, p10, p9,  p8,  p7  };
+            if (~ p40) hiarray[a] = { p38, p37, p36, p35, p32, p31, p30, p29 };
+        end
+    end
+
+endmodule

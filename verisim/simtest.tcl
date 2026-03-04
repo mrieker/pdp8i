@@ -9,7 +9,7 @@ set brkrequest   0
 set dma3cycle    0
 set dmaaddr      0
 set dmacainc     0
-set dmadatain    0
+set dmawrmem    0
 set dmafield     0
 set dmawdata     0
 set fullreal     0
@@ -43,6 +43,7 @@ set MS_DEPOS 8  ;# memory cycle is for deposit switch
 set MS_EXAM  9  ;# memory cycle is for examine switch
 
 set testexar 0  ;# test extended arithmetic
+set testxmem 0  ;# test extended memory
 set runquiet 1  ;# tell runstep command to keep quiet
 
 proc simtest {} {
@@ -51,7 +52,7 @@ proc simtest {} {
     global dma3cycle
     global dmaaddr
     global dmacainc
-    global dmadatain
+    global dmawrmem
     global dmafield
     global dmawdata
     global fullreal
@@ -67,6 +68,7 @@ proc simtest {} {
     global pctr
     global sctr
     global testexar
+    global testxmem
     global xmem_dfld
     global xmem_ifld
     global xmem_ifldafterjump
@@ -138,7 +140,7 @@ proc simtest {} {
 
             ;# transfer word at address dmafield:dmaaddr
             set dmardata [randbits 12]                  ;# random value that will be sent to processor as content of memory location dmafield:dmaaddr
-            if {! $dmadatain} {set dmawdata $dmardata}  ;# if writing, write will be value written to CM_DATA; if reading, write will be same as dmardata
+            if {! $dmawrmem} {set dmawdata $dmardata}   ;# if writing, write will be value written to CM_DATA; if reading, write will be same as dmardata
 
             puts -nonewline [format "  BRK:%o%04o / %04o => %04o" $dmafield $dmaaddr $dmardata $dmawdata]
             memorycycle $MS_BREAK $dmafield $dmaaddr $dmardata $dmawdata
@@ -180,12 +182,12 @@ proc simtest {} {
                     if {$opcode == 06001} break                 ;# ION
                     if {$opcode == 06002} break                 ;# IOF
                     if {$opcode == 06004} break                 ;# used to test skip/acclr
-                    if {$lastopc != 06001} {                    ;# don't do memext opcodes if instruction after ION
+                    if {$testxmem && ($lastopc != 06001)} {     ;# don't do memext opcodes if instruction after ION
                         if {($opcode & 07704) == 06200} break
                         if {($opcode & 07707) == 06204} break
                     }
                     if {($opcode & 07400) == 07000} {           ;# group 1
-                        if {($opcode & 016) == 002} continue    ;# bsw
+                        ##if {($opcode & 016) == 002} continue    ;# bsw
                         if {($opcode & 014) == 014} continue    ;# 6,7
                         break
                     }
@@ -398,8 +400,8 @@ proc memorycycle {state field addr rdata wdata} {
 ;# - vfywaddr = address in extmem[] to verify the write happened
 ;# - vfywdata = data that should be at vfywaddr
 proc memorycyclx {state field addr rdata rdbkdata wtbkdata vfywaddr vfywdata} {
-    global memcycwcover opcode
-    global MS_EXEC MS_FETCH
+    global dmawrmem dmawdata memcycwcover opcode
+    global MS_BREAK MS_EXEC MS_FETCH
 
     ;# clock until we see TS1
     waitassert TS1
@@ -420,6 +422,13 @@ proc memorycyclx {state field addr rdata rdbkdata wtbkdata vfywaddr vfywdata} {
 
     ;# MB should now have the value we wrote to the memory location
     verify12 [bus oMBUF] $rdbkdata "MB during read"
+
+    ;# if doing a previously requested DMA cycle that writes to memory,
+    ;# output the data to be written during TS2
+    ;# processor should pick it up at posedge TP2
+    if {($state == $MS_BREAK) && $dmawrmem} {
+        bus set iINBUS $dmawdata
+    }
 
     requestdmaorint $state $rdata
 
@@ -459,6 +468,9 @@ proc memorycyclx {state field addr rdata rdbkdata wtbkdata vfywaddr vfywdata} {
     if $doesio {
         verifybit [bus oIOP] 0 "IOP after IO instruction"
         bus set iACCLEAR 0 iIOSKIP 0 iINBUS 0 iLNKTOG 0
+    }
+    if {($state == $MS_BREAK) && $dmawrmem} {
+        bus set iINBUS 0
     }
 
     ;# verify the memory contents
@@ -634,7 +646,7 @@ proc waitnegate {sig {n 100}} {
 ;# maybe request dma or interrupt
 ;# processor samples it at end of TS3
 proc requestdmaorint {state rdata} {
-    global brkrequest dmafield dmaaddr dmadatain dmawdata dma3cycle dmacainc intenabled intrequest
+    global brkrequest dmafield dmaaddr dmawrmem dmawdata dma3cycle dmacainc intenabled intrequest
     global MS_FETCH MS_WRDCT MS_CURAD MS_BREAK
 
     if {($state == $MS_WRDCT) || ($state == $MS_CURAD) || ($state == $MS_BREAK)} {
@@ -644,15 +656,15 @@ proc requestdmaorint {state rdata} {
         if {$brkrequest} {
             set dmafield  [randbits 3]
             set dmaaddr   [randbits 12]
-            set dmadatain [randbits 1]          ;# 0=read memory; 1=write memory
+            set dmawrmem  [randbits 1]          ;# 0=read memory; 1=write memory
             set dmawdata  [randbits 12]
             set dma3cycle [expr {[randbits 2] == 0}]
             set dmacainc  [expr {$dma3cycle && [randbits 1]}]
             puts -nonewline [format "  <<brkreq=1 3cycle=%o addr=%o%04o" $dma3cycle $dmafield $dmaaddr]
-            if {$dmadatain} {puts -nonewline [format " wdata=%04o" $dmawdata]}
+            if {$dmawrmem} {puts -nonewline [format " wdata=%04o" $dmawdata]}
             puts -nonewline ">> "
-            bus set iBRKWRM $dmadatain iDMAADDR [expr {($dmafield << 12) | $dmaaddr}] \
-                iDMADATA $dmawdata i3CYCLE $dma3cycle iCAINC $dmacainc iBRKRQST 1
+            bus set iBRKWRM $dmawrmem iDMAADDR [expr {($dmafield << 12) | $dmaaddr}] \
+                i3CYCLE $dma3cycle iCAINC $dmacainc iBRKRQST 1
         }
     }
     if {! $brkrequest} {bus set iBRKRQST 0}

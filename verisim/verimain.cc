@@ -153,8 +153,7 @@ static int cmd_bus (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj
         {  1, OFFS (iIOSKIP),  true,  "iIOSKIP"  },   // increment PC at end of IO pulse
         {  1, OFFS (iLNKTOG),  true,  "iLNKTOG"  },   // toggle link register
         { 15, OFFS (iDMAADDR), true,  "iDMAADDR" },   // device sending address for DMA
-        { 12, OFFS (iDMADATA), true,  "iDMADATA" },   // device sending write data for DMA
-        { 12, OFFS (iINBUS),   true,  "iINBUS"   },   // device sending data for PIO
+        { 12, OFFS (iINBUS),   true,  "iINBUS"   },   // device sending data for PIO or DMA
 
         {  4, OFFS (majst),    false, "majst"    },
         {  3, OFFS (memfield), false, "memfield" },

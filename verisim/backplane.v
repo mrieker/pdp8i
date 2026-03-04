@@ -16,8 +16,7 @@ module backplane (
     input iIOSKIP,                  // increment PC at end of IO pulse
     input iLNKTOG,                  // toggle link register
     input[14:00] iDMAADDR,          // device sending address for DMA
-    input[11:00] iDMADATA,          // device sending write data for DMA
-    input[11:00] iINBUS,            // device sending data for PIO
+    input[11:00] iINBUS,            // device sending data for PIO or DMA
     output oBREAK,                  // currently doing BREAK (DMA) cycle
     output oBUSINI,                 // initialize bus devices
     output oBWCOV,                  // 3-cycle DMA wordcount overflowed
