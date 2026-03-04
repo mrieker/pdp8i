@@ -503,6 +503,69 @@ module X74LS109 (
 
 endmodule
 
+module Y74LS109 (
+          input  p1         // 1 _Pc
+        , input  p2         // 1  J
+        , input  p3         // 1 _K
+        , input  p4         // 1  CLK
+        , input  p5         // 1 _Ps
+        , output reg p6     // 1  Q
+        , output reg p7     // 1 _Q
+        , input  p8         // GND
+        , output reg p9     // 2 _Q
+        , output reg p10    // 2  Q
+        , input  p11        // 2 _Ps
+        , input  p12        // 2  CLK
+        , input  p13        // 2 _K
+        , input  p14        // 2  J
+        , input  p15        // 2 _Pc
+        , input  p16        // VCC
+);
+
+    always @(posedge p4 or negedge p1 or negedge p5) begin
+        $display ("Y74LS109*: p1=%b p2=%b p3=%b p4=%b p5=%b p6=%b p7=%b", p1, p2, p3, p4, p5, p6, p7);
+        if (~ p1 | ~ p5) begin
+            p6  <= ~ p5;    //  q <= ~ ps
+            p7  <= ~ p1;    // _q <= ~ pc
+        end else begin
+            if (  p2 &   p3) begin  // J=1 K=0
+                p6 <= 1;
+                p7 <= 0;
+            end
+            if (  p2 & ~ p3) begin  // J=1 K=1
+                p6 <= p7;
+                p7 <= p6;
+            end
+            if (~ p2 & ~ p3) begin  // J=0 K=1
+                p6 <= 0;
+                p7 <= 1;
+            end
+        end
+    end
+
+    always @(posedge p12 or negedge p15 or negedge p11) begin
+        $display ("Y74LS109*: p15=%b p14=%b p13=%b p12=%b p11=%b p10=%b p9=%b", p15, p14, p13, p12, p11, p10, p9);
+        if (~ p15 | ~ p11) begin
+            p10 <= ~ p11;   //  q <= ~ ps
+            p9  <= ~ p15;   // _q <= ~ pc
+        end else begin
+            if ( p14 &  p13) begin  // J=1 K=0
+                p10 <= 1;
+                p9  <= 0;
+            end
+            if ( p14 & ~p13) begin  // J=1 K=1
+                p10 <= p9;
+                p9  <= p10;
+            end
+            if (~p14 & ~p13) begin  // J=0 K=1
+                p10 <= 0;
+                p9  <= 1;
+            end
+        end
+    end
+
+endmodule
+
 module X74HC138 (
           input  p1     // A2
         , input  p2     // A1

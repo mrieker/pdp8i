@@ -14,9 +14,14 @@ proc disas {loaddr {hiaddr ""}} {
 }
 
 # reset to power-up state
+# make sure verimain sees a 0->1 edge on reset
 proc hardreset {} {
     bus set reset 1
-    clk 100000
+    clk 10
+    bus set reset 0
+    clk 10
+    bus set reset 1
+    clk 980
     bus set reset 0
 }
 
