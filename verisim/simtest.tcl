@@ -102,6 +102,12 @@ proc simtest {} {
         ;# once through this loop per instruction, dma transfer or interrupt acknowledge
         ;# processor should be at beginning of TS1 in FETCH, WDCNT, BREAK or INTAK cycle
 
+        ;# occasionally flip switches for OSR testing
+        if {$instrno % 1024 == 0} {
+            set swpend [randbits 12]
+            swtch set reg $swpend
+        }
+
         puts -nonewline [format "%10u : L.AC=%o.%04o MQ=%04o PC=%o%04o SC=%02o : " \
             [incr instrno] $linc $acum $mulq $xmem_ifld $pctr $sctr]
 
@@ -192,20 +198,16 @@ proc simtest {} {
                         break
                     }
                     if {($opcode & 07401) == 07400} {           ;# group 2
-                        set opcode [expr {$opcode & 07772}]     ;# don't do OSR
+                        set swsent [swtch reg]
+                        if {$swsent != $swpend} {               ;# see if processor has absorbed switches
+                            set opcode [expr {$opcode & 07773}] ;# if not, don't do OSR
+                        }
                         break
                     }
                     if {$testexar && (($opcode & 07401) == 07401)} break  ;# group 3 (extended arithmetic)
                 }
                 puts -nonewline [format "OP=%04o  %s" $opcode [disop $pctr $opcode]]
                 set lastopc $opcode
-
-                ;# set random switch register contents if about to do an OSR instruction
-                if {(($opcode & 07401) == 07400) && ($opcode & 0004)} {
-                    set randsr [randbits 12]
-                    swtch set reg $randsr
-                    ;# - takes too long to soak through console.v
-                }
 
                 ;# perform fetch memory cycle
                 memorycycle $MS_FETCH $xmem_ifld $pctr $opcode $opcode
@@ -295,7 +297,10 @@ proc simtest {} {
                             set pctr [expr {($pctr + 1) & 07777}]
                         }
                         if {$opcode & 0200} {set acum 0}
-                        if {$opcode & 0004} {set acum [expr {$acum | randsr}]}
+                        if {$opcode & 0004} {
+                            puts -nonewline [format " sr:%04o" $swpend]
+                            set acum [expr {$acum | $swpend}]
+                        }
                         puts -nonewline [format " => %04o" $acum]
                         if {$opcode & 0002} {
                             waitnegate RUN

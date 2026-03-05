@@ -146,9 +146,10 @@ module backplane (
         .mbus (memINBUS)
     );
 
+    wire readsr;
     wire acclear = iACCLEAR | eaeACCLEAR;
     wire hold = iHOLD | eaeHOLD;
-    wire[11:00] inbus = iINBUS | eaeINBUS | memINBUS | mexINBUS;
+    wire[11:00] inbus = iINBUS | eaeINBUS | memINBUS | mexINBUS | (readsr ? swreg : 12'b0);
     wire ioskip = iIOSKIP | eaeIOSKIP;
     wire lnktog = iLNKTOG | eaeLNKTOG;
     wire[3:0] nxtms;
@@ -368,6 +369,7 @@ module backplane (
         , .MQUO_8   ()
         , .MQUO_9   ()
         , .NXTMSBRK (oBREAK)
+        , .READSR   (readsr)
         , .RESET    (reset)
         , .RUN      (oRUN)
         , .SCTR_0   ()

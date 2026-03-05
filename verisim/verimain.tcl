@@ -185,14 +185,15 @@ proc runloop {{n ""}} {
     }
 }
 proc runstep {} {
-    global lightrows runquiet switchrows
+    global lightrows runquiet swrowpends swrowsents
 
     set c [clk]                         ;# kerchunk the 100MHz clock and get cycle count
     set g [gpio]                        ;# read gpio connector contents
     for {set r 0} {$r < 3} {incr r} {   ;# maybe it wants switch contents
         if {! ($g & (0x1000 << $r))} {
-            set swrow [lindex $switchrows $r]
-            gpio [expr {($g & 0xFFF000) | $swrow}]
+            set sw [lindex $swrowpends $r]
+            gpio [expr {($g & 0xFFF000) | $sw}]
+            lset swrowsents $r $sw
         }
     }
     set v [expr {~ $g & 07777}]         ;# get the 12-bit row contents
@@ -208,6 +209,7 @@ proc runstep {} {
     }
 }
 
+# start processor at the given address
 proc startat {addr} {
     if {($addr < 0) || ($addr > 07777)} {
         error "bad address $addr"
@@ -224,11 +226,12 @@ proc startat {addr} {
 }
 
 # modify and query switch settings
-# just gets/sets the in-memory values, does not forward them on to processor
-# use 'runloop' to pass them on to processor
-set switchrows {0 0 0}
+# - set just queues the value, use 'runloop/runstep' to pass them on to processor
+# - get retrieves latest value sent to processor
+set swrowpends {0 0 0}      ;# waiting to be sent
+set swrowsents {0 0 0}      ;# has been sent
 proc swtch {args} {
-    global switchrows
+    global swrowpends swrowsents
 
     set retval ""
     set setmode 0
@@ -240,13 +243,13 @@ proc swtch {args} {
             df {
                 if {$setmode} {
                     set val [lindex $args [incr i]]
-                    set row [expr {[lindex $switchrows 1] & 0x3FE}]
+                    set row [expr {[lindex $swrowpends 1] & 0x3FE}]
                     if {$val & 4} {incr row 0x400}
                     if {$val & 2} {incr row 0x800}
                     if {$val & 1} {incr row 0x001}
-                    lset switchrows 1 $row
+                    lset swrowpends 1 $row
                 } else {
-                    set row [lindex $switchrows 1]
+                    set row [lindex $swrowsents 1]
                     set val 0
                     if {$row & 0x400} {incr val 4}
                     if {$row & 0x800} {incr val 2}
@@ -258,13 +261,13 @@ proc swtch {args} {
             if {
                 if {$setmode} {
                     set val [lindex $args [incr i]]
-                    set row [expr {[lindex $switchrows 1] & 0xFF1}]
+                    set row [expr {[lindex $swrowpends 1] & 0xFF1}]
                     if {$val & 4} {incr row 0x002}
                     if {$val & 2} {incr row 0x004}
                     if {$val & 1} {incr row 0x008}
-                    lset switchrows 1 $row
+                    lset swrowpends 1 $row
                 } else {
-                    set row [lindex $switchrows 1]
+                    set row [lindex $swrowsents 1]
                     set val 0
                     if {$row & 0x002} {incr val 4}
                     if {$row & 0x004} {incr val 2}
@@ -275,9 +278,9 @@ proc swtch {args} {
             reg {
                 if {$setmode} {
                     set val [lindex $args [incr i]]
-                    lset switchrows 0 [unscramgpio $val]
+                    lset swrowpends 0 [unscramgpio $val]
                 } else {
-                    lappend retval [unscramgpio [expr {[lindex $switchrows 0] ^ 07777}]]
+                    lappend retval [unscramgpio [lindex $swrowsents 0]]
                 }
             }
             set {set setmode 1}
@@ -289,11 +292,11 @@ proc swtch {args} {
                 set mask [expr {1 << $bitnum}]
                 if {$setmode} {
                     set val [lindex $args [incr i]]
-                    set row [expr {[lindex $switchrows 2] & ~ $mask}]
+                    set row [expr {[lindex $swrowpends 2] & ~ $mask}]
                     if {$val} {incr row $mask}
-                    lset switchrows 2 $row
+                    lset swrowpends 2 $row
                 } else {
-                    lappend retval [expr {([lindex $switchrows 2] & $mask) != 0}]
+                    lappend retval [expr {([lindex $swrowsents 2] & $mask) != 0}]
                 }
             }
         }
