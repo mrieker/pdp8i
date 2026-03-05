@@ -192,7 +192,7 @@ proc simtest {} {
                         break
                     }
                     if {($opcode & 07401) == 07400} {           ;# group 2
-                        set opcode [expr {$opcode & 07770}]     ;# don't do OSR,HLT
+                        set opcode [expr {$opcode & 07772}]     ;# don't do OSR
                         break
                     }
                     if {$testexar && (($opcode & 07401) == 07401)} break  ;# group 3 (extended arithmetic)
