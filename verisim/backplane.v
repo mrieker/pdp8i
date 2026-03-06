@@ -29,7 +29,9 @@ module backplane (
     output[11:00] mulq, pctr,
     output[2:0] memfield,
     output[3:0] majst,
-    output[4:0] sctr
+    output[4:0] sctr,
+    output swstart, swldad, swdepos, swexam,
+    output swcont, swstop, swsstep, swsinst
 );
 
     wire[11:09] ireg;
@@ -38,8 +40,6 @@ module backplane (
 
     wire[11:00] swreg;
     wire[2:0] swdfld, swifld;
-    wire swstart, swldad, swdepos, swexam;
-    wire swcont, swstop, swsstep, swsinst;
 
     wire[11:00] memINBUS;
     wire oEXEFET, oINTACK, oJMPJMS;

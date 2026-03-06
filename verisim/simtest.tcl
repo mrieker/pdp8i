@@ -9,7 +9,7 @@ set brkrequest   0
 set dma3cycle    0
 set dmaaddr      0
 set dmacainc     0
-set dmawrmem    0
+set dmawrmem     0
 set dmafield     0
 set dmawdata     0
 set fullreal     0
@@ -17,6 +17,9 @@ set halfreal     0
 set intdelayed   0
 set intenabled   0
 set intrequest   0
+set latsinst     0
+set latsstep     0
+set latstop      0
 set linc         0
 set memcycwcover 0
 set mulq         0
@@ -60,6 +63,9 @@ proc simtest {} {
     global intdelayed
     global intenabled
     global intrequest
+    global latsinst
+    global latsstep
+    global latstop
     global linc
     global memcycwcover
     global mulq
@@ -104,8 +110,8 @@ proc simtest {} {
 
         ;# occasionally flip switches for OSR testing
         if {$instrno % 1024 == 0} {
-            set swpend [randbits 12]
-            swtch set reg $swpend
+            set swregpend [randbits 12]
+            swtch set reg $swregpend sinst [randbits 1] sstep [randbits 1] stop [randbits 1]
         }
 
         puts -nonewline [format "%10u : L.AC=%o.%04o MQ=%04o PC=%o%04o SC=%02o : " \
@@ -198,8 +204,8 @@ proc simtest {} {
                         break
                     }
                     if {($opcode & 07401) == 07400} {           ;# group 2
-                        set swsent [swtch reg]
-                        if {$swsent != $swpend} {               ;# see if processor has absorbed switches
+                        set swregsent [swtch reg]
+                        if {$swregsent != $swregpend} {         ;# see if processor has absorbed switches
                             set opcode [expr {$opcode & 07773}] ;# if not, don't do OSR
                         }
                         break
@@ -298,18 +304,10 @@ proc simtest {} {
                         }
                         if {$opcode & 0200} {set acum 0}
                         if {$opcode & 0004} {
-                            puts -nonewline [format " sr:%04o" $swpend]
-                            set acum [expr {$acum | $swpend}]
+                            puts -nonewline [format " sr:%04o" $swregpend]
+                            set acum [expr {$acum | $swregpend}]
                         }
                         puts -nonewline [format " => %04o" $acum]
-                        if {$opcode & 0002} {
-                            waitnegate RUN
-                            puts -nonewline " cont"
-                            swtch set cont 1
-                            runloop 2000
-                            swtch set cont 0
-                            waitassert RUN 500
-                        }
                     } else {
                         ;# group 3 (extended arithmetic)
                         if {$opcode & 6} {
@@ -393,20 +391,53 @@ proc simtest {} {
 ;#   TS1 = reading memory location
 ;#   TS2 = computing any modification to value
 ;#   TS3 = writing memory location
-;# after that:
-;#   IOP1,2,4 = only if this was a fetch of an io instruction
-;#   TS4 = any post-processing for the cycle
+;#         update accumulator
+;#   TS4 = update to next state
 proc memorycycle {state field addr rdata wdata} {
-    memorycyclx $state $field $addr $rdata $rdata $wdata [expr {($field << 12) | $addr}] $wdata
+    global MS_BREAK MS_EXEC MS_FETCH MS_INTAK MS_WRDCT
+    global latsinst latsstep latstop
+
+    ;# do memory cycle through to end of TS4
+    memorycyclx $state $field $addr $rdata $wdata
+
+    ;# check for halted/running
+    set isrunning [bus oRUN]
+    set newstate [bus majst]
+    set sbhalted 0
+    set haltwhy ""
+    if {$latsstep} {
+        set sbhalted 1
+        set haltwhy "sstep"
+    } elseif {$latstop} {
+        set sbhalted 1
+        set haltwhy "stop"
+    } elseif {($state == $MS_FETCH) && (($rdata & 07403) == 07402)} {
+        set sbhalted 1
+        set haltwhy "hlt"
+    } elseif {$latsinst && (($newstate == $MS_FETCH) || ($newstate == $MS_INTAK) || ($newstate == $MS_WRDCT) || (($newstate == $MS_BREAK) && ! [bus i3CYCLE]))} {
+        set sbhalted 1
+        set haltwhy "sinst"
+    }
+    if {$isrunning == $sbhalted} {
+        set is [expr {$isrunning ? "running" : "halted"}]
+        set sb [expr {$sbhalted ? "halted" : "running"}]
+        error "processor is $is, should be $sb ($haltwhy sinst=$latsinst sstep=$latsstep stop=$latstop oldstate=$state newstate=$newstate)"
+    }
+
+    ;# if halted, turn off stop/step switches and press continue
+    if {! $isrunning} {
+        puts -nonewline " $haltwhy.cont"
+        swtch set sinst 0 sstep 0 stop 0 cont 1
+        runloop 2000
+        swtch set cont 0
+        waitassert RUN 500
+    }
 }
 
-;# - rdbkdata = data sent to processor as result of read
-;# - wtbkdata = data received back from processor
-;# - vfywaddr = address in extmem[] to verify the write happened
-;# - vfywdata = data that should be at vfywaddr
-proc memorycyclx {state field addr rdata rdbkdata wtbkdata vfywaddr vfywdata} {
+proc memorycyclx {state field addr rdata wdata} {
     global dmawrmem dmawdata memcycwcover opcode
     global MS_BREAK MS_EXEC MS_FETCH
+    global latsinst latsstep latstop
 
     ;# clock until we see TS1
     waitassert TS1
@@ -426,7 +457,7 @@ proc memorycyclx {state field addr rdata rdbkdata wtbkdata vfywaddr vfywdata} {
     waitnegate TS1
 
     ;# MB should now have the value we wrote to the memory location
-    verify12 [bus oMBUF] $rdbkdata "MB during read"
+    verify12 [bus oMBUF] $rdata "MB during read"
 
     ;# if doing a previously requested DMA cycle that writes to memory,
     ;# output the data to be written during TS2
@@ -455,9 +486,7 @@ proc memorycyclx {state field addr rdata rdbkdata wtbkdata vfywaddr vfywdata} {
     }
 
     ;# beginning of TS3, MB should now have the possibly modified value
-    runstep
-    runstep
-    verify12 [bus oMBUF] $wtbkdata "MB during writeback"
+    verify12 [bus oMBUF] $wdata "MB during writeback"
 
     ;# BWC_OVERFLOW is valid
     ;# - clocked with TP2 (vol 2, p5 D-5)
@@ -466,7 +495,15 @@ proc memorycyclx {state field addr rdata rdbkdata wtbkdata vfywaddr vfywdata} {
 
     ;# wait for TP3 asserted then negated indicating value written to memory
     ;# also clocks in any io instruction result
-    waitassert TP3
+    ;# and clocks in the step/stop switches
+    for {set i 0} true {incr i} {
+        set latsinst [bus swsinst]
+        set latsstep [bus swsstep]
+        set latstop  [bus swstop]
+        if {[bus oTP3]} break
+        if {$i > 100} {error "timed out waiting for TP3 asserted"}
+        runstep
+    }
     waitnegate TP3
 
     ;# clear any bits being output by io instruction
@@ -479,7 +516,11 @@ proc memorycyclx {state field addr rdata rdbkdata wtbkdata vfywaddr vfywdata} {
     }
 
     ;# verify the memory contents
-    verify12 [mem $vfywaddr] $vfywdata [format "address %05o mismatch" $vfywaddr]
+    verify12 [mem $expaddr] $wdata [format "address %05o mismatch" $expaddr]
+
+    ;# step to end of cycle
+    waitassert TP4
+    waitnegate TP4
 }
 
 ;# process IOP pulse

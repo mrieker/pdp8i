@@ -162,6 +162,15 @@ static int cmd_bus (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj
         {  1, OFFS (reset),    true,  "reset"    },
         {  5, OFFS (sctr),     false, "sctr"     },
 
+        {  1, OFFS (swcont),   false, "swcont"   },
+        {  1, OFFS (swstop),   false, "swstop"   },
+        {  1, OFFS (swstart),  false, "swstart"  },
+        {  1, OFFS (swsstep),  false, "swsstep"  },
+        {  1, OFFS (swsinst),  false, "swsinst"  },
+        {  1, OFFS (swldad),   false, "swldad"   },
+        {  1, OFFS (swexam),   false, "swexam"   },
+        {  1, OFFS (swdepos),  false, "swdepos"  },
+
         { 12, OFFS (oACUM),    false, "oACUM"    },
         {  1, OFFS (oBREAK),   false, "oBREAK"   },   // currently doing BREAK (DMA) cycle
         {  1, OFFS (oBWCOV),   false, "oBWCOV"   },   // 3-cycle DMA wordcount overflowed
