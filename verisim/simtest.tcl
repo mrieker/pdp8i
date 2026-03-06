@@ -60,6 +60,7 @@ proc simtest {} {
     global dmawdata
     global fullreal
     global halfreal
+    global instrno
     global intdelayed
     global intenabled
     global intrequest
@@ -73,6 +74,7 @@ proc simtest {} {
     global perclock
     global pctr
     global sctr
+    global swregpend
     global testexar
     global testxmem
     global xmem_dfld
@@ -104,273 +106,280 @@ proc simtest {} {
     set lastopc -1
 
     while true {
+        set ercode [catch {
 
-        ;# once through this loop per instruction, dma transfer or interrupt acknowledge
-        ;# processor should be at beginning of TS1 in FETCH, WDCNT, BREAK or INTAK cycle
+            ;# once through this loop per instruction, dma transfer or interrupt acknowledge
+            ;# processor should be at beginning of TS1 in FETCH, WDCNT, BREAK or INTAK cycle
 
-        ;# occasionally flip switches for OSR testing
-        if {$instrno % 1024 == 0} {
-            set swregpend [randbits 12]
-            swtch set reg $swregpend sinst [randbits 1] sstep [randbits 1] stop [randbits 1]
-        }
-
-        puts -nonewline [format "%10u : L.AC=%o.%04o MQ=%04o PC=%o%04o SC=%02o : " \
-            [incr instrno] $linc $acum $mulq $xmem_ifld $pctr $sctr]
-
-        set startclockno [clk 0]
-
-        set effaddr 0
-        set randsr  0
-        set execst $MS_EXEC
-
-        ;# maybe do a dma cycle
-        if {$brkrequest} {
-
-            puts -nonewline [format "DMA %d-cycle" [expr {($dma3cycle ? 3 : 1)}]]
-            if {$dma3cycle} {
-
-                ;# WC state reads wordcount from dmaaddr, increments it and writes it back
-                ;# make wordcount overflow somewhat common for testing
-                set oldwordcount [randbits 12]
-                if {$oldwordcount & 04000} {set oldwordcount [expr {$oldwordcount | 07770}]}
-                set newwordcount [expr {($oldwordcount + 1) & 07777}]
-                puts -nonewline [format "  WC:%04o / %04o => %04o" $dmaaddr $oldwordcount $newwordcount]
-                memorycycle $MS_WRDCT 0 $dmaaddr $oldwordcount $newwordcount
-
-                set wcshouldover [expr {$newwordcount == 0}]
-                verifybit $memcycwcover $wcshouldover "BWC OVERFLOW mismatch"
-
-                ;# CA state reads pointer from dmaaddr + 1, increments it and writes it back
-                ;# then we use the incremented pointer for the transfer address
-                set dmaaddr [expr {($dmaaddr + 1) & 07777}]
-                set oldcuraddr [randbits 12]
-                set newcuraddr [expr {($oldcuraddr + $dmacainc) & 07777}]
-                puts -nonewline [format "  CA:%04o / %04o => %04o" $dmaaddr $oldcuraddr $newcuraddr]
-                memorycycle $MS_CURAD 0 $dmaaddr $oldcuraddr $newcuraddr
-                set dmaaddr $newcuraddr
+            ;# occasionally flip switches for OSR testing
+            if {$instrno % 1024 == 0} {
+                set swregpend [randbits 12]
+                swtch set reg $swregpend sinst [randbits 1] sstep [randbits 1] stop [randbits 1]
             }
 
-            ;# transfer word at address dmafield:dmaaddr
-            set dmardata [randbits 12]                  ;# random value that will be sent to processor as content of memory location dmafield:dmaaddr
-            if {! $dmawrmem} {set dmawdata $dmardata}   ;# if writing, write will be value written to CM_DATA; if reading, write will be same as dmardata
+            puts -nonewline [format "%10u : L.AC=%o.%04o MQ=%04o PC=%o%04o SC=%02o : " \
+                [incr instrno] $linc $acum $mulq $xmem_ifld $pctr $sctr]
 
-            puts -nonewline [format "  BRK:%o%04o / %04o => %04o" $dmafield $dmaaddr $dmardata $dmawdata]
-            memorycycle $MS_BREAK $dmafield $dmaaddr $dmardata $dmawdata
-        } else {
+            set startclockno [clk 0]
 
-            ;# maybe interrupt request is next
-            set datafield $xmem_ifld
-            if {$intrequest && ! $xmem_intdisableduntiljump && $intenabled} {
-                puts -nonewline "interrupt acknowledge"
+            set effaddr 0
+            set randsr  0
+            set execst $MS_EXEC
 
-                set intrequest 0        ;#TODO: drop request random number of cycles later
-                bus set iINTRQST 0
+            ;# maybe do a dma cycle
+            if {$brkrequest} {
 
-                ;# save and reset fields
-                set xmem_saveddfld $xmem_dfld
-                set xmem_savedifld $xmem_ifld
-                set xmem_dfld 0
-                set xmem_ifld 0
-                set xmem_ifldafterjump 0
+                puts -nonewline [format "DMA %d-cycle" [expr {($dma3cycle ? 3 : 1)}]]
+                if {$dma3cycle} {
 
-                ;# disable interrupts then execute a JMS 0 instruction
-                set intdelayed 0
-                set intenabled 0
-                set opcode 04000
-                set execst $MS_INTAK
+                    ;# WC state reads wordcount from dmaaddr, increments it and writes it back
+                    ;# make wordcount overflow somewhat common for testing
+                    set oldwordcount [randbits 12]
+                    if {$oldwordcount & 04000} {set oldwordcount [expr {$oldwordcount | 07770}]}
+                    set newwordcount [expr {($oldwordcount + 1) & 07777}]
+                    puts -nonewline [format "  WC:%04o / %04o => %04o" $dmaaddr $oldwordcount $newwordcount]
+                    memorycycle $MS_WRDCT 0 $dmaaddr $oldwordcount $newwordcount
+
+                    set wcshouldover [expr {$newwordcount == 0}]
+                    verifybit $memcycwcover $wcshouldover "BWC OVERFLOW mismatch"
+
+                    ;# CA state reads pointer from dmaaddr + 1, increments it and writes it back
+                    ;# then we use the incremented pointer for the transfer address
+                    set dmaaddr [expr {($dmaaddr + 1) & 07777}]
+                    set oldcuraddr [randbits 12]
+                    set newcuraddr [expr {($oldcuraddr + $dmacainc) & 07777}]
+                    puts -nonewline [format "  CA:%04o / %04o => %04o" $dmaaddr $oldcuraddr $newcuraddr]
+                    memorycycle $MS_CURAD 0 $dmaaddr $oldcuraddr $newcuraddr
+                    set dmaaddr $newcuraddr
+                }
+
+                ;# transfer word at address dmafield:dmaaddr
+                set dmardata [randbits 12]                  ;# random value that will be sent to processor as content of memory location dmafield:dmaaddr
+                if {! $dmawrmem} {set dmawdata $dmardata}   ;# if writing, write will be value written to CM_DATA; if reading, write will be same as dmardata
+
+                puts -nonewline [format "  BRK:%o%04o / %04o => %04o" $dmafield $dmaaddr $dmardata $dmawdata]
+                memorycycle $MS_BREAK $dmafield $dmaaddr $dmardata $dmawdata
             } else {
 
-                ;# stop when processor is ready to fetch
-                if [ctrlcflag] break
+                ;# maybe interrupt request is next
+                set datafield $xmem_ifld
+                if {$intrequest && ! $xmem_intdisableduntiljump && $intenabled} {
+                    puts -nonewline "interrupt acknowledge"
 
-                ;# delayed ION active now that we are about to do a fetch
-                set intenabled $intdelayed
+                    set intrequest 0        ;#TODO: drop request random number of cycles later
+                    bus set iINTRQST 0
 
-                ;# send random opcode
-                ;# for IOs, only allow processor (600x) and xmem (62xx)
-                while true {
-                    set opcode [randbits 12]
-                    if {($opcode & 06000) != 06000} break       ;# and,tad,isz,dca,jms,jmp
-                    if {$opcode == 06001} break                 ;# ION
-                    if {$opcode == 06002} break                 ;# IOF
-                    if {$opcode == 06004} break                 ;# used to test skip/acclr
-                    if {$testxmem && ($lastopc != 06001)} {     ;# don't do memext opcodes if instruction after ION
-                        if {($opcode & 07704) == 06200} break
-                        if {($opcode & 07707) == 06204} break
+                    ;# save and reset fields
+                    set xmem_saveddfld $xmem_dfld
+                    set xmem_savedifld $xmem_ifld
+                    set xmem_dfld 0
+                    set xmem_ifld 0
+                    set xmem_ifldafterjump 0
+
+                    ;# disable interrupts then execute a JMS 0 instruction
+                    set intdelayed 0
+                    set intenabled 0
+                    set opcode 04000
+                    set execst $MS_INTAK
+                } else {
+
+                    ;# stop when processor is ready to fetch
+                    if [ctrlcflag] break
+
+                    ;# delayed ION active now that we are about to do a fetch
+                    set intenabled $intdelayed
+
+                    ;# send random opcode
+                    ;# for IOs, only allow processor (600x) and xmem (62xx)
+                    while true {
+                        set opcode [randbits 12]
+                        if {($opcode & 06000) != 06000} break       ;# and,tad,isz,dca,jms,jmp
+                        if {$opcode == 06001} break                 ;# ION
+                        if {$opcode == 06002} break                 ;# IOF
+                        if {$opcode == 06004} break                 ;# used to test skip/acclr
+                        if {$testxmem && ($lastopc != 06001)} {     ;# don't do memext opcodes if instruction after ION
+                            if {($opcode & 07704) == 06200} break
+                            if {($opcode & 07707) == 06204} break
+                        }
+                        if {($opcode & 07400) == 07000} {           ;# group 1
+                            ##if {($opcode & 016) == 002} continue    ;# bsw
+                            if {($opcode & 014) == 014} continue    ;# 6,7
+                            break
+                        }
+                        if {($opcode & 07401) == 07400} {           ;# group 2
+                            set swregsent [swtch reg]
+                            if {$swregsent != $swregpend} {         ;# see if processor has absorbed switches
+                                set opcode [expr {$opcode & 07773}] ;# if not, don't do OSR
+                            }
+                            break
+                        }
+                        if {$testexar && (($opcode & 07401) == 07401)} break  ;# group 3 (extended arithmetic)
                     }
-                    if {($opcode & 07400) == 07000} {           ;# group 1
-                        ##if {($opcode & 016) == 002} continue    ;# bsw
-                        if {($opcode & 014) == 014} continue    ;# 6,7
-                        break
-                    }
-                    if {($opcode & 07401) == 07400} {           ;# group 2
-                        set swregsent [swtch reg]
-                        if {$swregsent != $swregpend} {         ;# see if processor has absorbed switches
-                            set opcode [expr {$opcode & 07773}] ;# if not, don't do OSR
+                    puts -nonewline [format "OP=%04o  %s" $opcode [disop $pctr $opcode]]
+                    set lastopc $opcode
+
+                    ;# perform fetch memory cycle
+                    memorycycle $MS_FETCH $xmem_ifld $pctr $opcode $opcode
+
+                    ;# compute effective address then increment program counter
+                    set effaddr [expr {(($opcode & 00200) ? ($pctr & 07600) : 0) | ($opcode & 00177)}]
+                    set pctr [expr {($pctr + 1) & 07777}]
+
+                    ;# maybe do a defer cycle
+                    if {($opcode & 07000) < 06000} {
+                        puts -nonewline " ="
+                        if {$opcode & 0400} {
+                            set pointer [randbits 12]
+                            set autoinc [expr {($pointer + (($effaddr & 07770) == 00010)) & 07777}]
+                            puts -nonewline [format " %o%04o /" $xmem_ifld $effaddr]
+                            memorycycle $MS_DEFER $xmem_ifld $effaddr $pointer $autoinc
+                            set effaddr $autoinc
+                            set datafield $xmem_dfld
                         }
-                        break
-                    }
-                    if {$testexar && (($opcode & 07401) == 07401)} break  ;# group 3 (extended arithmetic)
-                }
-                puts -nonewline [format "OP=%04o  %s" $opcode [disop $pctr $opcode]]
-                set lastopc $opcode
-
-                ;# perform fetch memory cycle
-                memorycycle $MS_FETCH $xmem_ifld $pctr $opcode $opcode
-
-                ;# compute effective address then increment program counter
-                set effaddr [expr {(($opcode & 00200) ? ($pctr & 07600) : 0) | ($opcode & 00177)}]
-                set pctr [expr {($pctr + 1) & 07777}]
-
-                ;# maybe do a defer cycle
-                if {($opcode & 07000) < 06000} {
-                    puts -nonewline " ="
-                    if {$opcode & 0400} {
-                        set pointer [randbits 12]
-                        set autoinc [expr {($pointer + (($effaddr & 07770) == 00010)) & 07777}]
-                        puts -nonewline [format " %o%04o /" $xmem_ifld $effaddr]
-                        memorycycle $MS_DEFER $xmem_ifld $effaddr $pointer $autoinc
-                        set effaddr $autoinc
-                        set datafield $xmem_dfld
-                    }
-                }
-            }
-
-            ;# do the exec cycle
-            switch [expr {$opcode >> 9}] {
-
-                4 {             ;# jms
-                    set xmem_intdisableduntiljump 0
-                    set xmem_ifld $xmem_ifldafterjump
-                    set operand [randbits 12]
-                    puts -nonewline [format " %o%04o / %04o <= %04o" $xmem_ifld $effaddr $operand $pctr]
-                    memorycycle $execst $xmem_ifld $effaddr $operand $pctr
-                    set pctr [expr {($effaddr + 1) & 07777}]
-                }
-
-                5 {             ;# jmp
-                    set xmem_intdisableduntiljump 0
-                    set xmem_ifld $xmem_ifldafterjump
-                    set pctr $effaddr
-                    puts -nonewline [format " %o%04o" $xmem_ifld $pctr]
-                }
-
-                6 {             ;# iot
-                    puts -nonewline [format " / %04o" $acum]
-                }
-
-                7 {             ;# opr
-                    if {! ($opcode & 0400)} {
-                        ;# group 1
-                        if {$opcode & 00200} {set acum 0}
-                        if {$opcode & 00100} {set linc 0}
-                        if {$opcode & 00040} {set acum [expr {$acum ^ 07777}]}
-                        if {$opcode & 00020} {set linc [expr {$linc ^ 1}]}
-                        if {$opcode & 00001} {
-                            set acum [expr {($acum + 1) & 07777}]
-                            if {$acum == 0} {set linc [expr {$linc ^ 1}]}
-                        }
-                        switch [expr {($opcode >> 1) & 7}] {
-                            1 {                                 ;# BSW
-                                set acum [expr {(($acum & 077) << 6) | ($acum >> 6)}]
-                            }
-                            2 {                                 ;# RAL
-                                set acum [expr {($acum << 1) | $linc}]
-                                set linc [expr {($acum & 010000) != 0}]
-                                set acum [expr {$acum & 07777}]
-                            }
-                            3 {                                 ;# RTL
-                                set acum [expr {($acum << 2) | ($linc << 1) | ($acum >> 11)}]
-                                set linc [expr {($acum & 010000) != 0}]
-                                set acum [expr {$acum & 07777}]
-                            }
-                            4 {                                 ;# RAR
-                                set oldac $acum
-                                set acum [expr {($acum >> 1) | ($linc << 11)}]
-                                set linc [expr {($oldac & 1) != 0}]
-                            }
-                            5 {                                 ;# RTR
-                                set acum [expr {($acum >> 2) | ($linc << 10) | (($acum & 3) << 11)}]
-                                set linc [expr {($acum & 010000) != 0}]
-                                set acum [expr {$acum & 07777}]
-                            }
-                        }
-                        puts -nonewline [format " => %o.%04o" $linc $acum]
-                    } elseif {! ($opcode & 0001)} {
-                        ;# group 2
-                        if {[g2skip $opcode]} {
-                            puts -nonewline " skip"
-                            set pctr [expr {($pctr + 1) & 07777}]
-                        }
-                        if {$opcode & 0200} {set acum 0}
-                        if {$opcode & 0004} {
-                            puts -nonewline [format " sr:%04o" $swregpend]
-                            set acum [expr {$acum | $swregpend}]
-                        }
-                        puts -nonewline [format " => %04o" $acum]
-                    } else {
-                        ;# group 3 (extended arithmetic)
-                        if {$opcode & 6} {
-                            ;# group 3 with memory operand
-                            ;# supply a random value for value fetched from (PC)+
-                            ;# then perform the extended arithmetic as part of the EXEC cycle
-                            set operand [randbits 12]
-                            puts -nonewline [format " %o%04o / %04o" $xmem_ifld $pctr $operand]
-                            memorycycle $MS_EXEC $xmem_ifld $pctr $operand $operand
-                            set pctr [expr {($pctr + 1) & 07777}]
-                        }
-                        ;# for non-memory operand instructions, the arithmetic was done as part of the FETCH
-                        ;# in any case, we are now past TP3 and so can drop the extended arithmetic results
-                        bus set iACCLEAR 0 iINBUS 0 iLNKTOG 0
                     }
                 }
 
-                default {               ;# and, tad, isz, dca
-                    set operand [randbits 12]
-                    puts -nonewline [format " %o%04o / %04o" $datafield $effaddr $operand]
-                    switch [expr {$opcode >> 9}] {
-                        0 {
-                            memorycycle $MS_EXEC $datafield $effaddr $operand $operand
-                            set acum [expr {$acum & $operand}]
-                            puts -nonewline [format " => %04o" $acum]
-                        }
-                        1 {
-                            memorycycle $MS_EXEC $datafield $effaddr $operand $operand
-                            set sum [expr {$acum + ($linc ? 010000 : 0) + $operand}]
-                            set acum [expr {$sum & 07777}]
-                            set linc [expr {($sum >> 12) & 1}]
+                ;# do the exec cycle
+                switch [expr {$opcode >> 9}] {
+
+                    4 {             ;# jms
+                        set xmem_intdisableduntiljump 0
+                        set xmem_ifld $xmem_ifldafterjump
+                        set operand [randbits 12]
+                        puts -nonewline [format " %o%04o / %04o <= %04o" $xmem_ifld $effaddr $operand $pctr]
+                        memorycycle $execst $xmem_ifld $effaddr $operand $pctr
+                        set pctr [expr {($effaddr + 1) & 07777}]
+                    }
+
+                    5 {             ;# jmp
+                        set xmem_intdisableduntiljump 0
+                        set xmem_ifld $xmem_ifldafterjump
+                        set pctr $effaddr
+                        puts -nonewline [format " %o%04o" $xmem_ifld $pctr]
+                    }
+
+                    6 {             ;# iot
+                        puts -nonewline [format " / %04o" $acum]
+                    }
+
+                    7 {             ;# opr
+                        if {! ($opcode & 0400)} {
+                            ;# group 1
+                            if {$opcode & 00200} {set acum 0}
+                            if {$opcode & 00100} {set linc 0}
+                            if {$opcode & 00040} {set acum [expr {$acum ^ 07777}]}
+                            if {$opcode & 00020} {set linc [expr {$linc ^ 1}]}
+                            if {$opcode & 00001} {
+                                set acum [expr {($acum + 1) & 07777}]
+                                if {$acum == 0} {set linc [expr {$linc ^ 1}]}
+                            }
+                            switch [expr {($opcode >> 1) & 7}] {
+                                1 {                                 ;# BSW
+                                    set acum [expr {(($acum & 077) << 6) | ($acum >> 6)}]
+                                }
+                                2 {                                 ;# RAL
+                                    set acum [expr {($acum << 1) | $linc}]
+                                    set linc [expr {($acum & 010000) != 0}]
+                                    set acum [expr {$acum & 07777}]
+                                }
+                                3 {                                 ;# RTL
+                                    set acum [expr {($acum << 2) | ($linc << 1) | ($acum >> 11)}]
+                                    set linc [expr {($acum & 010000) != 0}]
+                                    set acum [expr {$acum & 07777}]
+                                }
+                                4 {                                 ;# RAR
+                                    set oldac $acum
+                                    set acum [expr {($acum >> 1) | ($linc << 11)}]
+                                    set linc [expr {($oldac & 1) != 0}]
+                                }
+                                5 {                                 ;# RTR
+                                    set acum [expr {($acum >> 2) | ($linc << 10) | (($acum & 3) << 11)}]
+                                    set linc [expr {($acum & 010000) != 0}]
+                                    set acum [expr {$acum & 07777}]
+                                }
+                            }
                             puts -nonewline [format " => %o.%04o" $linc $acum]
+                        } elseif {! ($opcode & 0001)} {
+                            ;# group 2
+                            if {[g2skip $opcode]} {
+                                puts -nonewline " skip"
+                                set pctr [expr {($pctr + 1) & 07777}]
+                            }
+                            if {$opcode & 0200} {set acum 0}
+                            if {$opcode & 0004} {
+                                puts -nonewline [format " sr:%04o" $swregpend]
+                                set acum [expr {$acum | $swregpend}]
+                            }
+                            puts -nonewline [format " => %04o" $acum]
+                        } else {
+                            ;# group 3 (extended arithmetic)
+                            if {$opcode & 6} {
+                                ;# group 3 with memory operand
+                                ;# supply a random value for value fetched from (PC)+
+                                ;# then perform the extended arithmetic as part of the EXEC cycle
+                                set operand [randbits 12]
+                                puts -nonewline [format " %o%04o / %04o" $xmem_ifld $pctr $operand]
+                                memorycycle $MS_EXEC $xmem_ifld $pctr $operand $operand
+                                set pctr [expr {($pctr + 1) & 07777}]
+                            }
+                            ;# for non-memory operand instructions, the arithmetic was done as part of the FETCH
+                            ;# in any case, we are now past TP3 and so can drop the extended arithmetic results
+                            bus set iACCLEAR 0 iINBUS 0 iLNKTOG 0
                         }
-                        2 {
-                            set incd [expr {($operand + 1) & 07777}]
-                            puts -nonewline [format " => %04o" $incd]
-                            memorycycle $MS_EXEC $datafield $effaddr $operand $incd
-                            if {$incd == 0} {set pctr [expr {($pctr + 1) & 07777}]}
+                    }
+
+                    default {               ;# and, tad, isz, dca
+                        set operand [randbits 12]
+                        puts -nonewline [format " %o%04o / %04o" $datafield $effaddr $operand]
+                        switch [expr {$opcode >> 9}] {
+                            0 {
+                                memorycycle $MS_EXEC $datafield $effaddr $operand $operand
+                                set acum [expr {$acum & $operand}]
+                                puts -nonewline [format " => %04o" $acum]
+                            }
+                            1 {
+                                memorycycle $MS_EXEC $datafield $effaddr $operand $operand
+                                set sum [expr {$acum + ($linc ? 010000 : 0) + $operand}]
+                                set acum [expr {$sum & 07777}]
+                                set linc [expr {($sum >> 12) & 1}]
+                                puts -nonewline [format " => %o.%04o" $linc $acum]
+                            }
+                            2 {
+                                set incd [expr {($operand + 1) & 07777}]
+                                puts -nonewline [format " => %04o" $incd]
+                                memorycycle $MS_EXEC $datafield $effaddr $operand $incd
+                                if {$incd == 0} {set pctr [expr {($pctr + 1) & 07777}]}
+                            }
+                            3 {
+                                puts -nonewline [format " <= %04o" $acum]
+                                memorycycle $MS_EXEC $datafield $effaddr $operand $acum
+                                set acum 0
+                            }
+                            default {error "ABORT"}
                         }
-                        3 {
-                            puts -nonewline [format " <= %04o" $acum]
-                            memorycycle $MS_EXEC $datafield $effaddr $operand $acum
-                            set acum 0
-                        }
-                        default {error "ABORT"}
                     }
                 }
             }
+
+        } errmsg]
+
+        ;# get 0 if it worked normally
+        ;# get 47 if halted and did ldad/dep/exam
+        if {($ercode != 0) && ($ercode != 47)} {
+            return -code $ercode $errmsg
         }
 
-        ;# step to TS1 so we know everything has been updated
-        waitassert TS1
+        ;# print how many cycles it took (each clock is 10nS)
+        set clocks [expr {[clk 0] - $startclockno}]
+        puts [format "  (%u.%u uS)" [expr {$clocks / 10}] [expr {$clocks % 10}]]
 
         ;# the accumulator and link should be up to date
+        verifybit [bus oTS1]  1     "TS1 mismatch at end of instruction"
         verify12  [bus pctr]  $pctr "PC mismatch at end of instruction"
         verify12  [bus oACUM] $acum "AC mismatch at end of instruction"
         verifybit [bus oLINK] $linc "LINK mismatch at end of instruction"
         verify12  [bus mulq]  $mulq "MQ mismatch at end of instruction"
         verify12  [bus sctr]  $sctr "SC mismatch at end of instruction"
-
-        ;# print how many cycles it took (each clock is 10nS)
-        set clocks [expr {[clk 0] - $startclockno}]
-        puts [format "  (%u.%u uS)" [expr {$clocks / 10}] [expr {$clocks % 10}]]
     }
 
     puts "stopping for control-C"
@@ -394,8 +403,9 @@ proc simtest {} {
 ;#         update accumulator
 ;#   TS4 = update to next state
 proc memorycycle {state field addr rdata wdata} {
-    global MS_BREAK MS_EXEC MS_FETCH MS_INTAK MS_WRDCT
+    global MS_BREAK MS_DEPOS MS_EXAM MS_EXEC MS_FETCH MS_INTAK MS_WRDCT
     global latsinst latsstep latstop
+    global acum instrno linc mulq pctr sctr swregpend xmem_ifld
 
     ;# do memory cycle through to end of TS4
     memorycyclx $state $field $addr $rdata $wdata
@@ -426,11 +436,72 @@ proc memorycycle {state field addr rdata wdata} {
 
     ;# if halted, turn off stop/step switches and press continue
     if {! $isrunning} {
-        puts -nonewline " $haltwhy.cont"
-        swtch set sinst 0 sstep 0 stop 0 cont 1
+        puts -nonewline " $haltwhy"
+        swtch set sinst 0 sstep 0 stop 0
+        set wacked 0
+        while {[randbits 1] == 0} {
+            set sw [randbits 2]
+            switch $sw {
+                1 {
+                    if {[swtch reg] == $swregpend} {
+                        puts ""
+                        swtch set ldad 1            ;# press and hold ldad
+                        runloop 2000                ;# let it soak in good
+                        set addr $swregpend         ;# madr should be loaded with swreg contents
+                        set rdata [randbits 12]     ;# get random value for it to examine
+                        puts -nonewline [format "%10u : L.AC=%o.%04o MQ=%04o PC=%o%04o SC=%02o : LDAD  %o%04o / %04o" \
+                            [incr instrno] $linc $acum $mulq $xmem_ifld $pctr $sctr $xmem_ifld $addr $rdata]
+                        set swregpend [randbits 12] ;# flip switches to different random value and release ldad
+                        swtch set ldad 0 reg $swregpend
+                        waitassert RUN 500          ;# wait for processor to start an exam cycle
+                        memorycyclx $MS_EXAM $xmem_ifld $addr $rdata $rdata
+                        verifybit [bus oRUN] 0 "should be halted after LDAD"
+                        set wacked 1
+                    }
+                }
+                2 {
+                    if {[swtch reg] == $swregpend} {
+                        puts ""
+                        if {[bus majst] == $MS_DEPOS} {set addr [expr {($addr + 1) & 07777}]}
+                        swtch set depos 1
+                        runloop 2000
+                        set rdata [randbits 12]
+                        set wdata $swregpend
+                        puts -nonewline [format "%10u : L.AC=%o.%04o MQ=%04o PC=%o%04o SC=%02o : DEPOS %o%04o / %04o <= %04o" \
+                            [incr instrno] $linc $acum $mulq $xmem_ifld $pctr $sctr $xmem_ifld $addr $rdata $wdata]
+                        set swregpend [randbits 12]
+                        swtch set depos 0 reg $swregpend
+                        waitassert RUN 500
+                        memorycyclx $MS_DEPOS $xmem_ifld $addr $rdata $wdata
+                        verifybit [bus oRUN] 0 "should be halted after DEPOS"
+                        set wacked 1
+                    }
+                }
+                3 {
+                    puts ""
+                    if {[bus majst] == $MS_EXAM} {set addr [expr {($addr + 1) & 07777}]}
+                    swtch set exam 1
+                    runloop 2000
+                    set rdata [randbits 12]
+                    puts -nonewline [format "%10u : L.AC=%o.%04o MQ=%04o PC=%o%04o SC=%02o : EXAM  %o%04o / %04o" \
+                        [incr instrno] $linc $acum $mulq $xmem_ifld $pctr $sctr $xmem_ifld $addr $rdata]
+                    swtch set exam 0
+                    waitassert RUN 500
+                    memorycyclx $MS_EXAM $xmem_ifld $addr $rdata $rdata
+                    verifybit [bus oRUN] 0 "should be halted after EXAM"
+                    set wacked 1
+                }
+            }
+        }
+        puts -nonewline " cont"
+        swtch set cont 1
         runloop 2000
         swtch set cont 0
         waitassert RUN 500
+        if $wacked {
+            set pctr $addr
+            return -code 47
+        }
     }
 }
 

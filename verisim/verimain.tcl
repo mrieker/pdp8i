@@ -285,7 +285,7 @@ proc swtch {args} {
             }
             set {set setmode 1}
             default {
-                set bitnum [lsearch {"dep" "exam" "cont" "stop" "sstep" "sinst" "" "" "" "" "start" "ldad"} $sw]
+                set bitnum [lsearch {"depos" "exam" "cont" "stop" "sstep" "sinst" "" "" "" "" "start" "ldad"} $sw]
                 if {$bitnum < 0} {
                     error "unknown switch $sw"
                 }
@@ -339,9 +339,9 @@ proc wrmem {addr data} {
     runloop 240
     swtch set reg $data
     runloop 240
-    swtch set dep 1
+    swtch set depos 1
     runloop 960
-    swtch set dep 0
+    swtch set depos 0
     runloop 240
 }
 
