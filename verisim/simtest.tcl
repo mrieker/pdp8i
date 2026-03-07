@@ -12,8 +12,7 @@ set dmacainc     0
 set dmawrmem     0
 set dmafield     0
 set dmawdata     0
-set fullreal     0
-set halfreal     0
+set haltwhy      ""
 set intdelayed   0
 set intenabled   0
 set intrequest   0
@@ -58,8 +57,6 @@ proc simtest {} {
     global dmawrmem
     global dmafield
     global dmawdata
-    global fullreal
-    global halfreal
     global instrno
     global intdelayed
     global intenabled
@@ -159,7 +156,6 @@ proc simtest {} {
 
                 puts -nonewline [format "  BRK:%o%04o / %04o => %04o" $dmafield $dmaaddr $dmardata $dmawdata]
                 memorycycle $MS_BREAK $dmafield $dmaaddr $dmardata $dmawdata
-                checkhalted
             } else {
 
                 ;# maybe interrupt request is next
@@ -208,7 +204,7 @@ proc simtest {} {
                             break
                         }
                         if {($opcode & 07401) == 07400} {           ;# group 2
-                            set opcode [expr {$opcode & 07775}]     ;# don't do HLT
+                            ####set opcode [expr {$opcode & 07775}]     ;# don't do HLT
                             set swregsent [bus swreg]
                             if {$swregsent != $swregpend} {         ;# see if processor has absorbed switches
                                 set opcode [expr {$opcode & 07773}] ;# if not, don't do OSR
@@ -365,8 +361,8 @@ proc simtest {} {
                         }
                     }
                 }
-                checkhalted
             }
+            checkhalted
 
         } errmsg]
 
@@ -511,10 +507,10 @@ proc memorycycle {state field addr rdata wdata} {
     waitnegate TP4
 
     ;# check for halted/running
+    if {$haltwhy != ""} {error "unprocessed haltwhy $haltwhy}
     set isrunning [bus oRUN]
     set newstate [bus majst]
     set sbhalted 0
-    set haltwhy ""
     if {($state != $MS_DEPOS) && ($state != $MS_EXAM)} {
         if {$latsstep} {
             set sbhalted 1
@@ -550,6 +546,7 @@ proc checkhalted {} {
     ;# maybe do some ldad/exam/depos
     if {$haltwhy != ""} {
         puts -nonewline " $haltwhy"
+        set haltwhy ""
         swtch set sinst 0 sstep 0 stop 0
         set addr [bus oMADR]
         set wacked 0
