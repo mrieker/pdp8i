@@ -163,6 +163,9 @@ static int cmd_bus (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj
         {  5, OFFS (sctr),     false, "sctr"     },
 
         {  1, OFFS (swcont),   false, "swcont"   },
+        {  3, OFFS (swdfld),   false, "swdfld"   },
+        {  3, OFFS (swifld),   false, "swifld"   },
+        { 12, OFFS (swreg),    false, "swreg"    },
         {  1, OFFS (swstop),   false, "swstop"   },
         {  1, OFFS (swstart),  false, "swstart"  },
         {  1, OFFS (swsstep),  false, "swsstep"  },

@@ -30,6 +30,8 @@ module backplane (
     output[2:0] memfield,
     output[3:0] majst,
     output[4:0] sctr,
+    output[11:00] swreg,
+    output[2:0] swdfld, swifld,
     output swstart, swldad, swdepos, swexam,
     output swcont, swstop, swsstep, swsinst
 );
@@ -37,9 +39,6 @@ module backplane (
     wire[11:09] ireg;
     wire intenabd, paused;
     wire[2:0] dfield, ifield;
-
-    wire[11:00] swreg;
-    wire[2:0] swdfld, swifld;
 
     wire[11:00] memINBUS;
     wire oEXEFET, oINTACK, oJMPJMS;
@@ -261,6 +260,7 @@ module backplane (
         , .PCTR_7   (pctr[07])
         , .PCTR_8   (pctr[08])
         , .PCTR_9   (pctr[09])
+        , .READSR   (readsr)
         , .RESET    (reset)
         , .SCTR_0   ()
         , .SCTR_1   ()

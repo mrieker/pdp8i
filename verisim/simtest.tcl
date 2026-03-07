@@ -115,7 +115,7 @@ proc simtest {} {
             ;# occasionally flip switches for OSR testing
             if {$instrno % 1024 == 0} {
                 set swregpend [randbits 12]
-                ####swtch set reg $swregpend sinst [randbits 1] sstep [randbits 1] stop [randbits 1]
+                swtch set reg $swregpend ;### sinst [randbits 1] sstep [randbits 1] stop [randbits 1]
             }
 
             startline
@@ -208,8 +208,8 @@ proc simtest {} {
                             break
                         }
                         if {($opcode & 07401) == 07400} {           ;# group 2
-                            set opcode [expr {$opcode & 07771}]     ;# don't do HLT,OSR
-                            set swregsent [swtch reg]
+                            set opcode [expr {$opcode & 07775}]     ;# don't do HLT
+                            set swregsent [bus swreg]
                             if {$swregsent != $swregpend} {         ;# see if processor has absorbed switches
                                 set opcode [expr {$opcode & 07773}] ;# if not, don't do OSR
                             }
@@ -557,7 +557,7 @@ proc checkhalted {} {
             set sw [randbits 2]
             switch $sw {
                 1 {
-                    if {[swtch reg] == $swregpend} {
+                    if {[bus swreg] == $swregpend} {
                         finishline
                         startline
                         swtch set ldad 1            ;# press and hold ldad
@@ -574,7 +574,7 @@ proc checkhalted {} {
                     }
                 }
                 2 {
-                    if {[swtch reg] == $swregpend} {
+                    if {[bus swreg] == $swregpend} {
                         finishline
                         startline
                         if {[bus majst] == $MS_DEPOS} {set addr [expr {($addr + 1) & 07777}]}
