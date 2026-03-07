@@ -12,7 +12,6 @@ VFILES := \
 	memext.v \
 	memory.v \
 	../kicads/processor/processor.v \
-	../kicads/registers/registers.v \
 
 OFILES := \
 	verimain.$(MACH).o \

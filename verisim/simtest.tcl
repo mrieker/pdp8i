@@ -74,6 +74,7 @@ proc simtest {} {
     global perclock
     global pctr
     global sctr
+    global startclockno
     global swregpend
     global testexar
     global testxmem
@@ -114,13 +115,10 @@ proc simtest {} {
             ;# occasionally flip switches for OSR testing
             if {$instrno % 1024 == 0} {
                 set swregpend [randbits 12]
-                swtch set reg $swregpend sinst [randbits 1] sstep [randbits 1] stop [randbits 1]
+                ####swtch set reg $swregpend sinst [randbits 1] sstep [randbits 1] stop [randbits 1]
             }
 
-            puts -nonewline [format "%10u : L.AC=%o.%04o MQ=%04o PC=%o%04o SC=%02o : " \
-                [incr instrno] $linc $acum $mulq $xmem_ifld $pctr $sctr]
-
-            set startclockno [clk 0]
+            startline
 
             set effaddr 0
             set randsr  0
@@ -139,6 +137,7 @@ proc simtest {} {
                     set newwordcount [expr {($oldwordcount + 1) & 07777}]
                     puts -nonewline [format "  WC:%04o / %04o => %04o" $dmaaddr $oldwordcount $newwordcount]
                     memorycycle $MS_WRDCT 0 $dmaaddr $oldwordcount $newwordcount
+                    checkhalted
 
                     set wcshouldover [expr {$newwordcount == 0}]
                     verifybit $memcycwcover $wcshouldover "BWC OVERFLOW mismatch"
@@ -150,6 +149,7 @@ proc simtest {} {
                     set newcuraddr [expr {($oldcuraddr + $dmacainc) & 07777}]
                     puts -nonewline [format "  CA:%04o / %04o => %04o" $dmaaddr $oldcuraddr $newcuraddr]
                     memorycycle $MS_CURAD 0 $dmaaddr $oldcuraddr $newcuraddr
+                    checkhalted
                     set dmaaddr $newcuraddr
                 }
 
@@ -159,6 +159,7 @@ proc simtest {} {
 
                 puts -nonewline [format "  BRK:%o%04o / %04o => %04o" $dmafield $dmaaddr $dmardata $dmawdata]
                 memorycycle $MS_BREAK $dmafield $dmaaddr $dmardata $dmawdata
+                checkhalted
             } else {
 
                 ;# maybe interrupt request is next
@@ -207,6 +208,7 @@ proc simtest {} {
                             break
                         }
                         if {($opcode & 07401) == 07400} {           ;# group 2
+                            set opcode [expr {$opcode & 07771}]     ;# don't do HLT,OSR
                             set swregsent [swtch reg]
                             if {$swregsent != $swregpend} {         ;# see if processor has absorbed switches
                                 set opcode [expr {$opcode & 07773}] ;# if not, don't do OSR
@@ -229,6 +231,7 @@ proc simtest {} {
                     if {($opcode & 07000) < 06000} {
                         puts -nonewline " ="
                         if {$opcode & 0400} {
+                            checkhalted
                             set pointer [randbits 12]
                             set autoinc [expr {($pointer + (($effaddr & 07770) == 00010)) & 07777}]
                             puts -nonewline [format " %o%04o /" $xmem_ifld $effaddr]
@@ -243,6 +246,7 @@ proc simtest {} {
                 switch [expr {$opcode >> 9}] {
 
                     4 {             ;# jms
+                        checkhalted
                         set xmem_intdisableduntiljump 0
                         set xmem_ifld $xmem_ifldafterjump
                         set operand [randbits 12]
@@ -314,6 +318,7 @@ proc simtest {} {
                         } else {
                             ;# group 3 (extended arithmetic)
                             if {$opcode & 6} {
+                                checkhalted
                                 ;# group 3 with memory operand
                                 ;# supply a random value for value fetched from (PC)+
                                 ;# then perform the extended arithmetic as part of the EXEC cycle
@@ -329,6 +334,7 @@ proc simtest {} {
                     }
 
                     default {               ;# and, tad, isz, dca
+                        checkhalted
                         set operand [randbits 12]
                         puts -nonewline [format " %o%04o / %04o" $datafield $effaddr $operand]
                         switch [expr {$opcode >> 9}] {
@@ -359,6 +365,7 @@ proc simtest {} {
                         }
                     }
                 }
+                checkhalted
             }
 
         } errmsg]
@@ -366,12 +373,10 @@ proc simtest {} {
         ;# get 0 if it worked normally
         ;# get 47 if halted and did ldad/dep/exam
         if {($ercode != 0) && ($ercode != 47)} {
-            return -code $ercode $errmsg
+            return -code $ercode "$errmsg $::errorInfo"
         }
 
-        ;# print how many cycles it took (each clock is 10nS)
-        set clocks [expr {[clk 0] - $startclockno}]
-        puts [format "  (%u.%u uS)" [expr {$clocks / 10}] [expr {$clocks % 10}]]
+        finishline
 
         ;# the accumulator and link should be up to date
         verifybit [bus oTS1]  1     "TS1 mismatch at end of instruction"
@@ -385,15 +390,30 @@ proc simtest {} {
     puts "stopping for control-C"
 }
 
+proc startline {} {
+    global acum instrno linc mulq pctr sctr startclockno xmem_ifld
+
+    puts -nonewline [format "%10u : L.AC=%o.%04o MQ=%04o PC=%o%04o SC=%02o : " \
+        [incr instrno] $linc $acum $mulq $xmem_ifld $pctr $sctr]
+
+    set startclockno [clk 0]
+}
+
+;# print how many cycles it took (each clock is 100nS)
+proc finishline {} {
+    global startclockno
+    set clocks [expr {[clk 0] - $startclockno}]
+    puts [format "  (%u.%u uS)" [expr {$clocks / 10}] [expr {$clocks % 10}]]
+}
+
 ;# clock through a memory cycle, verifying the address and data
 ;#  input:
-;#   state = "state"
+;#   state = MS_state
 ;#   addr  = address it should be accessing
 ;#   rdata = data to send it for the read
 ;#   wdata = data it should send for writing
-;#   processor could possibly be somewhere near end of previous memory cycle
 ;#  output:
-;#   returns with processor just exited TS3
+;#   returns with processor just exited TS4
 ;#   memcycwcover = processor's oBWCOV at beg of TS3
 ;#
 ;# steps through:
@@ -403,112 +423,9 @@ proc simtest {} {
 ;#         update accumulator
 ;#   TS4 = update to next state
 proc memorycycle {state field addr rdata wdata} {
-    global MS_BREAK MS_DEPOS MS_EXAM MS_EXEC MS_FETCH MS_INTAK MS_WRDCT
-    global latsinst latsstep latstop
-    global acum instrno linc mulq pctr sctr swregpend xmem_ifld
-
-    ;# do memory cycle through to end of TS4
-    memorycyclx $state $field $addr $rdata $wdata
-
-    ;# check for halted/running
-    set isrunning [bus oRUN]
-    set newstate [bus majst]
-    set sbhalted 0
-    set haltwhy ""
-    if {$latsstep} {
-        set sbhalted 1
-        set haltwhy "sstep"
-    } elseif {$latstop} {
-        set sbhalted 1
-        set haltwhy "stop"
-    } elseif {($state == $MS_FETCH) && (($rdata & 07403) == 07402)} {
-        set sbhalted 1
-        set haltwhy "hlt"
-    } elseif {$latsinst && (($newstate == $MS_FETCH) || ($newstate == $MS_INTAK) || ($newstate == $MS_WRDCT) || (($newstate == $MS_BREAK) && ! [bus i3CYCLE]))} {
-        set sbhalted 1
-        set haltwhy "sinst"
-    }
-    if {$isrunning == $sbhalted} {
-        set is [expr {$isrunning ? "running" : "halted"}]
-        set sb [expr {$sbhalted ? "halted" : "running"}]
-        error "processor is $is, should be $sb ($haltwhy sinst=$latsinst sstep=$latsstep stop=$latstop oldstate=$state newstate=$newstate)"
-    }
-
-    ;# if halted, turn off stop/step switches and press continue
-    if {! $isrunning} {
-        puts -nonewline " $haltwhy"
-        swtch set sinst 0 sstep 0 stop 0
-        set wacked 0
-        while {[randbits 1] == 0} {
-            set sw [randbits 2]
-            switch $sw {
-                1 {
-                    if {[swtch reg] == $swregpend} {
-                        puts ""
-                        swtch set ldad 1            ;# press and hold ldad
-                        runloop 2000                ;# let it soak in good
-                        set addr $swregpend         ;# madr should be loaded with swreg contents
-                        set rdata [randbits 12]     ;# get random value for it to examine
-                        puts -nonewline [format "%10u : L.AC=%o.%04o MQ=%04o PC=%o%04o SC=%02o : LDAD  %o%04o / %04o" \
-                            [incr instrno] $linc $acum $mulq $xmem_ifld $pctr $sctr $xmem_ifld $addr $rdata]
-                        set swregpend [randbits 12] ;# flip switches to different random value and release ldad
-                        swtch set ldad 0 reg $swregpend
-                        waitassert RUN 500          ;# wait for processor to start an exam cycle
-                        memorycyclx $MS_EXAM $xmem_ifld $addr $rdata $rdata
-                        verifybit [bus oRUN] 0 "should be halted after LDAD"
-                        set wacked 1
-                    }
-                }
-                2 {
-                    if {[swtch reg] == $swregpend} {
-                        puts ""
-                        if {[bus majst] == $MS_DEPOS} {set addr [expr {($addr + 1) & 07777}]}
-                        swtch set depos 1
-                        runloop 2000
-                        set rdata [randbits 12]
-                        set wdata $swregpend
-                        puts -nonewline [format "%10u : L.AC=%o.%04o MQ=%04o PC=%o%04o SC=%02o : DEPOS %o%04o / %04o <= %04o" \
-                            [incr instrno] $linc $acum $mulq $xmem_ifld $pctr $sctr $xmem_ifld $addr $rdata $wdata]
-                        set swregpend [randbits 12]
-                        swtch set depos 0 reg $swregpend
-                        waitassert RUN 500
-                        memorycyclx $MS_DEPOS $xmem_ifld $addr $rdata $wdata
-                        verifybit [bus oRUN] 0 "should be halted after DEPOS"
-                        set wacked 1
-                    }
-                }
-                3 {
-                    puts ""
-                    if {[bus majst] == $MS_EXAM} {set addr [expr {($addr + 1) & 07777}]}
-                    swtch set exam 1
-                    runloop 2000
-                    set rdata [randbits 12]
-                    puts -nonewline [format "%10u : L.AC=%o.%04o MQ=%04o PC=%o%04o SC=%02o : EXAM  %o%04o / %04o" \
-                        [incr instrno] $linc $acum $mulq $xmem_ifld $pctr $sctr $xmem_ifld $addr $rdata]
-                    swtch set exam 0
-                    waitassert RUN 500
-                    memorycyclx $MS_EXAM $xmem_ifld $addr $rdata $rdata
-                    verifybit [bus oRUN] 0 "should be halted after EXAM"
-                    set wacked 1
-                }
-            }
-        }
-        puts -nonewline " cont"
-        swtch set cont 1
-        runloop 2000
-        swtch set cont 0
-        waitassert RUN 500
-        if $wacked {
-            set pctr $addr
-            return -code 47
-        }
-    }
-}
-
-proc memorycyclx {state field addr rdata wdata} {
     global dmawrmem dmawdata memcycwcover opcode
-    global MS_BREAK MS_EXEC MS_FETCH
-    global latsinst latsstep latstop
+    global MS_BREAK MS_DEPOS MS_EXAM MS_EXEC MS_FETCH MS_INTAK MS_WRDCT
+    global haltwhy latsinst latsstep latstop
 
     ;# clock until we see TS1
     waitassert TS1
@@ -592,6 +509,114 @@ proc memorycyclx {state field addr rdata wdata} {
     ;# step to end of cycle
     waitassert TP4
     waitnegate TP4
+
+    ;# check for halted/running
+    set isrunning [bus oRUN]
+    set newstate [bus majst]
+    set sbhalted 0
+    set haltwhy ""
+    if {($state != $MS_DEPOS) && ($state != $MS_EXAM)} {
+        if {$latsstep} {
+            set sbhalted 1
+            set haltwhy "sstep"
+        } elseif {$latstop} {
+            set sbhalted 1
+            set haltwhy "stop"
+        } elseif {($state == $MS_FETCH) && (($rdata & 07403) == 07402)} {
+            set sbhalted 1
+            set haltwhy "hlt"
+        } elseif {$latsinst && (($newstate == $MS_FETCH) || ($newstate == $MS_INTAK) || ($newstate == $MS_WRDCT) || (($newstate == $MS_BREAK) && ! [bus i3CYCLE]))} {
+            set sbhalted 1
+            set haltwhy "sinst"
+        }
+        if {$isrunning == $sbhalted} {
+            set is [expr {$isrunning ? "running" : "halted"}]
+            set sb [expr {$sbhalted ? "halted" : "running"}]
+            error "processor is $is, should be $sb ($haltwhy sinst=$latsinst sstep=$latsstep stop=$latstop oldstate=$state newstate=$newstate)"
+        }
+    } elseif {$isrunning} {
+        error "processor is running, should be halted (oldstate=$state newstate=$newstate)"
+    } elseif {$newstate != $state} {
+        error "processor new state $newstate but old state $state"
+    }
+}
+
+proc checkhalted {} {
+    global MS_BREAK MS_DEPOS MS_EXAM MS_EXEC MS_FETCH MS_INTAK MS_WRDCT
+    global haltwhy latsinst latsstep latstop
+    global acum instrno linc mulq pctr sctr swregpend xmem_ifld
+
+    ;# if halted, turn off stop/step switches and press continue
+    ;# maybe do some ldad/exam/depos
+    if {$haltwhy != ""} {
+        puts -nonewline " $haltwhy"
+        swtch set sinst 0 sstep 0 stop 0
+        set addr [bus oMADR]
+        set wacked 0
+        while {[randbits 1] == 2} {
+            set sw [randbits 2]
+            switch $sw {
+                1 {
+                    if {[swtch reg] == $swregpend} {
+                        finishline
+                        startline
+                        swtch set ldad 1            ;# press and hold ldad
+                        runloop 2000                ;# let it soak in good
+                        set addr $swregpend         ;# madr should be loaded with swreg contents
+                        set rdata [randbits 12]     ;# get random value for it to examine
+                        puts -nonewline [format "LDAD  %o%04o / %04o" $xmem_ifld $addr $rdata]
+                        set swregpend [randbits 12] ;# flip switches to different random value and release ldad
+                        swtch set ldad 0 reg $swregpend
+                        waitassert RUN 500          ;# wait for processor to start an exam cycle
+                        memorycycle $MS_EXAM $xmem_ifld $addr $rdata $rdata
+                        verifybit [bus oRUN] 0 "should be halted after LDAD"
+                        set wacked 1
+                    }
+                }
+                2 {
+                    if {[swtch reg] == $swregpend} {
+                        finishline
+                        startline
+                        if {[bus majst] == $MS_DEPOS} {set addr [expr {($addr + 1) & 07777}]}
+                        swtch set depos 1
+                        runloop 2000
+                        set rdata [randbits 12]
+                        set wdata $swregpend
+                        puts -nonewline [format "DEPOS %o%04o / %04o <= %04o" $xmem_ifld $addr $rdata $wdata]
+                        set swregpend [randbits 12]
+                        swtch set depos 0 reg $swregpend
+                        waitassert RUN 500
+                        memorycycle $MS_DEPOS $xmem_ifld $addr $rdata $wdata
+                        verifybit [bus oRUN] 0 "should be halted after DEPOS"
+                        set wacked 1
+                    }
+                }
+                3 {
+                    finishline
+                    startline
+                    if {[bus majst] == $MS_EXAM} {set addr [expr {($addr + 1) & 07777}]}
+                    swtch set exam 1
+                    runloop 2000
+                    set rdata [randbits 12]
+                    puts -nonewline [format "EXAM  %o%04o / %04o" $xmem_ifld $addr $rdata]
+                    swtch set exam 0
+                    waitassert RUN 500
+                    memorycycle $MS_EXAM $xmem_ifld $addr $rdata $rdata
+                    verifybit [bus oRUN] 0 "should be halted after EXAM"
+                    set wacked 1
+                }
+            }
+        }
+        puts -nonewline " cont"
+        swtch set cont 1
+        runloop 2000
+        swtch set cont 0
+        waitassert RUN 500
+        if $wacked {
+            set pctr $addr
+            return -code 47
+        }
+    }
 }
 
 ;# process IOP pulse
