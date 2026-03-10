@@ -891,6 +891,41 @@ module X74LS283 (
 
 endmodule
 
+module X74HCT541 (
+          input  p1
+        , input  p2
+        , input  p3
+        , input  p4
+        , input  p5
+        , input  p6
+        , input  p7
+        , input  p8
+        , input  p9
+        , input  p10
+        , output p11
+        , output p12
+        , output p13
+        , output p14
+        , output p15
+        , output p16
+        , output p17
+        , output p18
+        , input  p19
+        , input  p20
+);
+
+    wire oe = ~ p1 & ~ p19;
+    assign p18 = oe ? p2 : 1'bZ;
+    assign p17 = oe ? p3 : 1'bZ;
+    assign p16 = oe ? p4 : 1'bZ;
+    assign p15 = oe ? p5 : 1'bZ;
+    assign p14 = oe ? p6 : 1'bZ;
+    assign p13 = oe ? p7 : 1'bZ;
+    assign p12 = oe ? p8 : 1'bZ;
+    assign p11 = oe ? p9 : 1'bZ;
+
+endmodule
+
 module X74HC4075 (
           input  p1
         , input  p2
@@ -911,6 +946,54 @@ module X74HC4075 (
     assign p6  = p3  | p4  | p5;
     assign p9  = p1  | p2  | p8;
     assign p10 = p13 | p12 | p11;
+
+endmodule
+
+module XCY7C199 (
+    input  p1,  // A5
+    input  p2,  // A6
+    input  p3,  // A7
+    input  p4,  // A8
+    input  p5,  // A9
+    input  p6,  // A10
+    input  p7,  // A11
+    input  p8,  // A12
+    input  p9,  // A13
+    input  p10, // A14
+    inout  p11, // IO0
+    inout  p12, // IO1
+    inout  p13, // IO2
+    input  p14, // GND
+    inout  p15, // IO3
+    inout  p16, // IO4
+    inout  p17, // IO5
+    inout  p18, // IO6
+    inout  p19, // IO7
+    input  p20, // _CE
+    input  p21, // A0
+    input  p22, // _OE
+    input  p23, // A1
+    input  p24, // A2
+    input  p25, // A3
+    input  p26, // A4
+    input  p27, // _WE
+    input  p28  // VCC
+);
+
+    wire[14:00] a = { p10, p9, p8, p7, p6, p5, p4, p3, p2, p1, p26, p25, p24, p23, p21 };
+    reg[7:0] array[32767:0];
+
+    ////always @(*) begin
+    ////    $display ("XCY7C199*: %m ce=%b oe=%b we=%b a=%o array[a]=%o", ~p20, ~p22, ~p27, a, array[a]);
+    ////end
+
+    assign { p19, p18, p17, p16, p15, p13, p12, p11 } = (~ p20 & ~ p22 & p27) ? array[a] : 8'hZZ;
+
+    always @(negedge p20 or negedge p27) begin
+        if (~ p20 & ~ p27) begin
+            array[a] = { p19, p18, p17, p16, p15, p13, p12, p11 };
+        end
+    end
 
 endmodule
 

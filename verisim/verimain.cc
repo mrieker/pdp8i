@@ -348,8 +348,9 @@ static int cmd_mem (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj
                 Tcl_SetResultF (interp, "bad address %d", addr);
                 return TCL_ERROR;
             }
-            int data = vbkpl->backplane__DOT__meminst__DOT__memarray[addr];
-            Tcl_SetObjResult (interp, Tcl_NewIntObj (data));
+            int datalo = vbkpl->backplane__DOT__meminst__DOT__U175__DOT__array[addr] & 077;
+            int datahi = vbkpl->backplane__DOT__meminst__DOT__U177__DOT__array[addr] & 077;
+            Tcl_SetObjResult (interp, Tcl_NewIntObj ((datahi << 6) | datalo));
             return TCL_OK;
         }
 
@@ -369,7 +370,8 @@ static int cmd_mem (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj
                 Tcl_SetResultF (interp, "bad data %d", data);
                 return TCL_ERROR;
             }
-            vbkpl->backplane__DOT__meminst__DOT__memarray[addr] = data;
+            vbkpl->backplane__DOT__meminst__DOT__U175__DOT__array[addr] = data & 077;
+            vbkpl->backplane__DOT__meminst__DOT__U177__DOT__array[addr] = (data >> 6) & 077;
             return TCL_OK;
         }
 

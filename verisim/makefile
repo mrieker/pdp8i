@@ -8,9 +8,7 @@ VFILES := \
 	chips.v \
 	console.v \
 	extarith.v \
-	flipflops.v \
-	memext.v \
-	memory.v \
+	../kicads/extmemory/extmemory.v \
 	../kicads/processor/processor.v \
 
 OFILES := \
@@ -47,11 +45,11 @@ obj_dir/Vbackplane.cpp obj_dir/Vbackplane.h obj_dir/Vbackplane.mk: $(VFILES)
 	rm -rf obj_dir
 	verilator --cc --top-module backplane $(VFILES)
 
+../kicads/extmemory/extmemory.v: ../kicads/extmemory/extmemory.kicad_pcb
+	cd ../kicads/extmemory ; ../parsepcb.sh extmemory
+
 ../kicads/processor/processor.v: ../kicads/processor/processor.kicad_pcb
 	cd ../kicads/processor ; ../parsepcb.sh processor
-
-../kicads/registers/registers.v: ../kicads/registers/registers.kicad_pcb
-	cd ../kicads/registers ; ../parsepcb.sh registers
 
 ../kicads/processor/processor.kicad_pcb: ../kicads/processor/processor.kicad_sch
 	error update processor.kicad_pcb

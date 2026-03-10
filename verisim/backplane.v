@@ -110,39 +110,161 @@ module backplane (
     wire iINTINH;
     wire[11:00] mexINBUS;
 
-    memext mexinst (
-        .clok2 (clok2),
-        .reset (reset),
+    extmemory meminst (
+          .ACCLEAR  (acclear)
+        , .ACUM_0   (oACUM[00])
+        , .ACUM_1   (oACUM[01])
+        , .ACUM_10  (oACUM[10])
+        , .ACUM_11  (oACUM[11])
+        , .ACUM_2   (oACUM[02])
+        , .ACUM_3   (oACUM[03])
+        , .ACUM_4   (oACUM[04])
+        , .ACUM_5   (oACUM[05])
+        , .ACUM_6   (oACUM[06])
+        , .ACUM_7   (oACUM[07])
+        , .ACUM_8   (oACUM[08])
+        , .ACUM_9   (oACUM[09])
+        , .BRKRQST  (iBRKRQST)
+        , .BRKWRM   (iBRKWRM)
+        , .BUSINI   (oBUSINI)
+        , .BWCOV    (oBWCOV)
+        , .CAINC    (iCAINC)
+        , .CLOK2    (clok2)
+        , .CYCLE3   (i3CYCLE)
+        , .DFLD_0   (dfield[0])
+        , .DFLD_1   (dfield[1])
+        , .DFLD_2   (dfield[2])
+        , .DMADR_0  (iDMAADDR[00] | swldad & swdfld[0])
+        , .DMADR_1  (iDMAADDR[01] | swldad & swdfld[1])
+        , .DMADR_2  (iDMAADDR[02] | swldad & swdfld[2])
+        , .DMADR_3  (iDMAADDR[03] | swldad & swifld[0])
+        , .DMADR_4  (iDMAADDR[04] | swldad & swifld[1])
+        , .DMADR_5  (iDMAADDR[05] | swldad & swifld[2])
+        , .DMADR_6  (iDMAADDR[06])
+        , .DMADR_7  (iDMAADDR[07])
+        , .DMADR_8  (iDMAADDR[08])
+        , .DMADR_9  (iDMAADDR[09])
+        , .DMADR_10 (iDMAADDR[10])
+        , .DMADR_11 (iDMAADDR[11])
+        , .DMADR_12 (iDMAADDR[12])
+        , .DMADR_13 (iDMAADDR[13])
+        , .DMADR_14 (iDMAADDR[14])
+        , .EXEFET   (oEXEFET)
+        , .FIELD_0  (memfield[0])
+        , .FIELD_1  (memfield[1])
+        , .FIELD_2  (memfield[2])
+        , .GND      (1'b0)
+        , .HOLD     (hold)
+        , .IFLD_0   (ifield[0])
+        , .IFLD_1   (ifield[1])
+        , .IFLD_2   (ifield[2])
+        , .INBUS_0  (inbus[00])
+        , .INBUS_1  (inbus[01])
+        , .INBUS_10 (inbus[10])
+        , .INBUS_11 (inbus[11])
+        , .INBUS_2  (inbus[02])
+        , .INBUS_3  (inbus[03])
+        , .INBUS_4  (inbus[04])
+        , .INBUS_5  (inbus[05])
+        , .INBUS_6  (inbus[06])
+        , .INBUS_7  (inbus[07])
+        , .INBUS_8  (inbus[08])
+        , .INBUS_9  (inbus[09])
+        , .INTINH   (iINTINH)
+        , .INTRQST  (iINTRQST)
+        , .IOSKIP   (ioskip)
+        , .IREG_10  (ireg[10])
+        , .IREG_11  (ireg[11])
+        , .IREG_9   (ireg[09])
+        , .LINK     (oLINK)
+        , .LNKTOG   (lnktog)
+        , .MADR_0   (oMADR[00])
+        , .MADR_1   (oMADR[01])
+        , .MADR_10  (oMADR[10])
+        , .MADR_11  (oMADR[11])
+        , .MADR_2   (oMADR[02])
+        , .MADR_3   (oMADR[03])
+        , .MADR_4   (oMADR[04])
+        , .MADR_5   (oMADR[05])
+        , .MADR_6   (oMADR[06])
+        , .MADR_7   (oMADR[07])
+        , .MADR_8   (oMADR[08])
+        , .MADR_9   (oMADR[09])
+        , .MBUF_0   (oMBUF[00])
+        , .MBUF_1   (oMBUF[01])
+        , .MBUF_10  (oMBUF[10])
+        , .MBUF_11  (oMBUF[11])
+        , .MBUF_2   (oMBUF[02])
+        , .MBUF_3   (oMBUF[03])
+        , .MBUF_4   (oMBUF[04])
+        , .MBUF_5   (oMBUF[05])
+        , .MBUF_6   (oMBUF[06])
+        , .MBUF_7   (oMBUF[07])
+        , .MBUF_8   (oMBUF[08])
+        , .MBUF_9   (oMBUF[09])
+        , .MQUO_0   ()
+        , .MQUO_1   ()
+        , .MQUO_10  ()
+        , .MQUO_11  ()
+        , .MQUO_2   ()
+        , .MQUO_3   ()
+        , .MQUO_4   ()
+        , .MQUO_5   ()
+        , .MQUO_6   ()
+        , .MQUO_7   ()
+        , .MQUO_8   ()
+        , .MQUO_9   ()
+        , .PCTR_0   (pctr[00])
+        , .PCTR_1   (pctr[01])
+        , .PCTR_10  (pctr[10])
+        , .PCTR_11  (pctr[11])
+        , .PCTR_2   (pctr[02])
+        , .PCTR_3   (pctr[03])
+        , .PCTR_4   (pctr[04])
+        , .PCTR_5   (pctr[05])
+        , .PCTR_6   (pctr[06])
+        , .PCTR_7   (pctr[07])
+        , .PCTR_8   (pctr[08])
+        , .PCTR_9   (pctr[09])
+        , .READSR   (readsr)
+        , .RESET    (reset)
+        , .SCTR_0   ()
+        , .SCTR_1   ()
+        , .SCTR_2   ()
+        , .SCTR_3   ()
+        , .SCTR_4   ()
+        , .VCC      (1'b1)
+        , .swCONT   (swcont)
+        , .swDEPOS  (swdepos)
+        , .swEXAM   (swexam)
+        , .swLDAD   (swldad)
+        , .swSINST  (swsinst)
+        , .swSSTEP  (swsstep)
+        , .swSTART  (swstart)
+        , .swSTOP   (swstop)
 
-        .businit (oBUSINI),
-        .iop (oIOP),
-        .ldaddrsw (swldad),
-        .tp3 (oTP3),
-        .tp4 (oTP4),
-        .exefet (oEXEFET),
-        .intack (oINTACK),
-        .jmpjms (oJMPJMS),
-
-        .dmafield (iDMAADDR[14:12]),
-        .dfldsw (swdfld),
-        .ifldsw (swifld),
-        .fldsel (oFLDSEL),
-        .acum (oACUM),
-        .mbuf (oMBUF),
-
-        .intinh (iINTINH),
-        .field (memfield),
-        .inbus (mexINBUS)
-    );
-
-    memory meminst (
-        .clok2 (clok2),
-
-        .ts1  (oTS1),
-        .ts3  (oTS3),
-        .xadr ({ memfield, oMADR }),
-        .mbuf (oMBUF),
-        .mbus (memINBUS)
+        , .FLDSEL_0 (oFLDSEL[0])
+        , .FLDSEL_1 (oFLDSEL[1])
+        , .IOP      (oIOP)
+        , .MAJST_0  (majst[0])
+        , .MAJST_1  (majst[1])
+        , .MAJST_2  (majst[2])
+        , .MAJST_3  (majst[3])
+        , .NXTMS_0  (nxtms[0])
+        , .NXTMS_1  (nxtms[1])
+        , .NXTMS_2  (nxtms[2])
+        , .NXTMS_3  (nxtms[3])
+        , .NXTMSBRK ()
+        , .NXTMSIAK ()
+        , .RUN      (oRUN)
+        , .TP1      (oTP1)
+        , .TP2      (oTP2)
+        , .TP3      (oTP3)
+        , .TP4      (oTP4)
+        , .TS1      (oTS1)
+        , .TS2      (oTS2)
+        , .TS3      (oTS3)
+        , .TS4      (oTS4)
     );
 
     wire readsr;
