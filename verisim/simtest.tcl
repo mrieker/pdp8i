@@ -45,7 +45,7 @@ set MS_DEPOS 8  ;# memory cycle is for deposit switch
 set MS_EXAM  9  ;# memory cycle is for examine switch
 
 set testexar 0  ;# test extended arithmetic
-set testxmem 0  ;# test extended memory
+set testxmem 1  ;# test extended memory
 set runquiet 1  ;# tell runstep command to keep quiet
 
 proc simtest {} {
@@ -72,6 +72,8 @@ proc simtest {} {
     global pctr
     global sctr
     global startclockno
+    global swdfpend
+    global swifpend
     global swregpend
     global testexar
     global testxmem
@@ -112,8 +114,11 @@ proc simtest {} {
 
             ;# occasionally flip switches for OSR testing
             if {$instrno % 1024 == 0} {
+                set swdfpend [randbits 3]
+                set swifpend [randbits 3]
                 set swregpend [randbits 12]
-                swtch set reg $swregpend sinst [randbits 1] sstep [randbits 1] stop [randbits 1]
+                swtch set df $swdfpend if $swifpend reg $swregpend
+                swtch set sinst [randbits 1] sstep [randbits 1] stop [randbits 1]
             }
 
             startline
@@ -310,8 +315,6 @@ proc simtest {} {
                             if {$opcode & 0004} {
                                 puts -nonewline [format " sr:%04o" $swregpend]
                                 set acum [expr {$acum | $swregpend}]
-                                ;## set swregpend [randbits 12]
-                                ;## swtch set reg $swregpend
                             }
                             puts -nonewline [format " => %04o" $acum]
                         } else {
@@ -366,6 +369,13 @@ proc simtest {} {
                 }
             }
             checkhalted
+
+            ;# if did an OSR, set up new SR contents for next one
+            ;# wait until after checkhalted call so processor used old SR
+            if {($opcode & 07405) == 07404} {
+                set swregpend [randbits 12]
+                swtch set reg $swregpend
+            }
 
         } errmsg]
 
@@ -552,7 +562,7 @@ proc memorycycle {state field addr rdata wdata} {
 ;# cont alone should not reset state, should pick up where it left off
 proc checkhalted {} {
     global MS_BREAK MS_DEPOS MS_EXAM MS_EXEC MS_FETCH MS_INTAK MS_WRDCT
-    global haltwhy latsinst latsstep latstop pctr swregpend xmem_ifld
+    global haltwhy latsinst latsstep latstop pctr swdfpend swifpend swregpend xmem_dfld xmem_ifld xmem_ifldafterjump
 
     ;# if halted, turn off stop/step switches and press continue
     ;# maybe do some ldad/exam/depos
@@ -567,11 +577,15 @@ proc checkhalted {} {
             set sw [expr {$doldad ? 1 : [randbits 2]}]
             switch $sw {
                 1 {
-                    if {[bus swreg] == $swregpend} {
+                    ;# ldad - only if all 18 switches have soaked through console board
+                    if {([bus swdfld] == $swdfpend) && ([bus swifld] == $swifpend) && ([bus swreg] == $swregpend)} {
                         finishline
                         startline
                         swtch set ldad 1            ;# press and hold ldad
                         runloop 2000                ;# let it soak in good
+                        set xmem_dfld $swdfpend
+                        set xmem_ifld $swifpend
+                        set xmem_ifldafterjump $swifpend
                         set addr $swregpend         ;# madr should be loaded with swreg contents
                         set pctr $addr              ;# circuit also sets pctr to the address
                         set rdata [randbits 12]     ;# get random value for it to examine
@@ -588,6 +602,7 @@ proc checkhalted {} {
                     }
                 }
                 2 {
+                    ;# depos - only if 12 data switches have soaked through console board
                     if {[bus swreg] == $swregpend} {
                         finishline
                         startline
@@ -611,6 +626,7 @@ proc checkhalted {} {
                     }
                 }
                 3 {
+                    ;# exam
                     finishline
                     startline
                     if {[bus majst] == $MS_EXAM} {
