@@ -404,10 +404,10 @@ proc simtest {} {
 }
 
 proc startline {} {
-    global acum instrno linc mulq pctr sctr startclockno xmem_ifld
+    global acum instrno linc mulq pctr sctr startclockno xmem_dfld xmem_ifld
 
-    puts -nonewline [format "%10u : L.AC=%o.%04o MQ=%04o PC=%o%04o SC=%02o : " \
-        [incr instrno] $linc $acum $mulq $xmem_ifld $pctr $sctr]
+    puts -nonewline [format "%10u : L.AC=%o.%04o MQ=%04o PC=%o%04o SC=%02o DF=%o : " \
+        [incr instrno] $linc $acum $mulq $xmem_ifld $pctr $sctr $xmem_dfld]
 
     set startclockno [clk 0]
 }
@@ -695,21 +695,21 @@ proc doioinstr {opcode} {
                 set xmem_intdisableduntiljump 1
             }
         } elseif {($opcode & 7) == 4} {
-            switch [expr {($opcode >> 3) & 7}] {
-                1 {             ;# 6214
+            switch [expr {($opcode >> 3) & 3}] {
+                1 {                 ;# 6214
                     set acbits [expr {$xmem_dfld << 3}]
                 }
-                2 {             ;# 6224
+                2 {                 ;# 6224
                     set acbits [expr {$xmem_ifld << 3}]
                 }
-                3 {             ;# 6234
+                3 {                 ;# 6234
                     set acbits [expr {($xmem_savedifld << 3) | $xmem_saveddfld}]
                 }
-                4 {             ;# 6244
-                    puts -nonewline [format " (ifaj=%o dfld=%o)" $xmem_savedifld $xmem_saveddfld]
-                    set xmem_dfld          $xmem_saveddfld
-                    set xmem_ifldafterjump $xmem_savedifld
-                }
+            }
+            if {$opcode & 040} {    ;# 6244
+                puts -nonewline [format " (ifaj=%o dfld=%o)" $xmem_savedifld $xmem_saveddfld]
+                set xmem_dfld          $xmem_saveddfld
+                set xmem_ifldafterjump $xmem_savedifld
             }
         }
     } else {
