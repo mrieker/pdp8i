@@ -33,7 +33,8 @@ module extarith (
     reg[4:0] bctr;
     reg[6:1] extop;
     reg[11:00] myac, yreg;
-    reg[23:00] prod;
+
+    wire[11:00] ymul = mulq[00] ? yreg : 0;
 
     always @(posedge clok2) begin
 
@@ -54,7 +55,6 @@ module extarith (
 
         if (oTP1 & isextar & (lbMAJST == MS_EXEC)) begin
             yreg   <= iMEMBUS;                                      // local copy of extended operand so we can modify it
-            prod   <= 0;
         end
 
         if ((oTP2 | iHOLD) & isextar & (lbMAJST == (memop ? MS_EXEC : MS_FETCH))) begin
@@ -92,13 +92,11 @@ module extarith (
                     // 7405 MUY - multiply: Y * MQ => AC,MQ
                     2: begin
                         if (bctr != 12) begin
-                            prod   <= { prod[22:00], 1'b0 } + { 12'b0, (mulq[11] ? yreg : 12'b0) };
-                            mulq   <= { mulq[10:00], 1'b0 };
+                            { myac, mulq[11] } <= { 1'b0, myac } + { 1'b0, ymul };
+                            mulq[10:00] <= mulq[11:01];
                             bctr   <= bctr + 1;
                         end else begin
                             extop  <= 0;
-                            myac   <= prod[23:12];
-                            mulq   <= prod[11:00];
                             mylink <= 0;
                         end
                     end

@@ -554,8 +554,8 @@ proc extendedarithmetic {yreg} {
             set sctr [expr {037 & ~ $yreg}]
         }
 
-        2 {     ;# 7405 MUY - multiply: Y * MQ => AC,MQ
-            set prod [expr {$yreg * $mulq}]
+        2 {     ;# 7405 MUY - multiply: Y * MQ + AC => AC,MQ
+            set prod [expr {$yreg * $mulq + $acum}]
             set acum [expr {$prod >> 12}]
             set mulq [expr {$prod & 07777}]
             set linc 0
