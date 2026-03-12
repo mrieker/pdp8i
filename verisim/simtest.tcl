@@ -562,7 +562,9 @@ proc memorycycle {state field addr rdata wdata} {
 ;# cont alone should not reset state, should pick up where it left off
 proc checkhalted {} {
     global MS_BREAK MS_DEPOS MS_EXAM MS_EXEC MS_FETCH MS_INTAK MS_WRDCT
-    global haltwhy latsinst latsstep latstop pctr swdfpend swifpend swregpend xmem_dfld xmem_ifld xmem_ifldafterjump
+    global haltwhy latsinst latsstep latstop pctr swdfpend swifpend swregpend
+    global acum linc mulq sctr xmem_intdisableduntiljump brkrequest intdelayed intenabled intrequest
+    global xmem_dfld xmem_ifld xmem_ifldafterjump xmem_saveddfld xmem_savedifld
 
     ;# if halted, turn off stop/step switches and press continue
     ;# maybe do some ldad/exam/depos
@@ -646,10 +648,27 @@ proc checkhalted {} {
                 }
             }
         }
-        puts -nonewline " cont"
-        swtch set cont 1
+        if {$wacked && ([randbits 4] == 0)} {
+            puts -nonewline " start"
+            swtch set start 1
+            set acum 0
+            set linc 0
+            set mulq 0
+            set sctr 0
+            set xmem_saveddfld 0
+            set xmem_savedifld 0
+            set xmem_intdisableduntiljump 0
+            set intdelayed 0
+            set intenabled 0
+            bus set iBRKRQST 0 iINTRQST 0
+            set brkrequest 0
+            set intrequest 0
+        } else {
+            puts -nonewline " cont"
+            swtch set cont 1
+        }
         runloop 2000
-        swtch set cont 0
+        swtch set cont 0 start 0
         waitassert RUN 500
         if $wacked {
             return -code 47

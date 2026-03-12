@@ -418,6 +418,46 @@ module X74HC74 (
 
 endmodule
 
+module V74HC74 (
+          input  p1
+        , input  p2
+        , input  p3
+        , input  p4
+        , output reg p5
+        , output reg p6
+        , input  p7
+        , output reg p8
+        , output reg p9
+        , input  p10
+        , input  p11
+        , input  p12
+        , input  p13
+        , input  p14
+);
+
+    always @(posedge p3 or negedge p1 or negedge p4) begin
+        $display ("V74H74*: %m C=%b D=%b _Pc=%b _Ps=%b Q=%b _Q=%b", p3, p2, p1, p4, p5, p6);
+        if (~ p1 | ~ p4) begin
+            p5 <= ~ p4;     //  q <= ~ ps
+            p6 <= ~ p1;     // _q <= ~ pc
+        end else begin
+            p5 <=   p2;     //  q <=   d
+            p6 <= ~ p2;     // _q <= ~ d
+        end
+    end
+
+    always @(posedge p11 or negedge p13 or negedge p10) begin
+        if (~ p13 | ~ p10) begin
+            p9 <= ~ p10;    //  q <= ~ ps
+            p8 <= ~ p13;    // _q <= ~ pc
+        end else begin
+            p9 <=   p12;    //  q <=   d
+            p8 <= ~ p12;    // _q <= ~ d
+        end
+    end
+
+endmodule
+
 module X74HC86 (
           input  p1
         , input  p2
