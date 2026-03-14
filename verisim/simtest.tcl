@@ -502,7 +502,7 @@ proc memorycycle {state field addr rdata wdata} {
         set latsstep [bus swsstep]
         set latstop  [bus swstop]
         if {[bus oTP3]} break
-        if {$i > 100} {error "timed out waiting for TP3 asserted"}
+        if {$i > 500} {error "timed out waiting for TP3 asserted"}
         runstep
     }
     waitnegate TP3
@@ -771,16 +771,19 @@ proc extendedarithmetic {yreg} {
             set prod [expr {$yreg * $mulq + $acum}]
             set acum [expr {$prod >> 12}]
             set mulq [expr {$prod & 07777}]
+            set sctr 12
             set linc 0
         }
 
         3 {     ;# 7407 DVI - divide: AC,MQ / Y => MQ r AC
             if {$acum >= $yreg} {
+                set sctr 0
                 set linc 1
             } else {
                 set acmq [expr {($acum << 12) | $mulq}]
                 set acum [expr {$acmq % $yreg}]
                 set mulq [expr {($acmq - $acum) / $yreg}]
+                set sctr 11
                 set linc 0
             }
         }

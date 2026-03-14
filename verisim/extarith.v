@@ -32,14 +32,18 @@ module extarith (
 `include "msdef.v"
 
     reg extar, memop, myln, s3clk;
-    reg[11:00] mquo, myac, yreg;
+    reg[11:00] mquo, myac;
+    reg[11:05] yreglat;
+    reg[07:00] yregctr;
     reg[6:4] extop64;
     reg[3:1] extop31;
     reg[4:0] sctr;
 
+    wire[11:00] yreg = { yreglat, yregctr[04:00] };
+
     always @(posedge CLOK2) begin
-        $display ("extarith*: ts=%b%b%b%b majst=%x inbus=%o extar=%b memop=%b myln=%b s3clk=%b extop=%o%o sctr=%o myac=%o mquo=%o yreg=%o hold=%b skip=%b",
-            TS1,TS2,TS3,TS4, MAJST, INBUS, extar, memop, myln, s3clk, extop64, extop31, sctr, myac, mquo, yreg, HOLD, IOSKIP);
+        $display ("extarith*: ts=%b%b%b%b majst=%x s3clk=%b sctr=%o myac=%o mquo=%o yreg=%o dviboro=%b dvidiff=%o dvidend=%o dviqbit=%b",
+            TS1,TS2,TS3,TS4, MAJST, s3clk, sctr, myac, mquo, yreg, dviboro, dvidiff, dvidend, dviqbit);
     end
 
     assign MQUO = mquo;
@@ -48,16 +52,18 @@ module extarith (
     // major state executing
     wire msfetch = MAJST == MS_FETCH;
     wire msexec  = MAJST == MS_EXEC;
+
+    // we are doing execute cycle of an extended arithmetic instruction
     wire extarexec = extar & (memop ? msexec : msfetch);
 
     // opcode is one of SHL,ASR,LSR
     wire countedshift = extop31[3] & (extop31[2] | extop31[1]);
-    wire countedshiftdone = countedshift & (yreg[04:00] != 0);
+    wire countedshiftdone = countedshift & yregctr[07];
 
     // normalize is done
     wire nmidone = (myac[11] != myac[10]) | (myac[09:00] == 0) & (mquo == 0);
 
-    // step 2
+    // step 2 - clocked into myac at TP2
     wire[11:00] myacstep2 = (extop64[4] ? 12'b0 : myac) |           // 0020 MQL - load multipler quotient from accumulator
                             (extop64[5] ? { 7'b0, sctr } : 12'b0) | // 0040 SCA - step counter load into accumulator
                             (extop64[6] ? mquo : 12'b0);            // 0100 MQA - multiplier quotient load into accumulator
@@ -71,10 +77,10 @@ module extarith (
     // each step in divide
     wire dviover = myac >= yreg;
     wire[11:00] dvidend = { myac[10:00], mquo[11] };
-    wire dvicary;
+    wire dviboro;
     wire[11:00] dvidiff;
-    assign { dvicary, dvidiff } = { 1'b0, dvidend } + { 1'b1, ~ yreg } + 1;
-    wire dviqbit = dvicary | myac[11];
+    assign { dviboro, dvidiff } = { 1'b0, dvidend } - { 1'b0, ~ yreg };
+    wire dviqbit = myac[11] | ~ dviboro;
     wire[11:00] dviacstep = dviqbit ? dvidiff : dvidend;
     wire[11:00] dvimqstep = { mquo[10:00],  dviqbit };   // shift quotient bit into bottom of MQ
 
@@ -112,33 +118,21 @@ module extarith (
     //                         TS3 stretched by HOLD
     wire[6:1] extop_dat = INBUS[06:01];
     wire extop_clk = TP1 & msfetch;
-    wire _extop64_pc = ~ TP2;
-    wire _extop31_pc = ~ (
-            s3clk & (extop31 == 1) |                                // SCL done
-            s3clk & (extop31 == 2) & (sctr == 12) |                 // MUY done after 12 steps
-            s3clk & (extop31 == 3) & (sctr == 0) & (myac >= yreg) | // DVI overflow
-            s3clk & (extop31 == 3) & (sctr == 11) |                 // DVI normal
-            s3clk & (extop31 == 4) & nmidone |                      // NMI done
-            s3clk & (extop31 == 5) & countedshiftdone |             // SHL done
-            s3clk & (extop31 == 6) & countedshiftdone |             // ASR done
-            s3clk & (extop31 == 7) & countedshiftdone               // LSR done
-        );
 
-    always @(posedge extop_clk or negedge _extop64_pc) begin
-        if (~ _extop64_pc) extop64 <= 0;
-        else extop64 <= extop_dat[6:4];
-    end
-
-    always @(posedge extop_clk or negedge _extop31_pc) begin
-        if (~ _extop31_pc) extop31 <= 0;
-        else extop31 <= extop_dat[3:1];
+    always @(posedge extop_clk) begin
+        extop64 <= extop_dat[6:4];
+        extop31 <= extop_dat[3:1];
     end
 
 
     // hold processor at beginning of TS3 while doing step 3
     wire HOLD_clk = TS3;
     wire HOLD_dat = extarexec;
-    wire _HOLD_pc = (extop64 != 0) | (extop31 != 0);
+    wire _HOLD_pc =
+            (extop31 == 2) & (sctr != 12) |
+            (extop31 == 3) & (sctr != 11) |
+            (extop31 == 4) & ~ nmidone |
+            countedshift & ~ yregctr[07];
 
     always @(posedge HOLD_clk or negedge _HOLD_pc) begin
         if (~ _HOLD_pc) HOLD <= 0;
@@ -186,7 +180,7 @@ module extarith (
 
     wire[11:00] myac_dat =
         TS1 & msfetch ? (INBUS[07] ? 0 : ACUM) :                // get accumulator during fetch
-        TS2 &  msexec           ? myacstep2 :                   // update accumulator for step 2
+        TS2 & extarexec      ? myacstep2 :                      // update accumulator for step 2
         TS3 & (extop31 == 2) ? muyacstep :                      // update accumulator for multiply
         TS3 & (extop31 == 3) ? dviacstep :                      // update accumulator for divide
         TS3 & (extop31[3:2] == 2) ? shlacstep :                 // update accumulator for shift left
@@ -196,7 +190,7 @@ module extarith (
 
     wire myac_clk =
         TP1 & msfetch |                                         // get acum during fetch
-        TP2 &  msexec & (extop64 != 0) |                        // update acum during step 2 (MQL,SCA,MQA)
+        TP2 & extarexec & (extop64 != 0) |                      // update acum during step 2 (MQL,SCA,MQA)
         s3clk & (extop31 == 2) & (sctr != 12) |                 // accumulator for each step of multiply
         s3clk & (extop31 == 3) & (sctr != 0 | myac < yreg) |    // accumulator for divide steps
         extop31[3] & myln_clk;                                  // accumulator for shifts same as link
@@ -216,7 +210,7 @@ module extarith (
             mquo;
 
     wire mquo_clk =
-        TP2 & msexec & extop64[4] |                             // load mquo from acum in step 2
+        TP2 & extarexec & extop64[4] |                          // load mquo from acum in step 2
         s3clk & (extop31 == 2) & (sctr != 12) |                 // mult/quo for each step of multiply
         s3clk & (extop31 == 3) & (sctr != 0 | myac < yreg) |    // mult/quo for divide steps
         extop31[3] & myln_clk;                                  // mult/quo for shifts same as link
@@ -228,13 +222,15 @@ module extarith (
 
 
     wire[4:0] sctr_dat =
-        TS1 & msfetch ? 5'b0 :                                  // clear during fetch for MUY,DVI,NMI
-        TS3 & (extop31 == 1) ? ~ yreg[04:00] :                  // load sctr from memory
+        TS2 & (extop31 == 1) ? ~ yreg[04:00] :                  // load sctr from memory
+        TS2 & extarexec & (extop31[3:2] == 1) ? 0 :             // load 0 at TP2 for MUY,DVI
+        TS2 & extarexec & (extop31      == 4) ? 0 :             // load 0 at TP2 for NMI
             sctr;
 
     wire sctr_clk =
-        TP1 & msfetch & extar_dat & ((INBUS[3:2] == 2) | (INBUS[3:1] == 4)) |
-        s3clk & (extop31 == 1);                                 // load sctr from memory
+        TP2 & extarexec & (extop31      == 1) |                 // load sctr from memory
+        TP2 & extarexec & (extop31[3:2] == 1) |                 // load 0 at TP2 for MUY,DVI
+        TP2 & extarexec & (extop31      == 4);                  // load 0 at TP2 for NMI
 
     wire sctr_inc =
         s3clk & (extop31[3:2] == 1) |                           // multiply or divide, increment count
@@ -242,7 +238,7 @@ module extarith (
 
     always @(posedge sctr_clk or posedge sctr_inc or posedge BUSINI) begin
         if (BUSINI) sctr <= 0;
-        if (sctr_inc) sctr <= sctr + 1;
+        else if (sctr_inc) sctr <= sctr + 1;
         else sctr <= sctr_dat;
     end
 
@@ -252,8 +248,11 @@ module extarith (
     wire yreg40_dec = s3clk & countedshift;                     // TP3 decrement YREG for counted shifts
 
     always @(posedge yreg_clk or posedge yreg40_dec) begin
-        if (yreg40_dec) yreg[04:00] <= yreg[04:00] - 1;
-        else yreg <= yreg_dat;
+        if (yreg40_dec) yregctr <= yregctr - 1;
+        else begin
+            yreglat <=         yreg_dat[11:05];
+            yregctr <= { 3'b0, yreg_dat[04:00] };
+        end
     end
 
 endmodule
