@@ -44,7 +44,7 @@ set MS_INTAK 7  ;# memory cycle is for interrupt acknowledge
 set MS_DEPOS 8  ;# memory cycle is for deposit switch
 set MS_EXAM  9  ;# memory cycle is for examine switch
 
-set testexar 0  ;# test extended arithmetic
+set testexar 1  ;# test extended arithmetic
 set testxmem 1  ;# test extended memory
 set runquiet 1  ;# tell runstep command to keep quiet
 

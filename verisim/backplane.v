@@ -37,7 +37,7 @@ module backplane (
 );
 
     wire[11:09] ireg;
-    wire intenabd, paused;
+    wire intenabd;
     wire[2:0] dfield, ifield;
 
     wire[11:00] memINBUS;
@@ -59,7 +59,7 @@ module backplane (
         .lbireg (ireg),
         .lbmajst (majst),
         .lbion (intenabd),
-        .lbpause (paused),
+        .lbpause (hold),
         .lbrun (oRUN),
         .lbsc (sctr),
         .lbdf (dfield),
@@ -80,31 +80,32 @@ module backplane (
     );
 
     wire eaeACCLEAR, eaeHOLD, eaeIOSKIP, eaeLNKTOG;
-    wire[11:00] eaeINBUS;
 
     extarith eaeinst (
-        .clok2 (clok2),
-        .reset (reset),
+        .CLOK2 (clok2),
+        .BUSINI (oBUSINI),
 
-        .iACCLEAR (eaeACCLEAR),
-        .iHOLD (eaeHOLD),
-        .iIOSKIP (eaeIOSKIP),
-        .iLNKTOG (eaeLNKTOG),
-        .iINBUS (eaeINBUS),
+        .ACCLEAR (eaeACCLEAR),
+        .HOLD (eaeHOLD),
+        .IOSKIP (eaeIOSKIP),
+        .LNKTOG (eaeLNKTOG),
 
-        .iMEMBUS (memINBUS),
-        .oLINK (oLINK),
-        .oTP1 (oTP1),
-        .oTP2 (oTP2),
-        .oTP3 (oTP3),
-        .oTP4 (oTP4),
-        .oACUM (oACUM),
-        .oMBUF (oMBUF),
+        .INBUS (inbus),
+        .LINK (oLINK),
+        .TP1 (oTP1),
+        .TP2 (oTP2),
+        .TP3 (oTP3),
+        .TP4 (oTP4),
+        .TS1 (oTS1),
+        .TS2 (oTS2),
+        .TS3 (oTS3),
+        .TS4 (oTS4),
+        .ACUM (oACUM),
 
-        .lbMAJST (majst),
+        .MAJST (majst),
 
-        .mulq (mulq),
-        .sctr (sctr)
+        .MQUO (mulq),
+        .SCTR (sctr)
     );
 
     wire iINTINH;
@@ -270,7 +271,7 @@ module backplane (
     wire readsr;
     wire acclear = iACCLEAR | eaeACCLEAR;
     wire hold = iHOLD | eaeHOLD;
-    wire[11:00] inbus = iINBUS | eaeINBUS | memINBUS | mexINBUS | (readsr ? swreg : 12'b0);
+    wire[11:00] inbus = iINBUS | memINBUS | mexINBUS | (readsr ? swreg : 12'b0);
     wire ioskip = iIOSKIP | eaeIOSKIP;
     wire lnktog = iLNKTOG | eaeLNKTOG;
     wire[3:0] nxtms;
