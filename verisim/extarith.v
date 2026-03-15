@@ -42,8 +42,8 @@ module extarith (
     wire[11:00] yreg = { yreglat, yregctr[04:00] };
 
     always @(posedge CLOK2) begin
-        $display ("extarith*: ts=%b%b%b%b majst=%x s3clk=%b sctr=%o myac=%o mquo=%o yreg=%o dviboro=%b dvidiff=%o dvidend=%o dviqbit=%b",
-            TS1,TS2,TS3,TS4, MAJST, s3clk, sctr, myac, mquo, yreg, dviboro, dvidiff, dvidend, dviqbit);
+        $display ("extarith*: ts=%b%b%b%b majst=%x s3clk=%b sctr=%o myac=%o mquo=%o yreg=%o dviover=%b dviboro=%b dvidiff=%o dvidend=%o dviqbit=%b",
+            TS1,TS2,TS3,TS4, MAJST, s3clk, sctr, myac, mquo, yreg, dviover, dviboro, dvidiff, dvidend, dviqbit);
     end
 
     assign MQUO = mquo;
@@ -79,7 +79,7 @@ module extarith (
     wire[11:00] dvidend = { myac[10:00], mquo[11] };
     wire dviboro;
     wire[11:00] dvidiff;
-    assign { dviboro, dvidiff } = { 1'b0, dvidend } - { 1'b0, ~ yreg };
+    assign { dviboro, dvidiff } = { 1'b0, dvidend } - { 1'b0, yreg };
     wire dviqbit = myac[11] | ~ dviboro;
     wire[11:00] dviacstep = dviqbit ? dvidiff : dvidend;
     wire[11:00] dvimqstep = { mquo[10:00],  dviqbit };   // shift quotient bit into bottom of MQ
@@ -130,7 +130,7 @@ module extarith (
     wire HOLD_dat = extarexec;
     wire _HOLD_pc =
             (extop31 == 2) & (sctr != 12) |
-            (extop31 == 3) & (sctr != 11) |
+            (extop31 == 3) & (sctr != 12) & ~ dviover |
             (extop31 == 4) & ~ nmidone |
             countedshift & ~ yregctr[07];
 
@@ -149,19 +149,17 @@ module extarith (
 
     // perform step 3 clocking while processor holding at beginning of TS3
     wire s3clk_clk = CLOK2;
-    wire s3clk_dat = ~ s3clk;
-    wire _s3clk_pc = HOLD;
+    wire s3clk_dat = ~ s3clk & HOLD;
 
-    always @(posedge s3clk_clk or negedge _s3clk_pc) begin
-        if (~ _s3clk_pc) s3clk <= 0;
-        else s3clk <= s3clk_dat;
+    always @(posedge s3clk_clk) begin
+        s3clk <= s3clk_dat;
     end
 
     // internal copy of link
     wire myln_dat =
         TS1 & msfetch ? LINK :                                  // get link during fetch
         TS3 & (extop31 == 2) ? 0 :                              // multiply link is always 0
-        TS3 & (extop31 == 3) ? myac >= yreg :                   // divide link is overflow (first step only)
+        TS3 & (extop31 == 3) ? dviover :                        // divide link is overflow (first step only)
         TS3 & (extop31[3:2] == 2) ? shllnstep :                 // shift left link
         TS3 & (extop31[3:2] == 3) ? 0 :                         // shift right link always 0
             myln;

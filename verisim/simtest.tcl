@@ -783,7 +783,7 @@ proc extendedarithmetic {yreg} {
                 set acmq [expr {($acum << 12) | $mulq}]
                 set acum [expr {$acmq % $yreg}]
                 set mulq [expr {($acmq - $acum) / $yreg}]
-                set sctr 11
+                set sctr 12
                 set linc 0
             }
         }
