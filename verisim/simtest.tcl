@@ -771,19 +771,19 @@ proc extendedarithmetic {yreg} {
             set prod [expr {$yreg * $mulq + $acum}]
             set acum [expr {$prod >> 12}]
             set mulq [expr {$prod & 07777}]
-            set sctr 12
+            set sctr 0
             set linc 0
         }
 
         3 {     ;# 7407 DVI - divide: AC,MQ / Y => MQ r AC
             if {$acum >= $yreg} {
-                set sctr 0
+                set sctr 20
                 set linc 1
             } else {
                 set acmq [expr {($acum << 12) | $mulq}]
                 set acum [expr {$acmq % $yreg}]
                 set mulq [expr {($acmq - $acum) / $yreg}]
-                set sctr 12
+                set sctr 0
                 set linc 0
             }
         }
@@ -808,6 +808,7 @@ proc extendedarithmetic {yreg} {
             set linc [expr {($acmq >> 24) & 1}]
             set acum [expr {($acmq >> 12) & 07777}]
             set mulq [expr {$acmq & 07777}]
+            set sctr 0
         }
 
         6 {     ;# 7415 ASR - arithmetic shift right
@@ -817,6 +818,7 @@ proc extendedarithmetic {yreg} {
             set acmq [expr {$acmq >> (($yreg & 31) + 1)}]
             set acum [expr {($acmq >> 12) & 07777}]
             set mulq [expr {$acmq & 07777}]
+            set sctr 0
         }
 
         7 {     ;# 7417 LSR - logical shift right
@@ -825,6 +827,7 @@ proc extendedarithmetic {yreg} {
             set acmq [expr {$acmq >> (($yreg & 31) + 1)}]
             set acum [expr {$acmq >> 12}]
             set mulq [expr {$acmq & 07777}]
+            set sctr 0
         }
     }
 }
