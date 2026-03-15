@@ -41,10 +41,10 @@ module extarith (
 
     wire[11:00] yreg = { yreglat, yregctr[04:00] };
 
-    always @(posedge CLOK2) begin
-        $display ("extarith*: ts=%b%b%b%b majst=%x s3clk=%b sctr=%o myac=%o mquo=%o yreg=%o dviover=%b dviboro=%b dvidiff=%o dvidend=%o dviqbit=%b",
-            TS1,TS2,TS3,TS4, MAJST, s3clk, sctr, myac, mquo, yreg, dviover, dviboro, dvidiff, dvidend, dviqbit);
-    end
+////    always @(posedge CLOK2) begin
+////        $display ("extarith*: ts=%b%b%b%b majst=%x s3clk=%b sctr=%o myac=%o mquo=%o yreg=%o dviover=%b dviboro=%b dvidiff=%o dvidend=%o dviqbit=%b myln_clk=%b myln_dat=%b",
+////            TS1,TS2,TS3,TS4, MAJST, s3clk, sctr, myac, mquo, yreg, dviover, dviboro, dvidiff, dvidend, dviqbit, myln_clk, myln_dat);
+////    end
 
     assign MQUO = mquo;
     assign SCTR = sctr;
@@ -89,13 +89,10 @@ module extarith (
     wire[11:00] shlacstep, shlmqstep;
     assign { shllnstep, shlacstep, shlmqstep } = { myac, mquo, 1'b0 };
 
-    // each step in arith shift right
-    wire[11:00] asracstep, asrmqstep;
-    assign { asracstep, asrmqstep } = { myac[11], myac, mquo[11:01] };
-
-    // each step in logical shift right
-    wire[11:00] lsracstep, lsrmqstep;
-    assign { lsracstep, lsrmqstep } = { 1'b0, myac, mquo[11:01] };
+    // each step in shift right
+    wire shrlnstep = extop31[1] ? 1'b0 : myac[11];
+    wire[11:00] shracstep, shrmqstep;
+    assign { shracstep, shrmqstep } = { shrlnstep, myac, mquo[11:01] };
 
     // opcode being fetched from memory
     wire extar_clk = TP1 & msfetch;
@@ -159,15 +156,15 @@ module extarith (
     wire myln_dat =
         TS1 & msfetch ? LINK :                                  // get link during fetch
         TS3 & (extop31 == 2) ? 0 :                              // multiply link is always 0
-        TS3 & (extop31 == 3) ? dviover :                        // divide link is overflow (first step only)
+        TS3 & (extop31 == 3) ? dviover :                        // divide link is overflow
         TS3 & (extop31[3:2] == 2) ? shllnstep :                 // shift left link
-        TS3 & (extop31[3:2] == 3) ? 0 :                         // shift right link always 0
+        TS3 & (extop31[3:2] == 3) ? shrlnstep :                 // shift right link always myac<msb>
             myln;
 
     wire myln_clk =
         TP1 & msfetch |                                         // get link during fetch
-        s3clk & (extop31[3:2] == 1) & (sctr == 0) |             // clear link first step of multiply
-                                                                // overflow detect first step of divide
+        TP3 & (extop31 == 2) |                                  // clear link for multiply
+        TP3 & (extop31 == 3) |                                  // divide overflow
         s3clk & (extop31 == 4) & ~ nmidone |                    // normalize step link
         s3clk & countedshift;                                   // shift left, shift right
 
@@ -175,15 +172,14 @@ module extarith (
         myln <= myln_dat;
     end
 
-
+    // internal copy of accumulator
     wire[11:00] myac_dat =
         TS1 & msfetch ? (INBUS[07] ? 0 : ACUM) :                // get accumulator during fetch
         TS2 & extarexec      ? myacstep2 :                      // update accumulator for step 2
         TS3 & (extop31 == 2) ? muyacstep :                      // update accumulator for multiply
         TS3 & (extop31 == 3) ? dviacstep :                      // update accumulator for divide
         TS3 & (extop31[3:2] == 2) ? shlacstep :                 // update accumulator for shift left
-        TS3 & (extop31 == 6) ? asracstep :                      // update accumulator for shift right
-        TS3 & (extop31 == 7) ? lsracstep :                      // update accumulator for shift right
+        TS3 & (extop31[3:2] == 3) ? shracstep :                 // update accumulator for shift right
             myac;
 
     wire myac_clk =
@@ -197,14 +193,13 @@ module extarith (
         myac <= myac_dat;
     end
 
-
+    // multiplier/quotient
     wire[11:00] mquo_dat =
         TS2 & extop64[4] ? myac :                               // get from accum for step 2
         TS3 & (extop31 == 2) ? muymqstep :
         TS3 & (extop31 == 3) ? dvimqstep :
         TS3 & (extop31[3:2] == 2) ? shlmqstep :                 // NMI,SHL
-        TS3 & (extop31 == 6) ? asrmqstep :                      // ASR
-        TS3 & (extop31 == 7) ? lsrmqstep :                      // LSR
+        TS3 & (extop31[3:2] == 3) ? shrmqstep :                 // ASR,LSR
             mquo;
 
     wire mquo_clk =
