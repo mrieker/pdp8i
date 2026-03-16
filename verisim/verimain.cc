@@ -148,12 +148,12 @@ static int cmd_bus (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj
         {  1, OFFS (iBRKRQST), true,  "iBRKRQST" },   // requesting break
         {  1, OFFS (iBRKWRM),  true,  "iBRKWRM"  },   // break cycle writes memory
         {  1, OFFS (iCAINC),   true,  "iCAINC"   },   // curad cycle increments address word
-        {  1, OFFS (iHOLD),    true,  "iHOLD"    },   // hold internal clocking (stretch cycle)
         {  1, OFFS (iINTRQST), true,  "iINTRQST" },   // request interrupt
         {  1, OFFS (iIOSKIP),  true,  "iIOSKIP"  },   // increment PC at end of IO pulse
         {  1, OFFS (iLNKTOG),  true,  "iLNKTOG"  },   // toggle link register
         { 15, OFFS (iDMAADDR), true,  "iDMAADDR" },   // device sending address for DMA
         { 12, OFFS (iINBUS),   true,  "iINBUS"   },   // device sending data for PIO or DMA
+        {  1, OFFS (iPAUSE),   true,  "iPAUSE"   },   // pause processor clocking (stretch cycle)
 
         {  4, OFFS (majst),    false, "majst"    },
         {  3, OFFS (memfield), false, "memfield" },

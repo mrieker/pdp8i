@@ -11,12 +11,12 @@ module backplane (
     input iBRKRQST,                 // requesting break
     input iBRKWRM,                  // break cycle writes memory
     input iCAINC,                   // curad cycle increments address word
-    input iHOLD,                    // hold internal clocking (stretch cycle)
     input iINTRQST,                 // request interrupt
     input iIOSKIP,                  // increment PC at end of IO pulse
     input iLNKTOG,                  // toggle link register
     input[14:00] iDMAADDR,          // device sending address for DMA
     input[11:00] iINBUS,            // device sending data for PIO or DMA
+    input iPAUSE,                   // pause processor clocking (stretch cycle)
     output oBREAK,                  // currently doing BREAK (DMA) cycle
     output oBUSINI,                 // initialize bus devices
     output oBWCOV,                  // 3-cycle DMA wordcount overflowed
@@ -59,7 +59,7 @@ module backplane (
         .lbireg (ireg),
         .lbmajst (majst),
         .lbion (intenabd),
-        .lbpause (hold),
+        .lbpause (pause),
         .lbrun (oRUN),
         .lbsc (sctr),
         .lbdf (dfield),
@@ -79,19 +79,20 @@ module backplane (
         .swsinst (swsinst)      //toggle single instruction
     );
 
-    wire eaeACCLEAR, eaeHOLD, eaeIOSKIP, eaeLNKTOG;
+    wire eaeACCLEAR, eaePAUSE, eaeIOSKIP, eaeLNKTOG;
 
     extarith eaeinst (
         .CLOK2 (clok2),
         .BUSINI (oBUSINI),
 
         .ACCLEAR (eaeACCLEAR),
-        .HOLD (eaeHOLD),
         .IOSKIP (eaeIOSKIP),
         .LNKTOG (eaeLNKTOG),
+        .PAUSE (eaePAUSE),
 
         .INBUS (inbus),
         .LINK (oLINK),
+        .MBUF (oMBUF),
         .TP1 (oTP1),
         .TP2 (oTP2),
         .TP3 (oTP3),
@@ -155,7 +156,6 @@ module backplane (
         , .FIELD_1  (memfield[1])
         , .FIELD_2  (memfield[2])
         , .GND      (1'b0)
-        , .HOLD     (hold)
         , .IFLD_0   (ifield[0])
         , .IFLD_1   (ifield[1])
         , .IFLD_2   (ifield[2])
@@ -215,6 +215,7 @@ module backplane (
         , .MQUO_7   ()
         , .MQUO_8   ()
         , .MQUO_9   ()
+        , .PAUSE    (pause)
         , .PCTR_0   (pctr[00])
         , .PCTR_1   (pctr[01])
         , .PCTR_10  (pctr[10])
@@ -270,7 +271,7 @@ module backplane (
 
     wire readsr;
     wire acclear = iACCLEAR | eaeACCLEAR;
-    wire hold = iHOLD | eaeHOLD;
+    wire pause = iPAUSE | eaePAUSE;
     wire[11:00] inbus = iINBUS | memINBUS | mexINBUS | (readsr ? swreg : 12'b0);
     wire ioskip = iIOSKIP | eaeIOSKIP;
     wire lnktog = iLNKTOG | eaeLNKTOG;
@@ -314,7 +315,6 @@ module backplane (
         , .DMADR_9  (iDMAADDR[09])
         , .EXEFET   (oEXEFET)
         , .GND      (1'b0)
-        , .HOLD     (hold)
         , .INBUS_0  (inbus[00])
         , .INBUS_1  (inbus[01])
         , .INBUS_10 (inbus[10])
@@ -371,6 +371,7 @@ module backplane (
         , .MQUO_7   ()
         , .MQUO_8   ()
         , .MQUO_9   ()
+        , .PAUSE    (pause)
         , .PCTR_0   (pctr[00])
         , .PCTR_1   (pctr[01])
         , .PCTR_10  (pctr[10])
