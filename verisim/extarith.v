@@ -33,7 +33,7 @@ module extarith (
 
 `include "msdef.v"
 
-    reg extar, memop, myln, s3clk;
+    reg extar, memop, myln;
     reg[11:00] mquo, myac;
     reg[6:4] extop64;
     reg[3:1] extop31;
@@ -70,7 +70,12 @@ module extarith (
     assign muymqstep[10:00] = mquo[11:01];
 
     // each step in divide
-    wire dviover = myac >= yreg;
+    reg dviover;
+    wire _dviover_pc = TS3;
+    always @(posedge s3clk or negedge _dviover_pc) begin
+        if (~ _dviover_pc) dviover <= 0;
+        else dviover <= myac >= yreg;
+    end
     wire dvicary;
     wire[11:00] dviacstep;
     assign { dvicary, dviacstep } = { 1'b0, myac[10:00], mquo[11] } + { 1'b0, ~ yreg } + 1;
@@ -118,26 +123,24 @@ module extarith (
 
     // pause processor at beginning of TS3 while doing step 3
     // resume when termination condition is met
-    wire pause_clk = TS3;
-    wire pause_dat = extarex;
-    wire _pause_pc =
+    wire pause_dat =
             (extop31 == 2) & ~ sctr[5] |                // MUY done when 12 s3clk pulses have been generated
             (extop31 == 3) & ~ sctr[5] & ~ dviover |    // DVI done when 12 s3clk pulses or when overflow
             (extop31 == 4) & ~ nmidone |                // NMI done when NMI condition met
             countedshift   & ~ sctr[5];                 // shifts done when given number s3clk pulses generated
-
-    always @(posedge pause_clk or negedge _pause_pc) begin
-        if (~ _pause_pc) PAUSE <= 0;
-        else PAUSE <= pause_dat;
-    end
+    assign PAUSE = TS3 & extarex & pause_dat;
 
     // perform step 3 clocking while processor pausing at beginning of TS3
     // make sure all pulses have full width
-    wire s3clk_clk = CLOK2;
-    wire s3clk_dat = ~ s3clk & PAUSE;
+    // directly increments sctr
+    // loads shift-by-shift results in myac,mquo
+    reg s3clk_0, s3clk_1;
+    wire s3clk = extop31[3] ? s3clk_0 : s3clk_1;        // _0: 200nS; _1: 300nS per shift
+    wire s3clk_inc = ~ (~ PAUSE | s3clk);
 
-    always @(posedge s3clk_clk) begin
-        s3clk <= s3clk_dat;
+    always @(posedge CLOK2) begin
+        s3clk_1 <= s3clk_inc & s3clk_0;
+        s3clk_0 <= s3clk_inc;
     end
 
     // output results to processor

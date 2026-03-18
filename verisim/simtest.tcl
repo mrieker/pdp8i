@@ -776,11 +776,13 @@ proc extendedarithmetic {yreg} {
         }
 
         3 {     ;# 7407 DVI - divide: AC,MQ / Y => MQ r AC
+            set acmq [expr {($acum << 12) | $mulq}]
             if {$acum >= $yreg} {
-                set sctr 20
+                set acum [expr {(($acmq >> 11) - $yreg) & 07777}]
+                set mulq [expr {(($acmq << 1) + 1) & 07777}]
+                set sctr 21
                 set linc 1
             } else {
-                set acmq [expr {($acum << 12) | $mulq}]
                 set acum [expr {$acmq % $yreg}]
                 set mulq [expr {($acmq - $acum) / $yreg}]
                 set sctr 0
