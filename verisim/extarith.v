@@ -120,27 +120,23 @@ module extarith (
         extop31 <= extop_dat[3:1];
     end
 
-
     // pause processor at beginning of TS3 while doing step 3
     // resume when termination condition is met
     wire pause_dat =
-            (extop31 == 2) & ~ sctr[5] |                // MUY done when 12 s3clk pulses have been generated
-            (extop31 == 3) & ~ sctr[5] & ~ dviover |    // DVI done when 12 s3clk pulses or when overflow
+            (extop31 == 2) &   sctr[5] |                // MUY done when 12 s3clk pulses have been generated
+            (extop31 == 3) &   sctr[5] & ~ dviover |    // DVI done when 12 s3clk pulses or when overflow
             (extop31 == 4) & ~ nmidone |                // NMI done when NMI condition met
-            countedshift   & ~ sctr[5];                 // shifts done when given number s3clk pulses generated
+            countedshift   &   sctr[5];                 // shifts done when given number s3clk pulses generated
     assign PAUSE = TS3 & extarex & pause_dat;
 
     // perform step 3 clocking while processor pausing at beginning of TS3
     // make sure all pulses have full width
     // directly increments sctr
     // loads shift-by-shift results in myac,mquo
-    reg s3clk_0, s3clk_1;
-    wire s3clk = extop31[3] ? s3clk_0 : s3clk_1;        // _0: 200nS; _1: 300nS per shift
-    wire s3clk_inc = ~ (~ PAUSE | s3clk);
-
+    reg s3kkk, s3clk;
     always @(posedge CLOK2) begin
-        s3clk_1 <= s3clk_inc & s3clk_0;
-        s3clk_0 <= s3clk_inc;
+        s3kkk <= (PAUSE & ~ s3clk) | extop31[3];
+        s3clk <=  PAUSE & ~ s3clk  & s3kkk;
     end
 
     // output results to processor
@@ -154,6 +150,8 @@ module extarith (
 
     // important clocks:
     //  TP1   - clocks at end of reading memory, INBUS valid with data
+    //          clocked into extop or yreg now valid
+    //  TP2   - clocks myac or mquo for step2
     //  s3clk - clocks while pausing to step through multiply,divide,shifts
     //          exactly 12 pulses for MUY
     //          exactly 12 pulses for DVI without overflow
@@ -245,8 +243,8 @@ module extarith (
 
     wire[5:0] sctr_mux =
         sctr_zer ?  0 :
-        sctr_sel ? 20 :
-            { 1'b0, ~ yreg[04:00] };            // load from memory at TP2 for SCL,SHL,ASR,LSR
+        sctr_sel ? 52 :                         // 52 = 64 - 12
+            { 1'b1, ~ yreg[04:00] };            // load from memory at TP2 for SCL,SHL,ASR,LSR
 
     wire sctr_clk = TP2 & extarex & (extop31 != 0);
 
