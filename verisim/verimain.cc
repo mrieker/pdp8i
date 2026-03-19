@@ -420,10 +420,13 @@ static int cmd_randbits (ClientData clientdata, Tcl_Interp *interp, int objc, Tc
 // returns with output signals updated and clock just set low
 static void kerchunk ()
 {
-    vbkpl->eval ();     // let input signals soak in
-    vbkpl->clok2 = 1;   // clock the state
-    vbkpl->eval ();     // let new state settle in
-    vbkpl->clok2 = 0;   // get ready for more input changes
+    for (int i = 0; i < 10; i ++) {
+        vbkpl->clok2 = (i >= 5);
+        vbkpl->eval ();     // let input signals soak in
+        vbkpl->zclock = 1;
+        vbkpl->eval ();
+        vbkpl->zclock = 0;
+    }
     ++ cyclenum;        // one more clock cycle done
 }
 

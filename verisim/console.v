@@ -1,11 +1,13 @@
 
 module console (
+    input zclock,
+    input zreset,
     input clok2,
     input reset,
 
 //  inout[27:04] gpio,
     input[27:04] gpin,
-    output[27:04] gpout,
+    output reg[27:04] gpout,
 
     input[11:00] lbpctr,
     input[11:00] lbmadr,

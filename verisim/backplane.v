@@ -1,5 +1,7 @@
 
 module backplane (
+    input zclock,
+    input zreset,
     input clok2,                    // 10MHz clock
     input reset,                    // power-on reset
 
@@ -45,6 +47,8 @@ module backplane (
     wire[1:0] oFLDSEL;
 
     console coninst (
+        .zclock (zclock),
+        .zreset (zreset),
         .clok2 (clok2),
         .reset (reset),
 
@@ -82,6 +86,8 @@ module backplane (
     wire eaeACCLEAR, eaePAUSE, eaeIOSKIP, eaeLNKTOG;
 
     extarith eaeboard (
+        .zclock (zclock),
+        .zreset (zreset),
           .ACUM_0   (oACUM[0])
         , .ACUM_1   (oACUM[1])
         , .ACUM_2   (oACUM[2])
@@ -234,6 +240,8 @@ module backplane (
     wire[11:00] mexINBUS;
 
     extmemory meminst (
+        .zclock (zclock),
+        .zreset (zreset),
           .ACCLEAR  (acclear)
         , .ACUM_0   (oACUM[00])
         , .ACUM_1   (oACUM[01])
@@ -399,6 +407,8 @@ module backplane (
     wire[3:0] nxtms;
 
     processor procboard (
+        .zclock (zclock),
+        .zreset (zreset),
           .ACCLEAR  (acclear)
         , .ACUM_0   (oACUM[00])
         , .ACUM_1   (oACUM[01])
