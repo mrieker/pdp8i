@@ -238,22 +238,26 @@ module extarith (
     end
 
     // shift count
-    wire sctr_zer = (extop31      == 4);        // load  0 at TP2 for NMI
-    wire sctr_sel = (extop31[3:2] == 1);        // load 20 at TP2 for MUY,DVI
+    wire sctr_zer = (extop31      == 4);
+    wire sctr_sel = (extop31[3:2] == 1);
 
     wire[5:0] sctr_mux =
-        sctr_zer ?  0 :
-        sctr_sel ? 52 :                         // 52 = 64 - 12
+        sctr_zer ?  0 :                         // load 0 at TP2 for NMI
+        sctr_sel ? 52 :                         // load -12 at TP2 for MUY,DVI
             { 1'b1, ~ yreg[04:00] };            // load from memory at TP2 for SCL,SHL,ASR,LSR
 
-    wire sctr_clk = TP2 & extarex & (extop31 != 0);
+    wire sctr_ld  = TS2 & extarex & (extop31 != 0);
 
-    wire sctr_inc = s3clk;                      // increment count for MUY,DVI,NMI,SHL,ASR,LSR
+    wire sctr_inc = TS3;                        // increment count for MUY,DVI,NMI,SHL,ASR,LSR
 
-    always @(posedge sctr_clk or posedge sctr_inc or posedge BUSINI) begin
+    wire sctr_clk = TP2 | s3clk;
+
+    always @(posedge sctr_clk or posedge BUSINI) begin
         if (BUSINI) sctr <= 0;
-        else if (sctr_inc) sctr <= sctr + 1;
-        else sctr <= sctr_mux;
+        else begin
+            if (sctr_ld) sctr <= sctr_mux;
+            else if (sctr_inc) sctr <= sctr + 1;
+        end
     end
 
 endmodule

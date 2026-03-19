@@ -458,6 +458,37 @@ module V74HC74 (
 
 endmodule
 
+module X74LS85 (
+          input  p1     // B3
+        , input  p2     // (A < B) IN   from
+        , input  p3     // (A = B) IN   lower
+        , input  p4     // (A > B) IN   bits
+        , output p5     // (A > B) OUT  to
+        , output p6     // (A = B) OUT  higher
+        , output p7     // (A < B) OUT  bits
+        , input  p8     // GND
+        , input  p9     // B0
+        , input  p10    // A0
+        , input  p11    // B1
+        , input  p12    // A1
+        , input  p13    // A2
+        , input  p14    // B2
+        , input  p15    // A3
+        , input  p16    // VCC
+);
+    wire[3:0] a = { p15, p13, p12, p10 };
+    wire[3:0] b = { p1,  p14, p11, p9  };
+
+    wire agtb = (a >  b);
+    wire aeqb = (a == b);
+    wire altb = (a <  b);
+
+    assign p5 = aeqb ? p4 : agtb;
+    assign p6 = aeqb & p3;
+    assign p7 = aeqb ? p2 : altb;
+
+endmodule
+
 module X74HC86 (
           input  p1
         , input  p2
@@ -844,7 +875,7 @@ module V74LS174 (
 );
 
     always @(posedge p9 or negedge p1) begin
-        $display ("V74LS174*: clk=%b _pc=%b d=%02o q=%02o",
+        $display ("V74LS174*: %m clk=%b _pc=%b d=%02o q=%02o",
                 p9, p1, {p3,p4,p6,p11,p13,p14}, {p2,p5,p7,p10,p12,p15});
         if (~ p1) begin
             p2  <= 0;

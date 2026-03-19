@@ -7,7 +7,7 @@ VFILES := \
 	backplane.v \
 	chips.v \
 	console.v \
-	extarith.v \
+	../kicads/extarith/extarith.v \
 	../kicads/extmemory/extmemory.v \
 	../kicads/processor/processor.v \
 
@@ -45,15 +45,21 @@ obj_dir/Vbackplane.cpp obj_dir/Vbackplane.h obj_dir/Vbackplane.mk: $(VFILES)
 	rm -rf obj_dir
 	verilator --cc --top-module backplane $(VFILES)
 
+../kicads/extarith/extarith.v: ../kicads/extarith/extarith.kicad_pcb
+	cd ../kicads/extarith ; ../parsepcb.sh extarith
+
 ../kicads/extmemory/extmemory.v: ../kicads/extmemory/extmemory.kicad_pcb
 	cd ../kicads/extmemory ; ../parsepcb.sh extmemory
 
 ../kicads/processor/processor.v: ../kicads/processor/processor.kicad_pcb
 	cd ../kicads/processor ; ../parsepcb.sh processor
 
+../kicads/extarith/extarith.kicad_pcb: ../kicads/extarith/extarith.kicad_sch
+	error update extarith.kicad_pcb
+
+../kicads/extmemory/extmemory.kicad_pcb: ../kicads/extmemory/extmemory.kicad_sch
+	error update extmemory.kicad_pcb
+
 ../kicads/processor/processor.kicad_pcb: ../kicads/processor/processor.kicad_sch
 	error update processor.kicad_pcb
-
-../kicads/registers/registers.kicad_pcb: ../kicads/registers/registers.kicad_sch
-	error update registers.kicad_pcb
 
