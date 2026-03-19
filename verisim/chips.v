@@ -454,34 +454,36 @@ module X74HC74 (input zclock, zreset,
 endmodule
 
 module X74LS85 (input zclock, zreset,
-          input  p1     // B3
-        , input  p2     // (A < B) IN   from
-        , input  p3     // (A = B) IN   lower
-        , input  p4     // (A > B) IN   bits
+          input  p1         // B3
+        , input  p2         // (A < B) IN   from
+        , input  p3         // (A = B) IN   lower
+        , input  p4         // (A > B) IN   bits
         , output reg p5     // (A > B) OUT  to
         , output reg p6     // (A = B) OUT  higher
         , output reg p7     // (A < B) OUT  bits
-        , input  p8     // GND
-        , input  p9     // B0
-        , input  p10    // A0
-        , input  p11    // B1
-        , input  p12    // A1
-        , input  p13    // A2
-        , input  p14    // B2
-        , input  p15    // A3
-        , input  p16    // VCC
+        , input  p8         // GND
+        , input  p9         // B0
+        , input  p10        // A0
+        , input  p11        // B1
+        , input  p12        // A1
+        , input  p13        // A2
+        , input  p14        // B2
+        , input  p15        // A3
+        , input  p16        // VCC
 );
     wire[3:0] a = { p15, p13, p12, p10 };
     wire[3:0] b = { p1,  p14, p11, p9  };
+
+    reg[2:0] d5, d6, d7;
 
     wire agtb = (a >  b);
     wire aeqb = (a == b);
     wire altb = (a <  b);
 
     always @(posedge zclock) begin
-        p5 <= aeqb ? p4 : agtb;
-        p6 <= aeqb & p3;
-        p7 <= aeqb ? p2 : altb;
+        { p5, d5 } <= { d5, aeqb ? p4 : agtb };
+        { p6, d6 } <= { d6, aeqb & p3 };
+        { p7, d7 } <= { d7, aeqb ? p2 : altb };
     end
 
 endmodule
@@ -814,6 +816,50 @@ module X74LS174 (input zclock, zreset,
 
 endmodule
 
+module Z74LS174 (input zclock, zreset,
+          input      p1
+        , output reg p2
+        , input      p3
+        , input      p4
+        , output reg p5
+        , input      p6
+        , output reg p7
+        , input      p8
+        , input      p9
+        , output reg p10
+        , input      p11
+        , output reg p12
+        , input      p13
+        , input      p14
+        , output reg p15
+        , input      p16
+);
+
+    reg lastt;
+
+    always @(posedge zclock) begin
+        $display ("Z74LS174*: %m _PC=%b T=%b D=%o Q=%o", p1, p9, {p14,p13,p11,p6,p4,p3}, {p15,p12,p10,p7,p5,p2});
+        if (~ p1) begin
+            p2  <= 0;
+            p5  <= 0;
+            p7  <= 0;
+            p10 <= 0;
+            p12 <= 0;
+            p15 <= 0;
+        end else if (~ lastt & p9) begin
+            p2  <= p3;
+            p5  <= p4;
+            p7  <= p6;
+            p10 <= p11;
+            p12 <= p13;
+            p15 <= p14;
+        end
+
+        lastt <= p9;
+    end
+
+endmodule
+
 module X74LS175 (input zclock, zreset,
           input      p1
         , output reg p2
@@ -877,16 +923,17 @@ module X74LS283 (input zclock, zreset,
         , input  p16
 );
 
-    wire[3:0] a = { p12, p14, p3, p5 };
-    wire[3:0] b = { p11, p15, p2, p6 };
-
-    reg c0, c1, c2;
+    //reg c0, c1, c2;
 
     always @(posedge zclock) begin
+        /***
         { c0, p4  } <= { 1'b0, p5  } + { 1'b0, p6  } + { 1'b0, p7 };
         { c1, p1  } <= { 1'b0, p3  } + { 1'b0, p2  } + { 1'b0, c0 };
         { c2, p13 } <= { 1'b0, p14 } + { 1'b0, p15 } + { 1'b0, c1 };
         { p9, p10 } <= { 1'b0, p12 } + { 1'b0, p11 } + { 1'b0, c2 };
+        ***/
+
+        { p9, p10, p13, p1, p4 } <= { 1'b0, p12, p14, p3, p5 } + { 1'b0, p11, p15, p2, p6 } + { 4'b0, p7 };
     end
 
 endmodule
