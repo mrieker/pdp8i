@@ -19,6 +19,7 @@
 #include "readprompt.h"
 
 static bool volatile ctrlcflag;
+static int clkratio = 10;
 static int cyclenum;
 static Vbackplane *vbkpl;
 
@@ -251,13 +252,27 @@ static int cmd_bus (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj
 }
 
 // clk [n]
-// returns total number of clock cycles
+//  returns total number of clock cycles
+// clk ratio [r]
+//  sets or returns clock ratio
 static int cmd_clk (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
-    if (objc > 2) {
-        Tcl_SetResultF (interp, "extra arguments");
-        return TCL_ERROR;
+    if ((objc > 1) && (strcasecmp (Tcl_GetString (objv[1]), "ratio") == 0)) {
+        if (objc > 2) {
+            int num;
+            int rc = Tcl_GetIntFromObj (interp, objv[2], &num);
+            if (rc != TCL_OK) return rc;
+            if (num <= 1) {
+                Tcl_SetResultF (interp, "bad ratio %d", num);
+                return TCL_ERROR;
+            }
+            clkratio = num;
+        } else {
+            Tcl_SetObjResult (interp, Tcl_NewIntObj (clkratio));
+        }
+        return TCL_OK;
     }
+
     int num = 1;
     if (objc > 1) {
         int rc = Tcl_GetIntFromObj (interp, objv[1], &num);
@@ -420,8 +435,9 @@ static int cmd_randbits (ClientData clientdata, Tcl_Interp *interp, int objc, Tc
 // returns with output signals updated and clock just set low
 static void kerchunk ()
 {
-    for (int i = 0; i < 10; i ++) {
-        vbkpl->clok2 = (i >= 5);
+    int halfrat = clkratio / 2;
+    for (int i = 0; i < clkratio; i ++) {
+        vbkpl->clok2 = (i >= halfrat);
         vbkpl->eval ();     // let input signals soak in
         vbkpl->zclock = 1;
         vbkpl->eval ();

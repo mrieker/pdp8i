@@ -48,6 +48,8 @@ set testexar 1  ;# test extended arithmetic
 set testxmem 1  ;# test extended memory
 set runquiet 1  ;# tell runstep command to keep quiet
 
+clk ratio 12    ;# 120nS clock cycles
+
 proc simtest {} {
     global acum
     global brkrequest
@@ -415,8 +417,8 @@ proc startline {} {
 ;# print how many cycles it took (each clock is 100nS)
 proc finishline {} {
     global startclockno
-    set clocks [expr {[clk 0] - $startclockno}]
-    puts [format "  (%u.%u uS)" [expr {$clocks / 10}] [expr {$clocks % 10}]]
+    set clocks [expr {([clk 0] - $startclockno)  * [clk ratio]}]
+    puts [format "  (%u.%02u uS)" [expr {$clocks / 100}] [expr {$clocks % 100}]]
 }
 
 ;# clock through a memory cycle, verifying the address and data

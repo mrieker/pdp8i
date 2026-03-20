@@ -923,17 +923,13 @@ module X74LS283 (input zclock, zreset,
         , input  p16
 );
 
-    //reg c0, c1, c2;
+    reg c0, c1, c2;
 
     always @(posedge zclock) begin
-        /***
         { c0, p4  } <= { 1'b0, p5  } + { 1'b0, p6  } + { 1'b0, p7 };
         { c1, p1  } <= { 1'b0, p3  } + { 1'b0, p2  } + { 1'b0, c0 };
         { c2, p13 } <= { 1'b0, p14 } + { 1'b0, p15 } + { 1'b0, c1 };
         { p9, p10 } <= { 1'b0, p12 } + { 1'b0, p11 } + { 1'b0, c2 };
-        ***/
-
-        { p9, p10, p13, p1, p4 } <= { 1'b0, p12, p14, p3, p5 } + { 1'b0, p11, p15, p2, p6 } + { 4'b0, p7 };
     end
 
 endmodule
