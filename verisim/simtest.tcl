@@ -44,11 +44,12 @@ set MS_INTAK 7  ;# memory cycle is for interrupt acknowledge
 set MS_DEPOS 8  ;# memory cycle is for deposit switch
 set MS_EXAM  9  ;# memory cycle is for examine switch
 
+set testcons 1  ;# test console functions
 set testexar 1  ;# test extended arithmetic
 set testxmem 1  ;# test extended memory
 set runquiet 1  ;# tell runstep command to keep quiet
 
-clk ratio 12    ;# 120nS clock cycles
+clk ratio 10    ;# 100nS clock cycles
 
 proc simtest {} {
     global acum
@@ -77,6 +78,7 @@ proc simtest {} {
     global swdfpend
     global swifpend
     global swregpend
+    global testcons
     global testexar
     global testxmem
     global xmem_dfld
@@ -120,7 +122,9 @@ proc simtest {} {
                 set swifpend [randbits 3]
                 set swregpend [randbits 12]
                 swtch set df $swdfpend if $swifpend reg $swregpend
-                swtch set sinst [randbits 1] sstep [randbits 1] stop [randbits 1]
+                if {$testcons} {
+                    swtch set sinst [randbits 1] sstep [randbits 1] stop [randbits 1]
+                }
             }
 
             startline
@@ -564,7 +568,7 @@ proc memorycycle {state field addr rdata wdata} {
 ;# cont alone should not reset state, should pick up where it left off
 proc checkhalted {} {
     global MS_BREAK MS_DEPOS MS_EXAM MS_EXEC MS_FETCH MS_INTAK MS_WRDCT
-    global haltwhy latsinst latsstep latstop pctr swdfpend swifpend swregpend
+    global haltwhy latsinst latsstep latstop pctr swdfpend swifpend swregpend testcons
     global acum linc mulq sctr xmem_intdisableduntiljump brkrequest intdelayed intenabled intrequest
     global xmem_dfld xmem_ifld xmem_ifldafterjump xmem_saveddfld xmem_savedifld
 
@@ -573,80 +577,82 @@ proc checkhalted {} {
     if {$haltwhy != ""} {
         puts -nonewline " $haltwhy"
         set haltwhy ""
-        swtch set sinst 0 sstep 0 stop 0
-        set addr [bus oMADR]
         set wacked 0
-        set doldad 1
-        while {[randbits 1] == 0} {
-            set sw [expr {$doldad ? 1 : [randbits 2]}]
-            switch $sw {
-                1 {
-                    ;# ldad - only if all 18 switches have soaked through console board
-                    if {([bus swdfld] == $swdfpend) && ([bus swifld] == $swifpend) && ([bus swreg] == $swregpend)} {
-                        finishline
-                        startline
-                        swtch set ldad 1            ;# press and hold ldad
-                        runloop 2000                ;# let it soak in good
-                        set xmem_dfld $swdfpend
-                        set xmem_ifld $swifpend
-                        set xmem_ifldafterjump $swifpend
-                        set addr $swregpend         ;# madr should be loaded with swreg contents
-                        set pctr $addr              ;# circuit also sets pctr to the address
-                        set rdata [randbits 12]     ;# get random value for it to examine
-                        puts -nonewline [format "LDAD  %o%04o / %04o" $xmem_ifld $addr $rdata]
-                        swtch set ldad 0            ;# release ldad
-                        waitassert RUN 500          ;# wait for processor to start an exam cycle
-                        memorycycle $MS_EXAM $xmem_ifld $addr $rdata $rdata
-                        set haltwhy ""
-                        verifybit [bus oRUN] 0 "should be halted after LDAD"
-                        set wacked 1
-                        set swregpend [randbits 12]
-                        swtch set reg $swregpend
-                        set doldad 0
+        if {$testcons} {
+            swtch set sinst 0 sstep 0 stop 0
+            set addr [bus oMADR]
+            set doldad 1
+            while {[randbits 1] == 0} {
+                set sw [expr {$doldad ? 1 : [randbits 2]}]
+                switch $sw {
+                    1 {
+                        ;# ldad - only if all 18 switches have soaked through console board
+                        if {([bus swdfld] == $swdfpend) && ([bus swifld] == $swifpend) && ([bus swreg] == $swregpend)} {
+                            finishline
+                            startline
+                            swtch set ldad 1            ;# press and hold ldad
+                            runloop 2000                ;# let it soak in good
+                            set xmem_dfld $swdfpend
+                            set xmem_ifld $swifpend
+                            set xmem_ifldafterjump $swifpend
+                            set addr $swregpend         ;# madr should be loaded with swreg contents
+                            set pctr $addr              ;# circuit also sets pctr to the address
+                            set rdata [randbits 12]     ;# get random value for it to examine
+                            puts -nonewline [format "LDAD  %o%04o / %04o" $xmem_ifld $addr $rdata]
+                            swtch set ldad 0            ;# release ldad
+                            waitassert RUN 500          ;# wait for processor to start an exam cycle
+                            memorycycle $MS_EXAM $xmem_ifld $addr $rdata $rdata
+                            set haltwhy ""
+                            verifybit [bus oRUN] 0 "should be halted after LDAD"
+                            set wacked 1
+                            set swregpend [randbits 12]
+                            swtch set reg $swregpend
+                            set doldad 0
+                        }
                     }
-                }
-                2 {
-                    ;# depos - only if 12 data switches have soaked through console board
-                    if {[bus swreg] == $swregpend} {
+                    2 {
+                        ;# depos - only if 12 data switches have soaked through console board
+                        if {[bus swreg] == $swregpend} {
+                            finishline
+                            startline
+                            if {[bus majst] == $MS_DEPOS} {
+                                set addr [expr {($addr + 1) & 07777}]
+                                set pctr $addr
+                            }
+                            swtch set depos 1
+                            runloop 2000
+                            set rdata [randbits 12]
+                            set wdata $swregpend
+                            puts -nonewline [format "DEPOS %o%04o / %04o <= %04o" $xmem_ifld $addr $rdata $wdata]
+                            swtch set depos 0
+                            waitassert RUN 500
+                            memorycycle $MS_DEPOS $xmem_ifld $addr $rdata $wdata
+                            set haltwhy ""
+                            verifybit [bus oRUN] 0 "should be halted after DEPOS"
+                            set wacked 1
+                            set swregpend [randbits 12]
+                            swtch set reg $swregpend
+                        }
+                    }
+                    3 {
+                        ;# exam
                         finishline
                         startline
-                        if {[bus majst] == $MS_DEPOS} {
+                        if {[bus majst] == $MS_EXAM} {
                             set addr [expr {($addr + 1) & 07777}]
                             set pctr $addr
                         }
-                        swtch set depos 1
+                        swtch set exam 1
                         runloop 2000
                         set rdata [randbits 12]
-                        set wdata $swregpend
-                        puts -nonewline [format "DEPOS %o%04o / %04o <= %04o" $xmem_ifld $addr $rdata $wdata]
-                        swtch set depos 0
+                        puts -nonewline [format "EXAM  %o%04o / %04o" $xmem_ifld $addr $rdata]
+                        swtch set exam 0
                         waitassert RUN 500
-                        memorycycle $MS_DEPOS $xmem_ifld $addr $rdata $wdata
+                        memorycycle $MS_EXAM $xmem_ifld $addr $rdata $rdata
                         set haltwhy ""
-                        verifybit [bus oRUN] 0 "should be halted after DEPOS"
+                        verifybit [bus oRUN] 0 "should be halted after EXAM"
                         set wacked 1
-                        set swregpend [randbits 12]
-                        swtch set reg $swregpend
                     }
-                }
-                3 {
-                    ;# exam
-                    finishline
-                    startline
-                    if {[bus majst] == $MS_EXAM} {
-                        set addr [expr {($addr + 1) & 07777}]
-                        set pctr $addr
-                    }
-                    swtch set exam 1
-                    runloop 2000
-                    set rdata [randbits 12]
-                    puts -nonewline [format "EXAM  %o%04o / %04o" $xmem_ifld $addr $rdata]
-                    swtch set exam 0
-                    waitassert RUN 500
-                    memorycycle $MS_EXAM $xmem_ifld $addr $rdata $rdata
-                    set haltwhy ""
-                    verifybit [bus oRUN] 0 "should be halted after EXAM"
-                    set wacked 1
                 }
             }
         }
