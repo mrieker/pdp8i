@@ -178,6 +178,7 @@ static int cmd_bus (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj
         { 12, OFFS (oACUM),    false, "oACUM"    },
         {  1, OFFS (oBREAK),   false, "oBREAK"   },   // currently doing BREAK (DMA) cycle
         {  1, OFFS (oBWCOV),   false, "oBWCOV"   },   // 3-cycle DMA wordcount overflowed
+        {  1, OFFS (oION),     false, "oION"     },   // interrupts enabled
         {  1, OFFS (oIOP),     false, "oIOP"     },   // io instruction pulse
         {  1, OFFS (oLINK),    false, "oLINK"    },
         { 12, OFFS (oMADR),    false, "oMADR"    },

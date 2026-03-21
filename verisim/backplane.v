@@ -22,6 +22,7 @@ module backplane (
     output oBREAK,                  // currently doing BREAK (DMA) cycle
     output oBUSINI,                 // initialize bus devices
     output oBWCOV,                  // 3-cycle DMA wordcount overflowed
+    output oION,                    // interrupts enabled
     output oIOP,                    // io instruction pulse
     output oLINK,                   // link register
     output oRUN,
@@ -39,12 +40,10 @@ module backplane (
 );
 
     wire[11:09] ireg;
-    wire intenabd;
     wire[2:0] dfield, ifield;
 
     wire[11:00] memINBUS;
-    wire oEXEFET, oINTACK, oJMPJMS;
-    wire[1:0] oFLDSEL;
+    wire oINTACK, oJMPJMS;
 
     console coninst (
         .zclock (zclock),
@@ -62,7 +61,7 @@ module backplane (
         .lbmulq (mulq),
         .lbireg (ireg),
         .lbmajst (majst),
-        .lbion (intenabd),
+        .lbion (oION),
         .lbpause (pause),
         .lbrun (oRUN),
         .lbsc (sctr),
@@ -122,9 +121,6 @@ module backplane (
         , .DMADR_12 ()
         , .DMADR_13 ()
         , .DMADR_14 ()
-        , .EXEFET   ()
-        , .FLDSEL_0 ()
-        , .FLDSEL_1 ()
         , .GND      (1'b0)
         , .INTINH   ()
         , .INTRQST  ()
@@ -161,8 +157,6 @@ module backplane (
         , .MBUF_9   (oMBUF[9])
         , .MBUF_10  (oMBUF[10])
         , .MBUF_11  (oMBUF[11])
-        , .NXTMSBRK ()
-        , .NXTMSIAK ()
         , .NXTMS_0  ()
         , .NXTMS_1  ()
         , .NXTMS_2  ()
@@ -280,7 +274,6 @@ module backplane (
         , .DMADR_12 (iDMAADDR[12])
         , .DMADR_13 (iDMAADDR[13])
         , .DMADR_14 (iDMAADDR[14])
-        , .EXEFET   (oEXEFET)
         , .FIELD_0  (memfield[0])
         , .FIELD_1  (memfield[1])
         , .FIELD_2  (memfield[2])
@@ -374,8 +367,6 @@ module backplane (
         , .swSTART  (swstart)
         , .swSTOP   (swstop)
 
-        , .FLDSEL_0 (oFLDSEL[0])
-        , .FLDSEL_1 (oFLDSEL[1])
         , .IOP      (oIOP)
         , .MAJST_0  (majst[0])
         , .MAJST_1  (majst[1])
@@ -385,8 +376,6 @@ module backplane (
         , .NXTMS_1  (nxtms[1])
         , .NXTMS_2  (nxtms[2])
         , .NXTMS_3  (nxtms[3])
-        , .NXTMSBRK ()
-        , .NXTMSIAK ()
         , .RUN      (oRUN)
         , .TP1      (oTP1)
         , .TP2      (oTP2)
@@ -444,7 +433,6 @@ module backplane (
         , .DMADR_7  (iDMAADDR[07])
         , .DMADR_8  (iDMAADDR[08])
         , .DMADR_9  (iDMAADDR[09])
-        , .EXEFET   (oEXEFET)
         , .GND      (1'b0)
         , .INBUS_0  (inbus[00])
         , .INBUS_1  (inbus[01])
@@ -532,8 +520,7 @@ module backplane (
         , .swSTART  (swstart)
         , .swSTOP   (swstop)
 
-        , .FLDSEL_0 (oFLDSEL[0])
-        , .FLDSEL_1 (oFLDSEL[1])
+        , .ION      (oION)
         , .IOP      (oIOP)
         , .MAJST_0  (majst[0])
         , .MAJST_1  (majst[1])
@@ -543,8 +530,6 @@ module backplane (
         , .NXTMS_1  (nxtms[1])
         , .NXTMS_2  (nxtms[2])
         , .NXTMS_3  (nxtms[3])
-        , .NXTMSBRK ()
-        , .NXTMSIAK ()
         , .RUN      (oRUN)
         , .TP1      (oTP1)
         , .TP2      (oTP2)
