@@ -6,7 +6,7 @@ GPP    := g++ $(CFLAGS) -std=c++11 -g -Wall
 VFILES := \
 	backplane.v \
 	chips.v \
-	console.v \
+	../kicads/console/console.v \
 	../kicads/extarith/extarith.v \
 	../kicads/extmemory/extmemory.v \
 	../kicads/processor/processor.v \
@@ -45,6 +45,9 @@ obj_dir/Vbackplane.cpp obj_dir/Vbackplane.h obj_dir/Vbackplane.mk: $(VFILES)
 	rm -rf obj_dir
 	verilator --cc --top-module backplane $(VFILES)
 
+../kicads/console/console.v: ../kicads/console/console.kicad_pcb
+	cd ../kicads/console ; ../parsepcb.sh console
+
 ../kicads/extarith/extarith.v: ../kicads/extarith/extarith.kicad_pcb
 	cd ../kicads/extarith ; ../parsepcb.sh extarith
 
@@ -53,6 +56,9 @@ obj_dir/Vbackplane.cpp obj_dir/Vbackplane.h obj_dir/Vbackplane.mk: $(VFILES)
 
 ../kicads/processor/processor.v: ../kicads/processor/processor.kicad_pcb
 	cd ../kicads/processor ; ../parsepcb.sh processor
+
+../kicads/console/console.kicad_pcb: ../kicads/console/console.kicad_sch
+	error update console.kicad_pcb
 
 ../kicads/extarith/extarith.kicad_pcb: ../kicads/extarith/extarith.kicad_sch
 	error update extarith.kicad_pcb

@@ -214,15 +214,17 @@ proc startat {addr} {
     if {($addr < 0) || ($addr > 07777)} {
         error "bad address $addr"
     }
-    swtch set reg $addr
-    runloop 240
-    swtch set ldad 1
-    runloop 240
-    swtch set ldad 0
-    runloop 240
-    swtch set start 1
-    runloop 960
-    swtch set start 0
+    puts "startat*: setting swreg $addr"
+    swtchwait reg $addr
+    puts "startat*: pressing ldad"
+    swtchwait ldad 1
+    puts "startat*: releasing ldad"
+    swtchwait ldad 0
+    puts "startat*: pressing start"
+    swtchwait start 1
+    puts "startat*: releasing start"
+    swtchwait start 0
+    puts "startat*: done"
 }
 
 # modify and query switch settings
@@ -302,6 +304,17 @@ proc swtch {args} {
         }
     }
     return $retval
+}
+
+;# set switch to the given value
+;# wait for it to soak through the console circuit
+;# ...including any debounce time
+proc swtchwait {name valu} {
+    swtch set $name $valu
+    for {set i 0} {[bus sw$name] != $valu} {incr i} {
+        if {$i > 2000000} {error "timed out setting sw$name to $valu}
+        runstep
+    }
 }
 
 # unscramble data bits from gpio connector

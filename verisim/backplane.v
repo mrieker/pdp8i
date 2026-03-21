@@ -5,8 +5,9 @@ module backplane (
     input clok2,                    // 10MHz clock
     input reset,                    // power-on reset
 
-    input[27:04] gpin,              // gpio connector
-    output[27:04] gpout,
+    input[15:04] gpin,              // switches from verimain.cc
+    output[27:04] gpout,            // light bulbs to verimain.cc
+                                    // - also has row selectors
 
     input i3CYCLE,                  // do 3-cycle break
     input iACCLEAR,                 // io pulse clears AC
@@ -45,41 +46,195 @@ module backplane (
     wire[11:00] memINBUS;
     wire oINTACK, oJMPJMS;
 
+    wire[15:04] gpio = (gpout[18:16] == 7) ? 12'oZZZZ : gpin;
+    assign gpout[15:04] = gpio[15:04];
+
     console coninst (
         .zclock (zclock),
         .zreset (zreset),
-        .clok2 (clok2),
-        .reset (reset),
+        .CLOK2 (clok2),
+        .RESET (reset),
 
-        .gpin  (gpin),
-        .gpout (gpout),
+        .bGPIO_4   (gpio[04]),
+        .bGPIO_5   (gpio[05]),
+        .bGPIO_6   (gpio[06]),
+        .bGPIO_7   (gpio[07]),
+        .bGPIO_8   (gpio[08]),
+        .bGPIO_9   (gpio[09]),
+        .bGPIO_10  (gpio[10]),
+        .bGPIO_11  (gpio[11]),
+        .bGPIO_12  (gpio[12]),
+        .bGPIO_13  (gpio[13]),
+        .bGPIO_14  (gpio[14]),
+        .bGPIO_15  (gpio[15]),
+        .oGPOUT_16 (gpout[16]),
+        .oGPOUT_17 (gpout[17]),
+        .oGPOUT_18 (gpout[18]),
+        .oGPOUT_20 (gpout[20]),
+        .oGPOUT_21 (gpout[21]),
+        .oGPOUT_22 (gpout[22]),
+        .oGPOUT_23 (gpout[23]),
+        .oGPOUT_24 (gpout[24]),
+        .oGPOUT_25 (gpout[25]),
+        .oGPOUT_26 (gpout[26]),
+        .oGPOUT_27 (gpout[27]),
 
-        .lbpctr (pctr),
-        .lbmadr (oMADR),
-        .lbmbuf (oMBUF),
-        .lbacum (oACUM),
-        .lbmulq (mulq),
-        .lbireg (ireg),
-        .lbmajst (majst),
-        .lbion (oION),
-        .lbpause (pause),
-        .lbrun (oRUN),
-        .lbsc (sctr),
-        .lbdf (dfield),
-        .lbif (ifield),
-        .lblink (oLINK),
+        .ACCLEAR (),
+        .BRKRQST (),
+        .BRKWRM  (),
+        .BUSINI  (),
+        .BWCOV   (),
+        .CAINC   (),
+        .CYCLE3  (),
+        .DMADR_0  (),
+        .DMADR_1  (),
+        .DMADR_10 (),
+        .DMADR_11 (),
+        .DMADR_2  (),
+        .DMADR_3  (),
+        .DMADR_4  (),
+        .DMADR_5  (),
+        .DMADR_6  (),
+        .DMADR_7  (),
+        .DMADR_8  (),
+        .DMADR_9  (),
+        .DMADR_12 (),
+        .DMADR_13 (),
+        .DMADR_14 (),
+        .FIELD_0 (),
+        .FIELD_1 (),
+        .FIELD_2 (),
+        .GND     (1'b0),
+        .INTINH  (),
+        .INTRQST (),
+        .IOP     (),
+        .IOSKIP  (),
+        .LNKTOG  (),
 
-        .swreg (swreg),         //toggle switch register
-        .swdfld (swdfld),       //toggle data field
-        .swifld (swifld),       //toggle inst field
-        .swstart (swstart),     //button start (debounced)
-        .swldad (swldad),       //button load address
-        .swdepos (swdepos),     //button deposit (debounced)
-        .swexam (swexam),       //button examine (debounced)
-        .swcont (swcont),       //button continue (debounced)
-        .swstop (swstop),       //button stop
-        .swsstep (swsstep),     //toggle single cycle
-        .swsinst (swsinst)      //toggle single instruction
+        .NXTMS_0 (nxtms[0]),
+        .NXTMS_1 (nxtms[1]),
+        .NXTMS_2 (nxtms[2]),
+        .NXTMS_3 (nxtms[3]),
+        .READSR  (readsr),
+        .TP1     (oTP1),
+        .TP2     (oTP2),
+        .TP3     (oTP3),
+        .TP4     (oTP4),
+        .TS1     (oTS1),
+        .TS2     (oTS2),
+        .TS3     (oTS3),
+        .TS4     (oTS4),
+        .VCC     (1'b1)
+
+        , .PCTR_0   (pctr[00])
+        , .PCTR_1   (pctr[01])
+        , .PCTR_10  (pctr[10])
+        , .PCTR_11  (pctr[11])
+        , .PCTR_2   (pctr[02])
+        , .PCTR_3   (pctr[03])
+        , .PCTR_4   (pctr[04])
+        , .PCTR_5   (pctr[05])
+        , .PCTR_6   (pctr[06])
+        , .PCTR_7   (pctr[07])
+        , .PCTR_8   (pctr[08])
+        , .PCTR_9   (pctr[09])
+        , .MADR_0   (oMADR[00])
+        , .MADR_1   (oMADR[01])
+        , .MADR_10  (oMADR[10])
+        , .MADR_11  (oMADR[11])
+        , .MADR_2   (oMADR[02])
+        , .MADR_3   (oMADR[03])
+        , .MADR_4   (oMADR[04])
+        , .MADR_5   (oMADR[05])
+        , .MADR_6   (oMADR[06])
+        , .MADR_7   (oMADR[07])
+        , .MADR_8   (oMADR[08])
+        , .MADR_9   (oMADR[09])
+        , .MBUF_0   (oMBUF[00])
+        , .MBUF_1   (oMBUF[01])
+        , .MBUF_10  (oMBUF[10])
+        , .MBUF_11  (oMBUF[11])
+        , .MBUF_2   (oMBUF[02])
+        , .MBUF_3   (oMBUF[03])
+        , .MBUF_4   (oMBUF[04])
+        , .MBUF_5   (oMBUF[05])
+        , .MBUF_6   (oMBUF[06])
+        , .MBUF_7   (oMBUF[07])
+        , .MBUF_8   (oMBUF[08])
+        , .MBUF_9   (oMBUF[09])
+        , .ACUM_0   (oACUM[0])
+        , .ACUM_1   (oACUM[1])
+        , .ACUM_2   (oACUM[2])
+        , .ACUM_3   (oACUM[3])
+        , .ACUM_4   (oACUM[4])
+        , .ACUM_5   (oACUM[5])
+        , .ACUM_6   (oACUM[6])
+        , .ACUM_7   (oACUM[7])
+        , .ACUM_8   (oACUM[8])
+        , .ACUM_9   (oACUM[9])
+        , .ACUM_10  (oACUM[10])
+        , .ACUM_11  (oACUM[11])
+        , .MQUO_0   (mulq[0])
+        , .MQUO_1   (mulq[1])
+        , .MQUO_2   (mulq[2])
+        , .MQUO_3   (mulq[3])
+        , .MQUO_4   (mulq[4])
+        , .MQUO_5   (mulq[5])
+        , .MQUO_6   (mulq[6])
+        , .MQUO_7   (mulq[7])
+        , .MQUO_8   (mulq[8])
+        , .MQUO_9   (mulq[9])
+        , .MQUO_10  (mulq[10])
+        , .MQUO_11  (mulq[11])
+        , .INBUS_0  (inbus[0])
+        , .INBUS_1  (inbus[1])
+        , .INBUS_2  (inbus[2])
+        , .INBUS_3  (inbus[3])
+        , .INBUS_4  (inbus[4])
+        , .INBUS_5  (inbus[5])
+        , .INBUS_6  (inbus[6])
+        , .INBUS_7  (inbus[7])
+        , .INBUS_8  (inbus[8])
+        , .INBUS_9  (inbus[9])
+        , .INBUS_10 (inbus[10])
+        , .INBUS_11 (inbus[11])
+        , .IREG_9   (ireg[9])
+        , .IREG_10  (ireg[10])
+        , .IREG_11  (ireg[11])
+        , .MAJST_0  (majst[0])
+        , .MAJST_1  (majst[1])
+        , .MAJST_2  (majst[2])
+        , .MAJST_3  (majst[3]),
+        .ION (oION),
+        .PAUSE (pause),
+        .RUN (oRUN),
+          .SCTR_0   (sctr[0])
+        , .SCTR_1   (sctr[1])
+        , .SCTR_2   (sctr[2])
+        , .SCTR_3   (sctr[3])
+        , .SCTR_4   (sctr[4])
+        , .DFLD_0   (dfield[0])
+        , .DFLD_1   (dfield[1])
+        , .DFLD_2   (dfield[2])
+        , .IFLD_0   (ifield[0])
+        , .IFLD_1   (ifield[1])
+        , .IFLD_2   (ifield[2]),
+        .LINK (oLINK),
+
+        .swDFLD_0 (swdfld[0]),  //toggle data field
+        .swDFLD_1 (swdfld[1]),
+        .swDFLD_2 (swdfld[2]),
+        .swIFLD_0 (swifld[0]),  //toggle inst field
+        .swIFLD_1 (swifld[1]),
+        .swIFLD_2 (swifld[2]),
+        .swSTART  (swstart),    //button start (debounced)
+        .swLDAD   (swldad),     //button load address
+        .swDEPOS  (swdepos),    //button deposit (debounced)
+        .swEXAM   (swexam),     //button examine (debounced)
+        .swCONT   (swcont),     //button continue (debounced)
+        .swSTOP   (swstop),     //button stop
+        .swSSTEP  (swsstep),    //toggle single cycle
+        .swSINST  (swsinst)     //toggle single instruction
     );
 
     wire eaeACCLEAR, eaePAUSE, eaeIOSKIP, eaeLNKTOG;

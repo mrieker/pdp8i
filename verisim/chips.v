@@ -934,6 +934,40 @@ module X74LS283 (input zclock, zreset,
 
 endmodule
 
+module X74LS540 (input zclock, zreset,
+          input  p1
+        , input  p2
+        , input  p3
+        , input  p4
+        , input  p5
+        , input  p6
+        , input  p7
+        , input  p8
+        , input  p9
+        , input  p10
+        , output reg p11
+        , output reg p12
+        , output reg p13
+        , output reg p14
+        , output reg p15
+        , output reg p16
+        , output reg p17
+        , output reg p18
+        , input  p19
+        , input  p20
+);
+
+    reg[7:0] dout;
+    wire oe = ~ p1 & ~ p19;
+    wire[7:0] din = { p9, p8, p7, p6, p5, p4, p3, p2 };
+    assign { p11, p12, p13, p14, p15, p16, p17, p18 } = oe ? dout : 8'hZZ;
+
+    always @(posedge zclock) begin
+        dout <= ~ din;
+    end
+
+endmodule
+
 module X74HCT541 (input zclock, zreset,
           input  p1
         , input  p2
