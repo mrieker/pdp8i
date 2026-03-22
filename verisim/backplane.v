@@ -5,8 +5,8 @@ module backplane (
     input clok2,                    // 10MHz clock
     input reset,                    // power-on reset
 
-    input[15:04] gpin,              // switches from verimain.cc
-    output[27:04] gpout,            // light bulbs to verimain.cc
+    inout[27:04] gpio,              // switches from verimain.cc
+                                    // light bulbs to verimain.cc
                                     // - also has row selectors
 
     input i3CYCLE,                  // do 3-cycle break
@@ -34,7 +34,6 @@ module backplane (
     output[2:0] memfield,
     output[3:0] majst,
     output[4:0] sctr,
-    output[11:00] swreg,
     output[2:0] swdfld, swifld,
     output swstart, swldad, swdepos, swexam,
     output swcont, swstop, swsstep, swsinst
@@ -43,11 +42,8 @@ module backplane (
     wire[11:09] ireg;
     wire[2:0] dfield, ifield;
 
-    wire[11:00] memINBUS;
+    wire[11:00] conINBUS;
     wire oINTACK, oJMPJMS;
-
-    wire[15:04] gpio = (gpout[18:16] == 7) ? 12'oZZZZ : gpin;
-    assign gpout[15:04] = gpio[15:04];
 
     console coninst (
         .zclock (zclock),
@@ -67,17 +63,17 @@ module backplane (
         .bGPIO_13  (gpio[13]),
         .bGPIO_14  (gpio[14]),
         .bGPIO_15  (gpio[15]),
-        .oGPOUT_16 (gpout[16]),
-        .oGPOUT_17 (gpout[17]),
-        .oGPOUT_18 (gpout[18]),
-        .oGPOUT_20 (gpout[20]),
-        .oGPOUT_21 (gpout[21]),
-        .oGPOUT_22 (gpout[22]),
-        .oGPOUT_23 (gpout[23]),
-        .oGPOUT_24 (gpout[24]),
-        .oGPOUT_25 (gpout[25]),
-        .oGPOUT_26 (gpout[26]),
-        .oGPOUT_27 (gpout[27]),
+        .oGPOUT_16 (gpio[16]),
+        .oGPOUT_17 (gpio[17]),
+        .oGPOUT_18 (gpio[18]),
+        .oGPOUT_20 (gpio[20]),
+        .oGPOUT_21 (gpio[21]),
+        .oGPOUT_22 (gpio[22]),
+        .oGPOUT_23 (gpio[23]),
+        .oGPOUT_24 (gpio[24]),
+        .oGPOUT_25 (gpio[25]),
+        .oGPOUT_26 (gpio[26]),
+        .oGPOUT_27 (gpio[27]),
 
         .ACCLEAR (),
         .BRKRQST (),
@@ -186,18 +182,18 @@ module backplane (
         , .MQUO_9   (mulq[9])
         , .MQUO_10  (mulq[10])
         , .MQUO_11  (mulq[11])
-        , .INBUS_0  (inbus[0])
-        , .INBUS_1  (inbus[1])
-        , .INBUS_2  (inbus[2])
-        , .INBUS_3  (inbus[3])
-        , .INBUS_4  (inbus[4])
-        , .INBUS_5  (inbus[5])
-        , .INBUS_6  (inbus[6])
-        , .INBUS_7  (inbus[7])
-        , .INBUS_8  (inbus[8])
-        , .INBUS_9  (inbus[9])
-        , .INBUS_10 (inbus[10])
-        , .INBUS_11 (inbus[11])
+        , .INBUS_0  (conINBUS[0])   // reading switch register
+        , .INBUS_1  (conINBUS[1])   // ...when readsr asserted
+        , .INBUS_2  (conINBUS[2])
+        , .INBUS_3  (conINBUS[3])
+        , .INBUS_4  (conINBUS[4])
+        , .INBUS_5  (conINBUS[5])
+        , .INBUS_6  (conINBUS[6])
+        , .INBUS_7  (conINBUS[7])
+        , .INBUS_8  (conINBUS[8])
+        , .INBUS_9  (conINBUS[9])
+        , .INBUS_10 (conINBUS[10])
+        , .INBUS_11 (conINBUS[11])
         , .IREG_9   (ireg[9])
         , .IREG_10  (ireg[10])
         , .IREG_11  (ireg[11])
@@ -545,7 +541,7 @@ module backplane (
     wire readsr;
     wire acclear = iACCLEAR | eaeACCLEAR;
     wire pause = iPAUSE | eaePAUSE;
-    wire[11:00] inbus = iINBUS | memINBUS | mexINBUS | (readsr ? swreg : 12'b0);
+    wire[11:00] inbus = readsr ? conINBUS : iINBUS | mexINBUS;
     wire ioskip = iIOSKIP | eaeIOSKIP;
     wire lnktog = iLNKTOG | eaeLNKTOG;
     wire[3:0] nxtms;

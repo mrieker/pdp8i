@@ -166,7 +166,6 @@ static int cmd_bus (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj
         {  1, OFFS (swcont),   false, "swcont"   },
         {  3, OFFS (swdfld),   false, "swdfld"   },
         {  3, OFFS (swifld),   false, "swifld"   },
-        { 12, OFFS (swreg),    false, "swreg"    },
         {  1, OFFS (swstop),   false, "swstop"   },
         {  1, OFFS (swstart),  false, "swstart"  },
         {  1, OFFS (swsstep),  false, "swsstep"  },
@@ -207,6 +206,27 @@ static int cmd_bus (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj
         }
         if (strcasecmp (arg, "set") == 0) {
             setmode = true;
+            continue;
+        }
+        if (strcasecmp (arg, "swreg") == 0) {
+            if (setmode) {
+                Tcl_SetResultF (interp, "pin not settable %s", arg);
+                return TCL_ERROR;
+            }
+            int val = 0;
+            val |= vbkpl->backplane__DOT__coninst__DOT__swREG_0 << 0;
+            val |= vbkpl->backplane__DOT__coninst__DOT__swREG_1 << 1;
+            val |= vbkpl->backplane__DOT__coninst__DOT__swREG_2 << 2;
+            val |= vbkpl->backplane__DOT__coninst__DOT__swREG_3 << 3;
+            val |= vbkpl->backplane__DOT__coninst__DOT__swREG_4 << 4;
+            val |= vbkpl->backplane__DOT__coninst__DOT__swREG_5 << 5;
+            val |= vbkpl->backplane__DOT__coninst__DOT__swREG_6 << 6;
+            val |= vbkpl->backplane__DOT__coninst__DOT__swREG_7 << 7;
+            val |= vbkpl->backplane__DOT__coninst__DOT__swREG_8 << 8;
+            val |= vbkpl->backplane__DOT__coninst__DOT__swREG_9 << 9;
+            val |= vbkpl->backplane__DOT__coninst__DOT__swREG_10 << 10;
+            val |= vbkpl->backplane__DOT__coninst__DOT__swREG_11 << 11;
+            getobjs[ngetobjs++] = Tcl_NewIntObj (val);
             continue;
         }
         for (int j = 0;; j ++) {
@@ -340,12 +360,14 @@ static int cmd_gpio (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Ob
         return TCL_ERROR;
     }
     if (objc > 1) {
-        int num = 1;
+        int num = 0;
         int rc = Tcl_GetIntFromObj (interp, objv[1], &num);
         if (rc != TCL_OK) return rc;
-        vbkpl->gpin = num;
+        if ((vbkpl->gpio & 070000) != 070000) {
+            vbkpl->gpio = (vbkpl->gpio & ~ 07777) | (num & 07777);
+        }
     } else {
-        Tcl_SetObjResult (interp, Tcl_NewIntObj (vbkpl->gpout));
+        Tcl_SetObjResult (interp, Tcl_NewIntObj (vbkpl->gpio));
     }
     return TCL_OK;
 }
