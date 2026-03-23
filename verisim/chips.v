@@ -654,8 +654,8 @@ module X74LS151 (input zclock, zreset,
         , input  p2     // d2
         , input  p3     // d1
         , input  p4     // d0
-        , output reg p5     //  q
-        , output reg p6     // _q
+        , output reg p5 //  q
+        , output     p6 // _q
         , input  p7     // _g
         , input  p8     // gnd
         , input  p9     // c (s2)
@@ -749,7 +749,7 @@ module X74LS161 (input zclock, zreset,
         , output reg p12    // qc
         , output reg p13    // qb
         , output reg p14    // qa
-        , output reg     p15    // rco
+        , output     p15    // rco
         , input      p16    // vcc
 );
 
@@ -863,18 +863,18 @@ endmodule
 module X74LS175 (input zclock, zreset,
           input      p1
         , output reg p2
-        , output reg     p3
+        , output     p3
         , input      p4
         , input      p5
-        , output reg     p6
+        , output     p6
         , output reg p7
         , input      p8
         , input      p9
         , output reg p10
-        , output reg     p11
+        , output     p11
         , input      p12
         , input      p13
-        , output reg     p14
+        , output     p14
         , output reg p15
         , input      p16
 );
@@ -945,14 +945,14 @@ module X74LS540 (input zclock, zreset,
         , input  p8
         , input  p9
         , input  p10
-        , output reg p11
-        , output reg p12
-        , output reg p13
-        , output reg p14
-        , output reg p15
-        , output reg p16
-        , output reg p17
-        , output reg p18
+        , inout  p11
+        , inout  p12
+        , inout  p13
+        , inout  p14
+        , inout  p15
+        , inout  p16
+        , inout  p17
+        , inout  p18
         , input  p19
         , input  p20
 );
@@ -979,14 +979,14 @@ module X74HCT541 (input zclock, zreset,
         , input  p8
         , input  p9
         , input  p10
-        , output reg p11
-        , output reg p12
-        , output reg p13
-        , output reg p14
-        , output reg p15
-        , output reg p16
-        , output reg p17
-        , output reg p18
+        , inout  p11
+        , inout  p12
+        , inout  p13
+        , inout  p14
+        , inout  p15
+        , inout  p16
+        , inout  p17
+        , inout  p18
         , input  p19
         , input  p20
 );

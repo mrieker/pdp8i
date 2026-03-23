@@ -46,6 +46,7 @@ set MS_INTAK 7  ;# memory cycle is for interrupt acknowledge
 set MS_DEPOS 8  ;# memory cycle is for deposit switch
 set MS_EXAM  9  ;# memory cycle is for examine switch
 
+set memdisab 1  ;# 0=test extmemory.v memory chip; 1=this script is its own memory
 set testcons 1  ;# test console functions
 set testexar 1  ;# test extended arithmetic
 set testxmem 1  ;# test extended memory
@@ -71,6 +72,7 @@ proc simtest {} {
     global latstop
     global linc
     global memcycwcover
+    global memdisab
     global mulq
     global opcode
     global perclock
@@ -98,6 +100,8 @@ proc simtest {} {
     global MS_INTAK
     global MS_DEPOS
     global MS_EXAM
+
+    bus set memdisab $memdisab
 
     ;# reset then start processor
     hardreset
@@ -439,7 +443,7 @@ proc finishline {} {
 ;#         update accumulator
 ;#   TS4 = update to next state
 proc memorycycle {state field addr rdata wdata} {
-    global dmawrmem dmawdata memcycwcover opcode
+    global dmawrmem dmawdata memcycwcover memdisab opcode
     global MS_BREAK MS_DEPOS MS_EXAM MS_EXEC MS_FETCH MS_INTAK MS_WRDCT
     global haltwhy latsinst latsstep latstop memcycno testcons
 
@@ -460,17 +464,30 @@ proc memorycycle {state field addr rdata wdata} {
     verify12 [bus majst] $state "bad state at start of mem cycle"
 
     ;# cpu should be outputting address we expect
-    set actaddr [expr {([bus memfield] << 12) | [bus oMADR]}]
     set expaddr [expr {($field << 12) | $addr}]
+    set actaddr [expr {([bus memfield] << 12) | [bus oMADR]}]
     verify15 $actaddr $expaddr "XMA bad at beginning of $state cycle"
 
     ;# write the read data to the given address so cpu can read it
-    mem $expaddr $rdata
+    if {$memdisab} {
+        ;# this script is the memory, so put read data on the INBUS
+        bus set iINBUS $rdata
+        ;# put unrelated number in extmemory.v chip in case it is interfering
+        mem $expaddr [randbits 12]
+    } else {
+        ;# extmemory.v memory chip in use, so put read data directly in chip
+        mem $expaddr $rdata
+    }
 
     ;# end of TS1 means it finished reading that memory location into MB
     waitnegate TS1
 
-    ;# MB should now have the value we wrote to the memory location
+    ;# stop dumping memory read value onto iINBUS
+    if {$memdisab} {
+        bus set iINBUS 0
+    }
+
+    ;# MB should now have the value we wrote to the memory location or to the iINBUS
     verify12 [bus oMBUF] $rdata "MB during read"
 
     ;# if doing a previously requested DMA cycle that writes to memory,
@@ -500,7 +517,9 @@ proc memorycycle {state field addr rdata wdata} {
     }
 
     ;# beginning of TS3, MB should now have the possibly modified value
-    verify12 [bus oMBUF] $wdata "MB during writeback"
+    set actaddr [expr {([bus memfield] << 12) | [bus oMADR]}]
+    verify15 $actaddr $expaddr "XMA bad at beg TS3 of $state cycle"
+    verify12 [bus oMBUF] $wdata "MB during writeback at beg TS3"
 
     ;# BWC_OVERFLOW is valid
     ;# - clocked with TP2 (vol 2, p5 D-5)
@@ -510,11 +529,13 @@ proc memorycycle {state field addr rdata wdata} {
     ;# wait for TP3 asserted then negated indicating value written to memory
     ;# also clocks in any io instruction result
     ;# and clocks in the step/stop switches
-    for {set i 0} true {incr i} {
-        if {[bus oTP3]} break
-        if {$i > 500} {error "timed out waiting for TP3 asserted"}
-        runstep
-    }
+    waitassert TP3
+
+    ;# MA and MB should still have write memory contents
+    set actaddr [expr {([bus memfield] << 12) | [bus oMADR]}]
+    verify15 $actaddr $expaddr "XMA bad at end TS3 of $state cycle"
+    verify12 [bus oMBUF] $wdata "MB during writeback at end TS3"
+
     waitnegate TP3
     set latsinst [bus swsinst]
     set latsstep [bus swsstep]
@@ -529,8 +550,10 @@ proc memorycycle {state field addr rdata wdata} {
         bus set iINBUS 0
     }
 
-    ;# verify the memory contents
-    verify12 [mem $expaddr] $wdata [format "address %05o mismatch" $expaddr]
+    ;# verify the extmemory.v memory contents
+    if {! $memdisab} {
+        verify12 [mem $expaddr] $wdata [format "address %05o mismatch" $expaddr]
+    }
 
     ;# step to end of cycle
     waitassert TP4

@@ -30,6 +30,7 @@ module backplane (
     output oTP1, oTP2, oTP3, oTP4, oTS1, oTS2, oTS3, oTS4,
     output[11:00] oMADR, oMBUF, oACUM,
 
+    input memdisab,                 // disable internal memory chip
     output[11:00] mulq, pctr,
     output[2:0] memfield,
     output[3:0] majst,
@@ -107,10 +108,6 @@ module backplane (
         .IOSKIP  (),
         .LNKTOG  (),
 
-        .NXTMS_0 (nxtms[0]),
-        .NXTMS_1 (nxtms[1]),
-        .NXTMS_2 (nxtms[2]),
-        .NXTMS_3 (nxtms[3]),
         .READSR  (readsr),
         .TP1     (oTP1),
         .TP2     (oTP2),
@@ -308,10 +305,6 @@ module backplane (
         , .MBUF_9   (oMBUF[9])
         , .MBUF_10  (oMBUF[10])
         , .MBUF_11  (oMBUF[11])
-        , .NXTMS_0  ()
-        , .NXTMS_1  ()
-        , .NXTMS_2  ()
-        , .NXTMS_3  ()
         , .PCTR_0   ()
         , .PCTR_1   ()
         , .PCTR_2   ()
@@ -476,6 +469,7 @@ module backplane (
         , .MBUF_7   (oMBUF[07])
         , .MBUF_8   (oMBUF[08])
         , .MBUF_9   (oMBUF[09])
+        , .MEMDIS   (memdisab)
         , .MQUO_0   ()
         , .MQUO_1   ()
         , .MQUO_10  ()
@@ -523,10 +517,6 @@ module backplane (
         , .MAJST_1  (majst[1])
         , .MAJST_2  (majst[2])
         , .MAJST_3  (majst[3])
-        , .NXTMS_0  (nxtms[0])
-        , .NXTMS_1  (nxtms[1])
-        , .NXTMS_2  (nxtms[2])
-        , .NXTMS_3  (nxtms[3])
         , .RUN      (oRUN)
         , .TP1      (oTP1)
         , .TP2      (oTP2)
@@ -544,7 +534,6 @@ module backplane (
     wire[11:00] inbus = readsr ? conINBUS : iINBUS | mexINBUS;
     wire ioskip = iIOSKIP | eaeIOSKIP;
     wire lnktog = iLNKTOG | eaeLNKTOG;
-    wire[3:0] nxtms;
 
     processor procboard (
         .zclock (zclock),
@@ -677,10 +666,6 @@ module backplane (
         , .MAJST_1  (majst[1])
         , .MAJST_2  (majst[2])
         , .MAJST_3  (majst[3])
-        , .NXTMS_0  (nxtms[0])
-        , .NXTMS_1  (nxtms[1])
-        , .NXTMS_2  (nxtms[2])
-        , .NXTMS_3  (nxtms[3])
         , .RUN      (oRUN)
         , .TP1      (oTP1)
         , .TP2      (oTP2)
