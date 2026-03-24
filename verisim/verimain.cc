@@ -434,19 +434,19 @@ static int cmd_randbits (ClientData clientdata, Tcl_Interp *interp, int objc, Tc
     return TCL_OK;
 }
 
-// call with clock still low and input signals just changed
-// returns with output signals updated and clock just set low
+// call with 10MHz clock still low and input signals just changed
+// returns with output signals updated and 10MHz clock just set low
 static void kerchunk ()
 {
-    int halfrat = clkratio / 2;
-    for (int i = 0; i < clkratio; i ++) {
-        vbkpl->clok2 = (i >= halfrat);
+    // 10 100MHz cycles step the 10MHz osc through a cycle
+    // each 100MHz step progresses signals through gates and flipflops
+    for (int i = 0; i < 10; i ++) {
         vbkpl->eval ();     // let input signals soak in
-        vbkpl->zclock = 1;
-        vbkpl->eval ();
+        vbkpl->zclock = 1;  // clock progress through gates and flipflops
+        vbkpl->eval ();     // let new state settle in
         vbkpl->zclock = 0;
     }
-    ++ cyclenum;        // one more clock cycle done
+    ++ cyclenum;            // one more clock cycle done
 }
 
 // set result to formatted string

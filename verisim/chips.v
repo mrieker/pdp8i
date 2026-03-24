@@ -1075,3 +1075,28 @@ module XCY7C199 (input zclock, zreset,
     end
 
 endmodule
+
+module X10MHz (
+        input  zclock,
+        input  zreset,
+        input      p1,  // INPUT
+        input      p7,  // POWERIN
+        output reg p8,  // OUTPUT
+        input      p14  // POWERIN
+    );
+
+    reg[3:0] div;
+
+    always @(posedge zclock or posedge zreset) begin
+        if (zreset) begin
+            div <= 0;
+            p8  <= 0;
+        end else if (div == 4) begin
+            div <= 0;
+            p8  <= ~ p8;
+        end else begin
+            div <= div + 1;
+        end
+    end
+
+endmodule

@@ -2,7 +2,7 @@
 module backplane (
     input zclock,
     input zreset,
-    input clok2,                    // 10MHz clock
+    output clok2,                   // 10MHz clock from xtal osc on console board
     input reset,                    // power-on reset
 
     inout[27:04] gpio,              // switches from verimain.cc

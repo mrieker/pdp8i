@@ -71,6 +71,10 @@ public class ParsePCB {
                 Network network = new Network ();
                 network.netnum  = net.elems[1].asint ();
                 network.netname = net.elems[2].assym ();
+                if (netsbyname.get (network.netname) != null) {
+                    System.err.println ("duplicate network name " + network.netname);
+                    error = true;
+                }
                 netsbynum.put (network.netnum, network);
                 netsbyname.put (network.netname, network);
             }
@@ -363,8 +367,15 @@ public class ParsePCB {
             for (int i = 0; i < nq.length (); i ++) {
                 char ch = nq.charAt (i);
                 if ((i == 0) && (ch == '/')) continue;
-                if ("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789".indexOf (ch) < 0) ch = '_';
-                sb.append (ch);
+                switch (ch) {
+                case '>': sb.append ("gt"); break;
+                case '=': sb.append ("eq"); break;
+                case '<': sb.append ("lt"); break;
+                default:
+                    if ("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789".indexOf (ch) < 0) ch = '_';
+                    sb.append (ch);
+                    break;
+                }
             }
             return sb.toString ();
         }
