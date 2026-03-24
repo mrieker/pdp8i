@@ -218,7 +218,7 @@ proc simtest {} {
                         }
                         if {($opcode & 07401) == 07400} {           ;# group 2
                             ####set opcode [expr {$opcode & 07775}]     ;# don't do HLT
-                            set swregsent [bus swreg]
+                            set swregsent [swtch reg]
                             if {$swregsent != $swregpend} {         ;# see if processor has absorbed switches
                                 set opcode [expr {$opcode & 07773}] ;# if not, don't do OSR
                             }
@@ -621,7 +621,7 @@ proc checkhalted {} {
                         for {set i 0} true {incr i} {
                             set busdf [bus swdfld]
                             set busif [bus swifld]
-                            set busda [bus swreg]
+                            set busda [swtch reg]
                             if {($busdf == $swdfpend) && ($busif == $swifpend) && ($busda == $swregpend)} break
                             if {$i > 20000} {       ;# 1.68mS @ 10MHz
                                 error "timed out waiting for switches to soak in"
@@ -654,7 +654,7 @@ proc checkhalted {} {
                         ;# depos - only if 12 data switches have soaked through console board
                         finishline
                         for {set i 0} true {incr i} {
-                            set busda [bus swreg]
+                            set busda [swtch reg]
                             if {$busda == $swregpend} break
                             if {$i > 20000} {       ;# 1.68mS @ 10MHz
                                 error "timed out waiting for switches to soak in"
@@ -662,7 +662,7 @@ proc checkhalted {} {
                             runstep
                         }
                         startline
-                        set busda [bus swreg]
+                        set busda [swtch reg]
                         if {[bus majst] == $MS_DEPOS} {
                             set addr [expr {($addr + 1) & 07777}]
                             set pctr $addr

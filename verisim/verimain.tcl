@@ -184,18 +184,30 @@ proc runloop {{n ""}} {
         }
     }
 }
+set runstep_lastg 0
 proc runstep {} {
-    global lightrows runquiet swrowpends swrowsents
+    global lightrows runquiet runstep_lastg swrowpends swrowrcvds swrowsents
 
-    set c [clk]                         ;# kerchunk the 100MHz clock and get cycle count
+    set c [clk]                         ;# kerchunk the 10MHz clock and get cycle count
     set g [gpio]                        ;# read gpio connector contents
     for {set r 0} {$r < 3} {incr r} {   ;# maybe it wants switch contents
-        if {! ($g & (0x1000 << $r))} {
+        ;# if high-to-low for switch select, capture pending value to be sent
+        if {$runstep_lastg & ~ $g & (0x1000 << $r)} {
             set sw [lindex $swrowpends $r]
-            gpio [expr {($g & 0xFFF000) | $sw}]
             lset swrowsents $r $sw
         }
+        ;# if low switch select, send the row contents
+        if {~ $g & (0x1000 << $r)} {
+            set sw [lindex $swrowsents $r]
+            gpio [expr {($g & 0xFFF000) | $sw}]
+        }
+        ;# if low-to-high for switch select, processor clocked sent value in
+        if {~ $runstep_lastg & $g & (0x1000 << $r)} {
+            set sw [lindex $swrowsents $r]
+            lset swrowrcvds $r $sw
+        }
     }
+    set runstep_lastg $g                ;# save gpio to detect edges
     set v [expr {~ $g & 07777}]         ;# get the 12-bit row contents
     set newlbrows $lightrows            ;# update any possible lb row
     for {set r 0} {$r < 8} {incr r} {
@@ -229,11 +241,12 @@ proc startat {addr} {
 
 # modify and query switch settings
 # - set just queues the value, use 'runloop/runstep' to pass them on to processor
-# - get retrieves latest value sent to processor
-set swrowpends {0 0 0}      ;# waiting to be sent
-set swrowsents {0 0 0}      ;# has been sent
+# - get retrieves latest value received by processor
+set swrowpends {0 0 0}      ;# waiting to be sent to processor
+set swrowrcvds {0 0 0}      ;# has been received by processor
+set swrowsents {0 0 0}      ;# has been sent to processor
 proc swtch {args} {
-    global swrowpends swrowsents
+    global swrowpends swrowrcvds
 
     set retval ""
     set setmode 0
@@ -251,7 +264,7 @@ proc swtch {args} {
                     if {$val & 1} {incr row 0x001}
                     lset swrowpends 1 $row
                 } else {
-                    set row [lindex $swrowsents 1]
+                    set row [lindex $swrowrcvds 1]
                     set val 0
                     if {$row & 0x400} {incr val 4}
                     if {$row & 0x800} {incr val 2}
@@ -269,7 +282,7 @@ proc swtch {args} {
                     if {$val & 1} {incr row 0x008}
                     lset swrowpends 1 $row
                 } else {
-                    set row [lindex $swrowsents 1]
+                    set row [lindex $swrowrcvds 1]
                     set val 0
                     if {$row & 0x002} {incr val 4}
                     if {$row & 0x004} {incr val 2}
@@ -282,7 +295,7 @@ proc swtch {args} {
                     set val [lindex $args [incr i]]
                     lset swrowpends 0 [unscramgpio $val]
                 } else {
-                    lappend retval [unscramgpio [lindex $swrowsents 0]]
+                    lappend retval [unscramgpio [lindex $swrowrcvds 0]]
                 }
             }
             set {set setmode 1}
@@ -298,7 +311,8 @@ proc swtch {args} {
                     if {$val} {incr row $mask}
                     lset swrowpends 2 $row
                 } else {
-                    lappend retval [expr {([lindex $swrowsents 2] & $mask) != 0}]
+                    ;# bus sw$sw gets value after debouncing delay
+                    lappend retval [bus sw$sw]
                 }
             }
         }
@@ -311,7 +325,7 @@ proc swtch {args} {
 ;# ...including any debounce time
 proc swtchwait {name valu} {
     swtch set $name $valu
-    for {set i 0} {[bus sw$name] != $valu} {incr i} {
+    for {set i 0} {[swtch $name] != $valu} {incr i} {
         if {$i > 2000000} {error "timed out setting sw$name to $valu}
         runstep
     }

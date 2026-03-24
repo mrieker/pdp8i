@@ -209,27 +209,6 @@ static int cmd_bus (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj
             setmode = true;
             continue;
         }
-        if (strcasecmp (arg, "swreg") == 0) {
-            if (setmode) {
-                Tcl_SetResultF (interp, "pin not settable %s", arg);
-                return TCL_ERROR;
-            }
-            int val = 0;
-            val |= vbkpl->backplane__DOT__coninst__DOT__swREG_0 << 0;
-            val |= vbkpl->backplane__DOT__coninst__DOT__swREG_1 << 1;
-            val |= vbkpl->backplane__DOT__coninst__DOT__swREG_2 << 2;
-            val |= vbkpl->backplane__DOT__coninst__DOT__swREG_3 << 3;
-            val |= vbkpl->backplane__DOT__coninst__DOT__swREG_4 << 4;
-            val |= vbkpl->backplane__DOT__coninst__DOT__swREG_5 << 5;
-            val |= vbkpl->backplane__DOT__coninst__DOT__swREG_6 << 6;
-            val |= vbkpl->backplane__DOT__coninst__DOT__swREG_7 << 7;
-            val |= vbkpl->backplane__DOT__coninst__DOT__swREG_8 << 8;
-            val |= vbkpl->backplane__DOT__coninst__DOT__swREG_9 << 9;
-            val |= vbkpl->backplane__DOT__coninst__DOT__swREG_10 << 10;
-            val |= vbkpl->backplane__DOT__coninst__DOT__swREG_11 << 11;
-            getobjs[ngetobjs++] = Tcl_NewIntObj (val);
-            continue;
-        }
         for (int j = 0;; j ++) {
             Pin const *pin = &pintable[j];
             if (pin->name == NULL) {
