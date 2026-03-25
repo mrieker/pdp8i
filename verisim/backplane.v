@@ -5,8 +5,8 @@ module backplane (
     output clok2,                   // 10MHz clock from xtal osc on console board
     input reset,                    // power-on reset
 
-    inout[27:04] gpio,              // switches from verimain.cc
-                                    // light bulbs to verimain.cc
+    input[15:04] gpin,              // switches from verimain.cc
+    output[27:04] gpout,            // light bulbs to verimain.cc
                                     // - also has row selectors
 
     input i3CYCLE,                  // do 3-cycle break
@@ -19,6 +19,7 @@ module backplane (
     input iLNKTOG,                  // toggle link register
     input[14:00] iDMAADDR,          // device sending address for DMA
     input[11:00] iINBUS,            // device sending data for PIO or DMA
+                                    // also memory read data if memdisab set
     input iPAUSE,                   // pause processor clocking (stretch cycle)
     output oBREAK,                  // currently doing BREAK (DMA) cycle
     output oBUSINI,                 // initialize bus devices
@@ -52,29 +53,41 @@ module backplane (
         .CLOK2 (clok2),
         .RESET (reset),
 
-        .bGPIO_4   (gpio[04]),
-        .bGPIO_5   (gpio[05]),
-        .bGPIO_6   (gpio[06]),
-        .bGPIO_7   (gpio[07]),
-        .bGPIO_8   (gpio[08]),
-        .bGPIO_9   (gpio[09]),
-        .bGPIO_10  (gpio[10]),
-        .bGPIO_11  (gpio[11]),
-        .bGPIO_12  (gpio[12]),
-        .bGPIO_13  (gpio[13]),
-        .bGPIO_14  (gpio[14]),
-        .bGPIO_15  (gpio[15]),
-        .oGPOUT_16 (gpio[16]),
-        .oGPOUT_17 (gpio[17]),
-        .oGPOUT_18 (gpio[18]),
-        .oGPOUT_20 (gpio[20]),
-        .oGPOUT_21 (gpio[21]),
-        .oGPOUT_22 (gpio[22]),
-        .oGPOUT_23 (gpio[23]),
-        .oGPOUT_24 (gpio[24]),
-        .oGPOUT_25 (gpio[25]),
-        .oGPOUT_26 (gpio[26]),
-        .oGPOUT_27 (gpio[27]),
+        .bGPIO_4    (gpin[04]),
+        .bGPIO_5    (gpin[05]),
+        .bGPIO_6    (gpin[06]),
+        .bGPIO_7    (gpin[07]),
+        .bGPIO_8    (gpin[08]),
+        .bGPIO_9    (gpin[09]),
+        .bGPIO_10   (gpin[10]),
+        .bGPIO_11   (gpin[11]),
+        .bGPIO_12   (gpin[12]),
+        .bGPIO_13   (gpin[13]),
+        .bGPIO_14   (gpin[14]),
+        .bGPIO_15   (gpin[15]),
+        .bGPIO_4_o  (gpout[04]),
+        .bGPIO_5_o  (gpout[05]),
+        .bGPIO_6_o  (gpout[06]),
+        .bGPIO_7_o  (gpout[07]),
+        .bGPIO_8_o  (gpout[08]),
+        .bGPIO_9_o  (gpout[09]),
+        .bGPIO_10_o (gpout[10]),
+        .bGPIO_11_o (gpout[11]),
+        .bGPIO_12_o (gpout[12]),
+        .bGPIO_13_o (gpout[13]),
+        .bGPIO_14_o (gpout[14]),
+        .bGPIO_15_o (gpout[15]),
+        .oGPOUT_16  (gpout[16]),
+        .oGPOUT_17  (gpout[17]),
+        .oGPOUT_18  (gpout[18]),
+        .oGPOUT_20  (gpout[20]),
+        .oGPOUT_21  (gpout[21]),
+        .oGPOUT_22  (gpout[22]),
+        .oGPOUT_23  (gpout[23]),
+        .oGPOUT_24  (gpout[24]),
+        .oGPOUT_25  (gpout[25]),
+        .oGPOUT_26  (gpout[26]),
+        .oGPOUT_27  (gpout[27]),
 
         .ACCLEAR (),
         .BRKRQST (),
@@ -179,18 +192,30 @@ module backplane (
         , .MQUO_9   (mulq[9])
         , .MQUO_10  (mulq[10])
         , .MQUO_11  (mulq[11])
-        , .INBUS_0  (conINBUS[0])   // reading switch register
-        , .INBUS_1  (conINBUS[1])   // ...when readsr asserted
-        , .INBUS_2  (conINBUS[2])
-        , .INBUS_3  (conINBUS[3])
-        , .INBUS_4  (conINBUS[4])
-        , .INBUS_5  (conINBUS[5])
-        , .INBUS_6  (conINBUS[6])
-        , .INBUS_7  (conINBUS[7])
-        , .INBUS_8  (conINBUS[8])
-        , .INBUS_9  (conINBUS[9])
-        , .INBUS_10 (conINBUS[10])
-        , .INBUS_11 (conINBUS[11])
+        , .INBUS_0  (inbus[0])   // reading switch register
+        , .INBUS_1  (inbus[1])   // ...when readsr asserted
+        , .INBUS_2  (inbus[2])
+        , .INBUS_3  (inbus[3])
+        , .INBUS_4  (inbus[4])
+        , .INBUS_5  (inbus[5])
+        , .INBUS_6  (inbus[6])
+        , .INBUS_7  (inbus[7])
+        , .INBUS_8  (inbus[8])
+        , .INBUS_9  (inbus[9])
+        , .INBUS_10 (inbus[10])
+        , .INBUS_11 (inbus[11])
+        , .INBUS_0_o  (conINBUS[0])   // reading switch register
+        , .INBUS_1_o  (conINBUS[1])   // ...when readsr asserted
+        , .INBUS_2_o  (conINBUS[2])
+        , .INBUS_3_o  (conINBUS[3])
+        , .INBUS_4_o  (conINBUS[4])
+        , .INBUS_5_o  (conINBUS[5])
+        , .INBUS_6_o  (conINBUS[6])
+        , .INBUS_7_o  (conINBUS[7])
+        , .INBUS_8_o  (conINBUS[8])
+        , .INBUS_9_o  (conINBUS[9])
+        , .INBUS_10_o (conINBUS[10])
+        , .INBUS_11_o (conINBUS[11])
         , .IREG_9   (ireg[9])
         , .IREG_10  (ireg[10])
         , .IREG_11  (ireg[11])
@@ -231,6 +256,7 @@ module backplane (
     );
 
     wire eaeACCLEAR, eaePAUSE, eaeIOSKIP, eaeLNKTOG;
+    wire[11:00] eaeINBUS;
 
     extarith eaeboard (
         .zclock (zclock),
@@ -338,7 +364,8 @@ module backplane (
         , .swSTART  ()
         , .swSTOP   ()
 
-        , .ACCLEAR  (eaeACCLEAR)
+        , .ACCLEAR  (acclear)
+        , .ACCLEAR_o  (eaeACCLEAR)
         , .INBUS_0  (inbus[0])
         , .INBUS_1  (inbus[1])
         , .INBUS_2  (inbus[2])
@@ -351,8 +378,22 @@ module backplane (
         , .INBUS_9  (inbus[9])
         , .INBUS_10 (inbus[10])
         , .INBUS_11 (inbus[11])
-        , .IOSKIP   (eaeIOSKIP)
-        , .LNKTOG   (eaeLNKTOG)
+        , .INBUS_0_o  (eaeINBUS[0])
+        , .INBUS_1_o  (eaeINBUS[1])
+        , .INBUS_2_o  (eaeINBUS[2])
+        , .INBUS_3_o  (eaeINBUS[3])
+        , .INBUS_4_o  (eaeINBUS[4])
+        , .INBUS_5_o  (eaeINBUS[5])
+        , .INBUS_6_o  (eaeINBUS[6])
+        , .INBUS_7_o  (eaeINBUS[7])
+        , .INBUS_8_o  (eaeINBUS[8])
+        , .INBUS_9_o  (eaeINBUS[9])
+        , .INBUS_10_o (eaeINBUS[10])
+        , .INBUS_11_o (eaeINBUS[11])
+        , .IOSKIP (ioskip)
+        , .IOSKIP_o   (eaeIOSKIP)
+        , .LNKTOG (lnktog)
+        , .LNKTOG_o   (eaeLNKTOG)
 
         , .MQUO_0   (mulq[0])
         , .MQUO_1   (mulq[1])
@@ -375,12 +416,12 @@ module backplane (
     );
 
     wire iINTINH;
-    wire[11:00] mexINBUS;
+    wire[11:00] memINBUS;
 
     extmemory meminst (
         .zclock (zclock),
         .zreset (zreset),
-          .ACCLEAR  (acclear)
+          .ACCLEAR  ()
         , .ACUM_0   (oACUM[00])
         , .ACUM_1   (oACUM[01])
         , .ACUM_10  (oACUM[10])
@@ -425,10 +466,20 @@ module backplane (
         , .IFLD_0   (ifield[0])
         , .IFLD_1   (ifield[1])
         , .IFLD_2   (ifield[2])
+        , .INBUS_0_o  (memINBUS[00])
+        , .INBUS_1_o  (memINBUS[01])
+        , .INBUS_2_o  (memINBUS[02])
+        , .INBUS_3_o  (memINBUS[03])
+        , .INBUS_4_o  (memINBUS[04])
+        , .INBUS_5_o  (memINBUS[05])
+        , .INBUS_6_o  (memINBUS[06])
+        , .INBUS_7_o  (memINBUS[07])
+        , .INBUS_8_o  (memINBUS[08])
+        , .INBUS_9_o  (memINBUS[09])
+        , .INBUS_10_o (memINBUS[10])
+        , .INBUS_11_o (memINBUS[11])
         , .INBUS_0  (inbus[00])
         , .INBUS_1  (inbus[01])
-        , .INBUS_10 (inbus[10])
-        , .INBUS_11 (inbus[11])
         , .INBUS_2  (inbus[02])
         , .INBUS_3  (inbus[03])
         , .INBUS_4  (inbus[04])
@@ -437,6 +488,8 @@ module backplane (
         , .INBUS_7  (inbus[07])
         , .INBUS_8  (inbus[08])
         , .INBUS_9  (inbus[09])
+        , .INBUS_10 (inbus[10])
+        , .INBUS_11 (inbus[11])
         , .INTINH   (iINTINH)
         , .INTRQST  (iINTRQST)
         , .IOSKIP   (ioskip)
@@ -531,7 +584,7 @@ module backplane (
     wire readsr;
     wire acclear = iACCLEAR | eaeACCLEAR;
     wire pause = iPAUSE | eaePAUSE;
-    wire[11:00] inbus = readsr ? conINBUS : iINBUS | mexINBUS;
+    wire[11:00] inbus = conINBUS | eaeINBUS | iINBUS | memINBUS;
     wire ioskip = iIOSKIP | eaeIOSKIP;
     wire lnktog = iLNKTOG | eaeLNKTOG;
 

@@ -343,11 +343,9 @@ static int cmd_gpio (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Ob
         int num = 0;
         int rc = Tcl_GetIntFromObj (interp, objv[1], &num);
         if (rc != TCL_OK) return rc;
-        if ((vbkpl->gpio & 070000) != 070000) {
-            vbkpl->gpio = (vbkpl->gpio & ~ 07777) | (num & 07777);
-        }
+        vbkpl->gpin = num;
     } else {
-        Tcl_SetObjResult (interp, Tcl_NewIntObj (vbkpl->gpio));
+        Tcl_SetObjResult (interp, Tcl_NewIntObj (vbkpl->gpout));
     }
     return TCL_OK;
 }

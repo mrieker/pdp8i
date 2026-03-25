@@ -140,9 +140,9 @@ public class ParsePCB {
         // - if not refd by a connector, it is a wire
         System.out.println ("module " + modname + " (input zclock, zreset");
         char sep = ',';
-        sep = printnetnames (sep, netsbyname, "input");
-        sep = printnetnames (sep, netsbyname, "inout");
-        sep = printnetnames (sep, netsbyname, "output");
+        sep = printconpins (sep, netsbyname, "input");
+        sep = printconpins (sep, netsbyname, "inout");
+        sep = printconpins (sep, netsbyname, "output");
         System.out.println (");");
 
         System.out.println ("");
@@ -164,12 +164,38 @@ public class ParsePCB {
             }
         }
 
+        // output assign statements for wired-and tri-state networks
+        boolean first = true;
+        for (Network network : netsbyname.values ()) {
+            if (! network.trinetnames.isEmpty ()) {
+                if (first) System.out.println ("");
+                // trinetnames contains all internally generated signals
+                // netname = signal that contains all signals (internal and external) anded together
+                // if it is on a connector, we assume external circuitry will and everything together,
+                //   passing that big anded signal to our input pin named simply netname,
+                //   and the target of the and is netname_o (going to output pin)
+                // if not a connector, the target of the and is simply netname
+                System.out.print ("    assign " + network.netname);
+                if (network.netport) System.out.print ("_o");
+                System.out.print (" = ");
+                first = true;
+                for (String tnn : network.trinetnames) {
+                    if (! first) System.out.print (" | ");
+                    System.out.print (tnn);
+                    first = false;
+                }
+                System.out.println (";");
+                first = false;
+            }
+        }
+        if (! first) System.out.println ("");
+
         System.out.println ("endmodule");
 
         if (error) System.exit (1);
     }
 
-    // print network names for a module statement
+    // print connector network names for a module statement
     //  input:
     //   sep = separator character
     //   netnames = all networks indexed by name
@@ -177,7 +203,7 @@ public class ParsePCB {
     //  output:
     //   prints matching network names
     //   returns new separator char
-    public static char printnetnames (char sep, TreeMap<String,Network> netsbyname, String keywrd)
+    public static char printconpins (char sep, TreeMap<String,Network> netsbyname, String keywrd)
     {
         for (Network network : netsbyname.values ()) {
             if (network.netport && ! network.netname.startsWith ("unconnected")) {
@@ -185,8 +211,15 @@ public class ParsePCB {
                 if (network.netrefs > 0) porttype = "inout";
                 if (network.netrefs < 0) porttype = "output";
                 if (porttype.equals (keywrd)) {
-                    System.out.println ("    " + sep + " " + porttype + " " + network.netname);
-                    sep = ',';
+                    if (porttype.equals ("inout")) {
+                        System.out.println ("    " + sep + " input " + network.netname);  // everything anded together
+                        sep = ',';
+                        System.out.println ("    " + sep + " output " + network.netname + "_o");  // all internals anded
+                        sep = ',';
+                    } else {
+                        System.out.println ("    " + sep + " " + porttype + " " + network.netname);
+                        sep = ',';
+                    }
                 }
             }
         }
@@ -419,9 +452,11 @@ public class ParsePCB {
     public static class Network {
         public int netnum;
         public String netname;
-        public int netrefs;     // -1: has an OUTPUT pin
-                                // >0: multiple TRISTATE pins
-        public boolean netport; // is referenced by a connector
+        public int netrefs;         // <0: has an OUTPUT pin
+                                    // >0: multiple TRISTATE pins
+        public boolean netport;     // is referenced by a connector
+
+        public LinkedList<String> trinetnames = new LinkedList<> ();
     }
 
     // component
@@ -508,6 +543,20 @@ public class ParsePCB {
         public void print (TreeMap<Integer,Network> netsbynum)
         {
             System.out.println ("");
+
+            // print wire statements for each tri-state pin
+            //  wire <netname>_<uname>p<pinnum>;
+            for (int idx = 0; idx < padnets.length; idx ++) {
+                int netnum = padnets[idx];
+                if ((netnum >= 0) && (pintypes[idx] == PinType.TRISTATE)) {
+                    Network network = netsbynum.get (netnum);
+                    String tnn = network.netname + "_" + refer + "p" + idx;
+                    network.trinetnames.add (tnn);
+                    System.out.println ("    wire " + tnn + ";");
+                }
+            }
+
+            // output module instantiation
             System.out.println ("    X" + value + " " + refer + " (");
             System.out.println ("        .zclock(zclock),");
             System.out.println ("        .zreset(zreset)");
@@ -517,8 +566,16 @@ public class ParsePCB {
                 if (netnum >= 0) {
                     Network network = netsbynum.get (netnum);
                     String netname = (network == null) ? Integer.toString (netnum) : network.netname;
-                    System.out.println (String.format ("        %c .p%d(%s) // %s", sep, idx, netname, pintypes[idx].toString ()));
-                    sep = ',';
+                    if (pintypes[idx] == PinType.TRISTATE) {
+                        String tnn = netname + "_" + refer + "p" + idx;
+                        System.out.println (String.format ("        %c .p%di(%s) // TRISTATE", sep, idx, netname));
+                        sep = ',';
+                        System.out.println (String.format ("        %c .p%do(%s) // TRISTATE", sep, idx, tnn));
+                        sep = ',';
+                    } else {
+                        System.out.println (String.format ("        %c .p%d(%s) // %s", sep, idx, netname, pintypes[idx].toString ()));
+                        sep = ',';
+                    }
                 }
             }
             System.out.println ("    );");

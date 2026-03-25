@@ -945,25 +945,31 @@ module X74LS540 (input zclock, zreset,
         , input  p8
         , input  p9
         , input  p10
-        , inout  p11
-        , inout  p12
-        , inout  p13
-        , inout  p14
-        , inout  p15
-        , inout  p16
-        , inout  p17
-        , inout  p18
+        , input  p11i
+        , output reg p11o
+        , input  p12i
+        , output reg p12o
+        , input  p13i
+        , output reg p13o
+        , input  p14i
+        , output reg p14o
+        , input  p15i
+        , output reg p15o
+        , input  p16i
+        , output reg p16o
+        , input  p17i
+        , output reg p17o
+        , input  p18i
+        , output reg p18o
         , input  p19
         , input  p20
 );
 
-    reg[7:0] dout;
     wire oe = ~ p1 & ~ p19;
     wire[7:0] din = { p9, p8, p7, p6, p5, p4, p3, p2 };
-    assign { p11, p12, p13, p14, p15, p16, p17, p18 } = oe ? dout : 8'hZZ;
 
     always @(posedge zclock) begin
-        dout <= ~ din;
+        { p11o, p12o, p13o, p14o, p15o, p16o, p17o, p18o } <= oe ? ~ din : 8'h00;
     end
 
 endmodule
@@ -979,25 +985,31 @@ module X74HCT541 (input zclock, zreset,
         , input  p8
         , input  p9
         , input  p10
-        , inout  p11
-        , inout  p12
-        , inout  p13
-        , inout  p14
-        , inout  p15
-        , inout  p16
-        , inout  p17
-        , inout  p18
+        , input  p11i
+        , output reg p11o
+        , input  p12i
+        , output reg p12o
+        , input  p13i
+        , output reg p13o
+        , input  p14i
+        , output reg p14o
+        , input  p15i
+        , output reg p15o
+        , input  p16i
+        , output reg p16o
+        , input  p17i
+        , output reg p17o
+        , input  p18i
+        , output reg p18o
         , input  p19
         , input  p20
 );
 
-    reg[7:0] dout;
     wire oe = ~ p1 & ~ p19;
     wire[7:0] din = { p9, p8, p7, p6, p5, p4, p3, p2 };
-    assign { p11, p12, p13, p14, p15, p16, p17, p18 } = oe ? dout : 8'hZZ;
 
     always @(posedge zclock) begin
-        dout <= din;
+        { p11o, p12o, p13o, p14o, p15o, p16o, p17o, p18o } <= oe ? din : 8'h00;
     end
 
 endmodule
@@ -1028,41 +1040,47 @@ module X74HC4075 (input zclock, zreset,
 endmodule
 
 module XCY7C199 (input zclock, zreset,
-    input  p1,  // A5
-    input  p2,  // A6
-    input  p3,  // A7
-    input  p4,  // A8
-    input  p5,  // A9
-    input  p6,  // A10
-    input  p7,  // A11
-    input  p8,  // A12
-    input  p9,  // A13
-    input  p10, // A14
-    inout  p11, // IO0
-    inout  p12, // IO1
-    inout  p13, // IO2
-    input  p14, // GND
-    inout  p15, // IO3
-    inout  p16, // IO4
-    inout  p17, // IO5
-    inout  p18, // IO6
-    inout  p19, // IO7
-    input  p20, // _CE
-    input  p21, // A0
-    input  p22, // _OE
-    input  p23, // A1
-    input  p24, // A2
-    input  p25, // A3
-    input  p26, // A4
-    input  p27, // _WE
-    input  p28  // VCC
+    input      p1,   // A5
+    input      p2,   // A6
+    input      p3,   // A7
+    input      p4,   // A8
+    input      p5,   // A9
+    input      p6,   // A10
+    input      p7,   // A11
+    input      p8,   // A12
+    input      p9,   // A13
+    input      p10,  // A14
+    input      p11i, // IO0
+    output reg p11o, // IO0
+    input      p12i, // IO1
+    output reg p12o, // IO1
+    input      p13i, // IO2
+    output reg p13o, // IO2
+    input      p14,  // GND
+    input      p15i, // IO3
+    output reg p15o, // IO3
+    input      p16i, // IO4
+    output reg p16o, // IO4
+    input      p17i, // IO5
+    output reg p17o, // IO5
+    input      p18i, // IO6
+    output reg p18o, // IO6
+    input      p19i, // IO7
+    output reg p19o, // IO7
+    input      p20,  // _CE
+    input      p21,  // A0
+    input      p22,  // _OE
+    input      p23,  // A1
+    input      p24,  // A2
+    input      p25,  // A3
+    input      p26,  // A4
+    input      p27,  // _WE
+    input      p28   // VCC
 );
 
     wire[14:00] a = { p10, p9, p8, p7, p6, p5, p4, p3, p2, p1, p26, p25, p24, p23, p21 };
-    wire[7:0] din = { p19, p18, p17, p16, p15, p13, p12, p11 };
-    reg[7:0] array[32767:0], delay, dout;
-
-    assign { p19, p18, p17, p16, p15, p13, p12, p11 } = (~ p20 & ~ p22 & p27) ? dout : 8'hZZ;
+    wire[7:0] din = { p19i, p18i, p17i, p16i, p15i, p13i, p12i, p11i };
+    reg[7:0] array[32767:0], delay;
 
     always @(posedge zclock) begin
         if (~ p20 & ~ p27) begin
@@ -1071,7 +1089,7 @@ module XCY7C199 (input zclock, zreset,
         end else begin
             delay <= array[a];
         end
-        dout <= delay;
+        { p19o, p18o, p17o, p16o, p15o, p13o, p12o, p11o } <= (~ p20 & ~ p22 & p27) ? delay : 8'h00;
     end
 
 endmodule

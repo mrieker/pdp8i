@@ -46,7 +46,6 @@ set MS_INTAK 7  ;# memory cycle is for interrupt acknowledge
 set MS_DEPOS 8  ;# memory cycle is for deposit switch
 set MS_EXAM  9  ;# memory cycle is for examine switch
 
-set memdisab 1  ;# 0=test extmemory.v memory chip; 1=this script is its own memory
 set testcons 1  ;# test console functions
 set testexar 1  ;# test extended arithmetic
 set testxmem 1  ;# test extended memory
@@ -72,7 +71,6 @@ proc simtest {} {
     global latstop
     global linc
     global memcycwcover
-    global memdisab
     global mulq
     global opcode
     global perclock
@@ -100,8 +98,6 @@ proc simtest {} {
     global MS_INTAK
     global MS_DEPOS
     global MS_EXAM
-
-    bus set memdisab $memdisab
 
     ;# reset then start processor
     hardreset
@@ -443,11 +439,17 @@ proc finishline {} {
 ;#         update accumulator
 ;#   TS4 = update to next state
 proc memorycycle {state field addr rdata wdata} {
-    global dmawrmem dmawdata memcycwcover memdisab opcode
+    global dmawrmem dmawdata memcycwcover opcode
     global MS_BREAK MS_DEPOS MS_EXAM MS_EXEC MS_FETCH MS_INTAK MS_WRDCT
     global haltwhy latsinst latsstep latstop memcycno testcons
 
     incr memcycno
+
+    ;# 0 = use extmemory.v internal memory chip
+    ;# 1 = supply read data on iINBUS during TS1
+    ;#     get write data from oMBUF during TS3
+    set memdisab [randbits 1]
+    bus set memdisab $memdisab
 
     ;# maybe flip on an halt switch
     ;# takes several cycles to soak through console board
