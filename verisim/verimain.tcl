@@ -13,6 +13,11 @@ proc disas {loaddr {hiaddr ""}} {
     }
 }
 
+# get environment variable, return default value if not defined
+proc getenv {varname {defvalu ""}} {
+    return [expr {[info exists ::env($varname)] ? $::env($varname) : $defvalu}]
+}
+
 # reset to power-up state
 # make sure verimain sees a 0->1 edge on reset
 proc hardreset {} {

@@ -13,6 +13,7 @@ set dmawrmem     0
 set dmafield     0
 set dmawdata     0
 set haltwhy      ""
+set hasmemcmd    0
 set instrno      0
 set intdelayed   0
 set intenabled   0
@@ -46,11 +47,10 @@ set MS_INTAK 7  ;# memory cycle is for interrupt acknowledge
 set MS_DEPOS 8  ;# memory cycle is for deposit switch
 set MS_EXAM  9  ;# memory cycle is for examine switch
 
-set hasmemcmd 0 ;# has 'mem' command
-set testcons 1  ;# test console functions
-set testexar 1  ;# test extended arithmetic
-set testxmem 1  ;# test extended memory
-set runquiet 1  ;# tell runstep command to keep quiet
+set testcons [getenv testcons 1]  ;# test console functions
+set testexar [getenv testexar 1]  ;# test extended arithmetic
+set testxmem [getenv testxmem 1]  ;# test extended memory
+set runquiet [getenv runquiet 1]  ;# tell runstep command to keep quiet
 
 clk ratio 10    ;# 100nS clock cycles
 
@@ -221,7 +221,9 @@ proc simtest {} {
                             break
                         }
                         if {($opcode & 07401) == 07400} {           ;# group 2
-                            ####set opcode [expr {$opcode & 07775}]     ;# don't do HLT
+                            if {! $testcons} {
+                                set opcode [expr {$opcode & 07775}] ;# don't do HLT
+                            }
                             set swregsent [swtch reg]
                             if {$swregsent != $swregpend} {         ;# see if processor has absorbed switches
                                 set opcode [expr {$opcode & 07773}] ;# if not, don't do OSR
