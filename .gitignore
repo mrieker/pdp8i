@@ -2,6 +2,7 @@
 ~*
 *.jar
 *.log
+*.armv7l*
 *.x86_64*
 .nfs*
 obj_dir

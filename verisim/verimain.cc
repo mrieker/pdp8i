@@ -82,26 +82,26 @@ int main (int argc, char **argv)
     vbkpl = &vbackplane;
 #endif
 #ifdef ZTURN
-    int zfd = open ("/proc/zpdp8i", O_RDWR);
+    int zfd = open ("/proc/zynqpdp8i", O_RDWR);
     if (zfd < 0) {
-        fprintf (stderr, "error opening /proc/zpdp8i: %m\n");
+        fprintf (stderr, "error opening /proc/zynqpdp8i: %m\n");
         ABORT ();
     }
     if (flock (zfd, LOCK_EX | LOCK_NB) < 0) {
-        fprintf (stderr, "error locking /proc/zpdp8i: %m\n");
+        fprintf (stderr, "error locking /proc/zynqpdp8i: %m\n");
         ABORT ();
     }
     void *zp = mmap (NULL, 4096, PROT_READ | PROT_WRITE, MAP_SHARED, zfd, 0);
     if (zp == MAP_FAILED) {
-        fprintf (stderr, "error mapping /proc/zpdp8i: %m\n");
+        fprintf (stderr, "error mapping /proc/zynqpdp8i: %m\n");
         ABORT ();
     }
     zpage = (uint32_t volatile *)zp;
     if ((zpage[0] & 0xFFFF0000) != 0x38480000) {
-        fprintf (stderr, "bad majic number %08X\n", zpage[0]);
+        fprintf (stderr, "bad magic number %08X\n", zpage[0]);
         ABORT ();
     }
-    fprintf (stderr, "majic number %08X\n", zpage[0]);
+    fprintf (stderr, "magic number %08X\n", zpage[0]);
 #endif
 
     rc = Tcl_EvalFile (interp, "verimain.tcl");
@@ -185,177 +185,87 @@ struct Pin {
 #define OFFS(x) sizeof (vbkpl->x), &vbkpl->x
 #endif
 #ifdef ZTURN
-
-#define Z_RA 1
-#define i3CYCLE_M (1U<<2)
-#define i3CYCLE_I Z_RA
-#define iACCLEAR_M (1U<<3)
-#define iACCLEAR_I Z_RA
-#define iBRKRQST_M (1U<<4)
-#define iBRKRQST_I Z_RA
-#define iBRKWRM_M (1U<<5)
-#define iBRKWRM_I Z_RA
-#define iCAINC_M (1U<<6)
-#define iCAINC_I Z_RA
-#define iINTRQST_M (1U<<7)
-#define iINTRQST_I Z_RA
-#define iIOSKIP_M (1U<<8)
-#define iIOSKIP_I Z_RA
-#define iLNKTOG_M (1U<<9)
-#define iLNKTOG_I Z_RA
-#define iPAUSE_M (1U<<10)
-#define iPAUSE_I Z_RA
-#define memdisab_M (1U<<11)
-#define memdisab_I Z_RA
-#define reset_M (1U<<1)
-#define reset_I Z_RA
-#define zclock_M (1U<<12)
-#define zclock_I Z_RA
-#define zreset_M (1U<<13)
-#define zreset_I Z_RA
-
-#define Z_RB 2
-#define iDMAADDR_M (077777U<<0)
-#define iDMAADDR_I Z_RB
-#define iINBUS_M (07777U<<15)
-#define iINBUS_I Z_RB
-
-#define Z_RC 3
-#define oBREAK_M (1U<<0)
-#define oBREAK_I Z_RC
-#define oBUSINI_M (1U<<1)
-#define oBUSINI_I Z_RC
-#define oBWCOV_M (1U<<2)
-#define oBWCOV_I Z_RC
-#define oIOP_M (1U<<3)
-#define oIOP_I Z_RC
-#define oLINK_M (1U<<4)
-#define oLINK_I Z_RC
-#define oRUN_M (1U<<5)
-#define oRUN_I Z_RC
-#define oTP1_M (1U<<6)
-#define oTP1_I Z_RC
-#define oTP2_M (1U<<7)
-#define oTP2_I Z_RC
-#define oTP3_M (1U<<8)
-#define oTP3_I Z_RC
-#define oTP4_M (1U<<9)
-#define oTP4_I Z_RC
-#define oTS1_M (1U<<10)
-#define oTS1_I Z_RC
-#define oTS2_M (1U<<11)
-#define oTS2_I Z_RC
-#define oTS3_M (1U<<12)
-#define oTS3_I Z_RC
-#define oTS4_M (1U<<13)
-#define oTS4_I Z_RC
-#define swstart_M (1U<<14)
-#define swstart_I Z_RC
-#define swldad_M (1U<<15)
-#define swldad_I Z_RC
-#define swdepos_M (1U<<16)
-#define swdepos_I Z_RC
-#define swexam_M (1U<<17)
-#define swexam_I Z_RC
-#define swcont_M (1U<<18)
-#define swcont_I Z_RC
-#define swstop_M (1U<<19)
-#define swstop_I Z_RC
-#define swsstep_M (1U<<20)
-#define swsstep_I Z_RC
-#define swsinst_M (1U<<21)
-#define swsinst_I Z_RC
-#define oION_M (1U<<22)
-#define oION_I Z_RC
-#define clok2_M (1U<<23)
-#define clok2_I Z_RC
-
-#define Z_RD 4
-#define memfield_M (7U<<0)
-#define memfield_I Z_RD
-#define majst_M (017U<<3)
-#define majst_I Z_RD
-#define sctr_M (037U<<7)
-#define sctr_I Z_RD
-#define swdfld_M (017U<<24)
-#define swdfld_I Z_RD
-#define swifld_M (7U<<27)
-#define swifld_I Z_RD
-
-#define Z_RE 5
-#define Z_RF 6
-#define Z_RG 7
-#define oMADR_M (07777U<<0)
-#define oMADR_I Z_RE
-#define oMBUF_M (07777U<<12)
-#define oMBUF_I Z_RE
-#define oACUM_M (07777U<<0)
-#define oACUM_I Z_RF
-#define mquo_M (07777U<<12)
-#define mquo_I Z_RF
-#define pctr_M (07777U<<0)
-#define pctr_I Z_RG
-
+#include "zdefs.h"
 #define OFFS(x) x##_M, x##_I
-
-#define Z_RH 8  // gpin
-#define Z_RI 9  // gpout
 #endif
+
+static int sortpin (void const *a, void const *b)
+{
+    Pin const *p = (Pin const *)a;
+    Pin const *q = (Pin const *)b;
+    return strcasecmp (p->name, q->name);
+}
+
+static int findpin (void const *k, void const *e)
+{
+    char const *c = (char const *) k;
+    Pin const *p = (Pin const *) e;
+    return strcasecmp (c, p->name);
+}
 
 // bus get pin pin ... set pin val pin val ...
 static int cmd_bus (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
-    Pin const pintable[] = {
-        {  1, OFFS (i3CYCLE),  true,  "i3CYCLE"  },   // do 3-cycle break
-        {  1, OFFS (iACCLEAR), true,  "iACCLEAR" },   // io pulse clears AC
-        {  1, OFFS (iBRKRQST), true,  "iBRKRQST" },   // requesting break
-        {  1, OFFS (iBRKWRM),  true,  "iBRKWRM"  },   // break cycle writes memory
-        {  1, OFFS (iCAINC),   true,  "iCAINC"   },   // curad cycle increments address word
-        {  1, OFFS (iINTRQST), true,  "iINTRQST" },   // request interrupt
-        {  1, OFFS (iIOSKIP),  true,  "iIOSKIP"  },   // increment PC at end of IO pulse
-        {  1, OFFS (iLNKTOG),  true,  "iLNKTOG"  },   // toggle link register
-        { 15, OFFS (iDMAADDR), true,  "iDMAADDR" },   // device sending address for DMA
-        { 12, OFFS (iINBUS),   true,  "iINBUS"   },   // device sending data for PIO or DMA
-        {  1, OFFS (iPAUSE),   true,  "iPAUSE"   },   // pause processor clocking (stretch cycle)
+    static int pincount;
+    static Pin const *pintable;
 
-        {  4, OFFS (majst),    false, "majst"    },
-        {  1, OFFS (memdisab), true,  "memdisab" },
-        {  3, OFFS (memfield), false, "memfield" },
-        { 12, OFFS (mquo),     false, "mquo"     },
-        { 12, OFFS (pctr),     false, "pctr"     },
-        {  1, OFFS (reset),    true,  "reset"    },
-        {  5, OFFS (sctr),     false, "sctr"     },
+    if (pintable == NULL) {
+        Pin pt[] = {
+            {  1, OFFS (i3CYCLE),  true,  "i3CYCLE"  },   // do 3-cycle break
+            {  1, OFFS (iACCLEAR), true,  "iACCLEAR" },   // io pulse clears AC
+            {  1, OFFS (iBRKRQST), true,  "iBRKRQST" },   // requesting break
+            {  1, OFFS (iBRKWRM),  true,  "iBRKWRM"  },   // break cycle writes memory
+            {  1, OFFS (iCAINC),   true,  "iCAINC"   },   // curad cycle increments address word
+            {  1, OFFS (iINTRQST), true,  "iINTRQST" },   // request interrupt
+            {  1, OFFS (iIOSKIP),  true,  "iIOSKIP"  },   // increment PC at end of IO pulse
+            {  1, OFFS (iLNKTOG),  true,  "iLNKTOG"  },   // toggle link register
+            { 15, OFFS (iDMAADDR), true,  "iDMAADDR" },   // device sending address for DMA
+            { 12, OFFS (iINBUS),   true,  "iINBUS"   },   // device sending data for PIO or DMA
+            {  1, OFFS (iPAUSE),   true,  "iPAUSE"   },   // pause processor clocking (stretch cycle)
 
-        {  1, OFFS (swcont),   false, "swcont"   },
-        {  3, OFFS (swdfld),   false, "swdfld"   },
-        {  3, OFFS (swifld),   false, "swifld"   },
-        {  1, OFFS (swstop),   false, "swstop"   },
-        {  1, OFFS (swstart),  false, "swstart"  },
-        {  1, OFFS (swsstep),  false, "swsstep"  },
-        {  1, OFFS (swsinst),  false, "swsinst"  },
-        {  1, OFFS (swldad),   false, "swldad"   },
-        {  1, OFFS (swexam),   false, "swexam"   },
-        {  1, OFFS (swdepos),  false, "swdepos"  },
+            {  4, OFFS (majst),    false, "majst"    },
+            {  1, OFFS (memdisab), true,  "memdisab" },
+            {  3, OFFS (memfield), false, "memfield" },
+            { 12, OFFS (mquo),     false, "mquo"     },
+            { 12, OFFS (pctr),     false, "pctr"     },
+            {  1, OFFS (reset),    true,  "reset"    },
+            {  5, OFFS (sctr),     false, "sctr"     },
 
-        { 12, OFFS (oACUM),    false, "oACUM"    },
-        {  1, OFFS (oBREAK),   false, "oBREAK"   },   // currently doing BREAK (DMA) cycle
-        {  1, OFFS (oBWCOV),   false, "oBWCOV"   },   // 3-cycle DMA wordcount overflowed
-        {  1, OFFS (oION),     false, "oION"     },   // interrupts enabled
-        {  1, OFFS (oIOP),     false, "oIOP"     },   // io instruction pulse
-        {  1, OFFS (oLINK),    false, "oLINK"    },
-        { 12, OFFS (oMADR),    false, "oMADR"    },
-        { 12, OFFS (oMBUF),    false, "oMBUF"    },
-        {  1, OFFS (oRUN),     false, "oRUN"     },
-        {  1, OFFS (oTP1),     false, "oTP1"     },
-        {  1, OFFS (oTP2),     false, "oTP2"     },
-        {  1, OFFS (oTP3),     false, "oTP3"     },
-        {  1, OFFS (oTP4),     false, "oTP4"     },
-        {  1, OFFS (oTS1),     false, "oTS1"     },
-        {  1, OFFS (oTS2),     false, "oTS2"     },
-        {  1, OFFS (oTS3),     false, "oTS3"     },
-        {  1, OFFS (oTS4),     false, "oTS4"     },
-        {  0, 0, 0, 0, NULL }
-    };
+            {  1, OFFS (swcont),   false, "swcont"   },
+            {  3, OFFS (swdfld),   false, "swdfld"   },
+            {  3, OFFS (swifld),   false, "swifld"   },
+            {  1, OFFS (swstop),   false, "swstop"   },
+            {  1, OFFS (swstart),  false, "swstart"  },
+            {  1, OFFS (swsstep),  false, "swsstep"  },
+            {  1, OFFS (swsinst),  false, "swsinst"  },
+            {  1, OFFS (swldad),   false, "swldad"   },
+            {  1, OFFS (swexam),   false, "swexam"   },
+            {  1, OFFS (swdepos),  false, "swdepos"  },
+
+            { 12, OFFS (oACUM),    false, "oACUM"    },
+            {  1, OFFS (oBREAK),   false, "oBREAK"   },   // currently doing BREAK (DMA) cycle
+            {  1, OFFS (oBWCOV),   false, "oBWCOV"   },   // 3-cycle DMA wordcount overflowed
+            {  1, OFFS (oION),     false, "oION"     },   // interrupts enabled
+            {  1, OFFS (oIOP),     false, "oIOP"     },   // io instruction pulse
+            {  1, OFFS (oLINK),    false, "oLINK"    },
+            { 12, OFFS (oMADR),    false, "oMADR"    },
+            { 12, OFFS (oMBUF),    false, "oMBUF"    },
+            {  1, OFFS (oRUN),     false, "oRUN"     },
+            {  1, OFFS (oTP1),     false, "oTP1"     },
+            {  1, OFFS (oTP2),     false, "oTP2"     },
+            {  1, OFFS (oTP3),     false, "oTP3"     },
+            {  1, OFFS (oTP4),     false, "oTP4"     },
+            {  1, OFFS (oTS1),     false, "oTS1"     },
+            {  1, OFFS (oTS2),     false, "oTS2"     },
+            {  1, OFFS (oTS3),     false, "oTS3"     },
+            {  1, OFFS (oTS4),     false, "oTS4"     }
+        };
+        pincount = sizeof pt / sizeof pt[0];
+        qsort (pt, pincount, sizeof pt[0], sortpin);
+        pintable = (Pin const *) malloc (sizeof pt);
+        if (pintable == NULL) ABORT ();
+        memcpy ((void *) pintable, (void *) pt, sizeof pt);
+    }
 
     bool setmode = false;
     int ngetobjs = 0;
@@ -371,48 +281,43 @@ static int cmd_bus (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj
             setmode = true;
             continue;
         }
-        for (int j = 0;; j ++) {
-            Pin const *pin = &pintable[j];
-            if (pin->name == NULL) {
-                Tcl_SetResultF (interp, "bad pin %s", arg);
+        Pin const *pin = (Pin const *) bsearch (arg, pintable, pincount, sizeof *pintable, findpin);
+        if (pin == NULL) {
+            Tcl_SetResultF (interp, "bad pin %s", arg);
+            return TCL_ERROR;
+        }
+        if (setmode) {
+            if (! pin->writ) {
+                Tcl_SetResultF (interp, "pin not settable %s", arg);
                 return TCL_ERROR;
             }
-            if (strcasecmp (arg, pin->name) == 0) {
-                if (setmode) {
-                    if (! pin->writ) {
-                        Tcl_SetResultF (interp, "pin not settable %s", arg);
-                        return TCL_ERROR;
-                    }
-                    if (++ i >= objc) {
-                        Tcl_SetResultF (interp, "missing value for pin %s", arg);
-                        return TCL_ERROR;
-                    }
-                    int val;
-                    int rc = Tcl_GetIntFromObj (interp, objv[i], &val);
-                    if (rc != TCL_OK) return rc;
-                    if ((val < 0) || (val >= 1 << pin->bits)) {
-                        Tcl_SetResultF (interp, "value %d out of range for pin %s", val, arg);
-                        return TCL_ERROR;
-                    }
-#ifdef VERLTR
-                    memcpy (pin->addr, &val, pin->size);
-#endif
-#ifdef ZTURN
-                    zpage[pin->indx] = (zpage[pin->indx] & ~ pin->mask) | (val * (pin->mask & - pin->mask));
-#endif
-                } else {
-#ifdef VERLTR
-                    int val = 0;
-                    if (pin->size > (int) sizeof val) abort ();
-                    memcpy (&val, pin->addr, pin->size);
-#endif
-#ifdef ZTURN
-                    int val = (zpage[pin->indx] & pin->mask) / (pin->mask & - pin->mask);
-#endif
-                    getobjs[ngetobjs++] = Tcl_NewIntObj (val);
-                }
-                break;
+            if (++ i >= objc) {
+                Tcl_SetResultF (interp, "missing value for pin %s", arg);
+                return TCL_ERROR;
             }
+            int val;
+            int rc = Tcl_GetIntFromObj (interp, objv[i], &val);
+            if (rc != TCL_OK) return rc;
+            if ((val < 0) || (val >= 1 << pin->bits)) {
+                Tcl_SetResultF (interp, "value %d out of range for pin %s", val, arg);
+                return TCL_ERROR;
+            }
+#ifdef VERLTR
+            memcpy (pin->addr, &val, pin->size);
+#endif
+#ifdef ZTURN
+            zpage[pin->indx] = (zpage[pin->indx] & ~ pin->mask) | (val * (pin->mask & - pin->mask));
+#endif
+        } else {
+#ifdef VERLTR
+            int val = 0;
+            if (pin->size > (int) sizeof val) abort ();
+            memcpy (&val, pin->addr, pin->size);
+#endif
+#ifdef ZTURN
+            int val = (zpage[pin->indx] & pin->mask) / (pin->mask & - pin->mask);
+#endif
+            getobjs[ngetobjs++] = Tcl_NewIntObj (val);
         }
     }
     if (ngetobjs == 1) {
@@ -627,6 +532,9 @@ static void kerchunk ()
 {
     // 10 100MHz cycles step the 10MHz osc through a cycle
     // each 100MHz step progresses signals through gates and flipflops
+#ifdef ZTURN
+    uint32_t ctla = zpage[zclock_I];
+#endif
     for (int i = 0; i < 10; i ++) {
 #ifdef VERLTR
         vbkpl->eval ();     // let input signals soak in
@@ -635,8 +543,8 @@ static void kerchunk ()
         vbkpl->zclock = 0;
 #endif
 #ifdef ZTURN
-        zpage[zclock_I] |=   zclock_M;
-        zpage[zclock_I] &= ~ zclock_M;
+        zpage[zclock_I] = ctla | zclock_M;
+        zpage[zclock_I] = ctla;
 #endif
     }
     ++ cyclenum;            // one more clock cycle done

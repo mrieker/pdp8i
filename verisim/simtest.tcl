@@ -46,6 +46,7 @@ set MS_INTAK 7  ;# memory cycle is for interrupt acknowledge
 set MS_DEPOS 8  ;# memory cycle is for deposit switch
 set MS_EXAM  9  ;# memory cycle is for examine switch
 
+set hasmemcmd 0 ;# has 'mem' command
 set testcons 1  ;# test console functions
 set testexar 1  ;# test extended arithmetic
 set testxmem 1  ;# test extended memory
@@ -62,6 +63,7 @@ proc simtest {} {
     global dmawrmem
     global dmafield
     global dmawdata
+    global hasmemcmd
     global instrno
     global intdelayed
     global intenabled
@@ -98,6 +100,12 @@ proc simtest {} {
     global MS_INTAK
     global MS_DEPOS
     global MS_EXAM
+
+    ;# see if mem command works
+    ;# - verilator: yes, it has backdoor access to extmemory.v 32KW memory chip
+    ;# - zynq: no, no backdoor access to 32KW memory chip
+    set ercode [catch {mem 0}]
+    set hasmemcmd [expr {$ercode == 0}]
 
     ;# reset then start processor
     hardreset
@@ -439,16 +447,16 @@ proc finishline {} {
 ;#         update accumulator
 ;#   TS4 = update to next state
 proc memorycycle {state field addr rdata wdata} {
-    global dmawrmem dmawdata memcycwcover opcode
+    global dmawrmem dmawdata hasmemcmd memcycwcover opcode
     global MS_BREAK MS_DEPOS MS_EXAM MS_EXEC MS_FETCH MS_INTAK MS_WRDCT
     global haltwhy latsinst latsstep latstop memcycno testcons
 
     incr memcycno
 
-    ;# 0 = use extmemory.v internal memory chip
+    ;# 0 = use extmemory.v backdoor to access internal 32KW memory chip
     ;# 1 = supply read data on iINBUS during TS1
     ;#     get write data from oMBUF during TS3
-    set memdisab [randbits 1]
+    set memdisab [expr {! $hasmemcmd || [randbits 1]}]
     bus set memdisab $memdisab
 
     ;# maybe flip on an halt switch
@@ -470,14 +478,15 @@ proc memorycycle {state field addr rdata wdata} {
     set actaddr [expr {([bus memfield] << 12) | [bus oMADR]}]
     verify15 $actaddr $expaddr "XMA bad at beginning of $state cycle"
 
-    ;# write the read data to the given address so cpu can read it
+    ;# get the read data on the INBUS so cpu can read it
     if {$memdisab} {
-        ;# this script is the memory, so put read data on the INBUS
+        ;# this script is the memory, so put read data directly on the INBUS
         bus set iINBUS $rdata
         ;# put unrelated number in extmemory.v chip in case it is interfering
-        mem $expaddr [randbits 12]
+        if {$hasmemcmd} {mem $expaddr [randbits 12]}
     } else {
         ;# extmemory.v memory chip in use, so put read data directly in chip
+        ;# it should then soak onto INBUS
         mem $expaddr $rdata
     }
 
@@ -621,8 +630,8 @@ proc checkhalted {} {
                         ;# ldad - only if all 18 switches have soaked through console board
                         finishline
                         for {set i 0} true {incr i} {
-                            set busdf [bus swdfld]
-                            set busif [bus swifld]
+                            set busdf [swtch df]
+                            set busif [swtch if]
                             set busda [swtch reg]
                             if {($busdf == $swdfpend) && ($busif == $swifpend) && ($busda == $swregpend)} break
                             if {$i > 20000} {       ;# 1.68mS @ 10MHz
@@ -632,7 +641,6 @@ proc checkhalted {} {
                         }
                         startline
                         swtchwait ldad 1            ;# press and hold ldad
-                        runloop 2000                ;# let it soak in good
                         set xmem_dfld $swdfpend
                         set xmem_ifld $swifpend
                         set xmem_ifldafterjump $swifpend
@@ -670,7 +678,6 @@ proc checkhalted {} {
                             set pctr $addr
                         }
                         swtchwait depos 1
-                        runloop 2000
                         set rdata [randbits 12]
                         set wdata $swregpend
                         puts -nonewline [format "DEPOS %o%04o / %04o <= %04o" $xmem_ifld $addr $rdata $wdata]
@@ -681,7 +688,7 @@ proc checkhalted {} {
                         verifybit [bus oRUN] 0 "should be halted after DEPOS"
                         set wacked 1
                         set swregpend [randbits 12]
-                        swtchwait reg $swregpend
+                        swtch set reg $swregpend
                     }
                     3 {
                         ;# exam
@@ -692,7 +699,6 @@ proc checkhalted {} {
                             set pctr $addr
                         }
                         swtchwait exam 1
-                        runloop 2000
                         set rdata [randbits 12]
                         puts -nonewline [format "EXAM  %o%04o / %04o" $xmem_ifld $addr $rdata]
                         swtchwait exam 0
