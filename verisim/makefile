@@ -2,7 +2,6 @@ CFLAGS ?= -O2 -Werror
 MACH   := $(shell uname -m)
 GPP    := g++ $(CFLAGS) -std=c++11 -g -Wall
 
-
 VFILES := \
 	backplane.v \
 	chips.v \
@@ -16,15 +15,20 @@ OFILES := \
 	assemble.$(MACH).o \
 	disassemble.$(MACH).o \
 	readprompt.$(MACH).o \
-	verilated.$(MACH).o 
 
 default: verimain.$(MACH)
 
-verimain.$(MACH): $(OFILES) obj_dir/Vbackplane__ALL.a
-	$(GPP) -g -o verimain.$(MACH) $(OFILES) obj_dir/Vbackplane__ALL.a /home/mrieker/nfs/tcl8.6.17/install/lib/libtcl8.6.so -lreadline
+verimain.armv7l: $(OFILES)
+	$(GPP) -g -o verimain.$(MACH) $(OFILES) -lreadline -ltcl8.6
 
-verimain.$(MACH).o: verimain.cc obj_dir/Vbackplane.h
-	$(GPP) -g -fPIC -c -o verimain.$(MACH).o -I/usr/share/verilator/include/ verimain.cc
+verimain.x86_64: $(OFILES) verilated.$(MACH).o obj_dir/Vbackplane__ALL.a
+	$(GPP) -g -o verimain.$(MACH) $(OFILES) verilated.$(MACH).o obj_dir/Vbackplane__ALL.a /home/mrieker/nfs/tcl8.6.17/install/lib/libtcl8.6.so -lreadline
+
+verimain.armv7l.o: verimain.cc
+	$(GPP) -g -fPIC -c -o verimain.$(MACH).o -DZTURN verimain.cc
+
+verimain.x86_64.o: verimain.cc obj_dir/Vbackplane.h
+	$(GPP) -g -fPIC -c -o verimain.$(MACH).o -I/usr/share/verilator/include/ -DVERLTR verimain.cc
 
 assemble.$(MACH).o: assemble.cc
 	$(GPP) -g -fPIC -c -o assemble.$(MACH).o assemble.cc

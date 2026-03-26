@@ -278,7 +278,7 @@ module Zynq (
         .zclock   (regctla[12]),        // 100MHz clock
         .zreset   (regctla[13]),        // power-on reset
 
-        .clok2    (regctlc[22]),        // 10MHz clock
+        .clok2    (regctlc[23]),        // 10MHz clock
         .reset    (regctla[01]),        // power-on reset
 
         .i3CYCLE  (regctla[02]),        // do 3-cycle break
@@ -301,34 +301,36 @@ module Zynq (
         .oIOP     (regctlc[03]),        // io instruction pulse
         .oLINK    (regctlc[04]),        // link register
         .oRUN     (regctlc[05]),
-        .oTP1     (regctlc[06]), 
-        .oTP2     (regctlc[07]), 
-        .oTP3     (regctlc[08]), 
-        .oTP4     (regctlc[09]), 
-        .oTS1     (regctlc[10]), 
-        .oTS2     (regctlc[11]), 
-        .oTS3     (regctlc[12]), 
+        .oTP1     (regctlc[06]),
+        .oTP2     (regctlc[07]),
+        .oTP3     (regctlc[08]),
+        .oTP4     (regctlc[09]),
+        .oTS1     (regctlc[10]),
+        .oTS2     (regctlc[11]),
+        .oTS3     (regctlc[12]),
         .oTS4     (regctlc[13]),
 
-        .swstart  (regctlc[14]), 
-        .swldad   (regctlc[15]), 
-        .swdepos  (regctlc[16]), 
+        .swstart  (regctlc[14]),
+        .swldad   (regctlc[15]),
+        .swdepos  (regctlc[16]),
         .swexam   (regctlc[17]),
-        .swcont   (regctlc[18]), 
-        .swstop   (regctlc[19]), 
-        .swsstep  (regctlc[20]), 
+        .swcont   (regctlc[18]),
+        .swstop   (regctlc[19]),
+        .swsstep  (regctlc[20]),
         .swsinst  (regctlc[21]),
+
+        .oION     (regctlc[22]),
 
         .memfield (regctld[02:00]),
         .majst    (regctld[06:03]),
         .sctr     (regctld[11:07]),
-        .swdfld   (regctld[26:24]), 
+        .swdfld   (regctld[26:24]),
         .swifld   (regctld[29:27]),
 
-        .oMADR    (regctle[11:00]), 
-        .oMBUF    (regctle[23:12]), 
+        .oMADR    (regctle[11:00]),
+        .oMBUF    (regctle[23:12]),
         .oACUM    (regctlf[11:00]),
-        .mulq     (regctlf[23:12]), 
+        .mquo     (regctlf[23:12]),
         .pctr     (regctlg[11:00]),
 
         .gpin     (regctlh),

@@ -10,18 +10,30 @@
 #include <tcl8.6/tcl.h>
 #include <unistd.h>
 
-#define ABORT() do { fprintf (stderr, "ABORT %s %d\n", __FILE__, __LINE__); abort (); } while (0)
-
+#ifdef VERLTR
 #include "obj_dir/Vbackplane.h"
+#endif
+#ifdef ZTURN
+#include <sys/file.h>
+#include <sys/mman.h>
+#endif
 
 #include "assemble.h"
 #include "disassemble.h"
 #include "readprompt.h"
 
+#define ABORT() do { fprintf (stderr, "ABORT %s %d\n", __FILE__, __LINE__); abort (); } while (0)
+
 static bool volatile ctrlcflag;
 static int clkratio = 10;
 static int cyclenum;
+
+#ifdef VERLTR
 static Vbackplane *vbkpl;
+#endif
+#ifdef ZTURN
+static uint32_t volatile *zpage;
+#endif
 
 static Tcl_ObjCmdProc cmd_asmop;
 static Tcl_ObjCmdProc cmd_bus;
@@ -65,8 +77,32 @@ int main (int argc, char **argv)
 
     signal (SIGINT, siginthand);
 
+#ifdef VERLTR
     Vbackplane vbackplane;
     vbkpl = &vbackplane;
+#endif
+#ifdef ZTURN
+    int zfd = open ("/proc/zpdp8i", O_RDWR);
+    if (zfd < 0) {
+        fprintf (stderr, "error opening /proc/zpdp8i: %m\n");
+        ABORT ();
+    }
+    if (flock (zfd, LOCK_EX | LOCK_NB) < 0) {
+        fprintf (stderr, "error locking /proc/zpdp8i: %m\n");
+        ABORT ();
+    }
+    void *zp = mmap (NULL, 4096, PROT_READ | PROT_WRITE, MAP_SHARED, zfd, 0);
+    if (zp == MAP_FAILED) {
+        fprintf (stderr, "error mapping /proc/zpdp8i: %m\n");
+        ABORT ();
+    }
+    zpage = (uint32_t volatile *)zp;
+    if ((zpage[0] & 0xFFFF0000) != 0x38480000) {
+        fprintf (stderr, "bad majic number %08X\n", zpage[0]);
+        ABORT ();
+    }
+    fprintf (stderr, "majic number %08X\n", zpage[0]);
+#endif
 
     rc = Tcl_EvalFile (interp, "verimain.tcl");
     if (rc != TCL_OK) {
@@ -133,12 +169,138 @@ static int cmd_asmop (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_O
 
 struct Pin {
     int bits;
+#ifdef VERLTR
     int size;
-    void *offs;
+    void *addr;
+#endif
+#ifdef ZTURN
+    uint32_t mask;
+    int indx;
+#endif
     bool writ;
     char const *name;
 };
+
+#ifdef VERLTR
 #define OFFS(x) sizeof (vbkpl->x), &vbkpl->x
+#endif
+#ifdef ZTURN
+
+#define Z_RA 1
+#define i3CYCLE_M (1U<<2)
+#define i3CYCLE_I Z_RA
+#define iACCLEAR_M (1U<<3)
+#define iACCLEAR_I Z_RA
+#define iBRKRQST_M (1U<<4)
+#define iBRKRQST_I Z_RA
+#define iBRKWRM_M (1U<<5)
+#define iBRKWRM_I Z_RA
+#define iCAINC_M (1U<<6)
+#define iCAINC_I Z_RA
+#define iINTRQST_M (1U<<7)
+#define iINTRQST_I Z_RA
+#define iIOSKIP_M (1U<<8)
+#define iIOSKIP_I Z_RA
+#define iLNKTOG_M (1U<<9)
+#define iLNKTOG_I Z_RA
+#define iPAUSE_M (1U<<10)
+#define iPAUSE_I Z_RA
+#define memdisab_M (1U<<11)
+#define memdisab_I Z_RA
+#define reset_M (1U<<1)
+#define reset_I Z_RA
+#define zclock_M (1U<<12)
+#define zclock_I Z_RA
+#define zreset_M (1U<<13)
+#define zreset_I Z_RA
+
+#define Z_RB 2
+#define iDMAADDR_M (077777U<<0)
+#define iDMAADDR_I Z_RB
+#define iINBUS_M (07777U<<15)
+#define iINBUS_I Z_RB
+
+#define Z_RC 3
+#define oBREAK_M (1U<<0)
+#define oBREAK_I Z_RC
+#define oBUSINI_M (1U<<1)
+#define oBUSINI_I Z_RC
+#define oBWCOV_M (1U<<2)
+#define oBWCOV_I Z_RC
+#define oIOP_M (1U<<3)
+#define oIOP_I Z_RC
+#define oLINK_M (1U<<4)
+#define oLINK_I Z_RC
+#define oRUN_M (1U<<5)
+#define oRUN_I Z_RC
+#define oTP1_M (1U<<6)
+#define oTP1_I Z_RC
+#define oTP2_M (1U<<7)
+#define oTP2_I Z_RC
+#define oTP3_M (1U<<8)
+#define oTP3_I Z_RC
+#define oTP4_M (1U<<9)
+#define oTP4_I Z_RC
+#define oTS1_M (1U<<10)
+#define oTS1_I Z_RC
+#define oTS2_M (1U<<11)
+#define oTS2_I Z_RC
+#define oTS3_M (1U<<12)
+#define oTS3_I Z_RC
+#define oTS4_M (1U<<13)
+#define oTS4_I Z_RC
+#define swstart_M (1U<<14)
+#define swstart_I Z_RC
+#define swldad_M (1U<<15)
+#define swldad_I Z_RC
+#define swdepos_M (1U<<16)
+#define swdepos_I Z_RC
+#define swexam_M (1U<<17)
+#define swexam_I Z_RC
+#define swcont_M (1U<<18)
+#define swcont_I Z_RC
+#define swstop_M (1U<<19)
+#define swstop_I Z_RC
+#define swsstep_M (1U<<20)
+#define swsstep_I Z_RC
+#define swsinst_M (1U<<21)
+#define swsinst_I Z_RC
+#define oION_M (1U<<22)
+#define oION_I Z_RC
+#define clok2_M (1U<<23)
+#define clok2_I Z_RC
+
+#define Z_RD 4
+#define memfield_M (7U<<0)
+#define memfield_I Z_RD
+#define majst_M (017U<<3)
+#define majst_I Z_RD
+#define sctr_M (037U<<7)
+#define sctr_I Z_RD
+#define swdfld_M (017U<<24)
+#define swdfld_I Z_RD
+#define swifld_M (7U<<27)
+#define swifld_I Z_RD
+
+#define Z_RE 5
+#define Z_RF 6
+#define Z_RG 7
+#define oMADR_M (07777U<<0)
+#define oMADR_I Z_RE
+#define oMBUF_M (07777U<<12)
+#define oMBUF_I Z_RE
+#define oACUM_M (07777U<<0)
+#define oACUM_I Z_RF
+#define mquo_M (07777U<<12)
+#define mquo_I Z_RF
+#define pctr_M (07777U<<0)
+#define pctr_I Z_RG
+
+#define OFFS(x) x##_M, x##_I
+
+#define Z_RH 8  // gpin
+#define Z_RI 9  // gpout
+#endif
 
 // bus get pin pin ... set pin val pin val ...
 static int cmd_bus (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
@@ -159,7 +321,7 @@ static int cmd_bus (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj
         {  4, OFFS (majst),    false, "majst"    },
         {  1, OFFS (memdisab), true,  "memdisab" },
         {  3, OFFS (memfield), false, "memfield" },
-        { 12, OFFS (mulq),     false, "mulq"     },
+        { 12, OFFS (mquo),     false, "mquo"     },
         { 12, OFFS (pctr),     false, "pctr"     },
         {  1, OFFS (reset),    true,  "reset"    },
         {  5, OFFS (sctr),     false, "sctr"     },
@@ -232,11 +394,21 @@ static int cmd_bus (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj
                         Tcl_SetResultF (interp, "value %d out of range for pin %s", val, arg);
                         return TCL_ERROR;
                     }
-                    memcpy (pin->offs, &val, pin->size);
+#ifdef VERLTR
+                    memcpy (pin->addr, &val, pin->size);
+#endif
+#ifdef ZTURN
+                    zpage[pin->indx] = (zpage[pin->indx] & ~ pin->mask) | (val * (pin->mask & - pin->mask));
+#endif
                 } else {
+#ifdef VERLTR
                     int val = 0;
                     if (pin->size > (int) sizeof val) abort ();
-                    memcpy (&val, pin->offs, pin->size);
+                    memcpy (&val, pin->addr, pin->size);
+#endif
+#ifdef ZTURN
+                    int val = (zpage[pin->indx] & pin->mask) / (pin->mask & - pin->mask);
+#endif
                     getobjs[ngetobjs++] = Tcl_NewIntObj (val);
                 }
                 break;
@@ -343,9 +515,20 @@ static int cmd_gpio (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Ob
         int num = 0;
         int rc = Tcl_GetIntFromObj (interp, objv[1], &num);
         if (rc != TCL_OK) return rc;
+#ifdef VERLTR
         vbkpl->gpin = num;
+#endif
+#ifdef ZTURN
+        zpage[Z_RH] = num;
+#endif
     } else {
-        Tcl_SetObjResult (interp, Tcl_NewIntObj (vbkpl->gpout));
+#ifdef VERLTR
+        int num = vbkpl->gpout;
+#endif
+#ifdef ZTURN
+        int num = zpage[Z_RI];
+#endif
+        Tcl_SetObjResult (interp, Tcl_NewIntObj (num));
     }
     return TCL_OK;
 }
@@ -353,6 +536,7 @@ static int cmd_gpio (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Ob
 // direct internal memory access
 static int cmd_mem (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
+#ifdef VERLTR
     switch (objc) {
 
         // mem addr - read memory
@@ -396,6 +580,11 @@ static int cmd_mem (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj
             return TCL_ERROR;
         }
     }
+#endif
+#ifdef ZTURN
+    Tcl_SetResultF (interp, "not supported for zturn");
+    return TCL_ERROR;
+#endif
 }
 
 // randbits nbits
@@ -439,10 +628,16 @@ static void kerchunk ()
     // 10 100MHz cycles step the 10MHz osc through a cycle
     // each 100MHz step progresses signals through gates and flipflops
     for (int i = 0; i < 10; i ++) {
+#ifdef VERLTR
         vbkpl->eval ();     // let input signals soak in
         vbkpl->zclock = 1;  // clock progress through gates and flipflops
         vbkpl->eval ();     // let new state settle in
         vbkpl->zclock = 0;
+#endif
+#ifdef ZTURN
+        zpage[zclock_I] |=   zclock_M;
+        zpage[zclock_I] &= ~ zclock_M;
+#endif
     }
     ++ cyclenum;            // one more clock cycle done
 }

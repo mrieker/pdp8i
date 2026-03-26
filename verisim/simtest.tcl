@@ -23,7 +23,7 @@ set latstop      0
 set linc         0
 set memcycno     0
 set memcycwcover 0
-set mulq         0
+set mquo         0
 set opcode       0
 set perclock     0
 set pctr         0
@@ -71,7 +71,7 @@ proc simtest {} {
     global latstop
     global linc
     global memcycwcover
-    global mulq
+    global mquo
     global opcode
     global perclock
     global pctr
@@ -396,7 +396,7 @@ proc simtest {} {
         verify12  [bus pctr]  $pctr "PC mismatch at end of instruction"
         verify12  [bus oACUM] $acum "AC mismatch at end of instruction"
         verifybit [bus oLINK] $linc "LINK mismatch at end of instruction"
-        verify12  [bus mulq]  $mulq "MQ mismatch at end of instruction"
+        verify12  [bus mquo]  $mquo "MQ mismatch at end of instruction"
         verify12  [bus sctr]  $sctr "SC mismatch at end of instruction"
 
         ;# if halted and did ldad/dep/exam, next cycle will be a fetch, not wrdct/break/intak
@@ -407,10 +407,10 @@ proc simtest {} {
 }
 
 proc startline {} {
-    global acum instrno linc mulq pctr sctr startclockno xmem_dfld xmem_ifld
+    global acum instrno linc mquo pctr sctr startclockno xmem_dfld xmem_ifld
 
     puts -nonewline [format "%10u : L.AC=%o.%04o MQ=%04o PC=%o%04o SC=%02o DF=%o : " \
-        [incr instrno] $linc $acum $mulq $xmem_ifld $pctr $sctr $xmem_dfld]
+        [incr instrno] $linc $acum $mquo $xmem_ifld $pctr $sctr $xmem_dfld]
 
     set startclockno [clk 0]
 }
@@ -601,7 +601,7 @@ proc memorycycle {state field addr rdata wdata} {
 proc checkhalted {} {
     global MS_BREAK MS_DEPOS MS_EXAM MS_EXEC MS_FETCH MS_INTAK MS_WRDCT
     global haltwhy latsinst latsstep latstop pctr swdfpend swifpend swregpend testcons
-    global acum linc mulq sctr xmem_intdisableduntiljump brkrequest intdelayed intenabled intrequest
+    global acum linc mquo sctr xmem_intdisableduntiljump brkrequest intdelayed intenabled intrequest
     global xmem_dfld xmem_ifld xmem_ifldafterjump xmem_saveddfld xmem_savedifld
 
     ;# if halted, turn off stop/step switches and press continue
@@ -710,7 +710,7 @@ proc checkhalted {} {
             swtchwait start 1
             set acum 0
             set linc 0
-            set mulq 0
+            set mquo 0
             set sctr 0
             set xmem_saveddfld 0
             set xmem_savedifld 0
@@ -805,14 +805,14 @@ proc doioinstr {opcode} {
 
 ;# perform extended arithmetic
 proc extendedarithmetic {yreg} {
-    global acum linc mulq opcode sctr
+    global acum linc mquo opcode sctr
 
     ;# step 1
     if {$opcode & 0200} {set acum 0}                        ;# 0200 CLA - clear accumulator
 
     ;# step 2
-    set mqxx $mulq
-    if {$opcode & 0020} {set mulq $acum}                    ;# 0020 MQL - load multiplier quotient from accumulator
+    set mqxx $mquo
+    if {$opcode & 0020} {set mquo $acum}                    ;# 0020 MQL - load multiplier quotient from accumulator
     if {$opcode & 0020} {set acum 0}
     if {$opcode & 0040} {set acum [expr {$acum | $sctr}]}   ;# 0040 SCA - step counter load into accumulator
     if {$opcode & 0100} {set acum [expr {$acum | $mqxx}]}   ;# 0100 MQA - multiplier quotient load into accumulator
@@ -825,30 +825,30 @@ proc extendedarithmetic {yreg} {
         }
 
         2 {     ;# 7405 MUY - multiply: Y * MQ + AC => AC,MQ
-            set prod [expr {$yreg * $mulq + $acum}]
+            set prod [expr {$yreg * $mquo + $acum}]
             set acum [expr {$prod >> 12}]
-            set mulq [expr {$prod & 07777}]
+            set mquo [expr {$prod & 07777}]
             set sctr 0
             set linc 0
         }
 
         3 {     ;# 7407 DVI - divide: AC,MQ / Y => MQ r AC
-            set acmq [expr {($acum << 12) | $mulq}]
+            set acmq [expr {($acum << 12) | $mquo}]
             if {$acum >= $yreg} {
                 set acum [expr {(($acmq >> 11) - $yreg) & 07777}]
-                set mulq [expr {(($acmq << 1) + 1) & 07777}]
+                set mquo [expr {(($acmq << 1) + 1) & 07777}]
                 set sctr 21
                 set linc 1
             } else {
                 set acum [expr {$acmq % $yreg}]
-                set mulq [expr {($acmq - $acum) / $yreg}]
+                set mquo [expr {($acmq - $acum) / $yreg}]
                 set sctr 0
                 set linc 0
             }
         }
 
         4 {     ;# 7411 NMI - normalize
-            set acmq [expr {($acum << 12) | $mulq}]
+            set acmq [expr {($acum << 12) | $mquo}]
             for {set sctr 0} {$sctr < 31} {incr sctr} {
                 if {$acmq == 000000000} break
                 if {$acmq == 060000000} break
@@ -858,34 +858,34 @@ proc extendedarithmetic {yreg} {
                 set acmq [expr {($acmq << 1) & 077777777}]
             }
             set acum [expr {$acmq >> 12}]
-            set mulq [expr {$acmq & 07777}]
+            set mquo [expr {$acmq & 07777}]
         }
 
         5 {     ;# 7413 SHL - shift left
-            set acmq [expr {($acum << 12) | $mulq}]
+            set acmq [expr {($acum << 12) | $mquo}]
             set acmq [expr {$acmq << (($yreg & 31) + 1)}]
             set linc [expr {($acmq >> 24) & 1}]
             set acum [expr {($acmq >> 12) & 07777}]
-            set mulq [expr {$acmq & 07777}]
+            set mquo [expr {$acmq & 07777}]
             set sctr 0
         }
 
         6 {     ;# 7415 ASR - arithmetic shift right
-            set acmq [expr {($acum << 12) | $mulq}]
+            set acmq [expr {($acum << 12) | $mquo}]
             set linc [expr {$acmq >> 23}]
             set acmq [expr {($acmq ^ 040000000) - 040000000}]
             set acmq [expr {$acmq >> (($yreg & 31) + 1)}]
             set acum [expr {($acmq >> 12) & 07777}]
-            set mulq [expr {$acmq & 07777}]
+            set mquo [expr {$acmq & 07777}]
             set sctr 0
         }
 
         7 {     ;# 7417 LSR - logical shift right
-            set acmq [expr {($acum << 12) | $mulq}]
+            set acmq [expr {($acum << 12) | $mquo}]
             set linc 0
             set acmq [expr {$acmq >> (($yreg & 31) + 1)}]
             set acum [expr {$acmq >> 12}]
-            set mulq [expr {$acmq & 07777}]
+            set mquo [expr {$acmq & 07777}]
             set sctr 0
         }
     }

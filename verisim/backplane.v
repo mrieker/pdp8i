@@ -32,7 +32,7 @@ module backplane (
     output[11:00] oMADR, oMBUF, oACUM,
 
     input memdisab,                 // disable internal memory chip
-    output[11:00] mulq, pctr,
+    output[11:00] mquo, pctr,
     output[2:0] memfield,
     output[3:0] majst,
     output[4:0] sctr,
@@ -180,18 +180,18 @@ module backplane (
         , .ACUM_9   (oACUM[9])
         , .ACUM_10  (oACUM[10])
         , .ACUM_11  (oACUM[11])
-        , .MQUO_0   (mulq[0])
-        , .MQUO_1   (mulq[1])
-        , .MQUO_2   (mulq[2])
-        , .MQUO_3   (mulq[3])
-        , .MQUO_4   (mulq[4])
-        , .MQUO_5   (mulq[5])
-        , .MQUO_6   (mulq[6])
-        , .MQUO_7   (mulq[7])
-        , .MQUO_8   (mulq[8])
-        , .MQUO_9   (mulq[9])
-        , .MQUO_10  (mulq[10])
-        , .MQUO_11  (mulq[11])
+        , .MQUO_0   (mquo[0])
+        , .MQUO_1   (mquo[1])
+        , .MQUO_2   (mquo[2])
+        , .MQUO_3   (mquo[3])
+        , .MQUO_4   (mquo[4])
+        , .MQUO_5   (mquo[5])
+        , .MQUO_6   (mquo[6])
+        , .MQUO_7   (mquo[7])
+        , .MQUO_8   (mquo[8])
+        , .MQUO_9   (mquo[9])
+        , .MQUO_10  (mquo[10])
+        , .MQUO_11  (mquo[11])
         , .INBUS_0  (inbus[0])   // reading switch register
         , .INBUS_1  (inbus[1])   // ...when readsr asserted
         , .INBUS_2  (inbus[2])
@@ -395,18 +395,18 @@ module backplane (
         , .LNKTOG (lnktog)
         , .LNKTOG_o   (eaeLNKTOG)
 
-        , .MQUO_0   (mulq[0])
-        , .MQUO_1   (mulq[1])
-        , .MQUO_2   (mulq[2])
-        , .MQUO_3   (mulq[3])
-        , .MQUO_4   (mulq[4])
-        , .MQUO_5   (mulq[5])
-        , .MQUO_6   (mulq[6])
-        , .MQUO_7   (mulq[7])
-        , .MQUO_8   (mulq[8])
-        , .MQUO_9   (mulq[9])
-        , .MQUO_10  (mulq[10])
-        , .MQUO_11  (mulq[11])
+        , .MQUO_0   (mquo[0])
+        , .MQUO_1   (mquo[1])
+        , .MQUO_2   (mquo[2])
+        , .MQUO_3   (mquo[3])
+        , .MQUO_4   (mquo[4])
+        , .MQUO_5   (mquo[5])
+        , .MQUO_6   (mquo[6])
+        , .MQUO_7   (mquo[7])
+        , .MQUO_8   (mquo[8])
+        , .MQUO_9   (mquo[9])
+        , .MQUO_10  (mquo[10])
+        , .MQUO_11  (mquo[11])
         , .PAUSE    (eaePAUSE)
         , .SCTR_0   (sctr[0])
         , .SCTR_1   (sctr[1])
