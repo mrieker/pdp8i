@@ -126,7 +126,7 @@ proc simtest {} {
     set lastopc -1
     set nextfetch 0
 
-    while true {
+    while {! [ctrlcflag]} {
         set ercode [catch {
 
             ;# once through this loop per instruction, dma transfer or interrupt acknowledge
@@ -196,9 +196,6 @@ proc simtest {} {
                     set opcode 04000
                     set execst $MS_INTAK
                 } else {
-
-                    ;# stop when processor is ready to fetch
-                    if [ctrlcflag] break
 
                     ;# delayed ION active now that we are about to do a fetch
                     set intenabled $intdelayed

@@ -24,6 +24,20 @@
 
 #define ABORT() do { fprintf (stderr, "ABORT %s %d\n", __FILE__, __LINE__); abort (); } while (0)
 
+struct Pin {
+    int bits;
+#ifdef VERLTR
+    int size;
+    void *addr;
+#endif
+#ifdef ZTURN
+    uint32_t mask;
+    int indx;
+#endif
+    bool writ;
+    char const *name;
+};
+
 static bool volatile ctrlcflag;
 static int clkratio = 10;
 static int cyclenum;
@@ -43,8 +57,10 @@ static Tcl_ObjCmdProc cmd_disop;
 static Tcl_ObjCmdProc cmd_gpio;
 static Tcl_ObjCmdProc cmd_mem;
 static Tcl_ObjCmdProc cmd_randbits;
+static Tcl_ObjCmdProc cmd_tty;
 
 static void kerchunk ();
+static int cmdpintable (int pincount, Pin const *pintable, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
 static void Tcl_SetResultF (Tcl_Interp *interp, char const *fmt, ...);
 static void siginthand (int signum);
 
@@ -74,6 +90,7 @@ int main (int argc, char **argv)
     if (Tcl_CreateObjCommand (interp, "gpio", cmd_gpio, NULL, NULL) == NULL) ABORT ();
     if (Tcl_CreateObjCommand (interp, "mem",  cmd_mem,  NULL, NULL) == NULL) ABORT ();
     if (Tcl_CreateObjCommand (interp, "randbits",  cmd_randbits,  NULL, NULL) == NULL) ABORT ();
+    if (Tcl_CreateObjCommand (interp, "tty",  cmd_tty,  NULL, NULL) == NULL) ABORT ();
 
     signal (SIGINT, siginthand);
 
@@ -167,20 +184,6 @@ static int cmd_asmop (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_O
     return TCL_OK;
 }
 
-struct Pin {
-    int bits;
-#ifdef VERLTR
-    int size;
-    void *addr;
-#endif
-#ifdef ZTURN
-    uint32_t mask;
-    int indx;
-#endif
-    bool writ;
-    char const *name;
-};
-
 #ifdef VERLTR
 #define OFFS(x) sizeof (vbkpl->x), &vbkpl->x
 #endif
@@ -203,7 +206,7 @@ static int findpin (void const *k, void const *e)
     return strcasecmp (c, p->name);
 }
 
-// bus get pin pin ... set pin val pin val ...
+// bus [get] pin pin ... set pin val pin val ...
 static int cmd_bus (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
     static int pincount;
@@ -242,6 +245,13 @@ static int cmd_bus (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj
             {  1, OFFS (swexam),   false, "swexam"   },
             {  1, OFFS (swdepos),  false, "swdepos"  },
 
+#ifdef ZTURN
+            { 12, OFFS (businbus), false, "businbus" },
+            {  1, OFFS (busacclr), false, "busacclr" },
+            {  1, OFFS (busintrq), false, "busintrq" },
+            {  1, OFFS (busioskp), false, "busioskp" },
+#endif
+
             { 12, OFFS (oACUM),    false, "oACUM"    },
             {  1, OFFS (oBREAK),   false, "oBREAK"   },   // currently doing BREAK (DMA) cycle
             {  1, OFFS (oBWCOV),   false, "oBWCOV"   },   // 3-cycle DMA wordcount overflowed
@@ -267,66 +277,7 @@ static int cmd_bus (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj
         memcpy ((void *) pintable, (void *) pt, sizeof pt);
     }
 
-    bool setmode = false;
-    int ngetobjs = 0;
-    Tcl_Obj *getobjs[objc];
-
-    for (int i = 0; ++ i < objc;) {
-        char const *arg = Tcl_GetString (objv[i]);
-        if (strcasecmp (arg, "get") == 0) {
-            setmode = false;
-            continue;
-        }
-        if (strcasecmp (arg, "set") == 0) {
-            setmode = true;
-            continue;
-        }
-        Pin const *pin = (Pin const *) bsearch (arg, pintable, pincount, sizeof *pintable, findpin);
-        if (pin == NULL) {
-            Tcl_SetResultF (interp, "bad pin %s", arg);
-            return TCL_ERROR;
-        }
-        if (setmode) {
-            if (! pin->writ) {
-                Tcl_SetResultF (interp, "pin not settable %s", arg);
-                return TCL_ERROR;
-            }
-            if (++ i >= objc) {
-                Tcl_SetResultF (interp, "missing value for pin %s", arg);
-                return TCL_ERROR;
-            }
-            int val;
-            int rc = Tcl_GetIntFromObj (interp, objv[i], &val);
-            if (rc != TCL_OK) return rc;
-            if ((val < 0) || (val >= 1 << pin->bits)) {
-                Tcl_SetResultF (interp, "value %d out of range for pin %s", val, arg);
-                return TCL_ERROR;
-            }
-#ifdef VERLTR
-            memcpy (pin->addr, &val, pin->size);
-#endif
-#ifdef ZTURN
-            zpage[pin->indx] = (zpage[pin->indx] & ~ pin->mask) | (val * (pin->mask & - pin->mask));
-#endif
-        } else {
-#ifdef VERLTR
-            int val = 0;
-            if (pin->size > (int) sizeof val) abort ();
-            memcpy (&val, pin->addr, pin->size);
-#endif
-#ifdef ZTURN
-            int val = (zpage[pin->indx] & pin->mask) / (pin->mask & - pin->mask);
-#endif
-            getobjs[ngetobjs++] = Tcl_NewIntObj (val);
-        }
-    }
-    if (ngetobjs == 1) {
-        Tcl_SetObjResult (interp, getobjs[0]);
-    }
-    if (ngetobjs > 1) {
-        Tcl_SetObjResult (interp, Tcl_NewListObj (ngetobjs, getobjs));
-    }
-    return TCL_OK;
+    return cmdpintable (pincount, pintable, interp, objc, objv);
 }
 
 // clk [n]
@@ -526,6 +477,43 @@ static int cmd_randbits (ClientData clientdata, Tcl_Interp *interp, int objc, Tc
     return TCL_OK;
 }
 
+// tty [get] pin pin ... set pin val pin val ...
+static int cmd_tty (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
+{
+#ifdef VERLTR
+    Tcl_SetResultF (interp, "tty command not supported");
+    return TCL_ERROR;
+#endif
+#ifdef ZTURN
+    static int pincount;
+    static Pin const *pintable;
+
+    if (pintable == NULL) {
+        if ((zpage[32] & 0xFFFF0000) != 0x54540000) {
+            Tcl_SetResultF (interp, "bad tty magic number %08X", zpage[32]);
+            return TCL_ERROR;
+        }
+        Pin pt[] = {
+            { 32, 0xFFFFFFFFU, 32+0, false, "magic"   },
+            { 12, 0x00000FFFU, 32+1, true,  "kbchar"  },
+            {  1, 0x40000000U, 32+1, true,  "enable"  },
+            {  1, 0x80000000U, 32+1, true,  "kbflag"  },
+            { 12, 0x00000FFFU, 32+2, false, "prchar"  },
+            {  1, 0x40000000U, 32+2, true,  "prfull"  },
+            {  1, 0x80000000U, 32+2, true,  "prflag"  },
+            {  1, 0x00000100U, 32+3, false, "intenab" }
+        };
+        pincount = sizeof pt / sizeof pt[0];
+        qsort (pt, pincount, sizeof pt[0], sortpin);
+        pintable = (Pin const *) malloc (sizeof pt);
+        if (pintable == NULL) ABORT ();
+        memcpy ((void *) pintable, (void *) pt, sizeof pt);
+    }
+
+    return cmdpintable (pincount, pintable, interp, objc, objv);
+#endif
+}
+
 // call with 10MHz clock still low and input signals just changed
 // returns with output signals updated and 10MHz clock just set low
 static void kerchunk ()
@@ -548,6 +536,73 @@ static void kerchunk ()
 #endif
     }
     ++ cyclenum;            // one more clock cycle done
+}
+
+// process a pintable-type command
+//   command [get] pin pin ... set pin val pin val ...
+// returns 'get' pin values in a list
+static int cmdpintable (int pincount, Pin const *pintable, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
+{
+    bool setmode = false;
+    int ngetobjs = 0;
+    Tcl_Obj *getobjs[objc];
+
+    for (int i = 0; ++ i < objc;) {
+        char const *arg = Tcl_GetString (objv[i]);
+        if (strcasecmp (arg, "get") == 0) {
+            setmode = false;
+            continue;
+        }
+        if (strcasecmp (arg, "set") == 0) {
+            setmode = true;
+            continue;
+        }
+        Pin const *pin = (Pin const *) bsearch (arg, pintable, pincount, sizeof *pintable, findpin);
+        if (pin == NULL) {
+            Tcl_SetResultF (interp, "bad pin %s", arg);
+            return TCL_ERROR;
+        }
+        if (setmode) {
+            if (! pin->writ) {
+                Tcl_SetResultF (interp, "pin not settable %s", arg);
+                return TCL_ERROR;
+            }
+            if (++ i >= objc) {
+                Tcl_SetResultF (interp, "missing value for pin %s", arg);
+                return TCL_ERROR;
+            }
+            int val;
+            int rc = Tcl_GetIntFromObj (interp, objv[i], &val);
+            if (rc != TCL_OK) return rc;
+            if ((val < 0) || (val >= 1 << pin->bits)) {
+                Tcl_SetResultF (interp, "value %d out of range for pin %s", val, arg);
+                return TCL_ERROR;
+            }
+#ifdef VERLTR
+            memcpy (pin->addr, &val, pin->size);
+#endif
+#ifdef ZTURN
+            zpage[pin->indx] = (zpage[pin->indx] & ~ pin->mask) | (val * (pin->mask & - pin->mask));
+#endif
+        } else {
+#ifdef VERLTR
+            int val = 0;
+            if (pin->size > (int) sizeof val) abort ();
+            memcpy (&val, pin->addr, pin->size);
+#endif
+#ifdef ZTURN
+            int val = (zpage[pin->indx] & pin->mask) / (pin->mask & - pin->mask);
+#endif
+            getobjs[ngetobjs++] = Tcl_NewIntObj (val);
+        }
+    }
+    if (ngetobjs == 1) {
+        Tcl_SetObjResult (interp, getobjs[0]);
+    }
+    if (ngetobjs > 1) {
+        Tcl_SetObjResult (interp, Tcl_NewListObj (ngetobjs, getobjs));
+    }
+    return TCL_OK;
 }
 
 // set result to formatted string

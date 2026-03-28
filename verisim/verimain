@@ -1,0 +1,10 @@
+#!/bin/bash
+d=`dirname $0`
+if [ `uname -m` == 'armv7l' ]
+then
+    if [ ! -f /proc/zynqpdp8i ]
+    then
+        sudo insmod $d/km-zynqpdp8i/zynqpdp8i.ko
+    fi
+fi
+exec $d/verimain.`uname -m` "$@"

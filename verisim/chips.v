@@ -904,6 +904,47 @@ module X74LS175 (input zclock, zreset,
 
 endmodule
 
+module X74HC240 (input zclock, zreset,
+          input      p1
+        , input      p2
+        , input      p3i
+        , output reg p3o
+        , input      p4
+        , input      p5i
+        , output reg p5o
+        , input      p6
+        , input      p7i
+        , output reg p7o
+        , input      p8
+        , input      p9i
+        , output reg p9o
+        , input      p10
+        , input      p11
+        , input      p12i
+        , output reg p12o
+        , input      p13
+        , input      p14i
+        , output reg p14o
+        , input      p15
+        , input      p16i
+        , output reg p16o
+        , input      p17
+        , input      p18i
+        , output reg p18o
+        , input      p19
+        , input      p20
+);
+
+    always @(posedge zclock) begin
+        // 1y3   1y2   1y1   1y0      1oe              1a3  1a2  1a1  1a0
+        { p12o, p14o, p16o, p18o } <= p1  ? 4'h0 : ~ { p8,  p6,  p4,  p2  };
+
+        // 2y3   2y2   2y1   2y0      2oe              2a3  2a2  2a1  2a0
+        {  p3o,  p5o,  p7o,  p9o } <= p19 ? 4'h0 : ~ { p17, p15, p13, p11 };
+    end
+
+endmodule
+
 module X74LS283 (input zclock, zreset,
           output reg p1
         , input  p2

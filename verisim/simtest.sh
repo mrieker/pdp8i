@@ -2,7 +2,8 @@
 #
 #  run random instruction test on simulator
 #
-./verimain.`uname -m` <<EOF
+cd `dirname $0`
+./verimain <<EOF
 source simtest.tcl
 simtest
 EOF

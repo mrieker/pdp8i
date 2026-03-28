@@ -167,13 +167,13 @@ proc rdmem {addr} {
     if {($addr < 0) || ($addr > 07777)} {
         error "bad address $addr"
     }
-    swtch set reg $addr
-    runloop 240
-    swtch set ldad 1
-    runloop 240
-    swtch set ldad 0
-    runloop 240
-    return [light mb]
+    waithalt
+    swtchwait reg $addr
+    swtchwait ldad 1
+    swtchwait ldad 0
+    waitrun
+    waithalt
+    return [bus oMBUF]
 }
 
 # keep clocking processor, interpret changes in gpio
@@ -184,44 +184,48 @@ proc runloop {{n ""}} {
             runstep
         }
     } else {
-        for {set i 0} {$i < $n} {incr i} {
+        for {set i 0} {($i < $n) && ! [ctrlcflag]} {incr i} {
             runstep
         }
     }
 }
+
+# single-step processor, interpret changes in gpio
 set runstep_lastg 0
 proc runstep {} {
     global lightrows runquiet runstep_lastg swrowpends swrowrcvds swrowsents
 
-    set c [clk]                         ;# kerchunk the 10MHz clock and get cycle count
-    set g [gpio]                        ;# read gpio connector contents
-    for {set r 0} {$r < 3} {incr r} {   ;# maybe it wants switch contents
-        ;# if high-to-low for switch select, capture pending value to be sent
-        if {$runstep_lastg & ~ $g & (0x1000 << $r)} {
-            set sw [lindex $swrowpends $r]
-            lset swrowsents $r $sw
+    set c [clk]                             ;# kerchunk the 10MHz clock and get cycle count
+    set g [gpio]                            ;# read gpio connector contents
+    if {$runstep_lastg != $g} {
+        for {set r 0} {$r < 3} {incr r} {   ;# maybe it wants switch contents
+            ;# if high-to-low for switch select, capture pending value to be sent
+            if {$runstep_lastg & ~ $g & (0x1000 << $r)} {
+                set sw [lindex $swrowpends $r]
+                lset swrowsents $r $sw
+            }
+            ;# if low switch select, send the row contents
+            if {~ $g & (0x1000 << $r)} {
+                set sw [lindex $swrowsents $r]
+                gpio [expr {($g & 0xFFF000) | $sw}]
+            }
+            ;# if low-to-high for switch select, processor clocked sent value in
+            if {~ $runstep_lastg & $g & (0x1000 << $r)} {
+                set sw [lindex $swrowsents $r]
+                lset swrowrcvds $r $sw
+            }
         }
-        ;# if low switch select, send the row contents
-        if {~ $g & (0x1000 << $r)} {
-            set sw [lindex $swrowsents $r]
-            gpio [expr {($g & 0xFFF000) | $sw}]
+        set runstep_lastg $g                ;# save gpio to detect edges
+        set v [expr {~ $g & 07777}]         ;# get the 12-bit row contents
+        set newlbrows $lightrows            ;# update any possible lb row
+        for {set r 0} {$r < 8} {incr r} {
+            if {$g & (0x010000 << $r)} {lset newlbrows $r $v}
         }
-        ;# if low-to-high for switch select, processor clocked sent value in
-        if {~ $runstep_lastg & $g & (0x1000 << $r)} {
-            set sw [lindex $swrowsents $r]
-            lset swrowrcvds $r $sw
-        }
-    }
-    set runstep_lastg $g                ;# save gpio to detect edges
-    set v [expr {~ $g & 07777}]         ;# get the 12-bit row contents
-    set newlbrows $lightrows            ;# update any possible lb row
-    for {set r 0} {$r < 8} {incr r} {
-        if {$g & (0x010000 << $r)} {lset newlbrows $r $v}
-    }
-    if {$lightrows != $newlbrows} {     ;# see if any change in lb row contents
-        set lightrows $newlbrows
-        if {! $runquiet} {
-            puts [format "%12d: %s" $c [lights]]
+        if {$lightrows != $newlbrows} {     ;# see if any change in lb row contents
+            set lightrows $newlbrows
+            if {! $runquiet} {
+                puts [format "%12d: %s" $c [lights]]
+            }
         }
     }
 }
@@ -355,6 +359,28 @@ proc unscramgpio {row} {
     return $val
 }
 
+# wait for processor to halt if it isn't already
+proc waithalt {} {
+    for {set i 0} {[bus oRUN]} {incr i} {
+        if {[ctrlcflag]} break
+        if {$i > 20000} {
+            error "timed out waiting for halt"
+        }
+        runstep
+    }
+}
+
+# wait for processor to run if it isn't already
+proc waitrun {} {
+    for {set i 0} {! [bus oRUN]} {incr i} {
+        if {[ctrlcflag]} break
+        if {$i > 20000} {
+            error "timed out waiting for run"
+        }
+        runstep
+    }
+}
+
 # write memory location using front-panel switches
 proc wrmem {addr data} {
     if {($addr < 0) || ($addr > 07777)} {
@@ -363,18 +389,17 @@ proc wrmem {addr data} {
     if {($data < 0) || ($data > 07777)} {
         error "bad data $data"
     }
-    swtch set reg $addr
-    runloop 240
-    swtch set ldad 1
-    runloop 240
-    swtch set ldad 0
-    runloop 240
-    swtch set reg $data
-    runloop 240
-    swtch set depos 1
-    runloop 960
-    swtch set depos 0
-    runloop 240
+    waithalt
+    swtchwait reg $addr
+    swtchwait ldad 1
+    swtchwait ldad 0
+    waitrun
+    waithalt
+    swtchwait reg $data
+    swtchwait depos 1
+    swtchwait depos 0
+    waitrun
+    waithalt
 }
 
 # start out with an hard reset

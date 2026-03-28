@@ -98,18 +98,28 @@
 #define swifld_I Z_RD
 
 #define Z_RE 5
-#define Z_RF 6
-#define Z_RG 7
 #define oMADR_M (07777U<<0)
 #define oMADR_I Z_RE
 #define oMBUF_M (07777U<<12)
 #define oMBUF_I Z_RE
+
+#define Z_RF 6
 #define oACUM_M (07777U<<0)
 #define oACUM_I Z_RF
 #define mquo_M (07777U<<12)
 #define mquo_I Z_RF
+
+#define Z_RG 7
 #define pctr_M (07777U<<0)
 #define pctr_I Z_RG
+#define businbus_M (07777U<<12)
+#define businbus_I Z_RG
+#define busacclr_M (1U<<24)
+#define busacclr_I Z_RG
+#define busintrq_M (1U<<25)
+#define busintrq_I Z_RG
+#define busioskp_M (1U<<26)
+#define busioskp_I Z_RG
 
 #define Z_RH 8  // gpin
 #define Z_RI 9  // gpout

@@ -178,6 +178,11 @@ module Zynq (
     reg[11:00] ilaafter, ilaindex;
     reg ilaarmed;
 
+    // tty registers
+    wire[31:00] ttyarmrd;
+    wire[11:00] ttypdprd;
+    wire ttyacclr, ttyioskp, ttyintrq;
+
     /////////////////////////////////////
     // send register being read to ARM //
     /////////////////////////////////////
@@ -196,9 +201,11 @@ module Zynq (
         (readaddr        == 10'b0000010001) ? { ilaarmed, 3'b0, ilaafter, 4'b0, ilaindex } :
         (readaddr        == 10'b0000010010) ? { 17'b0, ilardata[14:00] } :
         (readaddr        == 10'b0000010011) ? { 32'b0                  } :
+        (readaddr[11:04] ==  8'b00001000)   ? ttyarmrd   :  // 00001000xx00
         32'hDEADBEEF;
 
     wire armwrite = saxi_WREADY & saxi_WVALID;          // arm is writing a register (single fpga clock cycle)
+    wire ttyarmwt = armwrite & (writeaddr[11:04] == 8'b00001000);
 
     // A3.3.1 Read transaction dependencies
     // A3.3.1 Write transaction dependencies
@@ -274,6 +281,13 @@ module Zynq (
     // ctlh    - gpio bits going to backplane, eg, switches
     // ctli    - gpio bits coming from backplane, eg, lights
 
+    wire[11:00] businbus = regctlb[26:15] | ttypdprd;
+    wire busacclr = regctla[03] | ttyacclr;
+    wire busintrq = regctla[07] | ttyintrq;
+    wire busioskp = regctla[08] | ttyioskp;
+
+    assign regctlg[26:12] = { busioskp, busintrq, busacclr, businbus };
+
     backplane backboard (
         .zclock   (regctla[12]),        // 100MHz clock
         .zreset   (regctla[13]),        // power-on reset
@@ -282,18 +296,18 @@ module Zynq (
         .reset    (regctla[01]),        // power-on reset
 
         .i3CYCLE  (regctla[02]),        // do 3-cycle break
-        .iACCLEAR (regctla[03]),        // io pulse clears AC
+        .iACCLEAR (busacclr),           // io pulse clears AC
         .iBRKRQST (regctla[04]),        // requesting break
         .iBRKWRM  (regctla[05]),        // break cycle writes memory
         .iCAINC   (regctla[06]),        // curad cycle increments address word
-        .iINTRQST (regctla[07]),        // request interrupt
-        .iIOSKIP  (regctla[08]),        // increment PC at end of IO pulse
+        .iINTRQST (busintrq),           // request interrupt
+        .iIOSKIP  (busioskp),           // increment PC at end of IO pulse
         .iLNKTOG  (regctla[09]),        // toggle link register
         .iPAUSE   (regctla[10]),        // pause processor clocking          (stretch cycle)
         .memdisab (regctla[11]),        // disable extmemory,v internal memory
 
         .iDMAADDR (regctlb[14:00]),     // device sending address for DMA
-        .iINBUS   (regctlb[26:15]),     // device sending data for PIO or DMA
+        .iINBUS   (businbus),           // device sending data for PIO or DMA
 
         .oBREAK   (regctlc[00]),        // currently doing BREAK          (DMA) cycle
         .oBUSINI  (regctlc[01]),        // initialize bus devices
@@ -335,6 +349,32 @@ module Zynq (
 
         .gpin     (regctlh),
         .gpout    (regctli)
+    );
+
+    wire businit = regctlc[01];
+    wire iopulse = regctlc[03];
+    wire[11:00] mbuf = regctle[23:12];
+    wire[11:00] acum = regctlf[11:00];
+
+    pdp8itty ttyinst (
+        .CLOCK (CLOCK),
+        .RESET (~ RESET_N),
+        .BINIT (businit),
+
+        .armwrite (ttyarmwt),
+        .armraddr (readaddr[03:02]),
+        .armwaddr (writeaddr[03:02]),
+        .armwdata (saxi_WDATA),
+        .armrdata (ttyarmrd),
+
+        .iopulse  (iopulse),
+        .ioopcode (mbuf[08:00]),
+        .cputodev (acum),
+
+        .devtocpu (ttypdprd),
+        .AC_CLEAR (ttyacclr),
+        .IO_SKIP  (ttyioskp),
+        .INT_RQST (ttyintrq)
     );
 
     // integrated logic analyzer
