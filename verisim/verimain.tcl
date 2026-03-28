@@ -173,7 +173,12 @@ proc rdmem {addr} {
     swtchwait ldad 0
     waitrun
     waithalt
-    return [bus oMBUF]
+    set data [bus oMBUF]
+    for {set i 0} {[light mb] != $data} {incr i} {
+        if {$i > 20000} {error "timed out waiting for mb lights"}
+        runstep
+    }
+    return $data
 }
 
 # keep clocking processor, interpret changes in gpio
@@ -400,6 +405,10 @@ proc wrmem {addr data} {
     swtchwait depos 0
     waitrun
     waithalt
+    for {set i 0} {[light mb] != $data} {incr i} {
+        if {$i > 20000} {error "timed out waiting for mb lights"}
+        runstep
+    }
 }
 
 # start out with an hard reset
