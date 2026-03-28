@@ -167,12 +167,12 @@ proc rdmem {addr} {
     if {($addr < 0) || ($addr > 07777)} {
         error "bad address $addr"
     }
-    waithalt
+    waithalt 20000
     swtchwait reg $addr
     swtchwait ldad 1
     swtchwait ldad 0
     waitrun
-    waithalt
+    waithalt 20000
     set data [bus oMBUF]
     for {set i 0} {[light mb] != $data} {incr i} {
         if {$i > 20000} {error "timed out waiting for mb lights"}
@@ -233,6 +233,20 @@ proc runstep {} {
             }
         }
     }
+}
+
+# single cycle processor
+proc singcyc {} {
+    if {! [bus oRUN]} {error "processor not running"}
+    for {set i 0} {! [bus oTS4]} {incr i} {
+        if {$i > 20000} {error "timed out waiting for TS4 asserted"}
+        runstep
+    }
+    for {set i 0} {[bus oTS4]} {incr i} {
+        if {$i > 20000} {error "timed out waiting for TS4 negated"}
+        runstep
+    }
+    return [format "PC=%04o MA=%04o MB=%04o L.AC=%o.%04o ST=%x" [bus pctr] [bus oMADR] [bus oMBUF] [bus oLINK] [bus oACUM] [bus majst]]
 }
 
 # start processor at the given address
@@ -365,10 +379,10 @@ proc unscramgpio {row} {
 }
 
 # wait for processor to halt if it isn't already
-proc waithalt {} {
+proc waithalt {{n ""}} {
     for {set i 0} {[bus oRUN]} {incr i} {
         if {[ctrlcflag]} break
-        if {$i > 20000} {
+        if {($n != "") && ($i > $n)} {
             error "timed out waiting for halt"
         }
         runstep
@@ -376,10 +390,10 @@ proc waithalt {} {
 }
 
 # wait for processor to run if it isn't already
-proc waitrun {} {
+proc waitrun {{n 20000}} {
     for {set i 0} {! [bus oRUN]} {incr i} {
         if {[ctrlcflag]} break
-        if {$i > 20000} {
+        if {$i > $n} {
             error "timed out waiting for run"
         }
         runstep
@@ -394,22 +408,19 @@ proc wrmem {addr data} {
     if {($data < 0) || ($data > 07777)} {
         error "bad data $data"
     }
-    waithalt
+    waithalt 20000
     swtchwait reg $addr
     swtchwait ldad 1
     swtchwait ldad 0
     waitrun
-    waithalt
+    waithalt 20000
     swtchwait reg $data
     swtchwait depos 1
     swtchwait depos 0
     waitrun
-    waithalt
+    waithalt 20000
     for {set i 0} {[light mb] != $data} {incr i} {
         if {$i > 20000} {error "timed out waiting for mb lights"}
         runstep
     }
 }
-
-# start out with an hard reset
-hardreset

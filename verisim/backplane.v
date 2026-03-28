@@ -39,6 +39,12 @@ module backplane (
     output[2:0] swdfld, swifld,
     output swstart, swldad, swdepos, swexam,
     output swcont, swstop, swsstep, swsinst
+
+    ,input armwrite
+    ,input[31:00] armwdata
+    ,input[11:02] armwaddr
+    ,input[11:02] armraddr
+    ,output[31:00] armrdata
 );
 
     wire[11:09] ireg;
@@ -582,10 +588,10 @@ module backplane (
     );
 
     wire readsr;
-    wire acclear = iACCLEAR | eaeACCLEAR;
+    wire acclear;
     wire pause = iPAUSE | eaePAUSE;
-    wire[11:00] inbus = conINBUS | eaeINBUS | iINBUS | memINBUS;
-    wire ioskip = iIOSKIP | eaeIOSKIP;
+    wire[11:00] inbus;
+    wire intrq, ioskip;
     wire lnktog = iLNKTOG | eaeLNKTOG;
 
     processor procboard (
@@ -640,7 +646,7 @@ module backplane (
         , .INBUS_8  (inbus[08])
         , .INBUS_9  (inbus[09])
         , .INTINH   (iINTINH)
-        , .INTRQST  (iINTRQST)
+        , .INTRQST  (intrq)
         , .IOSKIP   (ioskip)
         , .IREG_10  (ireg[10])
         , .IREG_11  (ireg[11])
@@ -729,5 +735,37 @@ module backplane (
         , .TS3      (oTS3)
         , .TS4      (oTS4)
     );
+
+    wire ttywrite = armwrite & (armwaddr[11:04] == 8'b00001000);
+    wire[31:00] ttyrdata;
+    wire[11:00] ttyinbus;
+    wire ttyacclr, ttyintrq, ttyioskp;
+
+    pdp8itty ttyinst (
+        .CLOCK (zclock),
+        .RESET (zreset),
+
+        .armwrite (ttywrite),
+        .armraddr (armraddr[03:02]),
+        .armwaddr (armwaddr[03:02]),
+        .armwdata (armwdata),
+        .armrdata (ttyrdata),
+
+        .BINIT    (oBUSINI),
+        .iopulse  (oIOP),
+        .ioopcode (oMBUF),
+        .cputodev (oACUM),
+        .devtocpu (ttyinbus),
+        .AC_CLEAR (ttyacclr),
+        .IO_SKIP  (ttyioskp),
+        .INT_RQST (ttyintrq)
+    );
+
+    assign armrdata = (armraddr[11:04] == 8'b00001000) ? ttyrdata : 0;
+
+    assign acclear = iACCLEAR | eaeACCLEAR | ttyacclr;
+    assign inbus   = conINBUS | eaeINBUS | iINBUS | memINBUS | ttyinbus;
+    assign ioskip  = iIOSKIP | eaeIOSKIP | ttyioskp;
+    assign intrq   = iINTRQST | ttyintrq;
 
 endmodule

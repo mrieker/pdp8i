@@ -245,6 +245,14 @@ static int cmd_bus (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj
             {  1, OFFS (swexam),   false, "swexam"   },
             {  1, OFFS (swdepos),  false, "swdepos"  },
 
+#ifdef VERLTR
+            { 10, OFFS (armraddr), true,  "armraddr" },
+            { 32, OFFS (armrdata), false, "armrdata" },
+            { 10, OFFS (armwaddr), true,  "armwaddr" },
+            { 32, OFFS (armwdata), true,  "armwdata" },
+            {  1, OFFS (armwrite), true,  "armwrite" },
+#endif
+
 #ifdef ZTURN
             { 12, OFFS (businbus), false, "businbus" },
             {  1, OFFS (busacclr), false, "busacclr" },
@@ -547,6 +555,10 @@ static int cmdpintable (int pincount, Pin const *pintable, Tcl_Interp *interp, i
     int ngetobjs = 0;
     Tcl_Obj *getobjs[objc];
 
+#ifdef VERLTR
+    bool needeval = false;
+#endif
+
     for (int i = 0; ++ i < objc;) {
         char const *arg = Tcl_GetString (objv[i]);
         if (strcasecmp (arg, "get") == 0) {
@@ -574,18 +586,23 @@ static int cmdpintable (int pincount, Pin const *pintable, Tcl_Interp *interp, i
             int val;
             int rc = Tcl_GetIntFromObj (interp, objv[i], &val);
             if (rc != TCL_OK) return rc;
-            if ((val < 0) || (val >= 1 << pin->bits)) {
-                Tcl_SetResultF (interp, "value %d out of range for pin %s", val, arg);
+            if ((uint32_t)val > (uint32_t)((1ULL << pin->bits) - 1)) {
+                Tcl_SetResultF (interp, "value %u out of range for pin %s", val, arg);
                 return TCL_ERROR;
             }
 #ifdef VERLTR
             memcpy (pin->addr, &val, pin->size);
+            needeval = true;
 #endif
 #ifdef ZTURN
             zpage[pin->indx] = (zpage[pin->indx] & ~ pin->mask) | (val * (pin->mask & - pin->mask));
 #endif
         } else {
 #ifdef VERLTR
+            if (needeval) {
+                needeval = false;
+                vbkpl->eval ();
+            }
             int val = 0;
             if (pin->size > (int) sizeof val) abort ();
             memcpy (&val, pin->addr, pin->size);
@@ -596,6 +613,9 @@ static int cmdpintable (int pincount, Pin const *pintable, Tcl_Interp *interp, i
             getobjs[ngetobjs++] = Tcl_NewIntObj (val);
         }
     }
+#ifdef VERLTR
+    if (needeval) vbkpl->eval ();
+#endif
     if (ngetobjs == 1) {
         Tcl_SetObjResult (interp, getobjs[0]);
     }

@@ -5,6 +5,7 @@ GPP    := g++ $(CFLAGS) -std=c++11 -g -Wall
 VFILES := \
 	backplane.v \
 	chips.v \
+	pdp8itty.v \
 	../kicads/console/console.v \
 	../kicads/extarith/extarith.v \
 	../kicads/extmemory/extmemory.v \
