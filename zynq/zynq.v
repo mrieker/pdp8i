@@ -178,17 +178,15 @@ module Zynq (
     reg[11:00] ilaafter, ilaindex;
     reg ilaarmed;
 
-    // tty registers
-    wire[31:00] ttyarmrd;
-    wire[11:00] ttypdprd;
-    wire ttyacclr, ttyioskp, ttyintrq;
+    // backplane arm registers
+    wire[31:00] bkplarmrd;
 
     /////////////////////////////////////
     // send register being read to ARM //
     /////////////////////////////////////
 
     assign saxi_RDATA =
-        (readaddr        == 10'b0000000000) ? VERSION    :  // 00000xxxxx00
+        (readaddr        == 10'b0000000000) ? VERSION    :
         (readaddr        == 10'b0000000001) ? regctla    :
         (readaddr        == 10'b0000000010) ? regctlb    :
         (readaddr        == 10'b0000000011) ? regctlc    :
@@ -201,11 +199,11 @@ module Zynq (
         (readaddr        == 10'b0000010001) ? { ilaarmed, 3'b0, ilaafter, 4'b0, ilaindex } :
         (readaddr        == 10'b0000010010) ? { 17'b0, ilardata[14:00] } :
         (readaddr        == 10'b0000010011) ? { 32'b0                  } :
-        (readaddr[11:04] ==  8'b00001000)   ? ttyarmrd   :  // 00001000xx00
+        (readaddr[11:07] !=  5'b00000)      ? bkplarmrd  :
         32'hDEADBEEF;
 
     wire armwrite = saxi_WREADY & saxi_WVALID;          // arm is writing a register (single fpga clock cycle)
-    wire ttyarmwt = armwrite & (writeaddr[11:04] == 8'b00001000);
+    wire bkplarmwt = armwrite & (writeaddr[11:07] != 5'b00000);
 
     // A3.3.1 Read transaction dependencies
     // A3.3.1 Write transaction dependencies
@@ -281,10 +279,10 @@ module Zynq (
     // ctlh    - gpio bits going to backplane, eg, switches
     // ctli    - gpio bits coming from backplane, eg, lights
 
-    wire[11:00] businbus = regctlb[26:15] | ttypdprd;
-    wire busacclr = regctla[03] | ttyacclr;
-    wire busintrq = regctla[07] | ttyintrq;
-    wire busioskp = regctla[08] | ttyioskp;
+    wire[11:00] businbus = regctlb[26:15];
+    wire        busacclr = regctla[03];
+    wire        busintrq = regctla[07];
+    wire        busioskp = regctla[08];
 
     assign regctlg[26:12] = { busioskp, busintrq, busacclr, businbus };
 
@@ -347,34 +345,14 @@ module Zynq (
         .mquo     (regctlf[23:12]),
         .pctr     (regctlg[11:00]),
 
+        .armraddr (readaddr),
+        .armrdata (bkplarmrd),
+        .armwrite (bkplarmwt),
+        .armwaddr (writeaddr),
+        .armwdata (saxi_WDATA),
+
         .gpin     (regctlh),
         .gpout    (regctli)
-    );
-
-    wire businit = regctlc[01];
-    wire iopulse = regctlc[03];
-    wire[11:00] mbuf = regctle[23:12];
-    wire[11:00] acum = regctlf[11:00];
-
-    pdp8itty ttyinst (
-        .CLOCK (CLOCK),
-        .RESET (~ RESET_N),
-        .BINIT (businit),
-
-        .armwrite (ttyarmwt),
-        .armraddr (readaddr[03:02]),
-        .armwaddr (writeaddr[03:02]),
-        .armwdata (saxi_WDATA),
-        .armrdata (ttyarmrd),
-
-        .iopulse  (iopulse),
-        .ioopcode (mbuf[08:00]),
-        .cputodev (acum),
-
-        .devtocpu (ttypdprd),
-        .AC_CLEAR (ttyacclr),
-        .IO_SKIP  (ttyioskp),
-        .INT_RQST (ttyintrq)
     );
 
     // integrated logic analyzer

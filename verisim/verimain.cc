@@ -68,6 +68,9 @@ int main (int argc, char **argv)
 {
     setlinebuf (stdout);
 
+    int scriptargc = argc - 1;
+    char **scriptargv = argv + 1;
+
     Tcl_FindExecutable (argv[0]);
     Tcl_Interp *interp = Tcl_CreateInterp ();
     if (interp == NULL) ABORT ();
@@ -127,7 +130,34 @@ int main (int argc, char **argv)
         return 1;
     }
 
-    while (true) {
+    // if given a filename, process that file as a whole
+    if (scriptargc > 0) {
+
+        // get tcl filename from first argument
+        char const *scriptfn = scriptargv[0];
+
+        // pass remaining arguments as list 'argv'
+        Tcl_Obj *scriptargobjs[scriptargc-1];
+        for (int i = 0; ++ i < scriptargc;) {
+            scriptargobjs[i-1] = Tcl_NewStringObj (scriptargv[i], -1);
+        }
+        if (Tcl_ObjSetVar2 (interp, Tcl_NewStringObj ("argv", 4), NULL, Tcl_NewListObj (scriptargc - 1, scriptargobjs), TCL_GLOBAL_ONLY) == NULL) {
+            ABORT ();
+        }
+
+        // evaluate the script file as a whole
+        rc = Tcl_EvalFile (interp, scriptfn);
+        if (rc != TCL_OK) {
+            char const *res = Tcl_GetStringResult (interp);
+            if ((res == NULL) || (res[0] == 0)) fprintf (stderr, "error %d evaluating script %s\n", rc, scriptfn);
+                                  else fprintf (stderr, "error %d evaluating script %s: %s\n", rc, scriptfn, res);
+            Tcl_EvalEx (interp, "puts $::errorInfo", -1, TCL_EVAL_GLOBAL);
+            return 1;
+        }
+    }
+
+    // no filename, prompt from stdin
+    else while (true) {
         ctrlcflag = false;
         char const *line = readprompt ("> ");
         ctrlcflag = false;
@@ -157,6 +187,8 @@ int main (int argc, char **argv)
         }
         else if (rer[0] != 0) puts (rer);
     }
+
+    return 0;
 }
 
 // asmop address mnemonic operands...
@@ -537,6 +569,7 @@ static void kerchunk ()
         vbkpl->zclock = 1;  // clock progress through gates and flipflops
         vbkpl->eval ();     // let new state settle in
         vbkpl->zclock = 0;
+        vbkpl->armwrite = 0;
 #endif
 #ifdef ZTURN
         zpage[zclock_I] = ctla | zclock_M;

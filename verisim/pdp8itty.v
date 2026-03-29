@@ -88,9 +88,6 @@ module pdp8itty
                 2: begin prflag <= armwdata[31]; prfull <= armwdata[30]; end
             endcase
         end else begin
-            if (~ lastiop & iopulse) begin
-                $display ("pdp8itty*: enable=%b ioopcode=%04o prflag=%b IO_SKIP=%b", enable, ioopcode, prflag, IO_SKIP);
-            end
 
             // process the IOP only on the leading edge
             // ...but leave output signals to PDP-8/L in place until given the all clear

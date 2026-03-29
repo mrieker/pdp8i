@@ -48,7 +48,6 @@ proc tttloop {} {
 proc tttrdch {} {
     set ch [bus set armraddr 042 get armrdata set armwaddr 042 armwdata 0x80000000 armwrite 1]
     tttstep
-    bus set armwrite 0
     return [expr {$ch & 07777}]
 }
 
