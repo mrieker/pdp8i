@@ -40,6 +40,10 @@ module backplane (
     output swstart, swldad, swdepos, swexam,
     output swcont, swstop, swsstep, swsinst
 
+    ,input  consck                  // console I2C bus
+    ,input  consdai
+    ,output consdao
+
     ,input armwrite
     ,input[31:00] armwdata
     ,input[11:02] armwaddr
@@ -58,6 +62,10 @@ module backplane (
         .zreset (zreset),
         .CLOK2 (clok2),
         .RESET (reset),
+
+        .CONSCK   (consck),
+        .CONSDA   (consdai),
+        .CONSDA_o (consdao),
 
         .bGPIO_4    (gpin[04]),
         .bGPIO_5    (gpin[05]),
@@ -120,7 +128,7 @@ module backplane (
         .FIELD_0 (),
         .FIELD_1 (),
         .FIELD_2 (),
-        .GND     (1'b0),
+        .GND     (),
         .INTINH  (),
         .INTRQST (),
         .IOP     (),

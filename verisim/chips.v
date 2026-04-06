@@ -1159,3 +1159,75 @@ module X10MHz (
     end
 
 endmodule
+
+module XMCP23017_SP (
+        input  zclock,
+        input  zreset,
+        input  p1i,     // GPB0
+        output p1o,
+        input  p2i,     // GPB1
+        output p2o,
+        input  p3i,     // GPB2
+        output p3o,
+        input  p4i,     // GPB3
+        output p4o,
+        input  p5i,     // GPB4
+        output p5o,
+        input  p6i,     // GPB5
+        output p6o,
+        input  p7i,     // GPB6
+        output p7o,
+        input  p8i,     // GPB7
+        output p8o,
+        input  p9,      // VDD
+        input  p10,     // VSS
+        input  p11,     // NC
+        input  p12,     // SCK
+        input  p13i,    // SDA
+        output p13o,
+        input  p14,     // NC
+        input  p15,     // A0
+        input  p16,     // A1
+        input  p17,     // A2
+        input  p18,     // _RESET
+        input  p19i,    // INTB
+        output p19o,
+        input  p20i,    // INTA
+        output p20o,
+        input  p21i,    // GPA0
+        output p21o,
+        input  p22i,    // GPA1
+        output p22o,
+        input  p23i,    // GPA2
+        output p23o,
+        input  p24i,    // GPA3
+        output p24o,
+        input  p25i,    // GPA4
+        output p25o,
+        input  p26i,    // GPA5
+        output p26o,
+        input  p27i,    // GPA6
+        output p27o,
+        input  p28i,    // GPA7
+        output p28o
+    );
+
+    mcp23017 wrap23017 (
+        .adr   ({ p17, p16, p15 }),
+        .clk   (zclock),
+        .res   (~ p18),
+        .scl   (p12),
+        .sdai  (p13i),
+        .sdao  (p13o),
+        .adefs (8'hC0),
+        .bdefs (8'hC0),
+        .ainps ({ p28i,p27i,p26i,p25i,p24i,p23i,p22i,p21i }),
+        .binps ({ p8i, p7i, p6i, p5i, p4i, p3i, p2i, p1i  }),
+        .aouts ({ p28o,p27o,p26o,p25o,p24o,p23o,p22o,p21o }),
+        .bouts ({ p8o, p7o, p6o, p5o, p4o, p3o, p2o, p1o  })
+    );
+
+endmodule
+
+module X47K (input zclock, input zreset, input p1, input p2);
+endmodule

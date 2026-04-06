@@ -500,6 +500,7 @@ public class ParsePCB {
                             ArrValue modulepadnet = (ArrValue) modulepadelem;
                             String ptstr = modulepadnet.elems[1].assym ();
                             switch (ptstr) {
+                                case "bidirectional": pintype = PinType.TRISTATE; break;
                                 case "input": pintype = PinType.INPUT; break;
                                 case "output": pintype = PinType.OUTPUT; break;
                                 case "power_in": pintype = PinType.POWERIN; break;
