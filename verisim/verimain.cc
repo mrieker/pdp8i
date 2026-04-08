@@ -55,6 +55,7 @@ static Tcl_ObjCmdProc cmd_clk;
 static Tcl_ObjCmdProc cmd_ctrlcflag;
 static Tcl_ObjCmdProc cmd_disop;
 static Tcl_ObjCmdProc cmd_gpio;
+static Tcl_ObjCmdProc cmd_help;
 static Tcl_ObjCmdProc cmd_iic;
 static Tcl_ObjCmdProc cmd_mem;
 static Tcl_ObjCmdProc cmd_randbits;
@@ -92,6 +93,7 @@ int main (int argc, char **argv)
     if (Tcl_CreateObjCommand (interp, "ctrlcflag", cmd_ctrlcflag, NULL, NULL) == NULL) ABORT ();
     if (Tcl_CreateObjCommand (interp, "disop", cmd_disop, NULL, NULL) == NULL) ABORT ();
     if (Tcl_CreateObjCommand (interp, "gpio", cmd_gpio, NULL, NULL) == NULL) ABORT ();
+    if (Tcl_CreateObjCommand (interp, "help", cmd_help, NULL, NULL) == NULL) ABORT ();
     if (Tcl_CreateObjCommand (interp, "iic", cmd_iic, NULL, NULL) == NULL) ABORT ();
     if (Tcl_CreateObjCommand (interp, "mem",  cmd_mem,  NULL, NULL) == NULL) ABORT ();
     if (Tcl_CreateObjCommand (interp, "randbits",  cmd_randbits,  NULL, NULL) == NULL) ABORT ();
@@ -273,7 +275,6 @@ static int cmd_bus (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj
             {  1, OFFS (swcont),   false, "swcont"   },
             {  3, OFFS (swdfld),   false, "swdfld"   },
             {  3, OFFS (swifld),   false, "swifld"   },
-            {  1, OFFS (swstop),   false, "swstop"   },
             {  1, OFFS (swstart),  false, "swstart"  },
             {  1, OFFS (swsstep),  false, "swsstep"  },
             {  1, OFFS (swsinst),  false, "swsinst"  },
@@ -430,6 +431,23 @@ static int cmd_gpio (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Ob
 #endif
         Tcl_SetObjResult (interp, Tcl_NewIntObj (num));
     }
+    return TCL_OK;
+}
+
+static int cmd_help (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
+{
+    puts ("");
+    puts ("  asmop <addr> <instr...> - assemble instruction");
+    puts ("  bus <busops...>         - access bus signals");
+    puts ("  clk [<n>]               - step 100nS clock");
+    puts ("  ctrlcflag [0|1]         - check control-C, clear/set flag");
+    puts ("  disop <addr> <opcode>   - disassemble opcode");
+    puts ("  gpio [<in>]             - write input value, read output value");
+    puts ("  iic [wr <n> rs rd...]   - access iic bus to console mcp23017");
+    puts ("  mem <addr> [<data>]     - backdoor access to memory chip");
+    puts ("  randbits <n>            - get random memory bits");
+    puts ("  tty <ttyops...>         - access tty port");
+    puts ("");
     return TCL_OK;
 }
 

@@ -40,12 +40,13 @@ module mcp23017 (adr, clk, res, scl, sdai, sdao, ainps, binps, adefs, bdefs, aou
 
     reg lastscl, lastsda, reading, sdaout, thisscl, thissda;
     reg start, haveix;
-    reg[175:0] registers;
+    reg[7:0] registers[21:00];
     reg[2:0] count;
     reg[2:0] mute;
     reg[4:0] index;
     reg[6:0] addr;
     reg[3:0] state;
+    reg[6:0] rbuf;
 
     localparam[3:0] IDLE       = 0; // waiting for start bit
     localparam[3:0] GETADR     = 1; // shifting in address and R/W bit
@@ -61,50 +62,52 @@ module mcp23017 (adr, clk, res, scl, sdai, sdao, ainps, binps, adefs, bdefs, aou
 
     // output latches go to output pins when in output mode
     // use default values when in input mode
-    assign aouts[0] = registers[{5'h00,3'h0}] ? adefs[0] : registers[{5'h14,3'h0}];
-    assign aouts[1] = registers[{5'h00,3'h1}] ? adefs[1] : registers[{5'h14,3'h1}];
-    assign aouts[2] = registers[{5'h00,3'h2}] ? adefs[2] : registers[{5'h14,3'h2}];
-    assign aouts[3] = registers[{5'h00,3'h3}] ? adefs[3] : registers[{5'h14,3'h3}];
-    assign aouts[4] = registers[{5'h00,3'h4}] ? adefs[4] : registers[{5'h14,3'h4}];
-    assign aouts[5] = registers[{5'h00,3'h5}] ? adefs[5] : registers[{5'h14,3'h5}];
-    assign aouts[6] = registers[{5'h00,3'h6}] ? adefs[6] : registers[{5'h14,3'h6}];
-    assign aouts[7] = registers[{5'h00,3'h7}] ? adefs[7] : registers[{5'h14,3'h7}];
-    assign bouts[0] = registers[{5'h01,3'h0}] ? bdefs[0] : registers[{5'h15,3'h0}];
-    assign bouts[1] = registers[{5'h01,3'h1}] ? bdefs[1] : registers[{5'h15,3'h1}];
-    assign bouts[2] = registers[{5'h01,3'h2}] ? bdefs[2] : registers[{5'h15,3'h2}];
-    assign bouts[3] = registers[{5'h01,3'h3}] ? bdefs[3] : registers[{5'h15,3'h3}];
-    assign bouts[4] = registers[{5'h01,3'h4}] ? bdefs[4] : registers[{5'h15,3'h4}];
-    assign bouts[5] = registers[{5'h01,3'h5}] ? bdefs[5] : registers[{5'h15,3'h5}];
-    assign bouts[6] = registers[{5'h01,3'h6}] ? bdefs[6] : registers[{5'h15,3'h6}];
-    assign bouts[7] = registers[{5'h01,3'h7}] ? bdefs[7] : registers[{5'h15,3'h7}];
+    assign aouts[0] = registers[5'h00][0] ? adefs[0] : registers[5'h14][0];
+    assign aouts[1] = registers[5'h00][1] ? adefs[1] : registers[5'h14][1];
+    assign aouts[2] = registers[5'h00][2] ? adefs[2] : registers[5'h14][2];
+    assign aouts[3] = registers[5'h00][3] ? adefs[3] : registers[5'h14][3];
+    assign aouts[4] = registers[5'h00][4] ? adefs[4] : registers[5'h14][4];
+    assign aouts[5] = registers[5'h00][5] ? adefs[5] : registers[5'h14][5];
+    assign aouts[6] = registers[5'h00][6] ? adefs[6] : registers[5'h14][6];
+    assign aouts[7] = registers[5'h00][7] ? adefs[7] : registers[5'h14][7];
+    assign bouts[0] = registers[5'h01][0] ? bdefs[0] : registers[5'h15][0];
+    assign bouts[1] = registers[5'h01][1] ? bdefs[1] : registers[5'h15][1];
+    assign bouts[2] = registers[5'h01][2] ? bdefs[2] : registers[5'h15][2];
+    assign bouts[3] = registers[5'h01][3] ? bdefs[3] : registers[5'h15][3];
+    assign bouts[4] = registers[5'h01][4] ? bdefs[4] : registers[5'h15][4];
+    assign bouts[5] = registers[5'h01][5] ? bdefs[5] : registers[5'h15][5];
+    assign bouts[6] = registers[5'h01][6] ? bdefs[6] : registers[5'h15][6];
+    assign bouts[7] = registers[5'h01][7] ? bdefs[7] : registers[5'h15][7];
 
     // readbacks come from input pin if input mode, output latch if output mode
     wire[7:0] arbks, brbks;
-    assign arbks[0] = registers[{5'h00,3'h0}] ? ainps[0] : registers[{5'h14,3'h0}];
-    assign arbks[1] = registers[{5'h00,3'h1}] ? ainps[1] : registers[{5'h14,3'h1}];
-    assign arbks[2] = registers[{5'h00,3'h2}] ? ainps[2] : registers[{5'h14,3'h2}];
-    assign arbks[3] = registers[{5'h00,3'h3}] ? ainps[3] : registers[{5'h14,3'h3}];
-    assign arbks[4] = registers[{5'h00,3'h4}] ? ainps[4] : registers[{5'h14,3'h4}];
-    assign arbks[5] = registers[{5'h00,3'h5}] ? ainps[5] : registers[{5'h14,3'h5}];
-    assign arbks[6] = registers[{5'h00,3'h6}] ? ainps[6] : registers[{5'h14,3'h6}];
-    assign arbks[7] = registers[{5'h00,3'h7}] ?   1'b0   : registers[{5'h14,3'h7}];  // output-only pin
-    assign brbks[0] = registers[{5'h01,3'h0}] ? binps[0] : registers[{5'h15,3'h0}];
-    assign brbks[1] = registers[{5'h01,3'h1}] ? binps[1] : registers[{5'h15,3'h1}];
-    assign brbks[2] = registers[{5'h01,3'h2}] ? binps[2] : registers[{5'h15,3'h2}];
-    assign brbks[3] = registers[{5'h01,3'h3}] ? binps[3] : registers[{5'h15,3'h3}];
-    assign brbks[4] = registers[{5'h01,3'h4}] ? binps[4] : registers[{5'h15,3'h4}];
-    assign brbks[5] = registers[{5'h01,3'h5}] ? binps[5] : registers[{5'h15,3'h5}];
-    assign brbks[6] = registers[{5'h01,3'h6}] ? binps[6] : registers[{5'h15,3'h6}];
-    assign brbks[7] = registers[{5'h01,3'h7}] ?   1'b0   : registers[{5'h15,3'h7}];  // output-only pin
+    assign arbks[0] = registers[5'h00][0] ? ainps[0] : registers[5'h14][0];
+    assign arbks[1] = registers[5'h00][1] ? ainps[1] : registers[5'h14][1];
+    assign arbks[2] = registers[5'h00][2] ? ainps[2] : registers[5'h14][2];
+    assign arbks[3] = registers[5'h00][3] ? ainps[3] : registers[5'h14][3];
+    assign arbks[4] = registers[5'h00][4] ? ainps[4] : registers[5'h14][4];
+    assign arbks[5] = registers[5'h00][5] ? ainps[5] : registers[5'h14][5];
+    assign arbks[6] = registers[5'h00][6] ? ainps[6] : registers[5'h14][6];
+    assign arbks[7] = registers[5'h00][7] ?   1'b0   : registers[5'h14][7];  // output-only pin
+    assign brbks[0] = registers[5'h01][0] ? binps[0] : registers[5'h15][0];
+    assign brbks[1] = registers[5'h01][1] ? binps[1] : registers[5'h15][1];
+    assign brbks[2] = registers[5'h01][2] ? binps[2] : registers[5'h15][2];
+    assign brbks[3] = registers[5'h01][3] ? binps[3] : registers[5'h15][3];
+    assign brbks[4] = registers[5'h01][4] ? binps[4] : registers[5'h15][4];
+    assign brbks[5] = registers[5'h01][5] ? binps[5] : registers[5'h15][5];
+    assign brbks[6] = registers[5'h01][6] ? binps[6] : registers[5'h15][6];
+    assign brbks[7] = registers[5'h01][7] ?   1'b0   : registers[5'h15][7];  // output-only pin
 
     // splice the readbacks into the registers for reading
     // also we do not implement registers 02..11 so they always readback as zeroes
     wire[255:0] regreads;
-    assign regreads[{5'h01,3'h7}:{5'h00,3'h0}] = registers[{5'h01,3'h7}:{5'h00,3'h0}];
+    assign regreads[{5'h00,3'h7}:{5'h00,3'h0}] = registers[5'h00];
+    assign regreads[{5'h01,3'h7}:{5'h01,3'h0}] = registers[5'h01];
     assign regreads[{5'h11,3'h7}:{5'h02,3'h0}] = 0;
     assign regreads[{5'h12,3'h7}:{5'h12,3'h0}] = arbks;
     assign regreads[{5'h13,3'h7}:{5'h13,3'h0}] = brbks;
-    assign regreads[{5'h15,3'h7}:{5'h14,3'h0}] = registers[{5'h15,3'h7}:{5'h14,3'h0}];
+    assign regreads[{5'h14,3'h7}:{5'h14,3'h0}] = registers[5'h14];
+    assign regreads[{5'h15,3'h7}:{5'h15,3'h0}] = registers[5'h15];
     assign regreads[{5'h1F,3'h7}:{5'h16,3'h0}] = 0;
 
     always @(posedge clk or posedge res) begin
@@ -121,8 +124,8 @@ module mcp23017 (adr, clk, res, scl, sdai, sdao, ainps, binps, adefs, bdefs, aou
             state   <= IDLE;        // waiting for start bit
             thisscl <= 1'b1;        // current clock sample is high
             thissda <= 1'b1;        // current data sample is high
-            registers[{5'h00,3'h7}:{5'h00,3'h0}] <= 8'hFF;  // i/o pins default to inputs
-            registers[{5'h01,3'h7}:{5'h01,3'h0}] <= 8'hFF;
+            registers[5'h00] <= 8'hFF;  // i/o pins default to inputs
+            registers[5'h01] <= 8'hFF;
         end else begin
 
             // detect data transition when clock is high
@@ -226,10 +229,11 @@ module mcp23017 (adr, clk, res, scl, sdai, sdao, ainps, binps, adefs, bdefs, aou
                             // receive data bits for writing register
                         RECVBITS:
                             begin
-                                registers[{index,count}] <= thissda;
                                 if (count != 3'h0) begin
+                                    rbuf   <= { rbuf[5:0], thissda };
                                     count  <= count - 1;
                                 end else begin
+                                    registers[index] <= { rbuf, thissda };
                                     sdaout <= 1'b0;
                                     index  <= index + 1;
                                     state  <= SENDIDXACK;

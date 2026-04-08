@@ -38,7 +38,7 @@ module backplane (
     output[4:0] sctr,
     output[2:0] swdfld, swifld,
     output swstart, swldad, swdepos, swexam,
-    output swcont, swstop, swsstep, swsinst
+    output swcont, swsstep, swsinst
 
     ,input  consck                  // console I2C bus
     ,input  consdai
@@ -67,18 +67,18 @@ module backplane (
         .CONSDA   (consdai),
         .CONSDA_o (consdao),
 
-        .bGPIO_4    (gpin[04]),
-        .bGPIO_5    (gpin[05]),
-        .bGPIO_6    (gpin[06]),
-        .bGPIO_7    (gpin[07]),
-        .bGPIO_8    (gpin[08]),
-        .bGPIO_9    (gpin[09]),
-        .bGPIO_10   (gpin[10]),
-        .bGPIO_11   (gpin[11]),
-        .bGPIO_12   (gpin[12]),
-        .bGPIO_13   (gpin[13]),
-        .bGPIO_14   (gpin[14]),
-        .bGPIO_15   (gpin[15]),
+        .bGPIO_4    (gpin[04] | gpout[04]),
+        .bGPIO_5    (gpin[05] | gpout[05]),
+        .bGPIO_6    (gpin[06] | gpout[06]),
+        .bGPIO_7    (gpin[07] | gpout[07]),
+        .bGPIO_8    (gpin[08] | gpout[08]),
+        .bGPIO_9    (gpin[09] | gpout[09]),
+        .bGPIO_10   (gpin[10] | gpout[10]),
+        .bGPIO_11   (gpin[11] | gpout[11]),
+        .bGPIO_12   (gpin[12] | gpout[12]),
+        .bGPIO_13   (gpin[13] | gpout[13]),
+        .bGPIO_14   (gpin[14] | gpout[14]),
+        .bGPIO_15   (gpin[15] | gpout[15]),
         .bGPIO_4_o  (gpout[04]),
         .bGPIO_5_o  (gpout[05]),
         .bGPIO_6_o  (gpout[06]),
@@ -264,7 +264,6 @@ module backplane (
         .swDEPOS  (swdepos),    //button deposit (debounced)
         .swEXAM   (swexam),     //button examine (debounced)
         .swCONT   (swcont),     //button continue (debounced)
-        .swSTOP   (swstop),     //button stop
         .swSSTEP  (swsstep),    //toggle single cycle
         .swSINST  (swsinst)     //toggle single instruction
     );
@@ -376,7 +375,6 @@ module backplane (
         , .swSINST  ()
         , .swSSTEP  ()
         , .swSTART  ()
-        , .swSTOP   ()
 
         , .ACCLEAR  (acclear)
         , .ACCLEAR_o  (eaeACCLEAR)
@@ -577,7 +575,6 @@ module backplane (
         , .swSINST  (swsinst)
         , .swSSTEP  (swsstep)
         , .swSTART  (swstart)
-        , .swSTOP   (swstop)
 
         , .IOP      (oIOP)
         , .MAJST_0  (majst[0])
@@ -725,7 +722,6 @@ module backplane (
         , .swSINST  (swsinst)
         , .swSSTEP  (swsstep)
         , .swSTART  (swstart)
-        , .swSTOP   (swstop)
 
         , .ION      (oION)
         , .IOP      (oIOP)

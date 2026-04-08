@@ -20,7 +20,6 @@ set intenabled   0
 set intrequest   0
 set latsinst     0
 set latsstep     0
-set latstop      0
 set linc         0
 set memcycno     0
 set memcycwcover 0
@@ -70,7 +69,6 @@ proc simtest {} {
     global intrequest
     global latsinst
     global latsstep
-    global latstop
     global linc
     global memcycwcover
     global mquo
@@ -108,6 +106,7 @@ proc simtest {} {
     set hasmemcmd [expr {$ercode == 0}]
 
     ;# reset then start processor
+    mcprelease
     hardreset
     startat 0
     waitassert TS1
@@ -448,7 +447,7 @@ proc finishline {} {
 proc memorycycle {state field addr rdata wdata} {
     global dmawrmem dmawdata hasmemcmd memcycwcover opcode
     global MS_BREAK MS_DEPOS MS_EXAM MS_EXEC MS_FETCH MS_INTAK MS_WRDCT
-    global haltwhy latsinst latsstep latstop memcycno testcons
+    global haltwhy latsinst latsstep memcycno testcons
 
     incr memcycno
 
@@ -549,7 +548,6 @@ proc memorycycle {state field addr rdata wdata} {
     waitnegate TP3
     set latsinst [bus swsinst]
     set latsstep [bus swsstep]
-    set latstop  [bus swstop]
 
     ;# clear any bits being output by io instruction
     if $doesio {
@@ -578,9 +576,6 @@ proc memorycycle {state field addr rdata wdata} {
         if {$latsstep} {
             set sbhalted 1
             set haltwhy "sstep"
-        } elseif {$latstop} {
-            set sbhalted 1
-            set haltwhy "stop"
         } elseif {($state == $MS_FETCH) && (($rdata & 07403) == 07402)} {
             set sbhalted 1
             set haltwhy "hlt"
@@ -591,7 +586,7 @@ proc memorycycle {state field addr rdata wdata} {
         if {$isrunning == $sbhalted} {
             set is [expr {$isrunning ? "running" : "halted"}]
             set sb [expr {$sbhalted ? "halted" : "running"}]
-            error "processor is $is, should be $sb ($haltwhy sinst=$latsinst sstep=$latsstep stop=$latstop oldstate=$state newstate=$newstate)"
+            error "processor is $is, should be $sb ($haltwhy sinst=$latsinst sstep=$latsstep oldstate=$state newstate=$newstate)"
         }
     } elseif {$isrunning} {
         error "processor is running, should be halted (oldstate=$state newstate=$newstate)"
@@ -608,7 +603,7 @@ proc memorycycle {state field addr rdata wdata} {
 ;# cont alone should not reset state, should pick up where it left off
 proc checkhalted {} {
     global MS_BREAK MS_DEPOS MS_EXAM MS_EXEC MS_FETCH MS_INTAK MS_WRDCT
-    global haltwhy latsinst latsstep latstop pctr swdfpend swifpend swregpend testcons
+    global haltwhy pctr swdfpend swifpend swregpend testcons
     global acum linc mquo sctr xmem_intdisableduntiljump brkrequest intdelayed intenabled intrequest
     global xmem_dfld xmem_ifld xmem_ifldafterjump xmem_saveddfld xmem_savedifld
 

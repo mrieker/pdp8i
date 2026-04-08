@@ -57,6 +57,40 @@ proc hardreset {} {
     bus set reset 0
 }
 
+# print help for commands defined herein
+proc helpini {} {
+    puts ""
+    puts "  assem <addr> <args...>           - assemble instruction and deposit into memory"
+    puts "  chartoint <cc>                   - convert one-character string to integer"
+    puts "  disas <loaddr> <<hiaddr \"\">>     - disassemble instruction(s)"
+    puts "  dumpit                           - dump processor registers"
+    puts "  getenv <varname> <<defvalu \"\">>  - read environment variable"
+    puts "  getttypr                         - read tty printer char"
+    puts "  hardreset                        - do power-on reset"
+    puts "  inttochar <ii>                   - convert integer to one-character string"
+    puts "  isztest                          - deposit simple isz test program & start it"
+    puts "  light <args...>                  - read given lights via gpio connector"
+    puts "  lights                           - read all lights via gpio connector"
+    puts "  loadbin <fname>                  - load bin tape file"
+    puts "  loadverify <verify>              - verify loadbin"
+    puts "  mcprd16 <reg>                    - read mcp23017 register pair"
+    puts "  mcpwr16 <reg> <val>              - write mcp23017 register pair"
+    puts "  mcprdltrow <row>                 - read light row via mcp23017"
+    puts "  mcpwrswrow <row> <val>           - write switch row via mcp23017"
+    puts "  mcprelease                       - release mcp23017 from lights & switches"
+    puts "  octal <n>                        - convert number to 4-digit octal string"
+    puts "  rdmem <addr>                     - read memory location via examine"
+    puts "  runloop <<n \"\">>                 - run <n> cpu cycles, update lights & switches"
+    puts "  runstep                          - run single cpu cycle, update lights & switches"
+    puts "  startat <addr>                   - reset processor and start at given address"
+    puts "  swtch <args...>                  - access switches via gpio connector"
+    puts "  swtchwait <name> <valu>          - set switch value, wait for it to soak in"
+    puts "  waithalt <<n \"\">>                - run cpu cycles until halted"
+    puts "  waitrun <<n 20000>>              - run cpu cycles until running"
+    puts "  wrmem <addr> <data>              - write memory location via deposit"
+    puts ""
+}
+
 # convert integer to character
 proc inttochar {ii} {
     if {$ii < 0} {return ""}
@@ -380,6 +414,104 @@ proc loadverify {verify} {
     puts "loadverify: verify ok"
 }
 
+# read console mcp23017 register pair
+#  reg = even register number
+# returns:
+#  val[15:08] = even register value
+#  val[07:00] = odd register value
+proc mcprd16 {reg} {
+    iic wr 0x40 wr $reg rs wr 0x41 rd rd
+    for {set i 0} {[iic] == ""} {incr i} {
+        if {$i > 9999} {error "mcprd16: timed out reading register"}
+        runstep
+    }
+    return [iic]
+}
+
+# write console mcp23017 register pair
+#  reg = even register number
+#  val[15:08] = even register value
+#  val[07:00] = odd register value
+proc mcpwr16 {reg val} {
+    iic wr 0x40 wr $reg wr [expr {$val >> 8}] wr [expr {$val & 255}]
+    for {set i 0} {[iic] == ""} {incr i} {
+        if {$i > 9999} {error "mcpwr16: timed out writing register"}
+        runstep
+    }
+}
+
+# read light row via console mcp23017
+#  input:
+#   row = light row 0..3
+#  output:
+#   returns 12-bit light row contents
+proc mcprdltrow {row} {
+
+    ;# set data pins to input mode
+    mcpwr16 0x00 0x3F3F
+
+    ;# set selection pins to the row
+    set iicsel_10 [expr {$row & 3}]
+    set iicsel_2 [expr {($row >> 2) & 1}]
+    mcpwr16 0x14 [expr {($iicsel_2 << 14) | ($iicsel_10 << 6)}]
+
+    ;# read light pins
+    ;#  [15]    = iicsel_3 = 0
+    ;#  [14]    = iicsel_2 = row[2]
+    ;#  [13:08] = data[05:00]
+    ;#  [07:06] = iicsel_1 = row[1:0]
+    ;#  [05:00] = data[11:06]
+    set val [mcprd16 0x12]
+    return [expr {((($val>>8)&63)|(($val&63)<<6))^07777}]
+}
+
+# write switch row via console mcp23017
+#  input:
+#   row = switch row 0..2
+#   val = 12-bit row value
+# row 0:
+#   val[11:00] = register
+# row 1:
+#   val[11:09] = 0n000 = DFLD n
+#   val[08:06] = 00n00 = IFLD n
+# row 2:
+#   val[04] = 00020 = SINST
+#   val[05] = 00040 = SSTEP
+#   val[06] = 00100 = STOP
+#   val[07] = 00200 = CONT
+#   val[08] = 00400 = EXAM
+#   val[09] = 01000 = DEPOS
+#   val[10] = 02000 = LDAD
+#   val[11] = 04000 = START
+proc mcpwrswrow {row val} {
+
+    ;# select switch row and output data
+    ;#  [15]    = iicsel_3 = 1
+    ;#  [14]    = iicsel_2 = 0
+    ;#  [13:08] = data[05:00]
+    ;#  [07:06] = iicsel_1 = row[1:0]
+    ;#  [05:00] = data[11:06]
+    set scram [expr {(($val & 63) << 8) | (($val >> 6) & 63)}]
+    mcpwr16 0x14 [expr {0x8000 | $scram | ($row << 6)}]
+
+    ;# set all pins to output mode
+    mcpwr16 0x00 0x0000
+
+    ;# select switch row '3' - clocks data into flipflops
+    mcpwr16 0x14 [expr {0x80C0 | $scram}]
+}
+
+# release mcp23017 control of console
+# normal lights & switches take over
+proc mcprelease {} {
+
+    ;# set data pins to input mode so they don't jam data lines
+    mcpwr16 0x00 0x3F3F
+
+    ;# set select pins to 1111 to let normal counters take over
+    mcpwr16 0x14 0xC0C0
+}
+
 # convert integer 0..4095 to 4-digit octal string
 proc octal {n} {
     return [format "%04o" $n]
@@ -456,20 +588,6 @@ proc runstep {} {
             }
         }
     }
-}
-
-# single cycle processor
-proc singcyc {} {
-    if {! [bus oRUN]} {error "processor not running"}
-    for {set i 0} {! [bus oTS4]} {incr i} {
-        if {$i > 20000} {error "timed out waiting for TS4 asserted"}
-        runstep
-    }
-    for {set i 0} {[bus oTS4]} {incr i} {
-        if {$i > 20000} {error "timed out waiting for TS4 negated"}
-        runstep
-    }
-    return [format "PC=%04o MA=%04o MB=%04o L.AC=%o.%04o ST=%x" [bus pctr] [bus oMADR] [bus oMBUF] [bus oLINK] [bus oACUM] [bus majst]]
 }
 
 # start processor at the given address
