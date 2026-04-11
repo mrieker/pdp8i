@@ -61,6 +61,7 @@ static Tcl_ObjCmdProc cmd_mem;
 static Tcl_ObjCmdProc cmd_randbits;
 static Tcl_ObjCmdProc cmd_tty;
 
+static uint32_t scramgpio (uint32_t x);
 static void kerchunk ();
 static int cmdpintable (int pincount, Pin const *pintable, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
 static void Tcl_SetResultF (Tcl_Interp *interp, char const *fmt, ...);
@@ -417,17 +418,17 @@ static int cmd_gpio (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Ob
         int rc = Tcl_GetIntFromObj (interp, objv[1], &num);
         if (rc != TCL_OK) return rc;
 #ifdef VERLTR
-        vbkpl->gpin = num;
+        vbkpl->gpin = scramgpio (num);
 #endif
 #ifdef ZTURN
-        zpage[Z_RH] = num;
+        zpage[Z_RH] = scramgpio (num);
 #endif
     } else {
 #ifdef VERLTR
-        int num = vbkpl->gpout;
+        int num = scramgpio (vbkpl->gpout);
 #endif
 #ifdef ZTURN
-        int num = zpage[Z_RI];
+        int num = scramgpio (zpage[Z_RI]);
 #endif
         Tcl_SetObjResult (interp, Tcl_NewIntObj (num));
     }
@@ -470,10 +471,12 @@ static int cmd_help (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Ob
 #define IIC_READ  4
 #define IIC_WRITE 5
 #define IIC_RSTRT 6
-static uint64_t iiccmd;
-static uint64_t iicrep;
+#define IICCMDSZ 64
+static uint8_t iiccmd[IICCMDSZ];
+static uint32_t iicrep;
+static int iiccix;
 static int iic_count;
-static int iic_state;
+static int iic_state = IIC_IDLE;
 static int cmd_iic (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
     if (objc < 2) {
@@ -486,9 +489,8 @@ static int cmd_iic (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj
         Tcl_SetResultF (interp, "busy with previous command %d", iic_state);
         return TCL_ERROR;
     }
-    iiccmd = 0;
-    iicrep = 0;
-    int n = 64;
+    memset (iiccmd, 0, sizeof iiccmd);
+    int nn = 0;
     for (int i = 0; ++ i < objc;) {
         char const *arg = Tcl_GetString (objv[i]);
         if (strcasecmp (arg, "wr") == 0) {
@@ -503,32 +505,28 @@ static int cmd_iic (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj
                 Tcl_SetResultF (interp, "wr value %d out of range 0..255", val);
                 return TCL_ERROR;
             }
-            if (n < 10) {
+            if (nn + 2 >= IICCMDSZ) {
                 Tcl_SetResultF (interp, "command too long");
                 return TCL_ERROR;
             }
-            n -= 2;
-            iiccmd |= IICWR << n;
-            n -= 8;
-            iiccmd |= ((uint64_t)(uint32_t)val) << n;
+            iiccmd[nn++] = IICWR;
+            iiccmd[nn++] = val;
             continue;
         }
         if (strcasecmp (arg, "rd") == 0) {
-            if (n < 2) {
+            if (nn + 1 >= IICCMDSZ) {
                 Tcl_SetResultF (interp, "command too long");
                 return TCL_ERROR;
             }
-            n -= 2;
-            iiccmd |= IICRD << n;
+            iiccmd[nn++] = IICRD;
             continue;
         }
         if (strcasecmp (arg, "rs") == 0) {
-            if (n < 2) {
+            if (nn + 1 >= IICCMDSZ) {
                 Tcl_SetResultF (interp, "command too long");
                 return TCL_ERROR;
             }
-            n -= 2;
-            iiccmd |= IICRS << n;
+            iiccmd[nn++] = IICRS;
             continue;
         }
         Tcl_SetResultF (interp, "unknown subcommand %s", arg);
@@ -538,6 +536,7 @@ static int cmd_iic (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj
     vbkpl->consck  = 1;
     vbkpl->consdai = 1;
     iic_state = IIC_START;
+    iiccix    = 0;
     iicrep    = 0;
     return TCL_OK;
 }
@@ -545,7 +544,7 @@ static int cmd_iic (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj
 // call every 10nS to update iic state
 //  note: consdai = input from perspective of mcp23017
 //        consdao = output from perspective of mcp23017
-#define countloend ((iic_count & 1023) == 499)
+#define countloend ((iic_count & 1023) == 29)  // 499=100KHz 124=400KHz 29=1.7MHz
 #define countloinc (iic_count + 1)
 #define counthiinc ((iic_count & - 1024) + 1024)
 #define counthi (iic_count >> 10)
@@ -584,11 +583,11 @@ static void iicupdate ()
             break;
         }
 
-        // begin processing command in iiccmd[63:62]
+        // begin processing command in iiccmd[iiccix]
         // assumes sck = 0
         case IIC_BEGIN: {
             iic_count = 0;
-            switch (iiccmd >> 62) {
+            switch (iiccmd[iiccix++]) {
                 case 0: {       // 00 - start sending STOP bit
                     vbkpl->consdai = 0;
                     iic_state = IIC_STOP;
@@ -604,13 +603,12 @@ static void iicupdate ()
                     break;
                 }
                 case IICWR: {   // 11 - start sending 8 bits to slave
-                    vbkpl->consdai = (iiccmd >> 61) & 1;
+                    vbkpl->consdai = iiccmd[iiccix] >> 7;
                     iic_state = IIC_WRITE;
                     break;
                 }
                 default: ABORT ();
             }
-            iiccmd <<= 2;
             break;
         }
 
@@ -674,7 +672,7 @@ static void iicupdate ()
                     }
                     case 16: {
                         iic_count = counthiinc;
-                        vbkpl->consdai = ((iiccmd >> 62) != IICRD);
+                        vbkpl->consdai = (iiccmd[iiccix] != IICRD);
                         break;
                     }
                     case 17: {
@@ -729,14 +727,14 @@ static void iicupdate ()
                     }
                     case 2: case 5: case 8: case 11: case 14: case 17: case 20:
                     {
-                        iiccmd <<= 1;
                         iic_count = counthiinc;
-                        vbkpl->consdai = iiccmd >> 63;
+                        uint8_t val = iiccmd[iiccix] << 1;
+                        iiccmd[iiccix] = val;
+                        vbkpl->consdai = val >> 7;
                         break;
                     }
                     case 23:
                     {
-                        iiccmd <<= 1;
                         iic_count = counthiinc;
                         vbkpl->consdai = 1;
                         break;
@@ -750,6 +748,7 @@ static void iicupdate ()
                     case 25:
                     {
                         if (vbkpl->consdao) ABORT ();       // error if no ack rcvd
+                        iiccix ++;                          // skip over data byte
                         vbkpl->consck = 0;                  // drop clock
                         iic_count = counthiinc;
                         break;
@@ -935,6 +934,25 @@ static int cmd_tty (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj
 
     return cmdpintable (pincount, pintable, interp, objc, objv);
 #endif
+}
+
+// scramble/unscramble gpio data bits
+static uint32_t scramgpio (uint32_t x)
+{
+    uint32_t y = x & ~ 0xFFF;
+    if (x & 0x400) y |= 0x800;
+    if (x & 0x800) y |= 0x400;
+    if (x & 0x001) y |= 0x200;
+    if (x & 0x002) y |= 0x100;
+    if (x & 0x004) y |= 0x080;
+    if (x & 0x008) y |= 0x040;
+    if (x & 0x010) y |= 0x020;
+    if (x & 0x020) y |= 0x010;
+    if (x & 0x040) y |= 0x008;
+    if (x & 0x080) y |= 0x004;
+    if (x & 0x100) y |= 0x002;
+    if (x & 0x200) y |= 0x001;
+    return y;
 }
 
 // call with 10MHz clock still low and input signals just changed

@@ -83,6 +83,7 @@ proc simtest {} {
     global testcons
     global testexar
     global testxmem
+    global usemcp
     global xmem_dfld
     global xmem_ifld
     global xmem_ifldafterjump
@@ -106,7 +107,7 @@ proc simtest {} {
     set hasmemcmd [expr {$ercode == 0}]
 
     ;# reset then start processor
-    mcprelease
+    set usemcp [getenv usemcp 0]
     hardreset
     startat 0
     waitassert TS1
