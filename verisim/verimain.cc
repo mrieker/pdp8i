@@ -475,6 +475,7 @@ static int cmd_help (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Ob
 static uint8_t iiccmd[IICCMDSZ];
 static uint32_t iicrep;
 static int iiccix;
+static bool iic_debug;
 static int iic_count;
 static int iic_state = IIC_IDLE;
 static int cmd_iic (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
@@ -489,6 +490,7 @@ static int cmd_iic (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj
         Tcl_SetResultF (interp, "busy with previous command %d", iic_state);
         return TCL_ERROR;
     }
+    if (iic_debug) printf ("cmd_iic*:");
     memset (iiccmd, 0, sizeof iiccmd);
     int nn = 0;
     for (int i = 0; ++ i < objc;) {
@@ -511,6 +513,7 @@ static int cmd_iic (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj
             }
             iiccmd[nn++] = IICWR;
             iiccmd[nn++] = val;
+            if (iic_debug) printf (" WR %03o", val);
             continue;
         }
         if (strcasecmp (arg, "rd") == 0) {
@@ -519,6 +522,7 @@ static int cmd_iic (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj
                 return TCL_ERROR;
             }
             iiccmd[nn++] = IICRD;
+            if (iic_debug) printf (" RD");
             continue;
         }
         if (strcasecmp (arg, "rs") == 0) {
@@ -527,11 +531,13 @@ static int cmd_iic (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj
                 return TCL_ERROR;
             }
             iiccmd[nn++] = IICRS;
+            if (iic_debug) printf (" RS");
             continue;
         }
         Tcl_SetResultF (interp, "unknown subcommand %s", arg);
         return TCL_ERROR;
     }
+    if (iic_debug) printf (" =>");
     iic_count = 0;
     vbkpl->consck  = 1;
     vbkpl->consdai = 1;
@@ -635,6 +641,7 @@ static void iicupdate ()
                     case 2: {
                         if (! vbkpl->consdao) ABORT (); // vbkpl->consdao should be 1, 0 means a MCP23017 is jamming line low
                         iic_state = IIC_IDLE;           // wait for command register to be written with new command
+                        if (iic_debug) printf (" .\n");
                         break;
                     }
                     default: ABORT ();
@@ -687,6 +694,7 @@ static void iicupdate ()
                     }
                     case 19: {
                         iic_state = IIC_BEGIN;
+                        if (iic_debug) printf (" %03o", iicrep & 255);
                         break;
                     }
                     default: ABORT ();

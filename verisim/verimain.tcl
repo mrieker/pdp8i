@@ -56,7 +56,7 @@ proc hardreset {} {
 
     if {$usemcp} {
 
-        ;# iicsel = 1111, ie, using console board internal counter
+        ;# reset leaves iicsel = 1111, ie, using console board internal counter
 
         ;# save toggles (SSTEP,SINST) from row 2, assume buttons (CONT,DEPOS,EXAM,LDAD,START,STOP) are off
         set savetogs [expr {[lindex $swrowpends 2] & 0060}]
@@ -107,11 +107,6 @@ proc helpini {} {
     puts "  lights                           - read all lights via gpio connector"
     puts "  loadbin <fname>                  - load bin tape file"
     puts "  loadverify <verify>              - verify loadbin"
-    puts "  mcprd16 <reg>                    - read mcp23017 register pair"
-    puts "  mcpwr16 <reg> <val>              - write mcp23017 register pair"
-    puts "  mcprdltrow <row>                 - read light row via mcp23017"
-    puts "  mcpwrswrow <row> <val>           - write switch row via mcp23017"
-    puts "  mcprelease                       - release mcp23017 from lights & switches"
     puts "  octal <n>                        - convert number to 4-digit octal string"
     puts "  rdmem <addr>                     - read memory location via examine"
     puts "  runloop <<n \"\">>                 - run <n> cpu cycles, update lights & switches"
@@ -426,104 +421,6 @@ proc loadverify {verify} {
     puts "loadverify: verify ok"
 }
 
-# read console mcp23017 register pair
-#  reg = even register number
-# returns:
-#  val[15:08] = even register value
-#  val[07:00] = odd register value
-proc mcprd16 {reg} {
-    iic wr 0x40 wr $reg rs wr 0x41 rd rd
-    for {set i 0} {[iic] == ""} {incr i} {
-        if {$i > 9999} {error "mcprd16: timed out reading register"}
-        runstep
-    }
-    return [iic]
-}
-
-# write console mcp23017 register pair
-#  reg = even register number
-#  val[15:08] = even register value
-#  val[07:00] = odd register value
-proc mcpwr16 {reg val} {
-    iic wr 0x40 wr $reg wr [expr {$val >> 8}] wr [expr {$val & 255}]
-    for {set i 0} {[iic] == ""} {incr i} {
-        if {$i > 9999} {error "mcpwr16: timed out writing register"}
-        runstep
-    }
-}
-
-# read light row via console mcp23017
-#  input:
-#   row = light row 0..3
-#  output:
-#   returns 12-bit light row contents
-proc mcprdltrow {row} {
-
-    ;# set data pins to input mode
-    mcpwr16 0x00 0x3F3F
-
-    ;# set selection pins to the row
-    set iicsel_10 [expr {$row & 3}]
-    set iicsel_2 [expr {($row >> 2) & 1}]
-    mcpwr16 0x14 [expr {($iicsel_2 << 14) | ($iicsel_10 << 6)}]
-
-    ;# read light pins
-    ;#  [15]    = iicsel_3 = 0
-    ;#  [14]    = iicsel_2 = row[2]
-    ;#  [13:08] = data[05:00]
-    ;#  [07:06] = iicsel_1 = row[1:0]
-    ;#  [05:00] = data[11:06]
-    set val [mcprd16 0x12]
-    return [expr {((($val>>8)&63)|(($val&63)<<6))^07777}]
-}
-
-# write switch row via console mcp23017
-#  input:
-#   row = switch row 0..2
-#   val = 12-bit row value
-# row 0:
-#   val[11:00] = register
-# row 1:
-#   val[11:09] = 0n000 = DFLD n
-#   val[08:06] = 00n00 = IFLD n
-# row 2:
-#   val[04] = 00020 = SINST
-#   val[05] = 00040 = SSTEP
-#   val[06] = 00100 = STOP
-#   val[07] = 00200 = CONT
-#   val[08] = 00400 = EXAM
-#   val[09] = 01000 = DEPOS
-#   val[10] = 02000 = LDAD
-#   val[11] = 04000 = START
-proc mcpwrswrow {row val} {
-
-    ;# select switch row and output data
-    ;#  [15]    = iicsel_3 = 1
-    ;#  [14]    = iicsel_2 = 0
-    ;#  [13:08] = data[05:00]
-    ;#  [07:06] = iicsel_1 = row[1:0]
-    ;#  [05:00] = data[11:06]
-    set scram [expr {(($val & 63) << 8) | (($val >> 6) & 63)}]
-    mcpwr16 0x14 [expr {0x8000 | $scram | ($row << 6)}]
-
-    ;# set all pins to output mode
-    mcpwr16 0x00 0x0000
-
-    ;# select switch row '3' - clocks data into flipflops
-    mcpwr16 0x14 [expr {0x80C0 | $scram}]
-}
-
-# release mcp23017 control of console
-# normal lights & switches take over
-proc mcprelease {} {
-
-    ;# set data pins to input mode so they don't jam data lines
-    mcpwr16 0x00 0x3F3F
-
-    ;# set select pins to 1111 to let normal counters take over
-    mcpwr16 0x14 0xC0C0
-}
-
 # convert integer 0..4095 to 4-digit octal string
 proc octal {n} {
     return [format "%04o" $n]
@@ -562,31 +459,28 @@ proc runloop {{n ""}} {
     }
 }
 
-# single-step processor, interpret changes in gpio
+# single-step processor, interpret changes in gpio and mcp23017
 set lastgpio  0
-set mcpltgry  0
 set mcpltime  0
 set mcpltrow -1
 set mcpstate  0
 set mcpswrow -1
-set usemcp    0
+set usemcp    0 ;# 0=gpio only; 1=mcp only; 2=both
 proc runstep {} {
     global lastgpio lightrows runquiet
-    global mcpltgry mcpltime mcpltrow mcpstate mcpswrow usemcp
-    global swrowpends swrowrcvds swrowsents
+    global mcpltime mcpltrow mcpstate mcpswrow usemcp
+    global swrowgpios swrowpends swrowrcvds swrowsents
 
     ;# kerchunk the 10MHz clock and get cycle count
     set c [clk]
 
     ;# process a row of lights and switches
-    if {$usemcp} {
+    if {$usemcp != 0} {
         ;# use iic/mcp to access lights and switches
         switch $mcpstate {
             0 {
                 ;# select next light row for display
-                ;# gray count so we only change one bit at a time
                 set mcpltrow [expr {($mcpltrow + 1) & 7}]
-                set mcpltgry [expr {$mcpltrow ^ ($mcpltrow >> 1)}]
                 ;# set data pins to input mode: 0x00 <= 0x3F3F
                 iic wr 0x40 wr 0x00 wr 0x3F wr 0x3F
                 set mcpltime 0
@@ -597,8 +491,8 @@ proc runstep {} {
                 incr mcpltime
                 if {[iic] != ""} {
                     ;# set selection pins to the row: 0x14 <= 1'b0 row<2> 6'b000000 row<1:0> 6'b000000
-                    set aout [expr {($mcpltgry & 4) << 4}]
-                    set bout [expr {($mcpltgry & 3) << 6}]
+                    set aout [expr {($mcpltrow & 4) << 4}]
+                    set bout [expr {($mcpltrow & 3) << 6}]
                     iic wr 0x40 wr 0x14 wr $aout wr $bout
                     set mcpstate 2
                 }
@@ -617,7 +511,12 @@ proc runstep {} {
                 incr mcpltime
                 set val [iic]
                 if {$val != ""} {
-                    lset lightrows $mcpltgry [expr {((($val>>8)&63)|(($val&63)<<6))^07777}]
+                    if {$usemcp == 1} {
+                        ;# usemcp == 1: save value read from mcp23017
+                        lset lightrows $mcpltrow [expr {((($val>>8)&63)|(($val&63)<<6))^07777}]
+                    } else {
+                        ;# usemcp == 2: value gets read from gpio pins below
+                    }
                     set mcpstate 4
                 }
             }
@@ -625,26 +524,54 @@ proc runstep {} {
             4 {
                 ;# wait for light row displayed for 200uS
                 if {[incr mcpltime] >= 2000} {
-                    ;# if like-numbered switch row is up-to-date, go on to next light row
-                    if {($mcpltgry > 2) || ([lindex $swrowpends $mcpltgry] == [lindex $swrowsents $mcpltgry])} {
-                        set mcpstate 0
-                    } else {
-                        ;# like-numbered switch row needs updating
-                        ;# handle it then do next light row
-                        set mcpswrow $mcpltgry
-                        set swval [lindex $swrowpends $mcpswrow]
-                        lset swrowsents $mcpswrow $swval
-                        ;# set data pins value to switch row and value: 0x14 <= 2'b10 val<11:06> row<1:0> val<05:00>
-                        ;# only changes one iicsel bit (sets iicsel_3) to avoid glitching lswrow<n>
-                        set aout [expr {0x80 | ($swval & 63)}]
-                        set bout [expr {($mcpswrow << 6) | ($swval >> 6)}]
-                        iic wr 0x40 wr 0x14 wr $aout wr $bout
-                        set mcpstate 5
+                    switch $usemcp {
+                        1 {
+                            ;# usemcp == 1: mcp23017 only
+                            ;#  swrowpends -> swrowsents -> swrowrcvds
+                            ;# maybe update like-numbered switch row
+                            if {($mcpltrow <= 2) && ([lindex $swrowpends $mcpltrow] != [lindex $swrowsents $mcpltrow])} {
+                                ;# like-numbered switch row needs updating
+                                ;# handle it then do next light row
+                                set mcpswrow $mcpltrow
+                                set swval [lindex $swrowpends $mcpswrow]
+                                lset swrowsents $mcpswrow $swval
+                                ;# set data pins value to switch row and value: 0x14 <= 2'b10 val<11:06> row<1:0> val<05:00>
+                                ;# only changes one iicsel bit (sets iicsel_3) to avoid glitching lswrow<n>
+                                set aout [expr {0x80 | ($swval & 63)}]
+                                set bout [expr {($mcpswrow << 6) | ($swval >> 6)}]
+                                iic wr 0x40 wr 0x14 wr $aout wr $bout
+                                set mcpstate 5
+                            } else {
+                                ;# no switches, do next light row
+                                set mcpstate 0
+                            }
+                        }
+
+                        2 {
+                            ;# usemcp == 2: both gpio and mcp23017
+                            ;#  swrowpends -> swrowsents -> swrowgpios -> swrowrcvds
+                            set mcpswrow [expr {$mcpltrow - 4}]
+                            if {($mcpswrow >= 0) && ($mcpswrow <= 2) && ([lindex $swrowpends $mcpswrow] != [lindex $swrowsents $mcpswrow])} {
+                                ;# like-numbered switch row needs updating
+                                ;# handle it then do next light row
+                                set swval [lindex $swrowpends $mcpswrow]
+                                lset swrowsents $mcpswrow $swval
+                                ;# tell gpio connector to request switch value from panel
+                                ;# aout<5:4> is 01, transition to 11.
+                                ;# bout<5:4> has light row = switch row
+                                iic wr 0x40 wr 0x14 wr 0xC0
+                                set mcpstate 10
+                            } else {
+                                ;# no switches, do next light row
+                                set mcpstate 0
+                            }
+                        }
                     }
                 }
             }
 
             5 {
+                ;# waiting for mcp to get the switch value to be sent to flipflops
                 if {[iic] != ""} {
                     ;# set data pins to output: 0x00 <= 0x0000
                     ;# gates data pins to flipflop inputs
@@ -654,8 +581,9 @@ proc runstep {} {
             }
 
             6 {
+                ;# waiting for mcp to turn output data pins on so flipflops will get data
                 if {[iic] != ""} {
-                    ;# kerchunk value into flipflops
+                    ;# data outputs turned on, kerchunk value into flipflops
                     set swval [lindex $swrowsents $mcpswrow]
                     if {$swval < 0} {set swval 0}
                     set bout [expr {($mcpswrow << 6) | ($swval >> 6)}]
@@ -678,9 +606,10 @@ proc runstep {} {
 
             7 {
                 if {[iic] != ""} {
-                    ;# resume doing lights
+                    ;# new value is received into flipflops
                     set swval [lindex $swrowsents $mcpswrow]
                     lset swrowrcvds $mcpswrow $swval
+                    ;# resume doing lights
                     set mcpstate 0
                 }
             }
@@ -701,39 +630,94 @@ proc runstep {} {
                     set mcpstate 5
                 }
             }
+
+            10 {
+                ;# waiting to finish telling gpio to request switch row from panel
+                if {[iic] != ""} {
+                    ;# gpio requesting switch row from panel, start reading switch pins: 0x12
+                    iic wr 0x40 wr 0x12 rs wr 0x41 rd rd
+                    set mcpstate 11
+                }
+            }
+
+            11 {
+                ;# waiting for switch row from gpio connector
+                set val [iic]
+                if {$val != ""} {
+                    ;# it should match what we put on gpio connector
+                    set swrcvd [expr {(($val >> 8) & 63) | (($val & 63) << 6)}]
+                    set swsent [lindex $swrowsents $mcpswrow]
+                    if {$swrcvd != $swsent} {
+                        error "received [octal $swrcvd] from gpio, sent [octal $swsent] on sw row $mcpswrow"
+                    }
+                    ;# start sending that same value back out so it will latch in flipflops
+                    ;#  currently have aout = 11xxxxxx; bout = nnxxxxxx  (nn = switch row 0..2)
+                    ;#  transition to  aout = 10dddddd; bout = nndddddd
+                    ;# only iicsel_2 is changing, so no glitching
+                    set aout [expr {0x80 | ($swsent & 63)}]
+                    set bout [expr {($mcpswrow << 6) | ($swsent >> 6)}]
+                    iic wr 0x40 wr 0x14 wr $aout wr $bout
+                    ;# next is to set all pins to output mode
+                    set mcpstate 5
+                }
+            }
         }
-    } else {
-        ;# use gpio to access lights amd switches
-        set g [gpio]                            ;# read gpio connector contents
-        if {$lastgpio != $g} {
-            for {set r 0} {$r < 3} {incr r} {   ;# maybe it wants switch contents
-                ;# if high-to-low for switch select, capture pending value to be sent
-                if {$lastgpio & ~ $g & (0x1000 << $r)} {
-                    set sw [lindex $swrowpends $r]
-                    lset swrowsents $r $sw
+    }
+
+    ;# here we pretend to be the panel
+    ;# capture what console.kicad_sch is feeding the lights
+    ;# send what we want to console.kicad_sch for switches when asked
+    set g [gpio]                            ;# read gpio connector contents
+    if {$lastgpio != $g} {
+        for {set r 0} {$r < 3} {incr r} {   ;# maybe it wants switch contents
+            switch $usemcp {
+                0 {
+                    ;# everything done via gpio - mcp23017 is unused
+                    ;# if high-to-low for switch select, capture pending value to be sent
+                    if {$lastgpio & ~ $g & (0x1000 << $r)} {
+                        set sw [lindex $swrowpends $r]
+                        lset swrowsents $r $sw
+                    }
+                    ;# if low switch select, send the row contents
+                    if {~ $g & (0x1000 << $r)} {
+                        set sw [lindex $swrowsents $r]
+                        gpio [expr {($g & 0xFFF000) | $sw}]
+                    }
+                    ;# if low-to-high for switch select, console.kicad_sch clocked sent value in
+                    if {~ $lastgpio & $g & (0x1000 << $r)} {
+                        set sw [lindex $swrowsents $r]
+                        lset swrowrcvds $r $sw
+                    }
                 }
-                ;# if low switch select, send the row contents
-                if {~ $g & (0x1000 << $r)} {
-                    set sw [lindex $swrowsents $r]
-                    gpio [expr {($g & 0xFFF000) | $sw}]
+                1 {
+                    ;# everything done via mcp23017 - shouldn't ask for switches
+                    if {($g & 0x7000) != 0x7000} {
+                        error "gpio asking for switches when usemcp == 1"
+                    }
                 }
-                ;# if low-to-high for switch select, processor clocked sent value in
-                if {~ $lastgpio & $g & (0x1000 << $r)} {
-                    set sw [lindex $swrowsents $r]
-                    lset swrowrcvds $r $sw
+                2 {
+                    ;# using both - send value via gpio, console.kicad_sch receives into mcp23017
+                    ;# if high-to-low for switch select, capture pending value to be sent
+                    if {$lastgpio & ~ $g & (0x1000 << $r)} {
+                        set sw [lindex $swrowsents $r]
+                        lset swrowgpios $r $sw
+                    }
+                    ;# if low switch select, send the row contents
+                    if {~ $g & (0x1000 << $r)} {
+                        set sw [lindex $swrowgpios $r]
+                        gpio [expr {($g & 0xFFF000) | $sw}]
+                    }
                 }
             }
-            set lastgpio $g                     ;# save gpio to detect edges
-            set v [expr {~ $g & 07777}]         ;# get the 12-bit row contents
-            set newlbrows $lightrows            ;# update any possible lb row
+        }
+        if {($g & 0x7000) == 0x7000} {
+            gpio 0                          ;# if no switches being requested, clear to zeroes
+        }
+        set lastgpio $g                     ;# save gpio to detect edges
+        if {$usemcp != 1} {
+            set v [expr {~ $g & 07777}]     ;# get the 12-bit row contents
             for {set r 0} {$r < 8} {incr r} {
-                if {$g & (0x010000 << $r)} {lset newlbrows $r $v}
-            }
-            if {$lightrows != $newlbrows} {     ;# see if any change in lb row contents
-                set lightrows $newlbrows
-                if {! $runquiet} {
-                    puts [format "%12d: %s" $c [lights]]
-                }
+                if {$g & (0x010000 << $r)} {lset lightrows $r $v}
             }
         }
     }
@@ -760,6 +744,7 @@ proc startat {addr} {
 # modify and query switch settings
 # - set just queues the value, use 'runloop/runstep' to pass them on to processor
 # - get retrieves latest value received by processor
+set swrowgpios {0 0 0}      ;# passed to gpio connector (usemcp == 2 only)
 set swrowpends {0 0 0}      ;# waiting to be sent to processor
 set swrowrcvds {0 0 0}      ;# has been received by processor
 set swrowsents {-1 -1 -1}   ;# has been sent to processor
@@ -830,7 +815,7 @@ proc swtch {args} {
 proc swtchwait {name valu} {
     swtch set $name $valu
     for {set i 0} {[swtch $name] != $valu} {incr i} {
-        if {$i > 20000} {error "timed out setting sw$name to $valu"}
+        if {$i > 50000} {error "timed out setting sw$name to $valu"}
         runstep
     }
 }
