@@ -12,19 +12,19 @@ set dmacainc     0
 set dmawrmem     0
 set dmafield     0
 set dmawdata     0
+set haltdelay    0
 set haltwhy      ""
 set hasmemcmd    0
 set instrno      0
 set intdelayed   0
 set intenabled   0
 set intrequest   0
-set latsinst     0
-set latsstep     0
 set linc         0
 set memcycno     0
 set memcycwcover 0
 set mquo         0
 set opcode       0
+set panelhalt    0
 set perclock     0
 set pctr         0
 set sctr         0
@@ -67,8 +67,6 @@ proc simtest {} {
     global intdelayed
     global intenabled
     global intrequest
-    global latsinst
-    global latsstep
     global linc
     global memcycwcover
     global mquo
@@ -108,6 +106,7 @@ proc simtest {} {
 
     ;# reset then start processor
     set usemcp [getenv usemcp 0]
+    puts "simtest: usemcp=$usemcp"
     hardreset
     startat 0
     waitassert TS1
@@ -448,7 +447,7 @@ proc finishline {} {
 proc memorycycle {state field addr rdata wdata} {
     global dmawrmem dmawdata hasmemcmd memcycwcover opcode
     global MS_BREAK MS_DEPOS MS_EXAM MS_EXEC MS_FETCH MS_INTAK MS_WRDCT
-    global haltwhy latsinst latsstep memcycno testcons
+    global haltdelay haltwhy memcycno panelhalt testcons
 
     incr memcycno
 
@@ -458,12 +457,16 @@ proc memorycycle {state field addr rdata wdata} {
     set memdisab [expr {! $hasmemcmd || [randbits 1]}]
     bus set memdisab $memdisab
 
-    ;# maybe flip on an halt switch
+    ;# maybe flip on an halt switch if none flipped on already
     ;# takes several cycles to soak through console board
-    if {$testcons && ($memcycno % 1024 == 0)} {
-        if {[randbits 1]} {swtch set sinst 1}
-        if {[randbits 1]} {swtch set sstep 1}
-        if {[randbits 1]} {swtch set stop  1}
+    ;# don't do for exam/depos cycles so we don't interfere with subsequent start switch
+    if {$testcons && ($panelhalt == 0) && ($state != $MS_DEPOS) && ($state != $MS_EXAM) && ($memcycno % 16 == 0)} {
+        set panelhalt [randbits 2]
+        switch $panelhalt {
+            1 { swtch set sinst 1 }
+            2 { swtch set sstep 1 }
+            3 { swtch set stop  1 }
+        }
     }
 
     ;# clock until we see TS1
@@ -547,8 +550,6 @@ proc memorycycle {state field addr rdata wdata} {
     verify12 [bus oMBUF] $wdata "MB during writeback at end TS3"
 
     waitnegate TP3
-    set latsinst [bus swsinst]
-    set latsstep [bus swsstep]
 
     ;# clear any bits being output by io instruction
     if $doesio {
@@ -574,15 +575,19 @@ proc memorycycle {state field addr rdata wdata} {
     set newstate [bus majst]
     set sbhalted 0
     if {($state != $MS_DEPOS) && ($state != $MS_EXAM)} {
-        if {$latsstep} {
-            set sbhalted 1
-            set haltwhy "sstep"
-        } elseif {($state == $MS_FETCH) && (($rdata & 07403) == 07402)} {
+        ##set beginst [expr {($newstate == $MS_FETCH) || ($newstate == $MS_INTAK) || ($newstate == $MS_WRDCT) ||
+        ##                   (($newstate == $MS_BREAK) && ! [bus i3CYCLE])}]
+
+        if {($state == $MS_FETCH) && (($rdata & 07403) == 07402)} {
             set sbhalted 1
             set haltwhy "hlt"
-        } elseif {$latsinst && (($newstate == $MS_FETCH) || ($newstate == $MS_INTAK) || ($newstate == $MS_WRDCT) || (($newstate == $MS_BREAK) && ! [bus i3CYCLE]))} {
+        } elseif {$panelhalt && (! $isrunning || ([incr haltdelay] > 20000))} {
             set sbhalted 1
-            set haltwhy "sinst"
+            switch $panelhalt {
+                1 { set haltwhy "swsinst/$haltdelay" }
+                2 { set haltwhy "swsstep/$haltdelay" }
+                3 { set haltwhy "swstop/$haltdelay" }
+            }
         }
         if {$isrunning == $sbhalted} {
             set is [expr {$isrunning ? "running" : "halted"}]
@@ -604,7 +609,7 @@ proc memorycycle {state field addr rdata wdata} {
 ;# cont alone should not reset state, should pick up where it left off
 proc checkhalted {} {
     global MS_BREAK MS_DEPOS MS_EXAM MS_EXEC MS_FETCH MS_INTAK MS_WRDCT
-    global haltwhy pctr swdfpend swifpend swregpend testcons
+    global haltdelay haltwhy panelhalt pctr swdfpend swifpend swregpend testcons
     global acum linc mquo sctr xmem_intdisableduntiljump brkrequest intdelayed intenabled intrequest
     global xmem_dfld xmem_ifld xmem_ifldafterjump xmem_saveddfld xmem_savedifld
 
@@ -616,6 +621,8 @@ proc checkhalted {} {
         set wacked 0
         if {$testcons} {
             swtch set sinst 0 sstep 0 stop 0
+            set haltdelay 0
+            set panelhalt 0
             set addr [bus oMADR]
             set doldad 1
             while {[randbits 1] == 0} {
@@ -644,7 +651,7 @@ proc checkhalted {} {
                         set rdata [randbits 12]     ;# get random value for it to examine
                         puts -nonewline [format "LDAD  %o%04o / %04o" $xmem_ifld $addr $rdata]
                         swtchwait ldad 0            ;# release ldad
-                        waitassert RUN 500          ;# wait for processor to start an exam cycle
+                        waitassert RUN              ;# wait for processor to start an exam cycle
                         memorycycle $MS_EXAM $xmem_ifld $addr $rdata $rdata
                         set haltwhy ""
                         verifybit [bus oRUN] 0 "should be halted after LDAD"
@@ -677,7 +684,7 @@ proc checkhalted {} {
                         set wdata $swregpend
                         puts -nonewline [format "DEPOS %o%04o / %04o <= %04o" $xmem_ifld $addr $rdata $wdata]
                         swtchwait depos 0
-                        waitassert RUN 500
+                        waitassert RUN
                         memorycycle $MS_DEPOS $xmem_ifld $addr $rdata $wdata
                         set haltwhy ""
                         verifybit [bus oRUN] 0 "should be halted after DEPOS"
@@ -697,7 +704,7 @@ proc checkhalted {} {
                         set rdata [randbits 12]
                         puts -nonewline [format "EXAM  %o%04o / %04o" $xmem_ifld $addr $rdata]
                         swtchwait exam 0
-                        waitassert RUN 500
+                        waitassert RUN
                         memorycycle $MS_EXAM $xmem_ifld $addr $rdata $rdata
                         set haltwhy ""
                         verifybit [bus oRUN] 0 "should be halted after EXAM"
@@ -706,8 +713,21 @@ proc checkhalted {} {
                 }
             }
         }
+        if {[bus oRUN]} {
+            error "should be halted"
+        }
+        ;# do a START from time-to-time
+        ;# only if wacked so we know PC==MA
+        set needscont 1
         if {$wacked && ([randbits 4] == 0)} {
-            puts -nonewline " start"
+            puts -nonewline "  start"
+            ;# START with SSTEP will just do the reset without starting
+            set sstep [expr {[randbits 2] == 0}]
+            if $sstep {
+                puts -nonewline "/sstep"
+                swtchwait sstep 1
+            }
+            ;# press START button, it should reset a bunch of things
             swtchwait start 1
             set acum 0
             set linc 0
@@ -721,13 +741,26 @@ proc checkhalted {} {
             bus set iBRKRQST 0 iINTRQST 0
             set brkrequest 0
             set intrequest 0
+            ;# release START button
             swtchwait start 0
-        } else {
-            puts -nonewline " cont"
+            ;# if SSTEP is on, it should remain halted
+            if $sstep {
+                for {set i 0} {$i < 100} {incr i} {
+                    runstep
+                    if {[bus oRUN]} {
+                        error "started running with start/sstep"
+                    }
+                }
+                swtchwait sstep 0
+            }
+            set needscont $sstep
+        }
+        if $needscont {
+            puts -nonewline "  cont"
             swtchwait cont 1
             swtchwait cont 0
         }
-        waitassert RUN 500
+        waitassert RUN
         if $wacked {
             return -code 47
         }
