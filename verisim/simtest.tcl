@@ -510,8 +510,6 @@ proc memorycycle {state field addr rdata wdata} {
         bus set iINBUS $dmawdata
     }
 
-    requestdmaorint $state $rdata
-
     ;# maybe perform extended arithmetic
     if {(($state == $MS_FETCH) && (($opcode & 07407) == 07401)) ||
         (($state == $MS_EXEC)  && (($opcode & 07401) == 07401))} {
@@ -534,10 +532,11 @@ proc memorycycle {state field addr rdata wdata} {
     verify15 $actaddr $expaddr "XMA bad at beg TS3 of $state cycle"
     verify12 [bus oMBUF] $wdata "MB during writeback at beg TS3"
 
-    ;# BWC_OVERFLOW is valid
-    ;# - clocked with TP2 (vol 2, p5 D-5)
-    ;# - cleared with TP3
+    ;# BWC_OVERFLOW is valid (assuming we're in WRDCT) at this TS3 through next cycle TP2
     set memcycwcover [bus oBWCOV]
+
+    ;# processor clocks BRKRQST, INTRQST at TP3, so output requests just prior to that
+    requestdmaorint $state $rdata
 
     ;# wait for TP3 asserted then negated indicating value written to memory
     ;# also clocks in any io instruction result
@@ -942,7 +941,7 @@ proc waitnegate {sig {n 100}} {
 }
 
 ;# maybe request dma or interrupt
-;# processor samples it at end of TS3
+;# processor samples it at TP3
 proc requestdmaorint {state rdata} {
     global brkrequest dmafield dmaaddr dmawrmem dmawdata dma3cycle dmacainc intenabled intrequest
     global MS_FETCH MS_WRDCT MS_CURAD MS_BREAK
