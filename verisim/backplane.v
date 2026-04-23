@@ -36,7 +36,7 @@ module backplane (
     output[2:0] memfield,
     output[3:0] majst,
     output[4:0] sctr,
-    output[2:0] swdfld, swifld,
+    output[2:0] swdfld, swifld,     // DFLD and IFLD switches
     output swstart, swldad, swdepos, swexam,
     output swcont, swsstep, swsinst
 
@@ -238,15 +238,15 @@ module backplane (
         , .DFLD_2   (dfield[2])
         , .IFLD_0   (ifield[0])
         , .IFLD_1   (ifield[1])
-        , .IFLD_2   (ifield[2]),
-        .LINK (oLINK),
+        , .IFLD_2   (ifield[2])
+        , .DFLD_0_o (swdfld[0])
+        , .DFLD_1_o (swdfld[1])
+        , .DFLD_2_o (swdfld[2])
+        , .IFLD_0_o (swifld[0])
+        , .IFLD_1_o (swifld[1])
+        , .IFLD_2_o (swifld[2])
+        , .LINK (oLINK),
 
-        .swDFLD_0 (swdfld[0]),  //toggle data field
-        .swDFLD_1 (swdfld[1]),
-        .swDFLD_2 (swdfld[2]),
-        .swIFLD_0 (swifld[0]),  //toggle inst field
-        .swIFLD_1 (swifld[1]),
-        .swIFLD_2 (swifld[2]),
         .swSTART  (swstart),    //button start (debounced)
         .swLDAD   (swldad),     //button load address
         .swDEPOS  (swdepos),    //button deposit (debounced)
@@ -405,6 +405,7 @@ module backplane (
 
     wire iINTINH;
     wire[11:00] memINBUS;
+    wire[2:0] ffdfld, ffifld;   // DFLD and IFLD flipflops
 
     extmemory meminst (
         .zclock (zclock),
@@ -432,12 +433,9 @@ module backplane (
         , .DFLD_0   (dfield[0])
         , .DFLD_1   (dfield[1])
         , .DFLD_2   (dfield[2])
-        , .DMADR_0  (swdfld[0])
-        , .DMADR_1  (swdfld[1])
-        , .DMADR_2  (swdfld[2])
-        , .DMADR_3  (swifld[0])
-        , .DMADR_4  (swifld[1])
-        , .DMADR_5  (swifld[2])
+        , .DFLD_0_o (ffdfld[0])
+        , .DFLD_1_o (ffdfld[1])
+        , .DFLD_2_o (ffdfld[2])
         , .DMAFLD_0 (iDMAFLD[0])
         , .DMAFLD_1 (iDMAFLD[1])
         , .DMAFLD_2 (iDMAFLD[2])
@@ -448,6 +446,9 @@ module backplane (
         , .IFLD_0   (ifield[0])
         , .IFLD_1   (ifield[1])
         , .IFLD_2   (ifield[2])
+        , .IFLD_0_o (ffifld[0])
+        , .IFLD_1_o (ffifld[1])
+        , .IFLD_2_o (ffifld[2])
         , .INBUS_0_o  (memINBUS[00])
         , .INBUS_1_o  (memINBUS[01])
         , .INBUS_2_o  (memINBUS[02])
@@ -729,5 +730,7 @@ module backplane (
     assign inbus   = conINBUS | eaeINBUS | iINBUS | memINBUS | ttyinbus;
     assign ioskip  = iIOSKIP | eaeIOSKIP | ttyioskp;
     assign intrq   = iINTRQST | ttyintrq;
+    assign dfield  = ffdfld | swdfld;   // swdfld when swLDAD else ffdfld
+    assign ifield  = ffifld | swifld;   // swifld when swLDAD else ffifld
 
 endmodule
