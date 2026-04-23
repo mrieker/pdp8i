@@ -261,7 +261,7 @@ static int cmd_bus (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj
             {  1, OFFS (iINTRQST), true,  "iINTRQST" },   // request interrupt
             {  1, OFFS (iIOSKIP),  true,  "iIOSKIP"  },   // increment PC at end of IO pulse
             {  1, OFFS (iLNKTOG),  true,  "iLNKTOG"  },   // toggle link register
-            { 15, OFFS (iDMAADDR), true,  "iDMAADDR" },   // device sending address for DMA
+            {  3, OFFS (iDMAFLD),  true,  "iDMAFLD"  },   // device sending address for DMA
             { 12, OFFS (iINBUS),   true,  "iINBUS"   },   // device sending data for PIO or DMA
             {  1, OFFS (iPAUSE),   true,  "iPAUSE"   },   // pause processor clocking (stretch cycle)
 

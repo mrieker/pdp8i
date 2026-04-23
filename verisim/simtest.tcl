@@ -445,7 +445,7 @@ proc finishline {} {
 ;#         update accumulator
 ;#   TS4 = update to next state
 proc memorycycle {state field addr rdata wdata} {
-    global dmawrmem dmawdata hasmemcmd memcycwcover opcode
+    global dmaaddr dmawrmem dmawdata hasmemcmd memcycwcover opcode
     global MS_BREAK MS_DEPOS MS_EXAM MS_EXEC MS_FETCH MS_INTAK MS_WRDCT
     global haltdelay haltwhy memcycno panelhalt testcons
 
@@ -564,9 +564,15 @@ proc memorycycle {state field addr rdata wdata} {
         verify12 [mem $expaddr] $wdata [format "address %05o mismatch" $expaddr]
     }
 
+    ;# assume we are doing a DMA and output the DMA address and field to the bus during TS4
+    bus set iINBUS $dmaaddr
+
     ;# step to end of cycle
     waitassert TP4
     waitnegate TP4
+
+    ;# remove DMA address from INBUS
+    bus set iINBUS 0
 
     ;# check for halted/running
     if {$haltwhy != ""} {error "unprocessed haltwhy $haltwhy}
@@ -960,7 +966,7 @@ proc requestdmaorint {state rdata} {
             puts -nonewline [format "  <<brkreq=1 3cycle=%o addr=%o%04o" $dma3cycle $dmafield $dmaaddr]
             if {$dmawrmem} {puts -nonewline [format " wdata=%04o" $dmawdata]}
             puts -nonewline ">> "
-            bus set iBRKWRM $dmawrmem iDMAADDR [expr {($dmafield << 12) | $dmaaddr}] \
+            bus set iBRKWRM $dmawrmem iDMAFLD $dmafield \
                 i3CYCLE $dma3cycle iCAINC $dmacainc iBRKRQST 1
         }
     }

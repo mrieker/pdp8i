@@ -17,7 +17,7 @@ module backplane (
     input iINTRQST,                 // request interrupt
     input iIOSKIP,                  // increment PC at end of IO pulse
     input iLNKTOG,                  // toggle link register
-    input[14:00] iDMAADDR,          // device sending address for DMA
+    input[2:0] iDMAFLD,             // device sending address for DMA
     input[11:00] iINBUS,            // device sending data for PIO or DMA
                                     // also memory read data if memdisab set
     input iPAUSE,                   // pause processor clocking (stretch cycle)
@@ -110,21 +110,9 @@ module backplane (
         .BWCOV   (),
         .CAINC   (),
         .CYCLE3  (),
-        .DMADR_0  (),
-        .DMADR_1  (),
-        .DMADR_10 (),
-        .DMADR_11 (),
-        .DMADR_2  (),
-        .DMADR_3  (),
-        .DMADR_4  (),
-        .DMADR_5  (),
-        .DMADR_6  (),
-        .DMADR_7  (),
-        .DMADR_8  (),
-        .DMADR_9  (),
-        .DMADR_12 (),
-        .DMADR_13 (),
-        .DMADR_14 (),
+        .DMAFLD_0 (),
+        .DMAFLD_1 (),
+        .DMAFLD_2 (),
         .FIELD_0 (),
         .FIELD_1 (),
         .FIELD_2 (),
@@ -293,21 +281,9 @@ module backplane (
         , .CAINC    ()
         , .CLOK2    (clok2)
         , .CYCLE3   ()
-        , .DMADR_0  ()
-        , .DMADR_1  ()
-        , .DMADR_2  ()
-        , .DMADR_3  ()
-        , .DMADR_4  ()
-        , .DMADR_5  ()
-        , .DMADR_6  ()
-        , .DMADR_7  ()
-        , .DMADR_8  ()
-        , .DMADR_9  ()
-        , .DMADR_10 ()
-        , .DMADR_11 ()
-        , .DMADR_12 ()
-        , .DMADR_13 ()
-        , .DMADR_14 ()
+        , .DMAFLD_0 ()
+        , .DMAFLD_1 ()
+        , .DMAFLD_2 ()
         , .GND      (1'b0)
         , .INTINH   ()
         , .INTRQST  ()
@@ -456,21 +432,15 @@ module backplane (
         , .DFLD_0   (dfield[0])
         , .DFLD_1   (dfield[1])
         , .DFLD_2   (dfield[2])
-        , .DMADR_0  (swldad ? swdfld[0] : iDMAADDR[00])
-        , .DMADR_1  (swldad ? swdfld[1] : iDMAADDR[01])
-        , .DMADR_2  (swldad ? swdfld[2] : iDMAADDR[02])
-        , .DMADR_3  (swldad ? swifld[0] : iDMAADDR[03])
-        , .DMADR_4  (swldad ? swifld[1] : iDMAADDR[04])
-        , .DMADR_5  (swldad ? swifld[2] : iDMAADDR[05])
-        , .DMADR_6  (iDMAADDR[06])
-        , .DMADR_7  (iDMAADDR[07])
-        , .DMADR_8  (iDMAADDR[08])
-        , .DMADR_9  (iDMAADDR[09])
-        , .DMADR_10 (iDMAADDR[10])
-        , .DMADR_11 (iDMAADDR[11])
-        , .DMADR_12 (iDMAADDR[12])
-        , .DMADR_13 (iDMAADDR[13])
-        , .DMADR_14 (iDMAADDR[14])
+        , .DMADR_0  (swdfld[0])
+        , .DMADR_1  (swdfld[1])
+        , .DMADR_2  (swdfld[2])
+        , .DMADR_3  (swifld[0])
+        , .DMADR_4  (swifld[1])
+        , .DMADR_5  (swifld[2])
+        , .DMAFLD_0 (iDMAFLD[0])
+        , .DMAFLD_1 (iDMAFLD[1])
+        , .DMAFLD_2 (iDMAFLD[2])
         , .FIELD_0  (memfield[0])
         , .FIELD_1  (memfield[1])
         , .FIELD_2  (memfield[2])
@@ -622,26 +592,12 @@ module backplane (
         , .CAINC    (iCAINC)
         , .CLOK2    (clok2)
         , .CYCLE3   (i3CYCLE)
-        , .DMADR_0  (iDMAADDR[00])
-        , .DMADR_1  (iDMAADDR[01])
-        , .DMADR_10 (iDMAADDR[10])
-        , .DMADR_11 (iDMAADDR[11])
-        , .DMADR_12 (iDMAADDR[12])
-        , .DMADR_13 (iDMAADDR[13])
-        , .DMADR_14 (iDMAADDR[14])
-        , .DMADR_2  (iDMAADDR[02])
-        , .DMADR_3  (iDMAADDR[03])
-        , .DMADR_4  (iDMAADDR[04])
-        , .DMADR_5  (iDMAADDR[05])
-        , .DMADR_6  (iDMAADDR[06])
-        , .DMADR_7  (iDMAADDR[07])
-        , .DMADR_8  (iDMAADDR[08])
-        , .DMADR_9  (iDMAADDR[09])
+        , .DMAFLD_0 ()
+        , .DMAFLD_1 ()
+        , .DMAFLD_2 ()
         , .GND      (1'b0)
         , .INBUS_0  (inbus[00])
         , .INBUS_1  (inbus[01])
-        , .INBUS_10 (inbus[10])
-        , .INBUS_11 (inbus[11])
         , .INBUS_2  (inbus[02])
         , .INBUS_3  (inbus[03])
         , .INBUS_4  (inbus[04])
@@ -650,6 +606,8 @@ module backplane (
         , .INBUS_7  (inbus[07])
         , .INBUS_8  (inbus[08])
         , .INBUS_9  (inbus[09])
+        , .INBUS_10 (inbus[10])
+        , .INBUS_11 (inbus[11])
         , .INTINH   (iINTINH)
         , .INTRQST  (intrq)
         , .IOSKIP   (ioskip)
