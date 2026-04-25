@@ -340,7 +340,7 @@ proc simtest {} {
                             }
                             ;# for non-memory operand instructions, the arithmetic was done as part of the FETCH
                             ;# in any case, we are now past TP3 and so can drop the extended arithmetic results
-                            bus set iACCLEAR 0 iINBUS 0 iLNKTOG 0
+                            bus set iACCLEAR 0 iINBUS 0
                         }
                     }
 
@@ -553,7 +553,7 @@ proc memorycycle {state field addr rdata wdata} {
     ;# clear any bits being output by io instruction
     if $doesio {
         verifybit [bus oIOP] 0 "IOP after IO instruction"
-        bus set iACCLEAR 0 iIOSKIP 0 iINBUS 0 iLNKTOG 0
+        bus set iACCLEAR 0 iIOSKIP 0 iINBUS 0
     }
     if {($state == $MS_BREAK) && $dmawrmem} {
         bus set iINBUS 0
@@ -581,7 +581,7 @@ proc memorycycle {state field addr rdata wdata} {
     set sbhalted 0
     if {($state != $MS_DEPOS) && ($state != $MS_EXAM)} {
         ##set beginst [expr {($newstate == $MS_FETCH) || ($newstate == $MS_INTAK) || ($newstate == $MS_WRDCT) ||
-        ##                   (($newstate == $MS_BREAK) && ! [bus i3CYCLE])}]
+        ##                   (($newstate == $MS_BREAK) && ! [bus iCYCLE3])}]
 
         if {($state == $MS_FETCH) && (($rdata & 07403) == 07402)} {
             set sbhalted 1
@@ -787,7 +787,6 @@ proc doioinstr {opcode} {
     set acclear 0
     set ioskip  0
     set acbits  0
-    set lnktog  0
 
     ;# - processor.v itself processes these io opcodes
     if {$opcode == 06001} {
@@ -799,7 +798,7 @@ proc doioinstr {opcode} {
         set acclear [randbits 1]    ;# supply random values
         set ioskip  [randbits 1]
         set acbits [randbits 12]
-        bus set iACCLEAR $acclear iIOSKIP $ioskip iINBUS $acbits iLNKTOG $lnktog
+        bus set iACCLEAR $acclear iIOSKIP $ioskip iINBUS $acbits
     } elseif {($opcode & 07700) == 06200} {
 
         ;# - memext.v processes these io opcodes (manipulate memory field bits)
@@ -833,12 +832,11 @@ proc doioinstr {opcode} {
         error [format "unknown IO opcode %04o" $opcode]
     }
 
-    puts -nonewline [format " => IOP => %s%s%04o%s" [expr {$lnktog ? "^" : " "}] [expr {$acclear ? "=" : "|"}] $acbits [expr {$ioskip ? "+" : " "}]]
+    puts -nonewline [format " => IOP => %s%04o%s" [expr {$acclear ? "=" : "|"}] $acbits [expr {$ioskip ? "+" : " "}]]
 
     ;# update our shadow registers
     if {$acclear} {set acum 0}
     if {$ioskip}  {set pctr [expr {($pctr + 1) & 07777}]}
-    set linc [expr {$linc ^ $lnktog}]
     set acum [expr {$acum | $acbits}]
 }
 
@@ -967,7 +965,7 @@ proc requestdmaorint {state rdata} {
             if {$dmawrmem} {puts -nonewline [format " wdata=%04o" $dmawdata]}
             puts -nonewline ">> "
             bus set iBRKWRM $dmawrmem iDMAFLD $dmafield \
-                i3CYCLE $dma3cycle iCAINC $dmacainc iBRKRQST 1
+                iCYCLE3 $dma3cycle iCAINC $dmacainc iBRKRQST 1
         }
     }
     if {! $brkrequest} {bus set iBRKRQST 0}

@@ -253,14 +253,13 @@ static int cmd_bus (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj
 
     if (pintable == NULL) {
         Pin pt[] = {
-            {  1, OFFS (i3CYCLE),  true,  "i3CYCLE"  },   // do 3-cycle break
             {  1, OFFS (iACCLEAR), true,  "iACCLEAR" },   // io pulse clears AC
             {  1, OFFS (iBRKRQST), true,  "iBRKRQST" },   // requesting break
             {  1, OFFS (iBRKWRM),  true,  "iBRKWRM"  },   // break cycle writes memory
             {  1, OFFS (iCAINC),   true,  "iCAINC"   },   // curad cycle increments address word
+            {  1, OFFS (iCYCLE3),  true,  "iCYCLE3"  },   // do 3-cycle break
             {  1, OFFS (iINTRQST), true,  "iINTRQST" },   // request interrupt
             {  1, OFFS (iIOSKIP),  true,  "iIOSKIP"  },   // increment PC at end of IO pulse
-            {  1, OFFS (iLNKTOG),  true,  "iLNKTOG"  },   // toggle link register
             {  3, OFFS (iDMAFLD),  true,  "iDMAFLD"  },   // device sending address for DMA
             { 12, OFFS (iINBUS),   true,  "iINBUS"   },   // device sending data for PIO or DMA
             {  1, OFFS (iPAUSE),   true,  "iPAUSE"   },   // pause processor clocking (stretch cycle)
@@ -299,7 +298,6 @@ static int cmd_bus (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj
 #endif
 
             { 12, OFFS (oACUM),    false, "oACUM"    },
-            {  1, OFFS (oBREAK),   false, "oBREAK"   },   // currently doing BREAK (DMA) cycle
             {  1, OFFS (oBWCOV),   false, "oBWCOV"   },   // 3-cycle DMA wordcount overflowed
             {  1, OFFS (oION),     false, "oION"     },   // interrupts enabled
             {  1, OFFS (oIOP),     false, "oIOP"     },   // io instruction pulse

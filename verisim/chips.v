@@ -937,10 +937,51 @@ module X74HC240 (input zclock, zreset,
 
     always @(posedge zclock) begin
         // 1y3   1y2   1y1   1y0      1oe              1a3  1a2  1a1  1a0
-        { p12o, p14o, p16o, p18o } <= p1  ? 4'h0 : ~ { p8,  p6,  p4,  p2  };
+        { p12o, p14o, p16o, p18o } <= p1  ? 4'hF : ~ { p8,  p6,  p4,  p2  };
 
         // 2y3   2y2   2y1   2y0      2oe              2a3  2a2  2a1  2a0
-        {  p3o,  p5o,  p7o,  p9o } <= p19 ? 4'h0 : ~ { p17, p15, p13, p11 };
+        {  p3o,  p5o,  p7o,  p9o } <= p19 ? 4'hF : ~ { p17, p15, p13, p11 };
+    end
+
+endmodule
+
+module X74HC244 (input zclock, zreset,
+          input      p1
+        , input      p2
+        , input      p3i
+        , output reg p3o
+        , input      p4
+        , input      p5i
+        , output reg p5o
+        , input      p6
+        , input      p7i
+        , output reg p7o
+        , input      p8
+        , input      p9i
+        , output reg p9o
+        , input      p10
+        , input      p11
+        , input      p12i
+        , output reg p12o
+        , input      p13
+        , input      p14i
+        , output reg p14o
+        , input      p15
+        , input      p16i
+        , output reg p16o
+        , input      p17
+        , input      p18i
+        , output reg p18o
+        , input      p19
+        , input      p20
+);
+
+    always @(posedge zclock) begin
+        // 1y3   1y2   1y1   1y0      1oe            1a3  1a2  1a1  1a0
+        { p12o, p14o, p16o, p18o } <= p1  ? 4'hF : { p8,  p6,  p4,  p2  };
+
+        // 2y3   2y2   2y1   2y0      2oe            2a3  2a2  2a1  2a0
+        {  p3o,  p5o,  p7o,  p9o } <= p19 ? 4'hF : { p17, p15, p13, p11 };
     end
 
 endmodule
@@ -1010,7 +1051,7 @@ module X74LS540 (input zclock, zreset,
     wire[7:0] din = { p9, p8, p7, p6, p5, p4, p3, p2 };
 
     always @(posedge zclock) begin
-        { p11o, p12o, p13o, p14o, p15o, p16o, p17o, p18o } <= oe ? ~ din : 8'h00;
+        { p11o, p12o, p13o, p14o, p15o, p16o, p17o, p18o } <= oe ? ~ din : 8'hFF;
     end
 
 endmodule
@@ -1050,7 +1091,7 @@ module X74HCT541 (input zclock, zreset,
     wire[7:0] din = { p9, p8, p7, p6, p5, p4, p3, p2 };
 
     always @(posedge zclock) begin
-        { p11o, p12o, p13o, p14o, p15o, p16o, p17o, p18o } <= oe ? din : 8'h00;
+        { p11o, p12o, p13o, p14o, p15o, p16o, p17o, p18o } <= oe ? din : 8'hFF;
     end
 
 endmodule
@@ -1130,7 +1171,7 @@ module XCY7C199 (input zclock, zreset,
         end else begin
             delay <= array[a];
         end
-        { p19o, p18o, p17o, p16o, p15o, p13o, p12o, p11o } <= (~ p20 & ~ p22 & p27) ? delay : 8'h00;
+        { p19o, p18o, p17o, p16o, p15o, p13o, p12o, p11o } <= (~ p20 & ~ p22 & p27) ? delay : 8'hFF;
     end
 
 endmodule

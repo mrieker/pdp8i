@@ -89,7 +89,7 @@ public class ParsePCB {
             }
         }
 
-        // fill in network references
+        // fill in networks referenced by the component
         for (String refer : compons.keySet ()) {
             Compon compon = compons.get (refer);
 
@@ -98,7 +98,10 @@ public class ParsePCB {
                 int npins = compon.padnets.length;
                 for (int i = 0; i < npins; i ++) {
                     Network network = netsbynum.get (compon.padnets[i]);
-                    if (network != null) network.netport = true;
+                    if (network != null) {
+                        network.netport = true;
+                        network.numrefs ++;
+                    }
                 }
             }
 
@@ -108,6 +111,7 @@ public class ParsePCB {
                 for (int i = 0; i < npins; i ++) {
                     Network network = netsbynum.get (compon.padnets[i]);
                     if (network != null) {
+                        network.numrefs ++;
                         switch (compon.pintypes[i]) {
                             case OUTPUT: {
                                 if (network.netrefs > 0) {
@@ -180,7 +184,7 @@ public class ParsePCB {
                 System.out.print (" = ");
                 first = true;
                 for (String tnn : network.trinetnames) {
-                    if (! first) System.out.print (" | ");
+                    if (! first) System.out.print (" & ");
                     System.out.print (tnn);
                     first = false;
                 }
@@ -195,7 +199,8 @@ public class ParsePCB {
         if (error) System.exit (1);
     }
 
-    // print connector network names for a module statement
+    // print connector pin network names for a module statement
+    // skip pins not connected to anything even if it has a network name
     //  input:
     //   sep = separator character
     //   netnames = all networks indexed by name
@@ -206,7 +211,7 @@ public class ParsePCB {
     public static char printconpins (char sep, TreeMap<String,Network> netsbyname, String keywrd)
     {
         for (Network network : netsbyname.values ()) {
-            if (network.netport && ! network.netname.startsWith ("unconnected")) {
+            if (network.netport && ! network.netname.startsWith ("unconnected") && (network.numrefs > 1)) {
                 String porttype = "input";
                 if (network.netrefs > 0) porttype = "inout";
                 if (network.netrefs < 0) porttype = "output";
@@ -455,6 +460,7 @@ public class ParsePCB {
         public int netrefs;         // <0: has an OUTPUT pin
                                     // >0: multiple TRISTATE pins
         public boolean netport;     // is referenced by a connector
+        public int numrefs;         // number of pins that reference the net
 
         public LinkedList<String> trinetnames = new LinkedList<> ();
     }
