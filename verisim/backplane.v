@@ -61,6 +61,9 @@ module backplane (
     wire[11:00] _busACUM, _busMADR, _busMBUF, _busMQUO, _busPCTR, _busINBUS;
     wire[11:09] _busIREG;
 
+    // power-on reset driven by sim
+    assign _busRESET = ~ reset;
+
     // output some bus signals to simulator
     assign oACUM    = ~ _busACUM;
     assign oBUSINI  = ~ _busBUSINI;
@@ -116,18 +119,18 @@ module backplane (
         .CONSDA   (consdai),
         .CONSDA_o (consdao),
 
-        .bGPIO_4    (gpin[04] | gpout[04]),
-        .bGPIO_5    (gpin[05] | gpout[05]),
-        .bGPIO_6    (gpin[06] | gpout[06]),
-        .bGPIO_7    (gpin[07] | gpout[07]),
-        .bGPIO_8    (gpin[08] | gpout[08]),
-        .bGPIO_9    (gpin[09] | gpout[09]),
-        .bGPIO_10   (gpin[10] | gpout[10]),
-        .bGPIO_11   (gpin[11] | gpout[11]),
-        .bGPIO_12   (gpin[12] | gpout[12]),
-        .bGPIO_13   (gpin[13] | gpout[13]),
-        .bGPIO_14   (gpin[14] | gpout[14]),
-        .bGPIO_15   (gpin[15] | gpout[15]),
+        .bGPIO_4    (gpin[04] & gpout[04]),
+        .bGPIO_5    (gpin[05] & gpout[05]),
+        .bGPIO_6    (gpin[06] & gpout[06]),
+        .bGPIO_7    (gpin[07] & gpout[07]),
+        .bGPIO_8    (gpin[08] & gpout[08]),
+        .bGPIO_9    (gpin[09] & gpout[09]),
+        .bGPIO_10   (gpin[10] & gpout[10]),
+        .bGPIO_11   (gpin[11] & gpout[11]),
+        .bGPIO_12   (gpin[12] & gpout[12]),
+        .bGPIO_13   (gpin[13] & gpout[13]),
+        .bGPIO_14   (gpin[14] & gpout[14]),
+        .bGPIO_15   (gpin[15] & gpout[15]),
         .bGPIO_4_o  (gpout[04]),
         .bGPIO_5_o  (gpout[05]),
         .bGPIO_6_o  (gpout[06]),
@@ -514,6 +517,13 @@ module backplane (
         ._IFLD_0_o  (_memIFLD[0]),
         ._IFLD_1_o  (_memIFLD[1]),
         ._IFLD_2_o  (_memIFLD[2]),
+
+        ._FIELD_0   (_busFIELD[0]),     // field currently in use
+        ._FIELD_1   (_busFIELD[1]),
+        ._FIELD_2   (_busFIELD[2]),
+        ._FIELD_0_o (_busFIELD[0]),
+        ._FIELD_1_o (_busFIELD[1]),
+        ._FIELD_2_o (_busFIELD[2]),
 
         ._INBUS_0   (_busINBUS[0]),
         ._INBUS_1   (_busINBUS[1]),
