@@ -217,8 +217,8 @@ proc simtest {} {
                             break
                         }
                         if {($opcode & 07401) == 07400} {           ;# group 2
-                            if {! $testcons} {
-                                set opcode [expr {$opcode & 07775}] ;# don't do HLT
+                            if {($opcode & 2) && (! $testcons || ([randbits 2] != 0))} {
+                                incr opcode -2                      ;# don't do HLT
                             }
                             set swregsent [swtch reg]
                             if {$swregsent != $swregpend} {         ;# see if processor has absorbed switches

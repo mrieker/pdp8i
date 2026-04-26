@@ -490,7 +490,14 @@ proc runstep {} {
             1 {
                 incr mcpltime
                 if {[iic] != ""} {
-                    ;# set selection pins to the row: 0x14 <= 1'b0 row<2> 6'b000000 row<1:0> 6'b000000
+                    ;# keep gpio panel connector data pins from munging bGPIO bus
+                    gpio 07777
+                    ;# set iicsel selection pins to the row
+                    ;#  0x14 <= 1'b0 row<2> 6'b000000
+                    ;#  0x15 <=    row<1:0> 6'b000000
+                    ;# asserts lb<row>sel and bGPOUT_2<row>
+                    ;#  lb<row>sel gates register onto bGPIO
+                    ;#  bGPOUT_2<row> tells panel to display on leds
                     set aout [expr {($mcpltrow & 4) << 4}]
                     set bout [expr {($mcpltrow & 3) << 6}]
                     iic wr 0x40 wr 0x14 wr $aout wr $bout
@@ -501,7 +508,7 @@ proc runstep {} {
             2 {
                 incr mcpltime
                 if {[iic] != ""} {
-                    ;# read light pins: 0x12
+                    ;# read light pins from bGPIO: 0x12,0x13
                     iic wr 0x40 wr 0x12 rs wr 0x41 rd rd
                     set mcpstate 3
                 }
@@ -529,14 +536,21 @@ proc runstep {} {
                             ;# usemcp == 1: mcp23017 only
                             ;#  swrowpends -> swrowsents -> swrowrcvds
                             ;# maybe update like-numbered switch row
+                            ;#  if just displayed light row 0, check switch row 0
+                            ;#  if just displayed light row 1, check switch row 1
+                            ;#  if just displayed light row 2, check switch row 2
                             if {($mcpltrow <= 2) && ([lindex $swrowpends $mcpltrow] != [lindex $swrowsents $mcpltrow])} {
+                                ;# at this point, ldswrow0,1,2 are all high
                                 ;# like-numbered switch row needs updating
                                 ;# handle it then do next light row
                                 set mcpswrow $mcpltrow
                                 set swval [lindex $swrowpends $mcpswrow]
                                 lset swrowsents $mcpswrow $swval
-                                ;# set data pins value to switch row and value: 0x14 <= 2'b10 val<11:06> row<1:0> val<05:00>
-                                ;# only changes one iicsel bit (sets iicsel_3) to avoid glitching lswrow<n>
+                                ;# set data pins value to switch row and value:
+                                ;#  0x14 <=    2'b10 val<11:06>
+                                ;#  0x14 <= row<1:0> val<05:00>
+                                ;# only changes one iicsel bit (sets iicsel_3) to avoid glitching ldswrow<n>
+                                ;#  smoothly drives ldswrow<n> low
                                 set aout [expr {0x80 | ($swval & 63)}]
                                 set bout [expr {($mcpswrow << 6) | ($swval >> 6)}]
                                 iic wr 0x40 wr 0x14 wr $aout wr $bout
@@ -572,8 +586,9 @@ proc runstep {} {
 
             5 {
                 ;# waiting for mcp to get the switch value to be sent to flipflops
+                ;# and for ldswrow<n> to go low
                 if {[iic] != ""} {
-                    ;# set data pins to output: 0x00 <= 0x0000
+                    ;# set data pins to output mode: 0x00 <= 0x0000
                     ;# gates data pins to flipflop inputs
                     iic wr 0x40 wr 0x00 wr 0x00 wr 0x00
                     set mcpstate 6
@@ -589,14 +604,15 @@ proc runstep {} {
                     set bout [expr {($mcpswrow << 6) | ($swval >> 6)}]
                     if {$mcpswrow == 0} {
                         ;# doing swrow 0, transition iicsel from 1000 to 1011 might glitch
-                        ;# so transition iicsel to 1010 first
+                        ;# so transition iicsel from 1000 to 1010 first
                         ;# by doing 0x15 <= 2'b10 val<05:00>
                         ;# driving ldswrow0 high (clocking data into swrow0)
                         ;#  with side-effect of driving ldswrow2 low
                         iic wr 0x40 wr 0x15 wr [expr {$bout | 0x80}]
                         set mcpstate 8
                     } else {
-                        ;# doing swrow 1 or 2, transition iicsel to 1011 won't glitch
+                        ;# doing swrow 1 or 2, transition iicsel from 1001 or 1010 to 1011 won't glitch
+                        ;# drives ldswrow<n> high
                         ;# so do 0x15 <= 2'b11 val<05:00>
                         iic wr 0x40 wr 0x15 wr [expr {$bout | 0xC0}]
                         set mcpstate 7
@@ -606,7 +622,7 @@ proc runstep {} {
 
             7 {
                 if {[iic] != ""} {
-                    ;# new value is received into flipflops
+                    ;# new switch value has been clocked into switch flipflops
                     set swval [lindex $swrowsents $mcpswrow]
                     lset swrowrcvds $mcpswrow $swval
                     ;# resume doing lights
@@ -680,8 +696,7 @@ proc runstep {} {
                     }
                     ;# if low switch select, send the row contents
                     if {~ $g & (0x1000 << $r)} {
-                        set sw [lindex $swrowsents $r]
-                        gpio [expr {($g & 0xFFF000) | $sw}]
+                        gpio [lindex $swrowsents $r]
                     }
                     ;# if low-to-high for switch select, console.kicad_sch clocked sent value in
                     if {~ $lastgpio & $g & (0x1000 << $r)} {
@@ -704,14 +719,13 @@ proc runstep {} {
                     }
                     ;# if low switch select, send the row contents
                     if {~ $g & (0x1000 << $r)} {
-                        set sw [lindex $swrowgpios $r]
-                        gpio [expr {($g & 0xFFF000) | $sw}]
+                        gpio [lindex $swrowgpios $r]
                     }
                 }
             }
         }
         if {($g & 0x7000) == 0x7000} {
-            gpio 0                          ;# if no switches being requested, clear to zeroes
+            gpio 07777                      ;# if no switches being requested, set to ones to not interfere with lights
         }
         set lastgpio $g                     ;# save gpio to detect edges
         if {$usemcp != 1} {
@@ -728,17 +742,17 @@ proc startat {addr} {
     if {($addr < 0) || ($addr > 07777)} {
         error "bad address $addr"
     }
-    puts "startat*: setting swreg $addr"
+    puts "startat: setting swreg $addr"
     swtchwait reg $addr
-    puts "startat*: pressing ldad"
+    puts "startat: pressing ldad"
     swtchwait ldad 1
-    puts "startat*: releasing ldad"
+    puts "startat: releasing ldad"
     swtchwait ldad 0
-    puts "startat*: pressing start"
+    puts "startat: pressing start"
     swtchwait start 1
-    puts "startat*: releasing start"
+    puts "startat: releasing start"
     swtchwait start 0
-    puts "startat*: done"
+    puts "startat: done"
 }
 
 # modify and query switch settings
