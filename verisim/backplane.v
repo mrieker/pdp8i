@@ -10,6 +10,7 @@ module backplane (
                                     // - also has row selectors
 
     input iACCLEAR,                 // io pulse clears AC
+    input iBRKGNTI,                 // chained break grant
     input iBRKRQST,                 // requesting break
     input iBRKWRM,                  // break cycle writes memory
     input iCAINC,                   // curad cycle increments address word
@@ -20,6 +21,7 @@ module backplane (
     input[11:00] iINBUS,            // device sending data for PIO or DMA
                                     // also memory read data if memdisab set
     input iPAUSE,                   // pause processor clocking (stretch cycle)
+    output oBRKGNTO,                // chained break grant
     output oBUSINI,                 // initialize bus devices
     output oBWCOV,                  // 3-cycle DMA wordcount overflowed
     output oION,                    // interrupts enabled
@@ -114,6 +116,8 @@ module backplane (
         .swifld_2 (swifld[2]),
         .swifld_1 (swifld[1]),
         .swifld_0 (swifld[0]),
+
+        .BRKGNTI  (),
 
         .CONSCK   (consck),
         .CONSDA   (consdai),
@@ -319,6 +323,8 @@ module backplane (
         .GND    (1'b0),
         .VCC    (1'b1),
 
+        .BRKGNTI  (),
+
         ._ACUM_0    (_busACUM[0]),
         ._ACUM_1    (_busACUM[1]),
         ._ACUM_2    (_busACUM[2]),
@@ -449,6 +455,8 @@ module backplane (
         .GND    (1'b0),
         .VCC    (1'b1),
 
+        .BRKGNTI  (),
+
         ._BUSINI   (_busBUSINI),
 
         ._DMAFLD_0 (_busDMAFLD[0]),
@@ -559,12 +567,17 @@ module backplane (
     //  PROCESSOR  //
     /////////////////
 
+    wire cpuBRKGNTO;
+
     processor procboard (
         .zclock (zclock),
         .zreset (zreset),
         .CLOK2  (clok2),
         .GND    (1'b0),
         .VCC    (1'b1),
+
+        .BRKGNTO    (cpuBRKGNTO),
+        .BRKGNTO_o  (cpuBRKGNTO),
 
         ._ACCLEAR   (_busACCLEAR),
         ._BRKRQST   (_busBRKRQST),
@@ -809,5 +822,8 @@ module backplane (
     assign _busIOSKIP  = _eaeIOSKIP & ~ iIOSKIP & ~ ttyioskp;
     assign _busMEMDIS  = ~ memdisab;
     assign _busPAUSE   = _eaePAUSE & ~ iPAUSE;
+
+    // break grant chain
+    assign oBRKGNTO = cpuBRKGNTO;
 
 endmodule

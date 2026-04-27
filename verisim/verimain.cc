@@ -254,6 +254,7 @@ static int cmd_bus (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj
     if (pintable == NULL) {
         Pin pt[] = {
             {  1, OFFS (iACCLEAR), true,  "iACCLEAR" },   // io pulse clears AC
+            {  1, OFFS (iBRKGNTI), true,  "iBRKGNTI" },   // break grant chain
             {  1, OFFS (iBRKRQST), true,  "iBRKRQST" },   // requesting break
             {  1, OFFS (iBRKWRM),  true,  "iBRKWRM"  },   // break cycle writes memory
             {  1, OFFS (iCAINC),   true,  "iCAINC"   },   // curad cycle increments address word
@@ -298,6 +299,7 @@ static int cmd_bus (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj
 #endif
 
             { 12, OFFS (oACUM),    false, "oACUM"    },
+            {  1, OFFS (oBRKGNTO), false, "oBRKGNTO" },   // break grant chain
             {  1, OFFS (oBWCOV),   false, "oBWCOV"   },   // 3-cycle DMA wordcount overflowed
             {  1, OFFS (oION),     false, "oION"     },   // interrupts enabled
             {  1, OFFS (oIOP),     false, "oIOP"     },   // io instruction pulse

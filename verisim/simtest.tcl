@@ -445,8 +445,8 @@ proc finishline {} {
 ;#         update accumulator
 ;#   TS4 = update to next state
 proc memorycycle {state field addr rdata wdata} {
-    global dmaaddr dmawrmem dmawdata hasmemcmd memcycwcover opcode
-    global MS_BREAK MS_DEPOS MS_EXAM MS_EXEC MS_FETCH MS_INTAK MS_WRDCT
+    global brkrequest dmaaddr dmawrmem dmawdata hasmemcmd memcycwcover opcode
+    global MS_BREAK MS_CURAD MS_DEPOS MS_EXAM MS_EXEC MS_FETCH MS_INTAK MS_WRDCT
     global haltdelay haltwhy memcycno panelhalt testcons
 
     incr memcycno
@@ -474,6 +474,9 @@ proc memorycycle {state field addr rdata wdata} {
 
     ;# should now be fully transitioned to the major state
     verify12 [bus majst] $state "bad state at start of mem cycle"
+
+    ;# break grant should match break request
+    verifybit [bus oBRKGNTO] $brkrequest "break grant at beginning of $state cycle"
 
     ;# cpu should be outputting address we expect
     set expaddr [expr {($field << 12) | $addr}]
@@ -516,6 +519,12 @@ proc memorycycle {state field addr rdata wdata} {
         extendedarithmetic $rdata
     }
 
+    ;# break grant should clear at TP2 of a BREAK cycle
+    if {$state == $MS_BREAK} {
+        waitassert TP2
+        verifybit [bus oBRKGNTO] 0 "break grant after TP2 of BREAK cycle"
+    }
+
     ;# wait for it to enter TS3, meanwhile cpu should possibly be modifying
     ;# the value and sending the value (modified or not) back to the memory
     waitassert TS3
@@ -547,6 +556,9 @@ proc memorycycle {state field addr rdata wdata} {
     set actaddr [expr {([bus memfield] << 12) | [bus oMADR]}]
     verify15 $actaddr $expaddr "XMA bad at end TS3 of $state cycle"
     verify12 [bus oMBUF] $wdata "MB during writeback at end TS3"
+
+    ;# break grant should match break request at TP3
+    verifybit [bus oBRKGNTO] $brkrequest "break grant after TP3"
 
     waitnegate TP3
 
