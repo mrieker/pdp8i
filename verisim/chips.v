@@ -453,6 +453,43 @@ module X74HC74 (input zclock, zreset,
 
 endmodule
 
+module X74LS75 (input zclock, zreset,
+          output     p1     // _q0
+        , input      p2     // d0
+        , input      p3     // d1
+        , input      p4     // e23
+        , input      p5     // vcc
+        , input      p6     // d2
+        , input      p7     // d3
+        , output     p8     // _q3
+        , output reg p9     // q3
+        , output reg p10    // q2
+        , output     p11    // _q2
+        , input      p12    // gnd
+        , input      p13    // e01
+        , output     p14    // _q1
+        , output reg p15    // q1
+        , output reg p16    // q0
+);
+
+    assign p1  = ~ p16;
+    assign p14 = ~ p15;
+    assign p11 = ~ p10;
+    assign p8  = ~ p9;
+
+    always @(posedge zclock) begin
+        if (p13) begin
+            p16 <= p2;
+            p15 <= p3;
+        end
+        if (p4) begin
+            p10 <= p6;
+            p9  <= p7;
+        end
+    end
+endmodule
+
+
 module X74LS85 (input zclock, zreset,
           input  p1         // B3
         , input  p2         // (A < B) IN   from

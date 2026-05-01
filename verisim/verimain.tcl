@@ -39,6 +39,7 @@ proc getenv {varname {defvalu ""}} {
 
 # get character sent by pdp to tty printer
 proc getttypr {} {
+    if {([bus set armraddr 040 get armrdata] & 0xFFFFF000) != 0x54541000} {error "bad tty device"}
     set pr [bus set armraddr 042 get armrdata]
     if {! ($pr & 0x40000000)} {return -1}
     bus set armwaddr 042 armwdata 0x80000000 armwrite 1

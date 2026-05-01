@@ -5,13 +5,6 @@
 ;#  > simtest
 
 set acum         0
-set brkrequest   0
-set dma3cycle    0
-set dmaaddr      0
-set dmacainc     0
-set dmawrmem     0
-set dmafield     0
-set dmawdata     0
 set haltdelay    0
 set haltwhy      ""
 set hasmemcmd    0
@@ -55,13 +48,6 @@ clk ratio 10    ;# 100nS clock cycles
 
 proc simtest {} {
     global acum
-    global brkrequest
-    global dma3cycle
-    global dmaaddr
-    global dmacainc
-    global dmawrmem
-    global dmafield
-    global dmawdata
     global hasmemcmd
     global instrno
     global intdelayed
@@ -125,6 +111,10 @@ proc simtest {} {
     set lastopc -1
     set nextfetch 0
 
+    set hasdmatest [expr {([bus set armraddr 044 get armrdata] & 0xFFFFF000) == 0x5A441000}]
+    set hasdmbtest [expr {([bus set armraddr 050 get armrdata] & 0xFFFFF000) == 0x5A441000}]
+    if {! $hasdmatest | ! $hasdmbtest} {error "missing dma tester"}
+
     while {! [ctrlcflag]} {
         set ercode [catch {
 
@@ -137,13 +127,27 @@ proc simtest {} {
             set randsr  0
             set execst $MS_EXEC
 
-            ;# maybe do a dma cycle
-            if {$brkrequest && ! $nextfetch} {
+            ;# see if any dma granted
+            set dmastat1 [bus set armraddr 045 get armrdata]
 
-                puts -nonewline [format "DMA %d-cycle" [expr {($dma3cycle ? 3 : 1)}]]
+            ;# maybe do a dma cycle
+            if {($dmastat1 & 0x10000) && ! $nextfetch} {
+
+                set dmbstat1 [bus set armraddr 051 get armrdata]
+                if {$dmbstat1 & 0x10000} {set dmastat1 $dmbstat1}
+                set dmastat2 [bus set armraddr [expr {($dmbstat1 & 0x10000) ? 052 : 046}] get armrdata]
+
+                set dma3cycle [expr {($dmastat1 >> 20) & 1}]
+                set dmacainc  [expr {($dmastat1 >> 19) & 1}]
+                set dmawrmem  [expr {($dmastat1 >> 18) & 1}]
+                set dmawdata  [expr {$dmastat2 & 07777}]
+                set dmaaddr   [expr {($dmastat2 >> 12) & 07777}]
+                set dmafield  [expr {($dmastat2 >> 24) & 7}]
+
+                puts -nonewline [format "DM%s %d-cycle" [expr {($dmbstat1 & 0x10000) ? "B" : "A"}] [expr {($dma3cycle ? 3 : 1)}]]
                 if {$dma3cycle} {
 
-                    ;# WC state reads wordcount from dmaaddr, increments it and writes it back
+                    ;# WC state reads wordcount from dmaaddr field 0, increments it and writes it back
                     ;# make wordcount overflow somewhat common for testing
                     set oldwordcount [randbits 12]
                     if {$oldwordcount & 04000} {set oldwordcount [expr {$oldwordcount | 07770}]}
@@ -155,7 +159,7 @@ proc simtest {} {
                     set wcshouldover [expr {$newwordcount == 0}]
                     verifybit $memcycwcover $wcshouldover "BWC OVERFLOW mismatch"
 
-                    ;# CA state reads pointer from dmaaddr + 1, increments it and writes it back
+                    ;# CA state reads pointer from dmaaddr + 1 field 0, increments it and writes it back
                     ;# then we use the incremented pointer for the transfer address
                     set dmaaddr [expr {($dmaaddr + 1) & 07777}]
                     set oldcuraddr [randbits 12]
@@ -168,10 +172,18 @@ proc simtest {} {
 
                 ;# transfer word at address dmafield:dmaaddr
                 set dmardata [randbits 12]                  ;# random value that will be sent to processor as content of memory location dmafield:dmaaddr
-                if {! $dmawrmem} {set dmawdata $dmardata}   ;# if writing, write will be value written to CM_DATA; if reading, write will be same as dmardata
+                if {! $dmawrmem} {set dmawdata $dmardata}   ;# if writing, write will be value from dmastat2; if reading, write will be same as dmardata
 
-                puts -nonewline [format "  BRK:%o%04o / %04o => %04o" $dmafield $dmaaddr $dmardata $dmawdata]
+                puts -nonewline [format "  BRK:%o%04o / %04o" $dmafield $dmaaddr $dmardata]
+                if {$dmawrmem} {
+                    puts -nonewline [format " => %04o" $dmawdata]
+                }
                 memorycycle $MS_BREAK $dmafield $dmaaddr $dmardata $dmawdata
+                if {! $dmawrmem} {
+                    set dmastat2 [bus set armraddr [expr {($dmbstat1 & 0x10000) ? 052 : 046}] get armrdata]
+                    set dmavdata [expr {$dmastat2 & 07777}]
+                    verify12 $dmavdata $dmardata "value read by dmatest.v"
+                }
             } else {
 
                 ;# maybe interrupt request is next
@@ -445,7 +457,7 @@ proc finishline {} {
 ;#         update accumulator
 ;#   TS4 = update to next state
 proc memorycycle {state field addr rdata wdata} {
-    global brkrequest dmaaddr dmawrmem dmawdata hasmemcmd memcycwcover opcode
+    global hasmemcmd memcycwcover opcode
     global MS_BREAK MS_CURAD MS_DEPOS MS_EXAM MS_EXEC MS_FETCH MS_INTAK MS_WRDCT
     global haltdelay haltwhy memcycno panelhalt testcons
 
@@ -454,7 +466,7 @@ proc memorycycle {state field addr rdata wdata} {
     ;# 0 = use extmemory.v backdoor to access internal 32KW memory chip
     ;# 1 = supply read data on iINBUS during TS1
     ;#     get write data from oMBUF during TS3
-    set memdisab [expr {! $hasmemcmd || [randbits 1]}]
+    set memdisab 0 ;## [expr {! $hasmemcmd || [randbits 1]}]
     bus set memdisab $memdisab
 
     ;# maybe flip on an halt switch if none flipped on already
@@ -474,9 +486,6 @@ proc memorycycle {state field addr rdata wdata} {
 
     ;# should now be fully transitioned to the major state
     verify12 [bus majst] $state "bad state at start of mem cycle"
-
-    ;# break grant should match break request
-    verifybit [bus oBRKGNTO] $brkrequest "break grant at beginning of $state cycle"
 
     ;# cpu should be outputting address we expect
     set expaddr [expr {($field << 12) | $addr}]
@@ -505,13 +514,6 @@ proc memorycycle {state field addr rdata wdata} {
 
     ;# MB should now have the value we wrote to the memory location or to the iINBUS
     verify12 [bus oMBUF] $rdata "MB during read"
-
-    ;# if doing a previously requested DMA cycle that writes to memory,
-    ;# output the data to be written during TS2
-    ;# processor should pick it up at posedge TP2
-    if {($state == $MS_BREAK) && $dmawrmem} {
-        bus set iINBUS $dmawdata
-    }
 
     ;# maybe perform extended arithmetic
     if {(($state == $MS_FETCH) && (($opcode & 07407) == 07401)) ||
@@ -544,8 +546,8 @@ proc memorycycle {state field addr rdata wdata} {
     ;# BWC_OVERFLOW is valid (assuming we're in WRDCT) at this TS3 through next cycle TP2
     set memcycwcover [bus oBWCOV]
 
-    ;# processor clocks BRKRQST, INTRQST at TP3, so output requests just prior to that
-    requestdmaorint $state $rdata
+    ;# processor clocks INTRQST at TP3, so output requests just prior to that
+    requestint $state $rdata
 
     ;# wait for TP3 asserted then negated indicating value written to memory
     ;# also clocks in any io instruction result
@@ -557,9 +559,6 @@ proc memorycycle {state field addr rdata wdata} {
     verify15 $actaddr $expaddr "XMA bad at end TS3 of $state cycle"
     verify12 [bus oMBUF] $wdata "MB during writeback at end TS3"
 
-    ;# break grant should match break request at TP3
-    verifybit [bus oBRKGNTO] $brkrequest "break grant after TP3"
-
     waitnegate TP3
 
     ;# clear any bits being output by io instruction
@@ -567,24 +566,15 @@ proc memorycycle {state field addr rdata wdata} {
         verifybit [bus oIOP] 0 "IOP after IO instruction"
         bus set iACCLEAR 0 iIOSKIP 0 iINBUS 0
     }
-    if {($state == $MS_BREAK) && $dmawrmem} {
-        bus set iINBUS 0
-    }
 
     ;# verify the extmemory.v memory contents
     if {! $memdisab} {
         verify12 [mem $expaddr] $wdata [format "address %05o mismatch" $expaddr]
     }
 
-    ;# assume we are doing a DMA and output the DMA address and field to the bus during TS4
-    bus set iINBUS $dmaaddr
-
     ;# step to end of cycle
     waitassert TP4
     waitnegate TP4
-
-    ;# remove DMA address from INBUS
-    bus set iINBUS 0
 
     ;# check for halted/running
     if {$haltwhy != ""} {error "unprocessed haltwhy $haltwhy}
@@ -627,7 +617,7 @@ proc memorycycle {state field addr rdata wdata} {
 proc checkhalted {} {
     global MS_BREAK MS_DEPOS MS_EXAM MS_EXEC MS_FETCH MS_INTAK MS_WRDCT
     global haltdelay haltwhy panelhalt pctr swdfpend swifpend swregpend testcons
-    global acum linc mquo sctr xmem_intdisableduntiljump brkrequest intdelayed intenabled intrequest
+    global acum linc mquo sctr xmem_intdisableduntiljump intdelayed intenabled intrequest
     global xmem_dfld xmem_ifld xmem_ifldafterjump xmem_saveddfld xmem_savedifld
 
     ;# if halted, turn off stop/step switches and press continue
@@ -755,8 +745,7 @@ proc checkhalted {} {
             set xmem_intdisableduntiljump 0
             set intdelayed 0
             set intenabled 0
-            bus set iBRKRQST 0 iINTRQST 0
-            set brkrequest 0
+            bus set iINTRQST 0
             set intrequest 0
             ;# release START button
             swtchwait start 0
@@ -956,31 +945,12 @@ proc waitnegate {sig {n 100}} {
     }
 }
 
-;# maybe request dma or interrupt
+;# maybe request interrupt
 ;# processor samples it at TP3
-proc requestdmaorint {state rdata} {
-    global brkrequest dmafield dmaaddr dmawrmem dmawdata dma3cycle dmacainc intenabled intrequest
-    global MS_FETCH MS_WRDCT MS_CURAD MS_BREAK
+proc requestint {state rdata} {
+    global intenabled intrequest
+    global MS_FETCH
 
-    if {($state == $MS_WRDCT) || ($state == $MS_CURAD) || ($state == $MS_BREAK)} {
-        set brkrequest 0
-    } elseif {! $brkrequest} {
-        set brkrequest [expr {[randbits 8] == 0}]
-        if {$brkrequest} {
-            set dmafield  [randbits 3]
-            set dmaaddr   [randbits 12]
-            set dmawrmem  [randbits 1]          ;# 0=read memory; 1=write memory
-            set dmawdata  [randbits 12]
-            set dma3cycle [expr {[randbits 2] == 0}]
-            set dmacainc  [expr {$dma3cycle && [randbits 1]}]
-            puts -nonewline [format "  <<brkreq=1 3cycle=%o addr=%o%04o" $dma3cycle $dmafield $dmaaddr]
-            if {$dmawrmem} {puts -nonewline [format " wdata=%04o" $dmawdata]}
-            puts -nonewline ">> "
-            bus set iBRKWRM $dmawrmem iDMAFLD $dmafield \
-                iCYCLE3 $dma3cycle iCAINC $dmacainc iBRKRQST 1
-        }
-    }
-    if {! $brkrequest} {bus set iBRKRQST 0}
     if {! $intrequest && (($state != $MS_FETCH) || (($rdata & 07403) != 07402))} {
         set intrequest [expr {[randbits 10] == 0}]
         if {$intrequest} {

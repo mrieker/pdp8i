@@ -777,10 +777,9 @@ module backplane (
     //  TELETYPE  //
     ////////////////
 
-    wire ttywrite = armwrite & (armwaddr[11:04] == 8'b00001000);
     wire[31:00] ttyrdata;
     wire[11:00] ttyinbus;
-    wire ttyacclr, ttyintrq, ttyioskp;
+    wire ttyacclr, ttyintrq, ttyioskp, ttywrite;
 
     pdp8itty ttyinst (
         .CLOCK (zclock),
@@ -802,28 +801,115 @@ module backplane (
         .INT_RQST (ttyintrq)
     );
 
+    wire dmaBRKGNTI, dmaBRKGNTO, dmaBRKRQST, dmaBRKWRM, dmaCAINC, dmaCYCLE3;
+    wire dmawrite;
+    wire[2:0] dmaDMAFLD;
+    wire[11:00] dmaINBUS;
+    wire[31:00] dmardata;
+
+    dmatest testa (
+        .seed (8'o123),
+        .zclock (zclock),
+        .zreset (zreset),
+
+        .armwrite (dmawrite),
+        .armraddr (armraddr[03:02]), 
+        .armwaddr (armwaddr[03:02]),
+        .armwdata (armwdata),
+        .armrdata (dmardata),
+
+        .busini (~_busBUSINI),
+        .tp2   (~ _busTP2),
+        .tp3   (~ _busTP3),
+        .ts2   (~ _busTS2),
+        .ts3   (~ _busTS3),
+        .ts4   (~ _busTS4),
+        .majst (~ _busMAJST),
+        .mbuf  (~ _busMBUF),
+
+        .brkgnti (dmaBRKGNTI),
+        .brkgnto (dmaBRKGNTO),
+
+        .brkrqst (~ _busBRKRQST),
+
+        .brkrqst_o (dmaBRKRQST),
+        .cycle3_o  (dmaCYCLE3),
+        .cainc_o   (dmaCAINC),
+        .wrmem_o   (dmaBRKWRM),
+        .dmafld_o  (dmaDMAFLD),
+        .inbus_o   (dmaINBUS)
+    );
+
+    wire dmbBRKGNTI, dmbBRKGNTO, dmbBRKRQST, dmbBRKWRM, dmbCAINC, dmbCYCLE3;
+    wire dmbwrite;
+    wire[2:0] dmbDMAFLD;
+    wire[11:00] dmbINBUS;
+    wire[31:00] dmbrdata;
+
+    dmatest testb (
+        .seed (8'o234),
+        .zclock (zclock),
+        .zreset (zreset),
+
+        .armwrite (dmbwrite),
+        .armraddr (armraddr[03:02]), 
+        .armwaddr (armwaddr[03:02]),
+        .armwdata (armwdata),
+        .armrdata (dmbrdata),
+
+        .busini (~_busBUSINI),
+        .tp2   (~ _busTP2),
+        .tp3   (~ _busTP3),
+        .ts2   (~ _busTS2),
+        .ts3   (~ _busTS3),
+        .ts4   (~ _busTS4),
+        .majst (~ _busMAJST),
+        .mbuf  (~ _busMBUF),
+
+        .brkgnti (dmbBRKGNTI),
+        .brkgnto (dmbBRKGNTO),
+
+        .brkrqst (~ _busBRKRQST),
+
+        .brkrqst_o (dmbBRKRQST),
+        .cycle3_o  (dmbCYCLE3),
+        .cainc_o   (dmbCAINC),
+        .wrmem_o   (dmbBRKWRM),
+        .dmafld_o  (dmbDMAFLD),
+        .inbus_o   (dmbINBUS)
+    );
+
     /////////////////////////////
     //  COMBINING BUS SIGNALS  //
     /////////////////////////////
 
-    assign armrdata = (armraddr[11:04] == 8'b00001000) ? ttyrdata : 0;
+    assign ttywrite = armwrite & (armwaddr[11:04] == 8'b00001000);
+    assign dmawrite = armwrite & (armwaddr[11:04] == 8'b00001001);
+    assign dmbwrite = armwrite & (armwaddr[11:04] == 8'b00001010);
+
+    assign armrdata = (armraddr[11:04] == 8'b00001000) ? ttyrdata :
+                      (armraddr[11:04] == 8'b00001001) ? dmardata :
+                      (armraddr[11:04] == 8'b00001010) ? dmbrdata :
+                      32'hDEADBEEF;
 
     // active low signals getting wire-anded on the backplane
-    assign _busACCLEAR = _eaeACCLEAR & ~ iACCLEAR & ~ ttyacclr;
-    assign _busBRKRQST = ~ iBRKRQST;
-    assign _busBRKWRM  = ~ iBRKWRM;
-    assign _busCAINC   = ~ iCAINC;
-    assign _busCYCLE3  = ~ iCYCLE3;
-    assign _busDFLD    = _conDFLD & _memDFLD;
-    assign _busDMAFLD  = ~ iDMAFLD;
-    assign _busIFLD    = _conIFLD & _memIFLD;
-    assign _busINBUS   = _conINBUS & _eaeINBUS & ~ iINBUS & _memINBUS & ~ ttyinbus;
-    assign _busINTRQST = ~ iINTRQST & ~ ttyintrq;
-    assign _busIOSKIP  = _eaeIOSKIP & ~ iIOSKIP & ~ ttyioskp;
+    assign _busACCLEAR = _eaeACCLEAR  & ~ iACCLEAR   & ~ ttyacclr;
+    assign _busBRKRQST = ~ dmaBRKRQST & ~ dmbBRKRQST & ~ iBRKRQST;
+    assign _busBRKWRM  = ~ dmaBRKWRM  & ~ dmbBRKWRM  & ~ iBRKWRM;
+    assign _busCAINC   = ~ dmaCAINC   & ~ dmbCAINC   & ~ iCAINC;
+    assign _busCYCLE3  = ~ dmaCYCLE3  & ~ dmbCYCLE3  & ~ iCYCLE3;
+    assign _busDFLD    = _conDFLD     & _memDFLD;
+    assign _busDMAFLD  = ~ dmaDMAFLD  & ~ dmbDMAFLD  & ~ iDMAFLD;
+    assign _busIFLD    = _conIFLD     & _memIFLD;
+    assign _busINBUS   = _conINBUS    & ~ dmaINBUS   & ~ dmbINBUS & _eaeINBUS & ~ iINBUS & _memINBUS & ~ ttyinbus;
+    assign _busINTRQST = ~ iINTRQST   & ~ ttyintrq;
+    assign _busIOSKIP  = _eaeIOSKIP   & ~ iIOSKIP    & ~ ttyioskp;
     assign _busMEMDIS  = ~ memdisab;
-    assign _busPAUSE   = _eaePAUSE & ~ iPAUSE;
+    assign _busPAUSE   = _eaePAUSE    & ~ iPAUSE;
 
     // break grant chain
-    assign oBRKGNTO = cpuBRKGNTO;
+    assign dmaBRKGNTI = cpuBRKGNTO;
+    assign dmbBRKGNTI = dmaBRKGNTO;
+    assign   oBRKGNTO = dmbBRKGNTO;
 
 endmodule

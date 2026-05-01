@@ -59,7 +59,6 @@ static Tcl_ObjCmdProc cmd_help;
 static Tcl_ObjCmdProc cmd_iic;
 static Tcl_ObjCmdProc cmd_mem;
 static Tcl_ObjCmdProc cmd_randbits;
-static Tcl_ObjCmdProc cmd_tty;
 
 static uint32_t scramgpio (uint32_t x);
 static void kerchunk ();
@@ -98,7 +97,6 @@ int main (int argc, char **argv)
     if (Tcl_CreateObjCommand (interp, "iic", cmd_iic, NULL, NULL) == NULL) ABORT ();
     if (Tcl_CreateObjCommand (interp, "mem",  cmd_mem,  NULL, NULL) == NULL) ABORT ();
     if (Tcl_CreateObjCommand (interp, "randbits",  cmd_randbits,  NULL, NULL) == NULL) ABORT ();
-    if (Tcl_CreateObjCommand (interp, "tty",  cmd_tty,  NULL, NULL) == NULL) ABORT ();
 
     signal (SIGINT, siginthand);
 
@@ -447,7 +445,6 @@ static int cmd_help (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Ob
     puts ("  iic [wr <n> rs rd...]   - access iic bus to console mcp23017");
     puts ("  mem <addr> [<data>]     - backdoor access to memory chip");
     puts ("  randbits <n>            - get random memory bits");
-    puts ("  tty <ttyops...>         - access tty port");
     puts ("");
     return TCL_OK;
 }
@@ -905,43 +902,6 @@ static int cmd_randbits (ClientData clientdata, Tcl_Interp *interp, int objc, Tc
 
     Tcl_SetObjResult (interp, Tcl_NewIntObj (randval));
     return TCL_OK;
-}
-
-// tty [get] pin pin ... set pin val pin val ...
-static int cmd_tty (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
-{
-#ifdef VERLTR
-    Tcl_SetResultF (interp, "tty command not supported");
-    return TCL_ERROR;
-#endif
-#ifdef ZTURN
-    static int pincount;
-    static Pin const *pintable;
-
-    if (pintable == NULL) {
-        if ((zpage[32] & 0xFFFF0000) != 0x54540000) {
-            Tcl_SetResultF (interp, "bad tty magic number %08X", zpage[32]);
-            return TCL_ERROR;
-        }
-        Pin pt[] = {
-            { 32, 0xFFFFFFFFU, 32+0, false, "magic"   },
-            { 12, 0x00000FFFU, 32+1, true,  "kbchar"  },
-            {  1, 0x40000000U, 32+1, true,  "enable"  },
-            {  1, 0x80000000U, 32+1, true,  "kbflag"  },
-            { 12, 0x00000FFFU, 32+2, false, "prchar"  },
-            {  1, 0x40000000U, 32+2, true,  "prfull"  },
-            {  1, 0x80000000U, 32+2, true,  "prflag"  },
-            {  1, 0x00000100U, 32+3, false, "intenab" }
-        };
-        pincount = sizeof pt / sizeof pt[0];
-        qsort (pt, pincount, sizeof pt[0], sortpin);
-        pintable = (Pin const *) malloc (sizeof pt);
-        if (pintable == NULL) ABORT ();
-        memcpy ((void *) pintable, (void *) pt, sizeof pt);
-    }
-
-    return cmdpintable (pincount, pintable, interp, objc, objv);
-#endif
 }
 
 // scramble/unscramble gpio data bits
