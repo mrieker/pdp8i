@@ -44,8 +44,6 @@ set testexar [getenv testexar 1]  ;# test extended arithmetic
 set testxmem [getenv testxmem 1]  ;# test extended memory
 set runquiet [getenv runquiet 1]  ;# tell runstep command to keep quiet
 
-clk ratio 10    ;# 100nS clock cycles
-
 proc simtest {} {
     global acum
     global hasmemcmd
@@ -438,7 +436,7 @@ proc startline {} {
 ;# print how many cycles it took (each clock is 100nS)
 proc finishline {} {
     global startclockno
-    set clocks [expr {([clk 0] - $startclockno)  * [clk ratio]}]
+    set clocks [expr {([clk 0] - $startclockno) * 20}]
     puts [format "  (%u.%02u uS)" [expr {$clocks / 100}] [expr {$clocks % 100}]]
 }
 

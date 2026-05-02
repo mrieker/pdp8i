@@ -24,6 +24,8 @@
 
 #define ABORT() do { fprintf (stderr, "ABORT %s %d\n", __FILE__, __LINE__); abort (); } while (0)
 
+#define HALFPERM1 9     // must match chips.v
+
 struct Pin {
     int bits;
 #ifdef VERLTR
@@ -39,7 +41,7 @@ struct Pin {
 };
 
 static bool volatile ctrlcflag;
-static int clkratio = 10;
+static double simulationtime;
 static int cyclenum;
 
 #ifdef VERLTR
@@ -326,26 +328,8 @@ static int cmd_bus (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj
 
 // clk [n]
 //  returns total number of clock cycles
-// clk ratio [r]
-//  sets or returns clock ratio
 static int cmd_clk (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
-    if ((objc > 1) && (strcasecmp (Tcl_GetString (objv[1]), "ratio") == 0)) {
-        if (objc > 2) {
-            int num;
-            int rc = Tcl_GetIntFromObj (interp, objv[2], &num);
-            if (rc != TCL_OK) return rc;
-            if (num <= 1) {
-                Tcl_SetResultF (interp, "bad ratio %d", num);
-                return TCL_ERROR;
-            }
-            clkratio = num;
-        } else {
-            Tcl_SetObjResult (interp, Tcl_NewIntObj (clkratio));
-        }
-        return TCL_OK;
-    }
-
     int num = 1;
     if (objc > 1) {
         int rc = Tcl_GetIntFromObj (interp, objv[1], &num);
@@ -927,12 +911,13 @@ static uint32_t scramgpio (uint32_t x)
 // returns with output signals updated and 10MHz clock just set low
 static void kerchunk ()
 {
-    // 10 100MHz cycles step the 10MHz osc through a cycle
-    // each 100MHz step progresses signals through gates and flipflops
+    // 20 200MHz cycles step the 10MHz osc through a cycle
+    // each 200MHz step progresses signals through gates and flipflops
+
 #ifdef ZTURN
     uint32_t ctla = zpage[zclock_I];
 #endif
-    for (int i = 0; i < 10; i ++) {
+    for (int i = 0; i < (HALFPERM1+1)*2; i ++) {
         iicupdate ();
 #ifdef VERLTR
         vbkpl->eval ();     // let input signals soak in
@@ -945,6 +930,7 @@ static void kerchunk ()
         zpage[zclock_I] = ctla | zclock_M;
         zpage[zclock_I] = ctla;
 #endif
+        simulationtime += 5;
     }
     ++ cyclenum;            // one more clock cycle done
 }
@@ -1034,4 +1020,9 @@ static void siginthand (int signum)
     if ((isatty (STDIN_FILENO) > 0) && (write (STDIN_FILENO, "\n", 1) > 0)) { }
     if (ctrlcflag) exit (1);
     ctrlcflag = true;
+}
+
+double sc_time_stamp()
+{
+    return simulationtime;
 }
