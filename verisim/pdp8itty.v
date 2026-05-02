@@ -60,7 +60,7 @@ module pdp8itty
 
     assign INT_RQST = intenab & (kbflag | prflag);
 
-    always @(posedge CLOCK) begin
+    always @(posedge CLOCK or posedge armwrite) begin
         if (BINIT) begin
             ////if (RESET) begin
             ////    enable <= 1;

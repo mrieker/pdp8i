@@ -958,10 +958,6 @@ static int cmdpintable (int pincount, Pin const *pintable, Tcl_Interp *interp, i
     int ngetobjs = 0;
     Tcl_Obj *getobjs[objc];
 
-#ifdef VERLTR
-    bool needeval = false;
-#endif
-
     for (int i = 0; ++ i < objc;) {
         char const *arg = Tcl_GetString (objv[i]);
         if (strcasecmp (arg, "get") == 0) {
@@ -995,17 +991,13 @@ static int cmdpintable (int pincount, Pin const *pintable, Tcl_Interp *interp, i
             }
 #ifdef VERLTR
             memcpy (pin->addr, &val, pin->size);
-            needeval = true;
+            vbkpl->eval ();
 #endif
 #ifdef ZTURN
             zpage[pin->indx] = (zpage[pin->indx] & ~ pin->mask) | (val * (pin->mask & - pin->mask));
 #endif
         } else {
 #ifdef VERLTR
-            if (needeval) {
-                needeval = false;
-                vbkpl->eval ();
-            }
             int val = 0;
             if (pin->size > (int) sizeof val) abort ();
             memcpy (&val, pin->addr, pin->size);
@@ -1016,9 +1008,6 @@ static int cmdpintable (int pincount, Pin const *pintable, Tcl_Interp *interp, i
             getobjs[ngetobjs++] = Tcl_NewIntObj (val);
         }
     }
-#ifdef VERLTR
-    if (needeval) vbkpl->eval ();
-#endif
     if (ngetobjs == 1) {
         Tcl_SetObjResult (interp, getobjs[0]);
     }

@@ -73,29 +73,20 @@ module dmatest (
                      endofbrk & wrmem_o & ts2 ? rwdat :
                      12'o0000;
 
-    always @(posedge zclock) begin
-        if (busini) begin
-            enable <= 1;
-            brkrqst_o <= 0;
-            cycle3_o  <= 0;
-            cainc_o   <= 0;
-            wrmem_o   <= 0;
-            lfsr <= { seed, 56'h12345678abcde };
-        end else if (~ zreset & armwrite) begin
+    always @(posedge zclock or posedge armwrite) begin
+        if (zreset & enable) begin
+            enable    <= 0;
+        end else if (armwrite) begin
 
             // arm writing enable bit
             case (armwaddr)
                 1: enable <= armwdata[31];
             endcase
-        end else if (~ enable) begin
-
-            // disabled, clear any outgoing break request
-            enable <= 1;
+        end else if (~ enable | busini) begin
             brkrqst_o <= 0;
             cycle3_o  <= 0;
             cainc_o   <= 0;
             wrmem_o   <= 0;
-
             lfsr <= { seed, 56'h12345678abcde };
         end else begin
 
