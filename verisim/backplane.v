@@ -1,8 +1,8 @@
 
 module backplane (
-    input zclock,
+    input yclock,                   // 10MHz clock coming from xtal osc on console
+    input zclock,                   // 100MHz
     input zreset,
-    output clok2,                   // 10MHz clock from xtal osc on console board
     input reset,                    // power-on reset
 
     input[15:04] gpin,              // switches from verimain.cc
@@ -57,6 +57,7 @@ module backplane (
         _busIOSKIP, _busLNKTOG, _busIOP, _busMEMDIS, _busINTINH, _busBWCOV;
     wire _busSWCONT, _busSWDEPOS, _busSWEXAM, _busSWLDAD, _busSWSINST, _busSWSSTEP, _busSWSTART;
     wire _busTP1, _busTP2, _busTP3, _busTP4, _busTS1, _busTS2, _busTS3, _busTS4;
+    wire busCLOK2;
     wire[2:0] _busDFLD, _busIFLD, _busDMAFLD, _busFIELD;
     wire[3:0] _busMAJST;
     wire[4:0] _busSCTR;
@@ -105,6 +106,7 @@ module backplane (
     wire[11:00] _conINBUS;
 
     console conboard (
+        .yclock (yclock),
         .zclock (zclock),
         .zreset (zreset),
         .GND    (1'b0),
@@ -249,8 +251,8 @@ module backplane (
         ._SCTR_3   (_busSCTR[3]),
         ._SCTR_4   (_busSCTR[4]),
 
-        .CLOK2     (clok2),
-        .CLOK2_o   (clok2),
+        .CLOK2     (busCLOK2),
+        .CLOK2_o   (busCLOK2),
 
         ._DFLD_0   (_busDFLD[0]),
         ._DFLD_1   (_busDFLD[1]),
@@ -317,9 +319,10 @@ module backplane (
     wire[11:00] _eaeINBUS;
 
     extarith eaeboard (
+        .yclock (yclock),
         .zclock (zclock),
         .zreset (zreset),
-        .CLOK2  (clok2),
+        .CLOK2  (busCLOK2),
         .GND    (1'b0),
         .VCC    (1'b1),
 
@@ -449,9 +452,10 @@ module backplane (
     wire[2:0] _memDFLD, _memIFLD;
 
     extmemory meminst (
+        .yclock (yclock),
         .zclock (zclock),
         .zreset (zreset),
-        .CLOK2  (clok2),
+        .CLOK2  (busCLOK2),
         .GND    (1'b0),
         .VCC    (1'b1),
 
@@ -570,9 +574,10 @@ module backplane (
     wire cpuBRKGNTO;
 
     processor procboard (
+        .yclock (yclock),
         .zclock (zclock),
         .zreset (zreset),
-        .CLOK2  (clok2),
+        .CLOK2  (busCLOK2),
         .GND    (1'b0),
         .VCC    (1'b1),
 

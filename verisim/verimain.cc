@@ -24,7 +24,8 @@
 
 #define ABORT() do { fprintf (stderr, "ABORT %s %d\n", __FILE__, __LINE__); abort (); } while (0)
 
-#define HALFPERM1 9     // must match chips.v
+#define PERIOD 20   // number of zclock cycles per yclock cycles
+                    // chips.v assumes zclock is 5nS
 
 struct Pin {
     int bits;
@@ -917,10 +918,11 @@ static void kerchunk ()
 #ifdef ZTURN
     uint32_t ctla = zpage[zclock_I];
 #endif
-    for (int i = 0; i < (HALFPERM1+1)*2; i ++) {
+    for (int i = 0; i < PERIOD; i ++) {
         iicupdate ();
 #ifdef VERLTR
         vbkpl->eval ();     // let input signals soak in
+        vbkpl->yclock = (i >= PERIOD/2);
         vbkpl->zclock = 1;  // clock progress through gates and flipflops
         vbkpl->eval ();     // let new state settle in
         vbkpl->zclock = 0;
@@ -932,6 +934,9 @@ static void kerchunk ()
 #endif
         simulationtime += 5;
     }
+#ifdef VERLTR
+    vbkpl->yclock = 0;
+#endif
     ++ cyclenum;            // one more clock cycle done
 }
 

@@ -1,5 +1,5 @@
 
-module X74HC00 (input zclock, zreset,
+module X74HC00 (input yclock, zclock, zreset,
           input      p1
         , input      p2
         , output reg p3
@@ -26,7 +26,7 @@ module X74HC00 (input zclock, zreset,
     end
 endmodule
 
-module X74LS00 (input zclock, zreset,
+module X74LS00 (input yclock, zclock, zreset,
           input  p1
         , input  p2
         , output p3
@@ -43,10 +43,10 @@ module X74LS00 (input zclock, zreset,
         , input  p14
 );
 
-    X74HC00 hc (zclock, zreset, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14);
+    X74HC00 hc (yclock, zclock, zreset, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14);
 endmodule
 
-module X74HC02 (input zclock, zreset,
+module X74HC02 (input yclock, zclock, zreset,
           output reg p1
         , input      p2
         , input      p3
@@ -73,7 +73,7 @@ module X74HC02 (input zclock, zreset,
     end
 endmodule
 
-module X74LS02 (input zclock, zreset,
+module X74LS02 (input yclock, zclock, zreset,
           output p1
         , input  p2
         , input  p3
@@ -90,10 +90,10 @@ module X74LS02 (input zclock, zreset,
         , input  p14
 );
 
-    X74HC02 hc (zclock, zreset, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14);
+    X74HC02 hc (yclock, zclock, zreset, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14);
 endmodule
 
-module X74HC04 (input zclock, zreset,
+module X74HC04 (input yclock, zclock, zreset,
           input      p1
         , output reg p2
         , input      p3
@@ -122,7 +122,7 @@ module X74HC04 (input zclock, zreset,
     end
 endmodule
 
-module X74LS04 (input zclock, zreset,
+module X74LS04 (input yclock, zclock, zreset,
           input  p1
         , output p2
         , input  p3
@@ -139,10 +139,10 @@ module X74LS04 (input zclock, zreset,
         , input  p14
 );
 
-    X74HC04 hc (zclock, zreset, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14);
+    X74HC04 hc (yclock, zclock, zreset, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14);
 endmodule
 
-module X74LS08 (input zclock, zreset,
+module X74LS08 (input yclock, zclock, zreset,
           input      p1
         , input      p2
         , output reg p3
@@ -169,7 +169,7 @@ module X74LS08 (input zclock, zreset,
     end
 endmodule
 
-module X74LS10 (input zclock, zreset,
+module X74LS10 (input yclock, zclock, zreset,
           input      p1
         , input      p2
         , input      p3
@@ -195,7 +195,7 @@ module X74LS10 (input zclock, zreset,
     end
 endmodule
 
-module X74LS11 (input zclock, zreset,
+module X74LS11 (input yclock, zclock, zreset,
           input      p1
         , input      p2
         , input      p3
@@ -221,7 +221,7 @@ module X74LS11 (input zclock, zreset,
     end
 endmodule
 
-module X74LS20 (input zclock, zreset,
+module X74LS20 (input yclock, zclock, zreset,
           input      p1
         , input      p2
         , input      p4
@@ -244,7 +244,7 @@ module X74LS20 (input zclock, zreset,
     end
 endmodule
 
-module X74LS21 (input zclock, zreset,
+module X74LS21 (input yclock, zclock, zreset,
           input      p1
         , input      p2
         , input      p4
@@ -267,7 +267,7 @@ module X74LS21 (input zclock, zreset,
     end
 endmodule
 
-module X74HC27 (input zclock, zreset,
+module X74HC27 (input yclock, zclock, zreset,
           input      p1
         , input      p2
         , input      p3
@@ -293,7 +293,7 @@ module X74HC27 (input zclock, zreset,
     end
 endmodule
 
-module X74LS27 (input zclock, zreset,
+module X74LS27 (input yclock, zclock, zreset,
           input  p1
         , input  p2
         , input  p3
@@ -310,10 +310,10 @@ module X74LS27 (input zclock, zreset,
         , input  p14
 );
 
-    X74HC27 hc (zclock, zreset, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14);
+    X74HC27 hc (yclock, zclock, zreset, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14);
 endmodule
 
-module X74LS30 (input zclock, zreset,
+module X74LS30 (input yclock, zclock, zreset,
           input      p1
         , input      p2
         , input      p3
@@ -334,7 +334,7 @@ module X74LS30 (input zclock, zreset,
     end
 endmodule
 
-module X74LS32 (input zclock, zreset,
+module X74LS32 (input yclock, zclock, zreset,
           input      p1
         , input      p2
         , output reg p3
@@ -361,7 +361,7 @@ module X74LS32 (input zclock, zreset,
     end
 endmodule
 
-module X74LS42 (input zclock, zreset,
+module X74LS42 (input yclock, zclock, zreset,
           output reg p1
         , output reg p2
         , output reg p3
@@ -399,7 +399,7 @@ module X74LS42 (input zclock, zreset,
     end
 endmodule
 
-module X74HC74 (input zclock, zreset,
+module X74HC74 (input yclock, zclock, zreset,
           input      p1     // 1 _pc
         , input      p2     // 1 D
         , input      p3     // 1 T
@@ -451,7 +451,7 @@ module X74HC74 (input zclock, zreset,
     end
 endmodule
 
-module X74LS75 (input zclock, zreset,
+module X74LS75 (input yclock, zclock, zreset,
           output     p1     // _q0
         , input      p2     // d0
         , input      p3     // d1
@@ -486,7 +486,7 @@ module X74LS75 (input zclock, zreset,
 endmodule
 
 
-module X74LS85 (input zclock, zreset,
+module X74LS85 (input yclock, zclock, zreset,
           input  p1         // B3
         , input  p2         // (A < B) IN   from
         , input  p3         // (A = B) IN   lower
@@ -521,7 +521,7 @@ module X74LS85 (input zclock, zreset,
     end
 endmodule
 
-module X74HC86 (input zclock, zreset,
+module X74HC86 (input yclock, zclock, zreset,
           input  p1
         , input  p2
         , output reg p3
@@ -548,7 +548,7 @@ module X74HC86 (input zclock, zreset,
     end
 endmodule
 
-module X74LS109 (input zclock, zreset,
+module X74LS109 (input yclock, zclock, zreset,
           input  p1         // 1 _Pc
         , input  p2         // 1  J
         , input  p3         // 1 _K
@@ -595,6 +595,13 @@ module X74LS109 (input zclock, zreset,
                  prop1 <= {  prop1[5:0], 1'b0 };
                 _prop1 <= { _prop1[5:0], 1'b1 };
             end
+            if (~ p2 &   p3) begin  // J=0 K=0
+                 prop1 <= {  prop1[5:0], p6   };
+                _prop1 <= { _prop1[5:0], p7   };
+            end
+        end else begin
+             prop1 <= {  prop1[5:0],  prop1[0] };
+            _prop1 <= { _prop1[5:0], _prop1[0] };
         end
         jsetup1 <= { jsetup1[2:0], p2 };
         ksetup1 <= { ksetup1[2:0], p3 };
@@ -618,6 +625,10 @@ module X74LS109 (input zclock, zreset,
                  prop2 <= {  prop2[5:0], 1'b0 };
                 _prop2 <= { _prop2[5:0], 1'b1 };
             end
+            if (~p14 &  p13) begin  // J=0 K=0
+                 prop2 <= {  prop2[5:0], p10  };
+                _prop2 <= { _prop2[5:0], p9   };
+            end
         end else begin
              prop2 <= {  prop2[5:0],  prop2[0] };
             _prop2 <= { _prop2[5:0], _prop2[0] };
@@ -628,7 +639,7 @@ module X74LS109 (input zclock, zreset,
     end
 endmodule
 
-module X74HC138 (input zclock, zreset,
+module X74HC138 (input yclock, zclock, zreset,
           input      p1         // A2
         , input      p2         // A1
         , input      p3         // A0
@@ -664,7 +675,7 @@ module X74HC138 (input zclock, zreset,
     end
 endmodule
 
-module X74LS139 (input zclock, zreset,
+module X74LS139 (input yclock, zclock, zreset,
           input  p1     // 1 _E
         , input  p2     // 1 A0
         , input  p3     // 1 A1
@@ -701,7 +712,7 @@ module X74LS139 (input zclock, zreset,
     end
 endmodule
 
-module X74LS151 (input zclock, zreset,
+module X74LS151 (input yclock, zclock, zreset,
           input  p1     // d3
         , input  p2     // d2
         , input  p3     // d1
@@ -732,7 +743,7 @@ module X74LS151 (input zclock, zreset,
     end
 endmodule
 
-module X74LS153 (input zclock, zreset,
+module X74LS153 (input yclock, zclock, zreset,
           input  p1
         , input  p2
         , input  p3
@@ -761,7 +772,7 @@ module X74LS153 (input zclock, zreset,
     end
 endmodule
 
-module X74LS157 (input zclock, zreset,
+module X74LS157 (input yclock, zclock, zreset,
           input  p1     // 0=A; 1=B
         , input  p2     // 1A
         , input  p3     // 1B
@@ -790,7 +801,7 @@ module X74LS157 (input zclock, zreset,
     end
 endmodule
 
-module X74LS161 (input zclock, zreset,
+module X74LS161 (input yclock, zclock, zreset,
           input      p1     // _clr
         , input      p2     // clk
         , input      p3     // a
@@ -825,15 +836,17 @@ module X74LS161 (input zclock, zreset,
             end else if (p7 & p10) begin
                 { p11, p12, p13, p14, delay } <= { delay, { p11, p12, p13, p14 } + 4'b0001 };
             end else begin
-                { p11, p12, p13, p14, delay } <= { delay, delay[03:00] };
+                { p11, p12, p13, p14, delay } <= { delay, p11, p12, p13, p14 };
             end
+        end else begin
+            { p11, p12, p13, p14, delay } <= { delay, delay[03:00] };
         end
 
         lastt <= p2;
     end
 endmodule
 
-module X74LS174 (input zclock, zreset,
+module X74LS174 (input yclock, zclock, zreset,
           input      p1
         , output reg p2
         , input      p3
@@ -885,7 +898,7 @@ module X74LS174 (input zclock, zreset,
 
 endmodule
 
-module X74LS175 (input zclock, zreset,
+module X74LS175 (input yclock, zclock, zreset,
           input      p1
         , output reg p2
         , output     p3
@@ -936,7 +949,7 @@ module X74LS175 (input zclock, zreset,
 
 endmodule
 
-module X74HC240 (input zclock, zreset,
+module X74HC240 (input yclock, zclock, zreset,
           input      p1
         , input      p2
         , input      p3i
@@ -978,7 +991,7 @@ module X74HC240 (input zclock, zreset,
     end
 endmodule
 
-module X74HC244 (input zclock, zreset,
+module X74HC244 (input yclock, zclock, zreset,
           input      p1
         , input      p2
         , input      p3i
@@ -1020,7 +1033,7 @@ module X74HC244 (input zclock, zreset,
     end
 endmodule
 
-module X74LS283 (input zclock, zreset,
+module X74LS283 (input yclock, zclock, zreset,
           output reg p1
         , input  p2
         , input  p3
@@ -1055,7 +1068,7 @@ module X74LS283 (input zclock, zreset,
     end
 endmodule
 
-module X74LS540 (input zclock, zreset,
+module X74LS540 (input yclock, zclock, zreset,
           input  p1
         , input  p2
         , input  p3
@@ -1096,7 +1109,7 @@ module X74LS540 (input zclock, zreset,
     end
 endmodule
 
-module X74HCT541 (input zclock, zreset,
+module X74HCT541 (input yclock, zclock, zreset,
           input  p1
         , input  p2
         , input  p3
@@ -1138,7 +1151,7 @@ module X74HCT541 (input zclock, zreset,
 
 endmodule
 
-module X74HC4075 (input zclock, zreset,
+module X74HC4075 (input yclock, zclock, zreset,
           input  p1
         , input  p2
         , input  p3
@@ -1165,7 +1178,7 @@ module X74HC4075 (input zclock, zreset,
 
 endmodule
 
-module XCY7C199 (input zclock, zreset,
+module XCY7C199 (input yclock, zclock, zreset,
     input      p1,   // A5
     input      p2,   // A6
     input      p3,   // A7
@@ -1215,7 +1228,7 @@ module XCY7C199 (input zclock, zreset,
         deloe <= { deloe[0], ~ p22 };
         delwe <= { deloe[0], ~ p27 };
         if (delce[1] & delwe[1]) begin
-            ////$display ("XCY7C199*: writing array[%o] <= %o", a, delay[31:24]);
+            $display ("XCY7C199*: writing array[%o] <= %o", a, delay[31:24]);
             array[a] <= delay[31:24];
             delay    <= { delay[23:00], din };
         end else begin
@@ -1226,35 +1239,17 @@ module XCY7C199 (input zclock, zreset,
     end
 endmodule
 
-module X10MHz (
-        input  zclock,
-        input  zreset,
-        input      p1,  // INPUT
-        input      p7,  // POWERIN
-        output reg p8,  // OUTPUT
-        input      p14  // POWERIN
+module X10MHz (input yclock, zclock, zreset,
+        input  p1,  // INPUT
+        input  p7,  // POWERIN
+        output p8,  // OUTPUT
+        input  p14  // POWERIN
     );
 
-    localparam[7:0] HALFPERM1 = 9; // must match verimain.cc
-
-    reg[7:0] div;
-
-    always @(posedge zclock or posedge zreset) begin
-        if (zreset) begin
-            div <= 0;
-            p8  <= 0;
-        end else if (div == HALFPERM1) begin
-            div <= 0;
-            p8  <= ~ p8;
-        end else begin
-            div <= div + 1;
-        end
-    end
+    assign p8 = yclock; // this wires yclock to clok2
 endmodule
 
-module XMCP23017_SP (
-        input  zclock,
-        input  zreset,
+module XMCP23017_SP (input yclock, zclock, zreset,
         input  p1i,     // GPB0
         output p1o,
         input  p2i,     // GPB1
@@ -1321,5 +1316,5 @@ module XMCP23017_SP (
 
 endmodule
 
-module X47K (input zclock, input zreset, input p1, input p2);
+module X47K (input yclock, zclock, input zreset, input p1, input p2);
 endmodule

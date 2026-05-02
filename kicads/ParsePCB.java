@@ -142,7 +142,7 @@ public class ParsePCB {
         // print networks
         // - if referenced by a connector, it is an input/output pin for the module
         // - if not refd by a connector, it is a wire
-        System.out.println ("module " + modname + " (input zclock, zreset");
+        System.out.println ("module " + modname + " (input yclock, zclock, zreset");
         char sep = ',';
         sep = printconpins (sep, netsbyname, "input");
         sep = printconpins (sep, netsbyname, "inout");
@@ -565,6 +565,7 @@ public class ParsePCB {
 
             // output module instantiation
             System.out.println ("    X" + value + " " + refer + " (");
+            System.out.println ("        .yclock(yclock),");
             System.out.println ("        .zclock(zclock),");
             System.out.println ("        .zreset(zreset)");
             char sep = ',';
