@@ -433,8 +433,10 @@ module X74HC74 (input yclock, zclock, zreset,
             ////if (setup1 != { 3 { p2 } }) $error ("%m setup1 failed");
              prop1 <= {  prop1[5:0],   p2 };  //  q <=   d
             _prop1 <= { _prop1[5:0], ~ p2 };  // _q <= ~ d
+        end else begin
+             prop1 <= {  prop1[5:0],  prop1[0] };  //  q <=   d
+            _prop1 <= { _prop1[5:0], _prop1[0] };  // _q <= ~ d
         end
-        setup1 <= { setup1[1:0], p2 };
 
         if (~ p13 | ~ p10) begin
              prop2 <= {  prop2[5:2], ~ p10, ~ p10, ~ p10 };  //  q <= ~ _ps
@@ -443,7 +445,12 @@ module X74HC74 (input yclock, zclock, zreset,
             ////if (setup2 != { 3 { p12 } }) $error ("%m setup2 failed");
              prop2 <= {  prop2[5:0],   p12 };  //  q <=   d
             _prop2 <= { _prop2[5:0], ~ p12 };  // _q <= ~ d
+        end else begin
+             prop2 <= {  prop2[5:0],  prop2[0] };  //  q <=   d
+            _prop2 <= { _prop2[5:0], _prop2[0] };  // _q <= ~ d
         end
+
+        setup1 <= { setup1[1:0], p2  };
         setup2 <= { setup2[1:0], p12 };
 
         lastt1 <= p3;
@@ -949,6 +956,85 @@ module X74LS175 (input yclock, zclock, zreset,
 
 endmodule
 
+module X74LS193 (input yclock, zclock, zreset,
+          input      p1     // db
+        , output     p2     // qb
+        , output     p3     // qa
+        , input      p4     // _dn
+        , input      p5     // _up
+        , output     p6     // qc
+        , output     p7     // qd
+        , input      p8     // gnd
+        , input      p9     // dd
+        , input      p10    // dc
+        , input      p11    // _ld
+        , output reg p12    // _co
+        , output reg p13    // _bo
+        , input      p14    // clr
+        , input      p15    // da
+        , input      p16    // vcc
+);
+
+    reg[35:00] delay;
+    reg[5:0] bodel, codel;
+
+    wire  da = p15;
+    wire  db = p1;
+    wire  dc = p10;
+    wire  dd = p9;
+    wire _dn = p4;
+    wire _up = p5;
+    wire _ld = p11;
+    wire clr = p14;
+
+    reg _lastdn, _lastup;
+    reg qa, qb, qc, qd;
+    assign p3 = qa;
+    assign p2 = qb;
+    assign p6 = qc;
+    assign p6 = qd;
+
+    always @(posedge zclock) begin
+        if (clr) begin
+            // async clear takes 48nS max
+            { qd, qc, qb, qa, delay } <= { delay, 4'b0 };
+        end else if (~ _ld) begin
+            // async load takes 52nS max
+            { qd, qc, qb, qa, delay } <= { delay, dd, dc, db, da };
+        end else begin
+            if (_up & _dn) begin
+                // clock up and down at the same time
+                if (~ _lastdn & ~ _lastup) begin
+                    { qd, qc, qb, qa, delay } <= { delay,   qd, qc, qb, qa };
+                end
+                // clock down takes 50nS max
+                if (~ _lastdn &   _lastup) begin
+                    { qd, qc, qb, qa, delay } <= { delay, { qd, qc, qb, qa } - 4'b1 };
+                end
+                // clock up takes 50nS max
+                if (  _lastdn & ~ _lastup) begin
+                    { qd, qc, qb, qa, delay } <= { delay, { qd, qc, qb, qa } + 4'b1 };
+                end
+                // clock neither, just advance delay
+                if (  _lastdn &   _lastup) begin
+                    { qd, qc, qb, qa, delay } <= { delay, delay[3:0] };
+                end
+            end else begin
+                // getting ready to clock, just advance delay
+                { qd, qc, qb, qa, delay } <= { delay, delay[3:0] };
+            end
+        end
+
+        // carry out and borrow out takes 33nS delay
+        { p12, codel } <= { codel, ~ (  qa &   qb &   qc &   qd & ~ _up) };
+        { p13, bodel } <= { bodel, ~ (~ qa & ~ qb & ~ qc & ~ qd & ~ _dn) };
+
+        // detect count up/down edges
+        _lastdn <= _dn;
+        _lastup <= _up;
+    end
+endmodule
+
 module X74HC240 (input yclock, zclock, zreset,
           input      p1
         , input      p2
@@ -1222,20 +1308,21 @@ module XCY7C199 (input yclock, zclock, zreset,
     reg[7:0] array[32767:0];
     reg[31:00] delay;
     reg[1:0] delce, deloe, delwe;
+    reg ce, oe, we;
 
     always @(posedge zclock) begin
-        delce <= { deloe[0], ~ p20 };
-        deloe <= { deloe[0], ~ p22 };
-        delwe <= { deloe[0], ~ p27 };
-        if (delce[1] & delwe[1]) begin
-            $display ("XCY7C199*: writing array[%o] <= %o", a, delay[31:24]);
+        { ce, delce } <= { delce, ~ p20 };
+        { oe, deloe } <= { deloe, ~ p22 };
+        { we, delwe } <= { delwe, ~ p27 };
+        if (ce & we) begin
+            ////$display ("XCY7C199*: writing array[%o] <= %o", a, delay[31:24]);
             array[a] <= delay[31:24];
             delay    <= { delay[23:00], din };
         end else begin
             ////$display ("XCY7C199*: reading array[%o] => %o", a, array[a]);
             delay    <= { delay[23:00], array[a] };
         end
-        { p19o, p18o, p17o, p16o, p15o, p13o, p12o, p11o } <= (delce[1] & deloe[1] & ~ delwe[1]) ? delay[31:24] : 8'hFF;
+        { p19o, p18o, p17o, p16o, p15o, p13o, p12o, p11o } <= (ce & oe & ~ we) ? delay[31:24] : 8'hFF;
     end
 endmodule
 

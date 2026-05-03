@@ -16,7 +16,7 @@ proc disas {loaddr {hiaddr ""}} {
     if {$hiaddr == ""} {set hiaddr $loaddr}
     for {set addr $loaddr} {$addr <= $hiaddr} {incr addr} {
         set opcd [rdmem $addr]
-        puts [format "  %04o:  %s" $addr [disop $addr $opcd]]
+        puts [format "  %04o:%04o  %s" $addr $opcd [disop $addr $opcd]]
     }
 }
 

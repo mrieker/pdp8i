@@ -43,6 +43,7 @@ set testcons [getenv testcons 1]  ;# test console functions
 set testexar [getenv testexar 1]  ;# test extended arithmetic
 set testxmem [getenv testxmem 1]  ;# test extended memory
 set runquiet [getenv runquiet 1]  ;# tell runstep command to keep quiet
+set clockns  [expr {[clk ratio] * 5}]
 
 proc simtest {} {
     global acum
@@ -99,8 +100,8 @@ proc simtest {} {
     set linc [bus oLINK]
 
     ;# set switches for OSR/LDAD testing
-    set swdfpend  [randbits  3]
-    set swifpend  [randbits  3]
+    set swdfpend  [expr {$testxmem ? [randbits 3] : 0}]
+    set swifpend  [expr {$testxmem ? [randbits 3] : 0}]
     set swregpend [randbits 12]
     swtch set df $swdfpend if $swifpend reg $swregpend
 
@@ -433,11 +434,11 @@ proc startline {} {
     set startclockno [clk 0]
 }
 
-;# print how many cycles it took (each clock is 100nS)
+;# print how many cycles it took
 proc finishline {} {
-    global startclockno
-    set clocks [expr {([clk 0] - $startclockno) * 20}]
-    puts [format "  (%u.%02u uS)" [expr {$clocks / 100}] [expr {$clocks % 100}]]
+    global clockns startclockno
+    set clocks [expr {([clk 0] - $startclockno) * $clockns}]
+    puts [format "  (%u.%03u uS)" [expr {$clocks / 1000}] [expr {$clocks % 1000}]]
 }
 
 ;# clock through a memory cycle, verifying the address and data
@@ -487,12 +488,8 @@ proc memorycycle {state field addr rdata wdata} {
     ;# should now be fully transitioned to the major state
     verify12 [bus majst] $state "bad state at start of mem cycle"
 
-    ;# cpu should be outputting address we expect
-    set expaddr [expr {($field << 12) | $addr}]
-    set actaddr [expr {([bus memfield] << 12) | [bus oMADR]}]
-    verify15 $actaddr $expaddr "XMA bad at beginning of $state cycle"
-
     ;# get the read data on the INBUS so cpu can read it
+    set expaddr [expr {($field << 12) | $addr}]
     if {$memdisab} {
         ;# this script is the memory, so put read data directly on the INBUS
         bus set iINBUS $rdata
@@ -503,6 +500,12 @@ proc memorycycle {state field addr rdata wdata} {
         ;# it should then soak onto INBUS
         mem $expaddr $rdata
     }
+
+    waitassert TP1
+
+    ;# cpu should be outputting address we expect
+    set actaddr [expr {([bus memfield] << 12) | [bus oMADR]}]
+    verify15 $actaddr $expaddr "XMA bad at beginning of $state cycle"
 
     ;# end of TS1 means it finished reading that memory location into MB
     waitnegate TS1
@@ -521,15 +524,14 @@ proc memorycycle {state field addr rdata wdata} {
         extendedarithmetic $rdata
     }
 
-    ;# break grant should clear at TP2 of a BREAK cycle
-    if {$state == $MS_BREAK} {
-        waitassert TP2
-        verifybit [bus oBRKGNTO] 0 "break grant after TP2 of BREAK cycle"
-    }
-
     ;# wait for it to enter TS3, meanwhile cpu should possibly be modifying
     ;# the value and sending the value (modified or not) back to the memory
     waitassert TS3
+
+    ;# break grant should clear at TP2 of a BREAK cycle
+    if {$state == $MS_BREAK} {
+        verifybit [bus oBRKGNTO] 0 "break grant after TP2 of BREAK cycle"
+    }
 
     ;# maybe perform i/o
     set doesio [expr {($state == $MS_FETCH) && (($opcode & 07000) == 06000)}]
@@ -616,7 +618,7 @@ proc memorycycle {state field addr rdata wdata} {
 ;# cont alone should not reset state, should pick up where it left off
 proc checkhalted {} {
     global MS_BREAK MS_DEPOS MS_EXAM MS_EXEC MS_FETCH MS_INTAK MS_WRDCT
-    global haltdelay haltwhy panelhalt pctr swdfpend swifpend swregpend testcons
+    global haltdelay haltwhy panelhalt pctr swdfpend swifpend swregpend testcons testxmem
     global acum linc mquo sctr xmem_intdisableduntiljump intdelayed intenabled intrequest
     global xmem_dfld xmem_ifld xmem_ifldafterjump xmem_saveddfld xmem_savedifld
 
@@ -663,9 +665,9 @@ proc checkhalted {} {
                         set haltwhy ""
                         verifybit [bus oRUN] 0 "should be halted after LDAD"
                         set wacked 1                ;# processor no longer doing the instruction
-                        set swdfpend [randbits 3]   ;# set up new switches for next time
-                        set swifpend [randbits 3]
-                        set swregpend [randbits 12]
+                        set swdfpend [expr {$testxmem ? [randbits 3] : 0}]
+                        set swifpend [expr {$testxmem ? [randbits 3] : 0}]
+                        set swregpend [randbits 12] ;# set up new switches for next time
                         swtch set df $swdfpend if $swifpend reg $swregpend
                         set doldad 0
                     }

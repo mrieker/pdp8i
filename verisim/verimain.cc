@@ -24,9 +24,6 @@
 
 #define ABORT() do { fprintf (stderr, "ABORT %s %d\n", __FILE__, __LINE__); abort (); } while (0)
 
-#define PERIOD 20   // number of zclock cycles per yclock cycles
-                    // chips.v assumes zclock is 5nS
-
 struct Pin {
     int bits;
 #ifdef VERLTR
@@ -43,6 +40,7 @@ struct Pin {
 
 static bool volatile ctrlcflag;
 static double simulationtime;
+static int clkratio;
 static int cyclenum;
 
 #ifdef VERLTR
@@ -102,6 +100,10 @@ int main (int argc, char **argv)
     if (Tcl_CreateObjCommand (interp, "randbits",  cmd_randbits,  NULL, NULL) == NULL) ABORT ();
 
     signal (SIGINT, siginthand);
+
+    clkratio = 20;
+    char const *env = getenv ("clkratio");
+    if (env != NULL) clkratio = atoi (env);
 
 #ifdef VERLTR
     Vbackplane vbackplane;
@@ -331,6 +333,10 @@ static int cmd_bus (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj
 //  returns total number of clock cycles
 static int cmd_clk (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
+    if ((objc > 1) && (strcasecmp (Tcl_GetString (objv[1]), "ratio") == 0)) {
+        Tcl_SetObjResult (interp, Tcl_NewIntObj (clkratio));
+        return TCL_OK;
+    }
     int num = 1;
     if (objc > 1) {
         int rc = Tcl_GetIntFromObj (interp, objv[1], &num);
@@ -918,11 +924,11 @@ static void kerchunk ()
 #ifdef ZTURN
     uint32_t ctla = zpage[zclock_I];
 #endif
-    for (int i = 0; i < PERIOD; i ++) {
+    for (int i = 0; i < clkratio; i ++) {
         iicupdate ();
 #ifdef VERLTR
         vbkpl->eval ();     // let input signals soak in
-        vbkpl->yclock = (i >= PERIOD/2);
+        vbkpl->yclock = (i * 2 >= clkratio);
         vbkpl->zclock = 1;  // clock progress through gates and flipflops
         vbkpl->eval ();     // let new state settle in
         vbkpl->zclock = 0;
