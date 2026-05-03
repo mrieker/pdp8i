@@ -416,42 +416,35 @@ module X74HC74 (input yclock, zclock, zreset,
         , input      p14    // VCC
 );
 
-    reg lastt1, lastt2;
-    reg[2:0] setup1, setup2;
-    reg[6:0] prop1, prop2, _prop1, _prop2;
-
-    assign p5 =  prop1[6];
-    assign p6 = _prop1[6];
-    assign p9 =  prop2[6];
-    assign p8 = _prop2[6];
+    reg d1, d2, lastt1, lastt2;
+    reg[1:0] setup1, setup2;
+    reg[5:0] prop1, prop2, _prop1, _prop2;
 
     always @(posedge zclock) begin
         if (~ p1 | ~ p4) begin
-             prop1 <= {  prop1[5:2], ~ p4, ~ p4, ~ p4 };  //  q <= ~ _ps
-            _prop1 <= { _prop1[5:2], ~ p1, ~ p1, ~ p1 };  // _q <= ~ _pc
+            { p5,  prop1 } <= {  prop1, ~ p4 };         //  q <= ~ _ps
+            { p6, _prop1 } <= { _prop1, ~ p1 };         // _q <= ~ _pc
         end else if (~ lastt1 & p3) begin
-            ////if (setup1 != { 3 { p2 } }) $error ("%m setup1 failed");
-             prop1 <= {  prop1[5:0],   p2 };  //  q <=   d
-            _prop1 <= { _prop1[5:0], ~ p2 };  // _q <= ~ d
+            { p5,  prop1 } <= {  prop1,   d1 };         //  q <=   d
+            { p6, _prop1 } <= { _prop1, ~ d1 };         // _q <= ~ d
         end else begin
-             prop1 <= {  prop1[5:0],  prop1[0] };  //  q <=   d
-            _prop1 <= { _prop1[5:0], _prop1[0] };  // _q <= ~ d
+            { p5,  prop1 } <= {  prop1,  prop1[0] };    //  q <=   q
+            { p6, _prop1 } <= { _prop1, _prop1[0] };    // _q <=  _q
         end
 
         if (~ p13 | ~ p10) begin
-             prop2 <= {  prop2[5:2], ~ p10, ~ p10, ~ p10 };  //  q <= ~ _ps
-            _prop2 <= { _prop2[5:2], ~ p13, ~ p13, ~ p13 };  // _q <= ~ _pc
+            { p9,  prop2 } <= {  prop2, ~ p10 };        //  q <= ~ _ps
+            { p8, _prop2 } <= { _prop2, ~ p13 };        // _q <= ~ _pc
         end else if (~ lastt2 & p11) begin
-            ////if (setup2 != { 3 { p12 } }) $error ("%m setup2 failed");
-             prop2 <= {  prop2[5:0],   p12 };  //  q <=   d
-            _prop2 <= { _prop2[5:0], ~ p12 };  // _q <= ~ d
+            { p9,  prop2 } <= {  prop2,   d2 };         //  q <=   d
+            { p8, _prop2 } <= { _prop2, ~ d2 };         // _q <= ~ d
         end else begin
-             prop2 <= {  prop2[5:0],  prop2[0] };  //  q <=   d
-            _prop2 <= { _prop2[5:0], _prop2[0] };  // _q <= ~ d
+            { p9,  prop2 } <= {  prop2,  prop2[0] };    //  q <=   q
+            { p8, _prop2 } <= { _prop2, _prop2[0] };    // _q <=  _q
         end
 
-        setup1 <= { setup1[1:0], p2  };
-        setup2 <= { setup2[1:0], p12 };
+        { d1, setup1 } <= { setup1, p2  };
+        { d2, setup2 } <= { setup2, p12 };
 
         lastt1 <= p3;
         lastt2 <= p11;
@@ -575,73 +568,65 @@ module X74LS109 (input yclock, zclock, zreset,
 );
 
     reg lastt1, lastt2;
-    reg[3:0] jsetup1, ksetup1, jsetup2, ksetup2;
-    reg[6:0] prop1, prop2, _prop1, _prop2;
-
-    assign p6  =  prop1[6];
-    assign p7  = _prop1[6];
-    assign p9  = _prop2[6];
-    assign p10 =  prop2[6];
+    reg j1, k1, j2, k2;
+    reg[2:0] jsetup1, ksetup1, jsetup2, ksetup2;
+    reg[5:0] prop1, prop2, _prop1, _prop2;
 
     always @(posedge zclock) begin
         if (~ p1 | ~ p5) begin
-             prop1 <= {  prop1[5:0], ~ p5 };  //  q <= ~ ps
-            _prop1 <= { _prop1[5:0], ~ p1 };  // _q <= ~ pc
+            { p6,  prop1 } <= {  prop1, ~ p5 };     //  q <= ~ ps
+            { p7, _prop1 } <= { _prop1, ~ p1 };     // _q <= ~ pc
         end else if (~ lastt1 & p4) begin
-            ////if (jsetup1 != { 4 { p2 } }) $error ("%m J1 setup failed");
-            ////if (ksetup1 != { 4 { p3 } }) $error ("%m K1 setup failed");
-            if (  p2 &   p3) begin  // J=1 K=0
-                 prop1 <= {  prop1[5:0], 1'b1 };
-                _prop1 <= { _prop1[5:0], 1'b0 };
+            if (~ j1 & ~ k1) begin                  // J=0 K=0
+                { p6,  prop1 } <= {  prop1, p6   };
+                { p7, _prop1 } <= { _prop1, p7   };
             end
-            if (  p2 & ~ p3) begin  // J=1 K=1
-                 prop1 <= {  prop1[5:0], p7   };
-                _prop1 <= { _prop1[5:0], p6   };
+            if (~ j1 &   k1) begin                  // J=0 K=1
+                { p6,  prop1 } <= {  prop1, 1'b0 };
+                { p7, _prop1 } <= { _prop1, 1'b1 };
             end
-            if (~ p2 & ~ p3) begin  // J=0 K=1
-                 prop1 <= {  prop1[5:0], 1'b0 };
-                _prop1 <= { _prop1[5:0], 1'b1 };
+            if (  j1 & ~ k1) begin                  // J=1 K=0
+                { p6,  prop1 } <= {  prop1, 1'b1 };
+                { p7, _prop1 } <= { _prop1, 1'b0 };
             end
-            if (~ p2 &   p3) begin  // J=0 K=0
-                 prop1 <= {  prop1[5:0], p6   };
-                _prop1 <= { _prop1[5:0], p7   };
+            if (  j1 &   k1) begin                  // J=1 K=1
+                { p6,  prop1 } <= {  prop1, p7   };
+                { p7, _prop1 } <= { _prop1, p6   };
             end
         end else begin
-             prop1 <= {  prop1[5:0],  prop1[0] };
-            _prop1 <= { _prop1[5:0], _prop1[0] };
+            { p6,  prop1 } <= {  prop1,  prop1[0] };
+            { p7, _prop1 } <= { _prop1, _prop1[0] };
         end
-        jsetup1 <= { jsetup1[2:0], p2 };
-        ksetup1 <= { ksetup1[2:0], p3 };
+        { j1, jsetup1 } <= { jsetup1,   p2 };
+        { k1, ksetup1 } <= { ksetup1, ~ p3 };
         lastt1  <= p4;
 
         if (~ p15 | ~ p11) begin
-             prop2 <= {  prop2[5:0], ~ p11 };  //  q <= ~ ps
-            _prop2 <= { _prop2[5:0], ~ p15 };  // _q <= ~ pc
+            { p10, prop2 } <= {  prop2, ~ p11 };    //  q <= ~ ps
+            { p9, _prop2 } <= { _prop2, ~ p15 };    // _q <= ~ pc
         end else if (~ lastt2 & p12) begin
-            ////if (jsetup2 != { 4 { p14 } }) $error ("%m J2 setup failed");
-            ////if (ksetup2 != { 4 { p13 } }) $error ("%m K2 setup failed");
-            if ( p14 &  p13) begin  // J=1 K=0
-                 prop2 <= {  prop2[5:0], 1'b1 };
-                _prop2 <= { _prop2[5:0], 1'b0 };
+            if (~ j2 & ~ k2) begin                  // J=0 K=0
+                { p10, prop2 } <= {  prop2, p10  };
+                { p9, _prop2 } <= { _prop2, p9   };
             end
-            if ( p14 & ~p13) begin  // J=1 K=1
-                 prop2 <= {  prop2[5:0], p9   };
-                _prop2 <= { _prop2[5:0], p10  };
+            if (~ j2 &   k2) begin                  // J=0 K=1
+                { p10, prop2 } <= {  prop2, 1'b0 };
+                { p9, _prop2 } <= { _prop2, 1'b1 };
             end
-            if (~p14 & ~p13) begin  // J=0 K=1
-                 prop2 <= {  prop2[5:0], 1'b0 };
-                _prop2 <= { _prop2[5:0], 1'b1 };
+            if (  j2 & ~ k2) begin                  // J=1 K=0
+                { p10, prop2 } <= {  prop2, 1'b1 };
+                { p9, _prop2 } <= { _prop2, 1'b0 };
             end
-            if (~p14 &  p13) begin  // J=0 K=0
-                 prop2 <= {  prop2[5:0], p10  };
-                _prop2 <= { _prop2[5:0], p9   };
+            if (  j2 &   k2) begin                  // J=1 K=1
+                { p10, prop2 } <= {  prop2, p9   };
+                { p9, _prop2 } <= { _prop2, p10  };
             end
         end else begin
-             prop2 <= {  prop2[5:0],  prop2[0] };
-            _prop2 <= { _prop2[5:0], _prop2[0] };
+            { p10, prop2 } <= {  prop2,  prop2[0] };
+            { p9, _prop2 } <= { _prop2, _prop2[0] };
         end
-        jsetup2 <= { jsetup2[2:0], p14 };
-        ksetup2 <= { ksetup2[2:0], p13 };
+        { j2, jsetup2 } <= { jsetup2,   p14 };
+        { k2, ksetup2 } <= { ksetup2, ~ p13 };
         lastt2  <= p12;
     end
 endmodule
@@ -874,31 +859,40 @@ module X74LS174 (input yclock, zclock, zreset,
 
     reg lastt;
 
-    reg[4:0] aa, bb, cc, dd, ee, ff;
+    reg da, db, dc, dd, de, df;
+    reg[1:0] sa, sb, sc, sd, se, sf;    // setup delays
+    reg[4:0] pa, pb, pc, pd, pe, pf;    // prop delays
 
     always @(posedge zclock) begin
         if (~ p1) begin
-            { p2,  aa } <= { aa, 1'b0  };
-            { p5,  bb } <= { bb, 1'b0  };
-            { p7,  cc } <= { cc, 1'b0  };
-            { p10, dd } <= { dd, 1'b0  };
-            { p12, ee } <= { ee, 1'b0  };
-            { p15, ff } <= { ff, 1'b0  };
+            { p2,  pa } <= { pa, 1'b0  };
+            { p5,  pb } <= { pb, 1'b0  };
+            { p7,  pc } <= { pc, 1'b0  };
+            { p10, pd } <= { pd, 1'b0  };
+            { p12, pe } <= { pe, 1'b0  };
+            { p15, pf } <= { pf, 1'b0  };
         end else if (~ lastt & p9) begin
-            { p2,  aa } <= { aa, p3    };
-            { p5,  bb } <= { bb, p4    };
-            { p7,  cc } <= { cc, p6    };
-            { p10, dd } <= { dd, p11   };
-            { p12, ee } <= { ee, p13   };
-            { p15, ff } <= { ff, p14   };
+            { p2,  pa } <= { pa, da };
+            { p5,  pb } <= { pb, db };
+            { p7,  pc } <= { pc, dc };
+            { p10, pd } <= { pd, dd };
+            { p12, pe } <= { pe, de };
+            { p15, pf } <= { pf, df };
         end else begin
-            { p2,  aa } <= { aa, aa[0] };
-            { p5,  bb } <= { bb, bb[0] };
-            { p7,  cc } <= { cc, cc[0] };
-            { p10, dd } <= { dd, dd[0] };
-            { p12, ee } <= { ee, ee[0] };
-            { p15, ff } <= { ff, ff[0] };
+            { p2,  pa } <= { pa, pa[0] };
+            { p5,  pb } <= { pb, pb[0] };
+            { p7,  pc } <= { pc, pc[0] };
+            { p10, pd } <= { pd, pd[0] };
+            { p12, pe } <= { pe, pe[0] };
+            { p15, pf } <= { pf, pf[0] };
         end
+
+        { da, sa } <= { sa, p3  };
+        { db, sb } <= { sb, p4  };
+        { dc, sc } <= { sc, p6  };
+        { dd, sd } <= { sd, p11 };
+        { de, se } <= { se, p13 };
+        { df, sf } <= { sf, p14 };
 
         lastt <= p9;
     end
@@ -931,25 +925,32 @@ module X74LS175 (input yclock, zclock, zreset,
 
     reg lastt;
 
-    reg[4:0] aa, bb, cc, dd;
+    reg da, db, dc, dd;
+    reg[1:0] sa, sb, sc, sd;    // setup delays
+    reg[4:0] pa, pb, pc, pd;    // prop delays
 
     always @(posedge zclock) begin
         if (~ p1) begin
-            { p2,  aa } <= { aa[4:2], 3'b0 };
-            { p7,  bb } <= { bb[4:2], 3'b0 };
-            { p10, cc } <= { cc[4:2], 3'b0 };
-            { p15, dd } <= { dd[4:2], 3'b0 };
+            { p2,  pa } <= { pa, 1'b0 };
+            { p7,  pb } <= { pb, 1'b0 };
+            { p10, pc } <= { pc, 1'b0 };
+            { p15, pd } <= { pd, 1'b0 };
         end else if (~ lastt & p9) begin
-            { p2,  aa } <= { aa, p4  };
-            { p7,  bb } <= { bb, p5  };
-            { p10, cc } <= { cc, p12 };
-            { p15, dd } <= { dd, p13 };
+            { p2,  pa } <= { pa, da };
+            { p7,  pb } <= { pb, db };
+            { p10, pc } <= { pc, dc };
+            { p15, pd } <= { pd, dd };
         end else begin
-            { p2,  aa } <= { aa, aa[0] };
-            { p7,  bb } <= { bb, bb[0] };
-            { p10, cc } <= { cc, cc[0] };
-            { p15, dd } <= { dd, dd[0] };
+            { p2,  pa } <= { pa, pa[0] };
+            { p7,  pb } <= { pb, pb[0] };
+            { p10, pc } <= { pc, pc[0] };
+            { p15, pd } <= { pd, pd[0] };
         end
+
+        { da, sa } <= { sa, p4  };
+        { db, sb } <= { sb, p5  };
+        { dc, sc } <= { sc, p12 };
+        { dd, sd } <= { sd, p13 };
 
         lastt <= p9;
     end
