@@ -73,7 +73,11 @@ module dmatest (
                      endofbrk & wrmem_o & ts2 ? rwdat :
                      12'o0000;
 
+    reg[31:00] cyclect;
+
     always @(posedge zclock or posedge armwrite) begin
+        cyclect <= zreset ? 0 : cyclect + 1;
+
         if (zreset & enable) begin
             enable    <= 0;
         end else if (armwrite) begin
@@ -102,6 +106,8 @@ module dmatest (
             // otherwise, if nothing, including us, is requesting a break, and break not being granted,
             // ...request a break from time-to-time
             else if (~ brkrqst & ~ brkgnti & (lfsr[63:45] == 0)) begin  // 327.68uS
+                $display ("dmatest*: %x dat=%o 3cy=%b cai=%b wrm=%b adr=%o",
+                    cyclect, lfsr[11:00], lfsr[12], lfsr[13], lfsr[14], lfsr[29:15]);
                 brkrqst_o <= 1;
                 rwdat     <= lfsr[11:00];
                 cycle3_o  <= lfsr[12];
