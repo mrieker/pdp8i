@@ -33,7 +33,9 @@ module dmatest (
     reg enable;
     reg[63:00] lfsr;
     reg[14:00] brkadr;
-    reg[11:00] rwdat;
+    reg[11:00] rdata, wdata;
+
+    reg cycle3req, caincreq, wrmemreq;
 
     // our break request has been granted
     wire isgranted = brkrqst_o & brkgnti;
@@ -56,30 +58,37 @@ module dmatest (
                                           dmafld_o,   //12
                                           inbus_o     //00
                                         } :
-                      (armraddr == 2) ? { 5'b0, brkadr, rwdat } :
+                      (armraddr == 2) ? { 5'b0, brkadr, wdata } :
+                      (armraddr == 3) ? { 20'b0, rdata } :
                                         32'hDEADBEEF;
 
     // pass brkgnti to brkgnto unless we are requesting a break
-    assign brkgnto = brkgnti & ~ brkrqst_o;
+    reg blockgrantpass;
+    assign brkgnto = brkgnti & ~ blockgrantpass;
 
     // output dma field as long as our break request has been granted
     // otherwise output zeroes so it doesn't jam up bus
     assign dmafld_o = isgranted ? brkadr[14:12] : 3'o0;
 
+    assign cycle3_o = isgranted ? cycle3req : 1'b0;
+    assign cainc_o  = isgranted ? caincreq  : 1'b0;
+    assign wrmem_o  = isgranted ? wrmemreq  : 1'b0;
+
     // output dma address during TS4 if our break request has been granted
-    // output dma data during TS2 of BREAK if our break request has been granted
+    // output dma write data during TS2 of BREAK if our break request has been granted
     // otherwise output zeroes so it doesn't jam up bus
     assign inbus_o = isgranted & ts4 ? brkadr[11:00] :
-                     endofbrk & wrmem_o & ts2 ? rwdat :
+                     endofbrk & wrmem_o & ts2 ? wdata :
                      12'o0000;
 
     reg[31:00] cyclect;
+    reg lastisgranted;
 
     always @(posedge zclock or posedge armwrite) begin
         cyclect <= zreset ? 0 : cyclect + 1;
 
         if (zreset & enable) begin
-            enable    <= 0;
+            enable <= 0;
         end else if (armwrite) begin
 
             // arm writing enable bit
@@ -87,37 +96,50 @@ module dmatest (
                 1: enable <= armwdata[31];
             endcase
         end else if (~ enable | busini) begin
+            blockgrantpass <= 0;
             brkrqst_o <= 0;
-            cycle3_o  <= 0;
-            cainc_o   <= 0;
-            wrmem_o   <= 0;
             lfsr <= { seed, 56'h12345678abcde };
         end else begin
 
             // if our break request has been granted and this is TP2 of a BREAK cycle, drop break request
+            // also clock in read data at TP2
             if (endofbrk & tp2) begin
-                if (~ wrmem_o) rwdat <= mbuf;
+                ////$display ("dmatest*: %m %x finished mbuf=%o", cyclect, mbuf);
                 brkrqst_o <= 0;
-                cycle3_o  <= 0;
-                cainc_o   <= 0;
-                wrmem_o   <= 0;
+                rdata <= mbuf;
+            end
+
+            // allow grant to pass to outer circuit when we are all done and processor has dropped our grant
+            else if (blockgrantpass & ~ brkrqst_o & ~ brkgnti) begin
+                ////$display ("dmatest*: %m %x all done", cyclect);
+                blockgrantpass <= 0;
             end
 
             // otherwise, if nothing, including us, is requesting a break, and break not being granted,
             // ...request a break from time-to-time
-            else if (~ brkrqst & ~ brkgnti & (lfsr[63:45] == 0)) begin  // 327.68uS
-                $display ("dmatest*: %x dat=%o 3cy=%b cai=%b wrm=%b adr=%o",
-                    cyclect, lfsr[11:00], lfsr[12], lfsr[13], lfsr[14], lfsr[29:15]);
+            // don't start request during TS2 so we don't stomp on previous break
+            //  ... previous break was a read, this is a write, processor gets a glitch of mbload
+            // block grant from passing to outer circuit.  if outer circuit starts requesting right now,
+            // ...it can't possibly receive grant from processor before we block it
+            else if (~ brkrqst & ~ brkgnti & ~ ts2 & ~ blockgrantpass & (lfsr[63:54] == 0)) begin  // 327.68uS
+                ////$display ("dmatest*: %m %x request dat=%o 3cy=%b cai=%b wrm=%b adr=%o",
+                ////    cyclect, lfsr[11:00], lfsr[12], lfsr[13], lfsr[14], lfsr[29:15]);
+                blockgrantpass <= 1;
                 brkrqst_o <= 1;
-                rwdat     <= lfsr[11:00];
-                cycle3_o  <= lfsr[12];
-                cainc_o   <= lfsr[13];
-                wrmem_o   <= lfsr[14];
+                wdata     <= lfsr[11:00];
+                cycle3req <= lfsr[12];
+                caincreq  <= lfsr[13];
+                wrmemreq  <= lfsr[14];
                 brkadr    <= lfsr[29:15];
             end
 
             // https://www.xilinx.com/support/documentation/application_notes/xapp052.pdf
             lfsr <= { lfsr[62:51] ^ (endofbrk & tp2 & ~ wrmem_o ? mbuf : 12'o0000), lfsr[50:00], ~ lfsr[63] ^ lfsr[62] ^ lfsr[60] ^ lfsr[59] };
         end
+
+        if (~ lastisgranted & isgranted) begin
+            ////$display ("dmatest*: %m %x granted", cyclect);
+        end
+        lastisgranted <= isgranted;
     end
 endmodule

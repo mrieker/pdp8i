@@ -153,7 +153,7 @@ proc simtest {} {
                     set oldwordcount [randbits 12]
                     if {$oldwordcount & 04000} {set oldwordcount [expr {$oldwordcount | 07770}]}
                     set newwordcount [expr {($oldwordcount + 1) & 07777}]
-                    puts -nonewline [format "  WC:%04o / %04o => %04o" $dmaaddr $oldwordcount $newwordcount]
+                    puts -nonewline [format "  WCT:%04o / %04o => %04o" $dmaaddr $oldwordcount $newwordcount]
                     memorycycle $MS_WRDCT 0 $dmaaddr $oldwordcount $newwordcount
                     checkhalted
 
@@ -165,7 +165,7 @@ proc simtest {} {
                     set dmaaddr [expr {($dmaaddr + 1) & 07777}]
                     set oldcuraddr [randbits 12]
                     set newcuraddr [expr {($oldcuraddr + $dmacainc) & 07777}]
-                    puts -nonewline [format "  CA:%04o / %04o => %04o" $dmaaddr $oldcuraddr $newcuraddr]
+                    puts -nonewline [format "  CAD:%04o / %04o => %04o" $dmaaddr $oldcuraddr $newcuraddr]
                     memorycycle $MS_CURAD 0 $dmaaddr $oldcuraddr $newcuraddr
                     checkhalted
                     set dmaaddr $newcuraddr
@@ -181,8 +181,8 @@ proc simtest {} {
                 }
                 memorycycle $MS_BREAK $dmafield $dmaaddr $dmardata $dmawdata
                 if {! $dmawrmem} {
-                    set dmastat2 [bus set armraddr [expr {($dmbstat1 & 0x10000) ? 052 : 046}] get armrdata]
-                    set dmavdata [expr {$dmastat2 & 07777}]
+                    set dmastat3 [bus set armraddr [expr {($dmbstat1 & 0x10000) ? 053 : 047}] get armrdata]
+                    set dmavdata [expr {$dmastat3 & 07777}]
                     verify12 $dmavdata $dmardata "value read by dmatest.v"
                 }
             } else {
