@@ -1,4 +1,64 @@
 
+/*
+
+    0)
+
+        forward brkgnti to brkgnto
+
+    1)
+
+        wait for
+        * brkrqst negated - nothing requesting a break
+        * brkgnti negated - processor not granting a break
+        * blockgrantpass negated - we are not doing a break
+
+        output
+        * blockgrantpass asserted - block sending brkgnt out to next outer device
+        * brkrqst asserted - request a break cycle from processor
+
+    2)
+
+        wait for
+        * brkgnti - processor to grant the request
+
+        output
+        * dmafld
+        * cycle3
+        * cainc
+        * wrmem
+
+        // our break request has been granted
+        wire isgranted = brkrqst_o & brkgnti;
+
+        // output dma field as long as our break request has been granted
+        // otherwise output zeroes so it doesn't jam up bus
+        assign dmafld_o = isgranted ? brkadr[14:12] : 3'o0;
+
+        assign cycle3_o = isgranted ? cycle3req : 1'b0;
+        assign cainc_o  = isgranted ? caincreq  : 1'b0;
+        assign wrmem_o  = isgranted ? wrmemreq  : 1'b0;
+
+    3)
+
+        wait for
+        * TP2 of BREAK cycle
+
+        clock in
+        * mbuf for read data if read cycle
+
+        output
+        * brkrqst negated
+
+    4)
+
+        wait for
+        * brkgnti negated
+
+        output
+        * blockgrantpass negated
+
+*/
+
 // generate random dma requests
 
 module dmatest (
@@ -11,8 +71,7 @@ module dmatest (
     output[31:00] armrdata,
 
     // signals from processor
-    input busini, tp2, tp3, ts2, ts3, ts4,
-    input[3:0] majst,
+    input busini, brkcyc, tp2, tp3, ts2, ts3, ts4,
     input[11:00] mbuf,
 
     // signal coming from next inner dma board if any or processor
@@ -41,7 +100,7 @@ module dmatest (
     wire isgranted = brkrqst_o & brkgnti;
  
     // end of our break cycle = our break request has been granted and processsor is doing a break cycle
-    wire endofbrk = isgranted & (majst == 6);
+    wire endofbrk = isgranted & brkcyc;
 
     // sim can read our status via arm port
     assign armrdata = (armraddr == 0) ? 32'h5A441001 : // [31:16] = 'ZD'; [15:12] = (log2 nreg) - 1; [11:00] = version
@@ -104,26 +163,24 @@ module dmatest (
             // if our break request has been granted and this is TP2 of a BREAK cycle, drop break request
             // also clock in read data at TP2
             if (endofbrk & tp2) begin
-                ////$display ("dmatest*: %m %x finished mbuf=%o", cyclect, mbuf);
+                $display ("dmatest*: %m %x finished mbuf=%o", cyclect, mbuf);
                 brkrqst_o <= 0;
                 rdata <= mbuf;
             end
 
             // allow grant to pass to outer circuit when we are all done and processor has dropped our grant
             else if (blockgrantpass & ~ brkrqst_o & ~ brkgnti) begin
-                ////$display ("dmatest*: %m %x all done", cyclect);
+                $display ("dmatest*: %m %x all done", cyclect);
                 blockgrantpass <= 0;
             end
 
             // otherwise, if nothing, including us, is requesting a break, and break not being granted,
             // ...request a break from time-to-time
-            // don't start request during TS2 so we don't stomp on previous break
-            //  ... previous break was a read, this is a write, processor gets a glitch of mbload
             // block grant from passing to outer circuit.  if outer circuit starts requesting right now,
             // ...it can't possibly receive grant from processor before we block it
-            else if (~ brkrqst & ~ brkgnti & ~ ts2 & ~ blockgrantpass & (lfsr[63:54] == 0)) begin  // 327.68uS
-                ////$display ("dmatest*: %m %x request dat=%o 3cy=%b cai=%b wrm=%b adr=%o",
-                ////    cyclect, lfsr[11:00], lfsr[12], lfsr[13], lfsr[14], lfsr[29:15]);
+            else if (~ brkrqst & ~ brkgnti & ~ blockgrantpass & (lfsr[63:54] == 0)) begin
+                $display ("dmatest*: %m %x request dat=%o 3cy=%b cai=%b wrm=%b adr=%o",
+                    cyclect, lfsr[11:00], lfsr[12], lfsr[13], lfsr[14], lfsr[29:15]);
                 blockgrantpass <= 1;
                 brkrqst_o <= 1;
                 wdata     <= lfsr[11:00];
@@ -138,7 +195,7 @@ module dmatest (
         end
 
         if (~ lastisgranted & isgranted) begin
-            ////$display ("dmatest*: %m %x granted", cyclect);
+            $display ("dmatest*: %m %x granted", cyclect);
         end
         lastisgranted <= isgranted;
     end

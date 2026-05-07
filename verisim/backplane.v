@@ -22,6 +22,7 @@ module backplane (
                                     // also memory read data if memdisab set
     input iPAUSE,                   // pause processor clocking (stretch cycle)
     output oBRKGNTO,                // chained break grant
+    output oBRKCYC,                 // break cycle
     output oBUSINI,                 // initialize bus devices
     output oBWCOV,                  // 3-cycle DMA wordcount overflowed
     output oION,                    // interrupts enabled
@@ -54,7 +55,7 @@ module backplane (
     // combined bus signals
     wire _busION, _busLINK, _busPAUSE, _busREADSR, _busRESET, _busRUN, _busBRKRQST,
         _busBRKWRM, _busCAINC, _busCYCLE3, _busINTRQST, _busBUSINI, _busACCLEAR,
-        _busIOSKIP, _busLNKTOG, _busIOP, _busMEMDIS, _busINTINH, _busBWCOV;
+        _busIOSKIP, _busLNKTOG, _busIOP, _busMEMDIS, _busINTINH, _busBWCOV, _busBRKCYC;
     wire _busSWCONT, _busSWDEPOS, _busSWEXAM, _busSWLDAD, _busSWSINST, _busSWSSTEP, _busSWSTART;
     wire _busTP1, _busTP2, _busTP3, _busTP4, _busTS1, _busTS2, _busTS3, _busTS4;
     wire busCLOK2;
@@ -69,6 +70,7 @@ module backplane (
 
     // output some bus signals to simulator
     assign oACUM    = ~ _busACUM;
+    assign oBRKCYC  = ~ _busBRKCYC;
     assign oBUSINI  = ~ _busBUSINI;
     assign oBWCOV   = ~ _busBWCOV;
     assign oION     = ~ _busION;
@@ -630,6 +632,7 @@ module backplane (
         ._ACUM_10   (_busACUM[10]),
         ._ACUM_11   (_busACUM[11]),
 
+        ._BRKCYC    (_busBRKCYC),
         ._BUSINI    (_busBUSINI),
         ._BWCOV     (_busBWCOV),
         ._ION       (_busION),
@@ -710,6 +713,7 @@ module backplane (
         ._ACUM_10_o (_busACUM[10]),
         ._ACUM_11_o (_busACUM[11]),
 
+        ._BRKCYC_o  (_busBRKCYC),
         ._BUSINI_o  (_busBUSINI),
         ._BWCOV_o   (_busBWCOV),
         ._ION_o     (_busION),
@@ -823,14 +827,14 @@ module backplane (
         .armwdata (armwdata),
         .armrdata (dmardata),
 
-        .busini (~_busBUSINI),
-        .tp2   (~ _busTP2),
-        .tp3   (~ _busTP3),
-        .ts2   (~ _busTS2),
-        .ts3   (~ _busTS3),
-        .ts4   (~ _busTS4),
-        .majst (~ _busMAJST),
-        .mbuf  (~ _busMBUF),
+        .brkcyc (~ _busBRKCYC),
+        .busini (~ _busBUSINI),
+        .tp2    (~ _busTP2),
+        .tp3    (~ _busTP3),
+        .ts2    (~ _busTS2),
+        .ts3    (~ _busTS3),
+        .ts4    (~ _busTS4),
+        .mbuf   (~ _busMBUF),
 
         .brkgnti (dmaBRKGNTI),
         .brkgnto (dmaBRKGNTO),
@@ -862,14 +866,14 @@ module backplane (
         .armwdata (armwdata),
         .armrdata (dmbrdata),
 
-        .busini (~_busBUSINI),
-        .tp2   (~ _busTP2),
-        .tp3   (~ _busTP3),
-        .ts2   (~ _busTS2),
-        .ts3   (~ _busTS3),
-        .ts4   (~ _busTS4),
-        .majst (~ _busMAJST),
-        .mbuf  (~ _busMBUF),
+        .brkcyc (~ _busBRKCYC),
+        .busini (~ _busBUSINI),
+        .tp2    (~ _busTP2),
+        .tp3    (~ _busTP3),
+        .ts2    (~ _busTS2),
+        .ts3    (~ _busTS3),
+        .ts4    (~ _busTS4),
+        .mbuf   (~ _busMBUF),
 
         .brkgnti (dmbBRKGNTI),
         .brkgnto (dmbBRKGNTO),
