@@ -37,7 +37,6 @@ module backplane (
     output[2:0] memfield,
     output[3:0] majst,
     output[4:0] sctr,
-    output[2:0] swdfld, swifld,     // DFLD and IFLD switches
     output swstart, swldad, swdepos, swexam,
     output swcont, swsstep, swsinst
 
@@ -113,13 +112,6 @@ module backplane (
         .zreset (zreset),
         .GND    (1'b0),
         .VCC    (1'b1),
-
-        .swdfld_2 (swdfld[2]),  // pass DFLD/IFLD switches directly to simulator
-        .swdfld_1 (swdfld[1]),
-        .swdfld_0 (swdfld[0]),
-        .swifld_2 (swifld[2]),
-        .swifld_1 (swifld[1]),
-        .swifld_0 (swifld[0]),
 
         .BRKGNTI  (),
 
