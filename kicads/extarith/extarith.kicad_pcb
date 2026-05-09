@@ -6544,7 +6544,7 @@
     (property "Sheetname" "")
     (property "ki_description" "quad 2-input NAND gate")
     (property "ki_keywords" "HCMOS nand 2-input")
-    (path "/da7375a2-a7fc-4e13-93ca-35c47c64bd2c")
+    (path "/4d85b623-06b4-4796-9518-66ce1ab9db1f")
     (attr through_hole)
     (fp_text reference "U161" (at 3.81 -2.33) (layer "F.SilkS")
         (effects (font (size 1 1) (thickness 0.15)))

@@ -270,9 +270,9 @@ proc simtest {} {
                 switch [expr {$opcode >> 9}] {
 
                     4 {             ;# jms
-                        checkhalted
-                        set xmem_intdisableduntiljump 0
-                        set xmem_ifld $xmem_ifldafterjump
+                        set xmem_intdisableduntiljump 0     ;# done at end of fetch or defer
+                        set xmem_ifld $xmem_ifldafterjump   ;# ditto
+                        checkhalted                         ;# maybe halt, maybe abort instruction
                         set operand [randbits 12]
                         puts -nonewline [format " %o%04o / %04o <= %04o" $xmem_ifld $effaddr $operand $pctr]
                         memorycycle $execst $xmem_ifld $effaddr $operand $pctr

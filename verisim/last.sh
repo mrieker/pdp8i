@@ -1,7 +1,12 @@
 #!/bin/bash
+#
+#  run simtest, print ever 100 instructions
+#  if failure, save whole of last 4M output
+#
 if [ "$usemcp" == "" ]
 then
     export usemcp=0
 fi
-rm -f last.err.$BASHPID last.out.$BASHPID
-time ./simtest.sh 2>&1 | ./last16k.`uname -m` 2> last.err.$BASHPID | ./bgrep '00 : L' | tee last.out.$BASHPID
+id=$$
+rm -f last.err.$id last.out.$id
+time ./simtest.sh 2>&1 | ./last16k.`uname -m` 2> last.err.$id | ./bgrep '00 : L' | tee last.out.$id
