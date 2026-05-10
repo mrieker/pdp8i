@@ -1323,7 +1323,7 @@ module X74AC161 (input yclock, zclock, zreset,
 
     always @(posedge zclock) begin
         if (~ p1) begin
-            { p11, p12, p13, p14, delay } <= { delay[27:16], 20'b0 };
+            { p11, p12, p13, p14, delay } <= { delay, 4'b0 };
         end else if (~ lastt & p2) begin
             if (~ p9) begin
                 { p11, p12, p13, p14, delay } <= { delay, p6, p5, p4, p3 };
@@ -1441,12 +1441,12 @@ module X74AHC174 (input yclock, zclock, zreset,
             { p12, pe } <= { pe, de };
             { p15, pf } <= { pf, df };
         end else begin
-            { p2,  pa } <= { pa, pa[0] };
-            { p5,  pb } <= { pb, pb[0] };
-            { p7,  pc } <= { pc, pc[0] };
-            { p10, pd } <= { pd, pd[0] };
-            { p12, pe } <= { pe, pe[0] };
-            { p15, pf } <= { pf, pf[0] };
+            { p2,  pa } <= { pa, pa };
+            { p5,  pb } <= { pb, pb };
+            { p7,  pc } <= { pc, pc };
+            { p10, pd } <= { pd, pd };
+            { p12, pe } <= { pe, pe };
+            { p15, pf } <= { pf, pf };
         end
 
         da <= p3;
@@ -1546,7 +1546,7 @@ module X74AC175 (input yclock, zclock, zreset,
     reg lastt;
 
     reg da, db, dc, dd;
-    reg[2:0] pa, pb, pc, pd;    // prop delays
+    reg pa, pb, pc, pd;    // prop delays
 
     always @(posedge zclock) begin
         if (~ p1) begin
@@ -1560,10 +1560,10 @@ module X74AC175 (input yclock, zclock, zreset,
             { p10, pc } <= { pc, dc };
             { p15, pd } <= { pd, dd };
         end else begin
-            { p2,  pa } <= { pa, pa[0] };
-            { p7,  pb } <= { pb, pb[0] };
-            { p10, pc } <= { pc, pc[0] };
-            { p15, pd } <= { pd, pd[0] };
+            { p2,  pa } <= { pa, pa };
+            { p7,  pb } <= { pb, pb };
+            { p10, pc } <= { pc, pc };
+            { p15, pd } <= { pd, pd };
         end
 
         da <= p4;
