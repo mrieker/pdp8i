@@ -1,7 +1,9 @@
 
 // variable-nanosecond delays approximating real-world gates
+// uses worst case timing
 // assumes zclock is clocked at 5nS
 // to clock yclock at 10MHz, set verimain.cc's clkratio=20
+// works with clkratio=32, not with clkratio=30
 
 module X74HC00 (input yclock, zclock, zreset,
           input      p1
@@ -30,24 +32,31 @@ module X74HC00 (input yclock, zclock, zreset,
     end
 endmodule
 
-module X74LS00 (input yclock, zclock, zreset,
-          input  p1
-        , input  p2
-        , output p3
-        , input  p4
-        , input  p5
-        , output p6
-        , input  p7
-        , output p8
-        , input  p9
-        , input  p10
-        , output p11
-        , input  p12
-        , input  p13
-        , input  p14
+module X74AHC00 (input yclock, zclock, zreset,
+          input      p1
+        , input      p2
+        , output reg p3
+        , input      p4
+        , input      p5
+        , output reg p6
+        , input      p7
+        , output reg p8
+        , input      p9
+        , input      p10
+        , output reg p11
+        , input      p12
+        , input      p13
+        , input      p14
 );
 
-    X74HC00 hc (yclock, zclock, zreset, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14);
+    reg aa, bb, cc, dd;
+
+    always @(posedge zclock) begin
+        { p3,  aa } <= { aa, ~ (p1  & p2)  };
+        { p6,  bb } <= { bb, ~ (p4  & p5)  };
+        { p8,  cc } <= { cc, ~ (p9  & p10) };
+        { p11, dd } <= { dd, ~ (p12 & p13) };
+    end
 endmodule
 
 module X74HC02 (input yclock, zclock, zreset,
@@ -77,24 +86,31 @@ module X74HC02 (input yclock, zclock, zreset,
     end
 endmodule
 
-module X74LS02 (input yclock, zclock, zreset,
-          output p1
-        , input  p2
-        , input  p3
-        , output p4
-        , input  p5
-        , input  p6
-        , input  p7
-        , input  p8
-        , input  p9
-        , output p10
-        , input  p11
-        , input  p12
-        , output p13
-        , input  p14
+module X74AHC02 (input yclock, zclock, zreset,
+          output reg p1
+        , input      p2
+        , input      p3
+        , output reg p4
+        , input      p5
+        , input      p6
+        , input      p7
+        , input      p8
+        , input      p9
+        , output reg p10
+        , input      p11
+        , input      p12
+        , output reg p13
+        , input      p14
 );
 
-    X74HC02 hc (yclock, zclock, zreset, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14);
+    reg aa, bb, cc, dd;
+
+    always @(posedge zclock) begin
+        { p1,  aa } <= { aa, ~ (p2  | p3)  };
+        { p4,  bb } <= { bb, ~ (p5  | p6)  };
+        { p10, cc } <= { cc, ~ (p8  | p9)  };
+        { p13, dd } <= { dd, ~ (p11 | p12) };
+    end
 endmodule
 
 module X74HC04 (input yclock, zclock, zreset,
@@ -126,27 +142,36 @@ module X74HC04 (input yclock, zclock, zreset,
     end
 endmodule
 
-module X74LS04 (input yclock, zclock, zreset,
-          input  p1
-        , output p2
-        , input  p3
-        , output p4
-        , input  p5
-        , output p6
-        , input  p7
-        , output p8
-        , input  p9
-        , output p10
-        , input  p11
-        , output p12
-        , input  p13
-        , input  p14
+module X74AHC04 (input yclock, zclock, zreset,
+          input      p1
+        , output reg p2
+        , input      p3
+        , output reg p4
+        , input      p5
+        , output reg p6
+        , input      p7
+        , output reg p8
+        , input      p9
+        , output reg p10
+        , input      p11
+        , output reg p12
+        , input      p13
+        , input      p14
 );
 
-    X74HC04 hc (yclock, zclock, zreset, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14);
+    reg aa, bb, cc, dd, ee, ff;
+
+    always @(posedge zclock) begin
+        { p2,  aa } <= { aa, ~ p1  };
+        { p4,  bb } <= { bb, ~ p3  };
+        { p6,  cc } <= { cc, ~ p5  };
+        { p8,  dd } <= { dd, ~ p9  };
+        { p10, ee } <= { ee, ~ p11 };
+        { p12, ff } <= { ff, ~ p13 };
+    end
 endmodule
 
-module X74LS08 (input yclock, zclock, zreset,
+module X74HC08 (input yclock, zclock, zreset,
           input      p1
         , input      p2
         , output reg p3
@@ -173,7 +198,34 @@ module X74LS08 (input yclock, zclock, zreset,
     end
 endmodule
 
-module X74LS10 (input yclock, zclock, zreset,
+module X74AHC08 (input yclock, zclock, zreset,
+          input      p1
+        , input      p2
+        , output reg p3
+        , input      p4
+        , input      p5
+        , output reg p6
+        , input      p7
+        , output reg p8
+        , input      p9
+        , input      p10
+        , output reg p11
+        , input      p12
+        , input      p13
+        , input      p14
+);
+
+    reg aa, bb, cc, dd;
+
+    always @(posedge zclock) begin
+        { p3,  aa } <= { aa, p1  & p2  };
+        { p6,  bb } <= { bb, p4  & p5  };
+        { p8,  cc } <= { cc, p9  & p10 };
+        { p11, dd } <= { dd, p12 & p13 };
+    end
+endmodule
+
+module X74HC10 (input yclock, zclock, zreset,
           input      p1
         , input      p2
         , input      p3
@@ -199,7 +251,33 @@ module X74LS10 (input yclock, zclock, zreset,
     end
 endmodule
 
-module X74LS11 (input yclock, zclock, zreset,
+module X74AC10 (input yclock, zclock, zreset,
+          input      p1
+        , input      p2
+        , input      p3
+        , input      p4
+        , input      p5
+        , output reg p6
+        , input      p7
+        , output reg p8
+        , input      p9
+        , input      p10
+        , input      p11
+        , output reg p12
+        , input      p13
+        , input      p14
+);
+
+    reg aa, bb, cc;
+
+    always @(posedge zclock) begin
+        { p6,  aa } <= { aa, ~ (p3 & p4  & p5)  };
+        { p8,  bb } <= { bb, ~ (p9 & p10 & p11) };
+        { p12, cc } <= { cc, ~ (p1 & p2  & p13) };
+    end
+endmodule
+
+module X74HC11 (input yclock, zclock, zreset,
           input      p1
         , input      p2
         , input      p3
@@ -225,7 +303,33 @@ module X74LS11 (input yclock, zclock, zreset,
     end
 endmodule
 
-module X74LS20 (input yclock, zclock, zreset,
+module X74AC11 (input yclock, zclock, zreset,
+          input      p1
+        , input      p2
+        , input      p3
+        , input      p4
+        , input      p5
+        , output reg p6
+        , input      p7
+        , output reg p8
+        , input      p9
+        , input      p10
+        , input      p11
+        , output reg p12
+        , input      p13
+        , input      p14
+);
+
+    reg aa, bb, cc;
+
+    always @(posedge zclock) begin
+        { p6,  aa } <= { aa, p3 & p4  & p5  };
+        { p8,  bb } <= { bb, p9 & p10 & p11 };
+        { p12, cc } <= { cc, p1 & p2  & p13 };
+    end
+endmodule
+
+module X74HC20 (input yclock, zclock, zreset,
           input      p1
         , input      p2
         , input      p4
@@ -248,7 +352,30 @@ module X74LS20 (input yclock, zclock, zreset,
     end
 endmodule
 
-module X74LS21 (input yclock, zclock, zreset,
+module X74AC20 (input yclock, zclock, zreset,
+          input      p1
+        , input      p2
+        , input      p4
+        , input      p5
+        , output reg p6
+        , input      p7
+        , output reg p8
+        , input      p9
+        , input      p10
+        , input      p12
+        , input      p13
+        , input      p14
+);
+
+    reg aa, bb;
+
+    always @(posedge zclock) begin
+        { p6, aa } <= { aa, ~ (p1 & p2  & p4  & p5)  };
+        { p8, bb } <= { bb, ~ (p9 & p10 & p12 & p13) };
+    end
+endmodule
+
+module X74HC21 (input yclock, zclock, zreset,
           input      p1
         , input      p2
         , input      p4
@@ -297,27 +424,7 @@ module X74HC27 (input yclock, zclock, zreset,
     end
 endmodule
 
-module X74LS27 (input yclock, zclock, zreset,
-          input  p1
-        , input  p2
-        , input  p3
-        , input  p4
-        , input  p5
-        , output p6
-        , input  p7
-        , output p8
-        , input  p9
-        , input  p10
-        , input  p11
-        , output p12
-        , input  p13
-        , input  p14
-);
-
-    X74HC27 hc (yclock, zclock, zreset, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14);
-endmodule
-
-module X74LS30 (input yclock, zclock, zreset,
+module X74HC30 (input yclock, zclock, zreset,
           input      p1
         , input      p2
         , input      p3
@@ -338,7 +445,7 @@ module X74LS30 (input yclock, zclock, zreset,
     end
 endmodule
 
-module X74LS32 (input yclock, zclock, zreset,
+module X74HC32 (input yclock, zclock, zreset,
           input      p1
         , input      p2
         , output reg p3
@@ -365,7 +472,34 @@ module X74LS32 (input yclock, zclock, zreset,
     end
 endmodule
 
-module X74LS42 (input yclock, zclock, zreset,
+module X74AHC32 (input yclock, zclock, zreset,
+          input      p1
+        , input      p2
+        , output reg p3
+        , input      p4
+        , input      p5
+        , output reg p6
+        , input      p7
+        , output reg p8
+        , input      p9
+        , input      p10
+        , output reg p11
+        , input      p12
+        , input      p13
+        , input      p14
+);
+
+    reg aa, bb, cc, dd;
+
+    always @(posedge zclock) begin
+        { p3,  aa } <= { aa, p1  | p2  };
+        { p6,  bb } <= { bb, p4  | p5  };
+        { p8,  cc } <= { cc, p9  | p10 };
+        { p11, dd } <= { dd, p12 | p13 };
+    end
+endmodule
+
+module X74HC42 (input yclock, zclock, zreset,
           output reg p1
         , output reg p2
         , output reg p3
@@ -455,7 +589,58 @@ module X74HC74 (input yclock, zclock, zreset,
     end
 endmodule
 
-module X74LS75 (input yclock, zclock, zreset,
+module X74AHC74 (input yclock, zclock, zreset,
+          input      p1     // 1 _pc
+        , input      p2     // 1 D
+        , input      p3     // 1 T
+        , input      p4     // 1 _ps
+        , output reg p5     // 1 Q
+        , output reg p6     // 1 _Q
+        , input      p7     // GND
+        , output reg p8     // 2 _Q
+        , output reg p9     // 2 Q
+        , input      p10    // 2 _ps
+        , input      p11    // 2 T
+        , input      p12    // 2 D
+        , input      p13    // 2 _pc
+        , input      p14    // VCC
+);
+
+    reg d1, d2, lastt1, lastt2;
+    reg[2:0] prop1, prop2, _prop1, _prop2;
+
+    always @(posedge zclock) begin
+        if (~ p1 | ~ p4) begin
+            { p5,  prop1 } <= {  prop1, ~ p4 };         //  q <= ~ _ps
+            { p6, _prop1 } <= { _prop1, ~ p1 };         // _q <= ~ _pc
+        end else if (~ lastt1 & p3) begin
+            { p5,  prop1 } <= {  prop1,   d1 };         //  q <=   d
+            { p6, _prop1 } <= { _prop1, ~ d1 };         // _q <= ~ d
+        end else begin
+            { p5,  prop1 } <= {  prop1,  prop1[0] };    //  q <=   q
+            { p6, _prop1 } <= { _prop1, _prop1[0] };    // _q <=  _q
+        end
+
+        if (~ p13 | ~ p10) begin
+            { p9,  prop2 } <= {  prop2, ~ p10 };        //  q <= ~ _ps
+            { p8, _prop2 } <= { _prop2, ~ p13 };        // _q <= ~ _pc
+        end else if (~ lastt2 & p11) begin
+            { p9,  prop2 } <= {  prop2,   d2 };         //  q <=   d
+            { p8, _prop2 } <= { _prop2, ~ d2 };         // _q <= ~ d
+        end else begin
+            { p9,  prop2 } <= {  prop2,  prop2[0] };    //  q <=   q
+            { p8, _prop2 } <= { _prop2, _prop2[0] };    // _q <=  _q
+        end
+
+        d1 <= p2;
+        d2 <= p12;
+
+        lastt1 <= p3;
+        lastt2 <= p11;
+    end
+endmodule
+
+module X74HC75 (input yclock, zclock, zreset,
           output     p1     // _q0
         , input      p2     // d0
         , input      p3     // d1
@@ -489,8 +674,7 @@ module X74LS75 (input yclock, zclock, zreset,
     end
 endmodule
 
-
-module X74LS85 (input yclock, zclock, zreset,
+module X74HC85 (input yclock, zclock, zreset,
           input  p1         // B3
         , input  p2         // (A < B) IN   from
         , input  p3         // (A = B) IN   lower
@@ -552,7 +736,34 @@ module X74HC86 (input yclock, zclock, zreset,
     end
 endmodule
 
-module X74LS109 (input yclock, zclock, zreset,
+module X74AHC86 (input yclock, zclock, zreset,
+          input  p1
+        , input  p2
+        , output reg p3
+        , input  p4
+        , input  p5
+        , output reg p6
+        , input  p7
+        , output reg p8
+        , input  p9
+        , input  p10
+        , output reg p11
+        , input  p12
+        , input  p13
+        , input  p14
+);
+
+    reg aa, bb, cc, dd;
+
+    always @(posedge zclock) begin
+        { p3,  aa } <= { aa, p1  ^ p2  };
+        { p6,  bb } <= { bb, p4  ^ p5  };
+        { p8,  cc } <= { cc, p9  ^ p10 };
+        { p11, dd } <= { dd, p12 ^ p13 };
+    end
+endmodule
+
+module X74HC109 (input yclock, zclock, zreset,
           input  p1         // 1 _Pc
         , input  p2         // 1  J
         , input  p3         // 1 _K
@@ -635,6 +846,88 @@ module X74LS109 (input yclock, zclock, zreset,
     end
 endmodule
 
+module X74AC109 (input yclock, zclock, zreset,
+          input  p1         // 1 _Pc
+        , input  p2         // 1  J
+        , input  p3         // 1 _K
+        , input  p4         // 1  CLK
+        , input  p5         // 1 _Ps
+        , output reg p6     // 1  Q
+        , output reg p7     // 1 _Q
+        , input  p8         // GND
+        , output reg p9     // 2 _Q
+        , output reg p10    // 2  Q
+        , input  p11        // 2 _Ps
+        , input  p12        // 2  CLK
+        , input  p13        // 2 _K
+        , input  p14        // 2  J
+        , input  p15        // 2 _Pc
+        , input  p16        // VCC
+);
+
+    reg lastt1, lastt2;
+    reg j1, k1, j2, k2;
+    reg[1:0] prop1, prop2, _prop1, _prop2;
+
+    always @(posedge zclock) begin
+        if (~ p1 | ~ p5) begin
+            { p6,  prop1 } <= {  prop1, ~ p5 };     //  q <= ~ ps
+            { p7, _prop1 } <= { _prop1, ~ p1 };     // _q <= ~ pc
+        end else if (~ lastt1 & p4) begin
+            if (~ j1 & ~ k1) begin                  // J=0 K=0
+                { p6,  prop1 } <= {  prop1, p6   };
+                { p7, _prop1 } <= { _prop1, p7   };
+            end
+            if (~ j1 &   k1) begin                  // J=0 K=1
+                { p6,  prop1 } <= {  prop1, 1'b0 };
+                { p7, _prop1 } <= { _prop1, 1'b1 };
+            end
+            if (  j1 & ~ k1) begin                  // J=1 K=0
+                { p6,  prop1 } <= {  prop1, 1'b1 };
+                { p7, _prop1 } <= { _prop1, 1'b0 };
+            end
+            if (  j1 &   k1) begin                  // J=1 K=1
+                { p6,  prop1 } <= {  prop1, p7   };
+                { p7, _prop1 } <= { _prop1, p6   };
+            end
+        end else begin
+            { p6,  prop1 } <= {  prop1,  prop1[0] };
+            { p7, _prop1 } <= { _prop1, _prop1[0] };
+        end
+        j1 <=   p2;
+        k1 <= ~ p3;
+        lastt1  <= p4;
+
+        if (~ p15 | ~ p11) begin
+            { p10, prop2 } <= {  prop2, ~ p11 };    //  q <= ~ ps
+            { p9, _prop2 } <= { _prop2, ~ p15 };    // _q <= ~ pc
+        end else if (~ lastt2 & p12) begin
+            if (~ j2 & ~ k2) begin                  // J=0 K=0
+                { p10, prop2 } <= {  prop2, p10  };
+                { p9, _prop2 } <= { _prop2, p9   };
+            end
+            if (~ j2 &   k2) begin                  // J=0 K=1
+                { p10, prop2 } <= {  prop2, 1'b0 };
+                { p9, _prop2 } <= { _prop2, 1'b1 };
+            end
+            if (  j2 & ~ k2) begin                  // J=1 K=0
+                { p10, prop2 } <= {  prop2, 1'b1 };
+                { p9, _prop2 } <= { _prop2, 1'b0 };
+            end
+            if (  j2 &   k2) begin                  // J=1 K=1
+                { p10, prop2 } <= {  prop2, p9   };
+                { p9, _prop2 } <= { _prop2, p10  };
+            end
+        end else begin
+            { p10, prop2 } <= {  prop2,  prop2[0] };
+            { p9, _prop2 } <= { _prop2, _prop2[0] };
+        end
+        j2 <=   p14;
+        k2 <= ~ p13;
+        lastt2  <= p12;
+    end
+endmodule
+
 module X74HC138 (input yclock, zclock, zreset,
           input      p1         // A2
         , input      p2         // A1
@@ -671,7 +964,43 @@ module X74HC138 (input yclock, zclock, zreset,
     end
 endmodule
 
-module X74LS139 (input yclock, zclock, zreset,
+module X74AHC138 (input yclock, zclock, zreset,
+          input      p1         // A2
+        , input      p2         // A1
+        , input      p3         // A0
+        , input      p4         // _G0
+        , input      p5         // _G1
+        , input      p6         // G2
+        , output reg p7         // Y7
+        , input      p8         // GND
+        , output     reg p9     // Y6
+        , output     reg p10    // Y5
+        , output     reg p11    // Y4
+        , output     reg p12    // Y3
+        , output     reg p13    // Y2
+        , output     reg p14    // Y1
+        , output     reg p15    // Y0
+        , input      p16        // VCC
+);
+
+    wire g = ~ p4 & ~ p5 & p6;
+    wire[2:0] n = { p3, p2, p1 };
+
+    reg d0, d1, d2, d3, d4, d5, d6, d7;
+
+    always @(posedge zclock) begin
+        { p15, d0 } <= { d0, ~ g | (n != 0) };
+        { p14, d1 } <= { d1, ~ g | (n != 1) };
+        { p13, d2 } <= { d2, ~ g | (n != 2) };
+        { p12, d3 } <= { d3, ~ g | (n != 3) };
+        { p11, d4 } <= { d4, ~ g | (n != 4) };
+        { p10, d5 } <= { d5, ~ g | (n != 5) };
+        { p9,  d6 } <= { d6, ~ g | (n != 6) };
+        { p7,  d7 } <= { d7, ~ g | (n != 7) };
+    end
+endmodule
+
+module X74HC139 (input yclock, zclock, zreset,
           input  p1     // 1 _E
         , input  p2     // 1 A0
         , input  p3     // 1 A1
@@ -708,7 +1037,44 @@ module X74LS139 (input yclock, zclock, zreset,
     end
 endmodule
 
-module X74LS151 (input yclock, zclock, zreset,
+module X74AHC139 (input yclock, zclock, zreset,
+          input  p1     // 1 _E
+        , input  p2     // 1 A0
+        , input  p3     // 1 A1
+        , output reg p4     // 1 _Y0
+        , output reg p5     // 1 _Y1
+        , output reg p6     // 1 _Y2
+        , output reg p7     // 1 _Y3
+        , input  p8     // GND
+        , output reg p9     // 2 _Y3
+        , output reg p10    // 2 _Y2
+        , output reg p11    // 2 _Y1
+        , output reg p12    // 2 _Y0
+        , input  p13    // 2 A1
+        , input  p14    // 2 A0
+        , input  p15    // 2 _E
+        , input  p16    // VCC
+);
+
+    wire[1:0] n1 = { p3,  p2  };
+    wire[1:0] n2 = { p13, p14 };
+
+    reg d10, d11, d12, d13, d20, d21, d22, d23;
+
+    always @(posedge zclock) begin
+        { p4,  d10 } <= { d10, p1  | (n1 != 0) };
+        { p5,  d11 } <= { d11, p1  | (n1 != 1) };
+        { p6,  d12 } <= { d12, p1  | (n1 != 2) };
+        { p7,  d13 } <= { d13, p1  | (n1 != 3) };
+
+        { p12, d20 } <= { d20, p15 | (n2 != 0) };
+        { p11, d21 } <= { d21, p15 | (n2 != 1) };
+        { p10, d22 } <= { d22, p15 | (n2 != 2) };
+        { p9,  d23 } <= { d23, p15 | (n2 != 3) };
+    end
+endmodule
+
+module X74HC151 (input yclock, zclock, zreset,
           input  p1     // d3
         , input  p2     // d2
         , input  p3     // d1
@@ -739,7 +1105,38 @@ module X74LS151 (input yclock, zclock, zreset,
     end
 endmodule
 
-module X74LS153 (input yclock, zclock, zreset,
+module X74AC151 (input yclock, zclock, zreset,
+          input  p1     // d3
+        , input  p2     // d2
+        , input  p3     // d1
+        , input  p4     // d0
+        , output reg p5 //  q
+        , output     p6 // _q
+        , input  p7     // _g
+        , input  p8     // gnd
+        , input  p9     // c (s2)
+        , input  p10    // b (s1)
+        , input  p11    // a (s0)
+        , input  p12    // d7
+        , input  p13    // d6
+        , input  p14    // d5
+        , input  p15    // d4
+        , input  p16    // vcc
+);
+
+    wire[2:0] s = { p9, p10, p11 };
+    assign p6 = ~ p5;
+
+    reg[2:0] delay;
+
+    always @(posedge zclock) begin
+        { p5, delay } <= { delay,
+                ~ p7  & ((s == 0) & p4  | (s == 1) & p3  | (s == 2) & p2  | (s == 3) & p1 |
+                         (s == 4) & p15 | (s == 5) & p14 | (s == 6) & p13 | (s == 7) & p12) };
+    end
+endmodule
+
+module X74HC153 (input yclock, zclock, zreset,
           input  p1
         , input  p2
         , input  p3
@@ -768,7 +1165,36 @@ module X74LS153 (input yclock, zclock, zreset,
     end
 endmodule
 
-module X74LS157 (input yclock, zclock, zreset,
+module X74AC153 (input yclock, zclock, zreset,
+          input  p1
+        , input  p2
+        , input  p3
+        , input  p4
+        , input  p5
+        , input  p6
+        , output reg p7
+        , input  p8
+        , output reg p9
+        , input  p10
+        , input  p11
+        , input  p12
+        , input  p13
+        , input  p14
+        , input  p15
+        , input  p16
+);
+
+    wire[1:0] s = { p2, p14 };
+
+    reg[2:0] dela, delb;
+
+    always @(posedge zclock) begin
+        { p7, dela } <= { dela, ~ p1  & ((s == 0) & p6  | (s == 1) & p5  | (s == 2) & p4  | (s == 3) & p3)  };
+        { p9, delb } <= { delb, ~ p15 & ((s == 0) & p10 | (s == 1) & p11 | (s == 2) & p12 | (s == 3) & p13) };
+    end
+endmodule
+
+module X74HC157 (input yclock, zclock, zreset,
           input  p1     // 0=A; 1=B
         , input  p2     // 1A
         , input  p3     // 1B
@@ -797,7 +1223,36 @@ module X74LS157 (input yclock, zclock, zreset,
     end
 endmodule
 
-module X74LS161 (input yclock, zclock, zreset,
+module X74AHC157 (input yclock, zclock, zreset,
+          input  p1     // 0=A; 1=B
+        , input  p2     // 1A
+        , input  p3     // 1B
+        , output reg p4     // 1Y
+        , input  p5     // 2A
+        , input  p6     // 2B
+        , output reg p7     // 2Y
+        , input  p8     // GND
+        , output reg p9     // 3Y
+        , input  p10    // 3B
+        , input  p11    // 3A
+        , output reg p12    // 4Y
+        , input  p13    // 4B
+        , input  p14    // 4A
+        , input  p15    // _G
+        , input  p16    // VCC
+);
+
+    reg[1:0] dela, delb, delc, deld;
+
+    always @(posedge zclock) begin
+        { p4,  dela } <= { dela, ~ p15 & (p1 ? p3  : p2)  };
+        { p7,  delb } <= { delb, ~ p15 & (p1 ? p6  : p5)  };
+        { p9,  delc } <= { delc, ~ p15 & (p1 ? p10 : p11) };
+        { p12, deld } <= { deld, ~ p15 & (p1 ? p13 : p14) };
+    end
+endmodule
+
+module X74HC161 (input yclock, zclock, zreset,
           input      p1     // _clr
         , input      p2     // clk
         , input      p3     // a
@@ -841,7 +1296,51 @@ module X74LS161 (input yclock, zclock, zreset,
     end
 endmodule
 
-module X74LS174 (input yclock, zclock, zreset,
+module X74AC161 (input yclock, zclock, zreset,
+          input      p1     // _clr
+        , input      p2     // clk
+        , input      p3     // a
+        , input      p4     // b
+        , input      p5     // c
+        , input      p6     // d
+        , input      p7     // enp
+        , input      p8     // gnd
+        , input      p9     // _load
+        , input      p10    // ent
+        , output reg p11    // qd
+        , output reg p12    // qc
+        , output reg p13    // qb
+        , output reg p14    // qa
+        , output     p15    // rco
+        , input      p16    // vcc
+);
+
+    assign p15 = p14 & p13 & p12 & p11 & p10;
+
+    reg lastt;
+
+    reg[11:00] delay;
+
+    always @(posedge zclock) begin
+        if (~ p1) begin
+            { p11, p12, p13, p14, delay } <= { delay[27:16], 20'b0 };
+        end else if (~ lastt & p2) begin
+            if (~ p9) begin
+                { p11, p12, p13, p14, delay } <= { delay, p6, p5, p4, p3 };
+            end else if (p7 & p10) begin
+                { p11, p12, p13, p14, delay } <= { delay, { p11, p12, p13, p14 } + 4'b0001 };
+            end else begin
+                { p11, p12, p13, p14, delay } <= { delay, p11, p12, p13, p14 };
+            end
+        end else begin
+            { p11, p12, p13, p14, delay } <= { delay, delay[03:00] };
+        end
+
+        lastt <= p2;
+    end
+endmodule
+
+module X74HC174 (input yclock, zclock, zreset,
           input      p1
         , output reg p2
         , input      p3
@@ -902,7 +1401,67 @@ module X74LS174 (input yclock, zclock, zreset,
 
 endmodule
 
-module X74LS175 (input yclock, zclock, zreset,
+module X74AHC174 (input yclock, zclock, zreset,
+          input      p1
+        , output reg p2
+        , input      p3
+        , input      p4
+        , output reg p5
+        , input      p6
+        , output reg p7
+        , input      p8
+        , input      p9
+        , output reg p10
+        , input      p11
+        , output reg p12
+        , input      p13
+        , input      p14
+        , output reg p15
+        , input      p16
+);
+
+    reg lastt;
+
+    reg da, db, dc, dd, de, df;
+    reg pa, pb, pc, pd, pe, pf;    // prop delays
+
+    always @(posedge zclock) begin
+        if (~ p1) begin
+            { p2,  pa } <= { pa, 1'b0  };
+            { p5,  pb } <= { pb, 1'b0  };
+            { p7,  pc } <= { pc, 1'b0  };
+            { p10, pd } <= { pd, 1'b0  };
+            { p12, pe } <= { pe, 1'b0  };
+            { p15, pf } <= { pf, 1'b0  };
+        end else if (~ lastt & p9) begin
+            { p2,  pa } <= { pa, da };
+            { p5,  pb } <= { pb, db };
+            { p7,  pc } <= { pc, dc };
+            { p10, pd } <= { pd, dd };
+            { p12, pe } <= { pe, de };
+            { p15, pf } <= { pf, df };
+        end else begin
+            { p2,  pa } <= { pa, pa[0] };
+            { p5,  pb } <= { pb, pb[0] };
+            { p7,  pc } <= { pc, pc[0] };
+            { p10, pd } <= { pd, pd[0] };
+            { p12, pe } <= { pe, pe[0] };
+            { p15, pf } <= { pf, pf[0] };
+        end
+
+        da <= p3;
+        db <= p4;
+        dc <= p6;
+        dd <= p11;
+        de <= p13;
+        df <= p14;
+
+        lastt <= p9;
+    end
+
+endmodule
+
+module X74HC175 (input yclock, zclock, zreset,
           input      p1
         , output reg p2
         , output     p3
@@ -960,7 +1519,64 @@ module X74LS175 (input yclock, zclock, zreset,
 
 endmodule
 
-module X74LS193 (input yclock, zclock, zreset,
+module X74AC175 (input yclock, zclock, zreset,
+          input      p1
+        , output reg p2
+        , output     p3
+        , input      p4
+        , input      p5
+        , output     p6
+        , output reg p7
+        , input      p8
+        , input      p9
+        , output reg p10
+        , output     p11
+        , input      p12
+        , input      p13
+        , output     p14
+        , output reg p15
+        , input      p16
+);
+
+    assign p3  = ~ p2;
+    assign p6  = ~ p7;
+    assign p11 = ~ p10;
+    assign p14 = ~ p15;
+
+    reg lastt;
+
+    reg da, db, dc, dd;
+    reg[2:0] pa, pb, pc, pd;    // prop delays
+
+    always @(posedge zclock) begin
+        if (~ p1) begin
+            { p2,  pa } <= { pa, 1'b0 };
+            { p7,  pb } <= { pb, 1'b0 };
+            { p10, pc } <= { pc, 1'b0 };
+            { p15, pd } <= { pd, 1'b0 };
+        end else if (~ lastt & p9) begin
+            { p2,  pa } <= { pa, da };
+            { p7,  pb } <= { pb, db };
+            { p10, pc } <= { pc, dc };
+            { p15, pd } <= { pd, dd };
+        end else begin
+            { p2,  pa } <= { pa, pa[0] };
+            { p7,  pb } <= { pb, pb[0] };
+            { p10, pc } <= { pc, pc[0] };
+            { p15, pd } <= { pd, pd[0] };
+        end
+
+        da <= p4;
+        db <= p5;
+        dc <= p12;
+        dd <= p13;
+
+        lastt <= p9;
+    end
+
+endmodule
+
+module X74HC193 (input yclock, zclock, zreset,
           input      p1     // db
         , output     p2     // qb
         , output     p3     // qa
@@ -1081,6 +1697,90 @@ module X74HC240 (input yclock, zclock, zreset,
     end
 endmodule
 
+module X74AHC240 (input yclock, zclock, zreset,
+          input      p1
+        , input      p2
+        , input      p3i
+        , output reg p3o
+        , input      p4
+        , input      p5i
+        , output reg p5o
+        , input      p6
+        , input      p7i
+        , output reg p7o
+        , input      p8
+        , input      p9i
+        , output reg p9o
+        , input      p10
+        , input      p11
+        , input      p12i
+        , output reg p12o
+        , input      p13
+        , input      p14i
+        , output reg p14o
+        , input      p15
+        , input      p16i
+        , output reg p16o
+        , input      p17
+        , input      p18i
+        , output reg p18o
+        , input      p19
+        , input      p20
+);
+
+    reg[3:0] del1, del2;
+
+    always @(posedge zclock) begin
+        // 1y3   1y2   1y1   1y0                     1oe              1a3  1a2  1a1  1a0
+        { p12o, p14o, p16o, p18o, del1 } <= { del1, (p1  ? 4'hF : ~ { p8,  p6,  p4,  p2  }) };
+
+        // 2y3   2y2   2y1   2y0                     2oe              2a3  2a2  2a1  2a0
+        {  p3o,  p5o,  p7o,  p9o, del2 } <= { del2, (p19 ? 4'hF : ~ { p17, p15, p13, p11 }) };
+    end
+endmodule
+
+module X74AC240 (input yclock, zclock, zreset,
+          input      p1
+        , input      p2
+        , input      p3i
+        , output reg p3o
+        , input      p4
+        , input      p5i
+        , output reg p5o
+        , input      p6
+        , input      p7i
+        , output reg p7o
+        , input      p8
+        , input      p9i
+        , output reg p9o
+        , input      p10
+        , input      p11
+        , input      p12i
+        , output reg p12o
+        , input      p13
+        , input      p14i
+        , output reg p14o
+        , input      p15
+        , input      p16i
+        , output reg p16o
+        , input      p17
+        , input      p18i
+        , output reg p18o
+        , input      p19
+        , input      p20
+);
+
+    reg[3:0] del1, del2;
+
+    always @(posedge zclock) begin
+        // 1y3   1y2   1y1   1y0                     1oe              1a3  1a2  1a1  1a0
+        { p12o, p14o, p16o, p18o, del1 } <= { del1, (p1  ? 4'hF : ~ { p8,  p6,  p4,  p2  }) };
+
+        // 2y3   2y2   2y1   2y0                     2oe              2a3  2a2  2a1  2a0
+        {  p3o,  p5o,  p7o,  p9o, del2 } <= { del2, (p19 ? 4'hF : ~ { p17, p15, p13, p11 }) };
+    end
+endmodule
+
 module X74HC244 (input yclock, zclock, zreset,
           input      p1
         , input      p2
@@ -1123,7 +1823,91 @@ module X74HC244 (input yclock, zclock, zreset,
     end
 endmodule
 
-module X74LS283 (input yclock, zclock, zreset,
+module X74AHC244 (input yclock, zclock, zreset,
+          input      p1
+        , input      p2
+        , input      p3i
+        , output reg p3o
+        , input      p4
+        , input      p5i
+        , output reg p5o
+        , input      p6
+        , input      p7i
+        , output reg p7o
+        , input      p8
+        , input      p9i
+        , output reg p9o
+        , input      p10
+        , input      p11
+        , input      p12i
+        , output reg p12o
+        , input      p13
+        , input      p14i
+        , output reg p14o
+        , input      p15
+        , input      p16i
+        , output reg p16o
+        , input      p17
+        , input      p18i
+        , output reg p18o
+        , input      p19
+        , input      p20
+);
+
+    reg[3:0] del1, del2;
+
+    always @(posedge zclock) begin
+        // 1y3   1y2   1y1   1y0                    1oe            1a3  1a2  1a1  1a0
+        { p12o, p14o, p16o, p18o, del1 } <= { del1, p1  ? 4'hF : { p8,  p6,  p4,  p2  } };
+
+        // 2y3   2y2   2y1   2y0                    2oe            2a3  2a2  2a1  2a0
+        {  p3o,  p5o,  p7o,  p9o, del2 } <= { del2, p19 ? 4'hF : { p17, p15, p13, p11 } };
+    end
+endmodule
+
+module X74AC244 (input yclock, zclock, zreset,
+          input      p1
+        , input      p2
+        , input      p3i
+        , output reg p3o
+        , input      p4
+        , input      p5i
+        , output reg p5o
+        , input      p6
+        , input      p7i
+        , output reg p7o
+        , input      p8
+        , input      p9i
+        , output reg p9o
+        , input      p10
+        , input      p11
+        , input      p12i
+        , output reg p12o
+        , input      p13
+        , input      p14i
+        , output reg p14o
+        , input      p15
+        , input      p16i
+        , output reg p16o
+        , input      p17
+        , input      p18i
+        , output reg p18o
+        , input      p19
+        , input      p20
+);
+
+    reg[3:0] del1, del2;
+
+    always @(posedge zclock) begin
+        // 1y3   1y2   1y1   1y0                    1oe            1a3  1a2  1a1  1a0
+        { p12o, p14o, p16o, p18o, del1 } <= { del1, p1  ? 4'hF : { p8,  p6,  p4,  p2  } };
+
+        // 2y3   2y2   2y1   2y0                    2oe            2a3  2a2  2a1  2a0
+        {  p3o,  p5o,  p7o,  p9o, del2 } <= { del2, p19 ? 4'hF : { p17, p15, p13, p11 } };
+    end
+endmodule
+
+module X74HC283 (input yclock, zclock, zreset,
           output reg p1
         , input  p2
         , input  p3
@@ -1158,7 +1942,33 @@ module X74LS283 (input yclock, zclock, zreset,
     end
 endmodule
 
-module X74LS540 (input yclock, zclock, zreset,
+module X74AC283 (input yclock, zclock, zreset,
+          output reg p1
+        , input  p2
+        , input  p3
+        , output reg p4
+        , input  p5
+        , input  p6
+        , input  p7
+        , input  p8
+        , output reg p9
+        , output reg p10
+        , input  p11
+        , input  p12
+        , output reg p13
+        , input  p14
+        , input  p15
+        , input  p16
+);
+
+    reg[4:0] delay;
+
+    always @(posedge zclock) begin
+        { p9, p10, p13, p1, p4, delay } <= { delay, { 1'b0, p12, p14, p3, p5 } + { 1'b0, p11, p15, p2, p6 } + { 4'b0, p7 } };
+    end
+endmodule
+
+module X74HC540 (input yclock, zclock, zreset,
           input  p1
         , input  p2
         , input  p3
@@ -1199,7 +2009,89 @@ module X74LS540 (input yclock, zclock, zreset,
     end
 endmodule
 
-module X74HCT541 (input yclock, zclock, zreset,
+module X74AHC540 (input yclock, zclock, zreset,
+          input  p1
+        , input  p2
+        , input  p3
+        , input  p4
+        , input  p5
+        , input  p6
+        , input  p7
+        , input  p8
+        , input  p9
+        , input  p10
+        , input  p11i
+        , output reg p11o
+        , input  p12i
+        , output reg p12o
+        , input  p13i
+        , output reg p13o
+        , input  p14i
+        , output reg p14o
+        , input  p15i
+        , output reg p15o
+        , input  p16i
+        , output reg p16o
+        , input  p17i
+        , output reg p17o
+        , input  p18i
+        , output reg p18o
+        , input  p19
+        , input  p20
+);
+
+    reg[7:0] delay;
+
+    wire oe = ~ p1 & ~ p19;
+    wire[7:0] din = { p9, p8, p7, p6, p5, p4, p3, p2 };
+
+    always @(posedge zclock) begin
+        { p11o, p12o, p13o, p14o, p15o, p16o, p17o, p18o, delay } <= { delay, oe ? ~ din : 8'hFF };
+    end
+endmodule
+
+module X74AC540 (input yclock, zclock, zreset,
+          input  p1
+        , input  p2
+        , input  p3
+        , input  p4
+        , input  p5
+        , input  p6
+        , input  p7
+        , input  p8
+        , input  p9
+        , input  p10
+        , input  p11i
+        , output reg p11o
+        , input  p12i
+        , output reg p12o
+        , input  p13i
+        , output reg p13o
+        , input  p14i
+        , output reg p14o
+        , input  p15i
+        , output reg p15o
+        , input  p16i
+        , output reg p16o
+        , input  p17i
+        , output reg p17o
+        , input  p18i
+        , output reg p18o
+        , input  p19
+        , input  p20
+);
+
+    reg[7:0] delay;
+
+    wire oe = ~ p1 & ~ p19;
+    wire[7:0] din = { p9, p8, p7, p6, p5, p4, p3, p2 };
+
+    always @(posedge zclock) begin
+        { p11o, p12o, p13o, p14o, p15o, p16o, p17o, p18o, delay } <= { delay, oe ? ~ din : 8'hFF };
+    end
+endmodule
+
+module X74HC541 (input yclock, zclock, zreset,
           input  p1
         , input  p2
         , input  p3
@@ -1231,6 +2123,90 @@ module X74HCT541 (input yclock, zclock, zreset,
 );
 
     reg[23:00] delay;
+
+    wire oe = ~ p1 & ~ p19;
+    wire[7:0] din = { p9, p8, p7, p6, p5, p4, p3, p2 };
+
+    always @(posedge zclock) begin
+        { p11o, p12o, p13o, p14o, p15o, p16o, p17o, p18o, delay } <= { delay, oe ? din : 8'hFF };
+    end
+
+endmodule
+
+module X74AHC541 (input yclock, zclock, zreset,
+          input  p1
+        , input  p2
+        , input  p3
+        , input  p4
+        , input  p5
+        , input  p6
+        , input  p7
+        , input  p8
+        , input  p9
+        , input  p10
+        , input  p11i
+        , output reg p11o
+        , input  p12i
+        , output reg p12o
+        , input  p13i
+        , output reg p13o
+        , input  p14i
+        , output reg p14o
+        , input  p15i
+        , output reg p15o
+        , input  p16i
+        , output reg p16o
+        , input  p17i
+        , output reg p17o
+        , input  p18i
+        , output reg p18o
+        , input  p19
+        , input  p20
+);
+
+    reg[15:00] delay;
+
+    wire oe = ~ p1 & ~ p19;
+    wire[7:0] din = { p9, p8, p7, p6, p5, p4, p3, p2 };
+
+    always @(posedge zclock) begin
+        { p11o, p12o, p13o, p14o, p15o, p16o, p17o, p18o, delay } <= { delay, oe ? din : 8'hFF };
+    end
+
+endmodule
+
+module X74AC541 (input yclock, zclock, zreset,
+          input  p1
+        , input  p2
+        , input  p3
+        , input  p4
+        , input  p5
+        , input  p6
+        , input  p7
+        , input  p8
+        , input  p9
+        , input  p10
+        , input  p11i
+        , output reg p11o
+        , input  p12i
+        , output reg p12o
+        , input  p13i
+        , output reg p13o
+        , input  p14i
+        , output reg p14o
+        , input  p15i
+        , output reg p15o
+        , input  p16i
+        , output reg p16o
+        , input  p17i
+        , output reg p17o
+        , input  p18i
+        , output reg p18o
+        , input  p19
+        , input  p20
+);
+
+    reg[7:0] delay;
 
     wire oe = ~ p1 & ~ p19;
     wire[7:0] din = { p9, p8, p7, p6, p5, p4, p3, p2 };

@@ -1,0 +1,36 @@
+
+            AHC: 8mA            AC: 24mA
+
+74HC00      AHC = 7.5nS         AC = 8nS
+74HC02      AHC = 8.5nS         AC = 10.4nS
+74HC04      AHC = 7.5nS         AC = 9nS
+74HC08      AHC = 9nS
+74HC10      AHC = n/a           AC = 8nS
+74HC11      AHC = n/a           AC = 8nS
+74HC20      AHC = n/a           AC = 7nS
+74HC21      AHC = n/a           AC = n/a
+74HC27      AHC = n/a           AC = n/a
+74HC30      AHC = n/a           AC = n/a
+74HC32      AHC = 7.5nS
+74HC42      AHC = n/a           AC = n/a
+74HC74      AHC = 5nS / 18nS    AC = 5nS / 10nS
+74HC75      AHC = n/a           AC = n/a
+74HC85      AHC = n/a           AC = n/a
+74HC86      AHC = 8.8nS         AC = 8.5nS
+74HC109     AHC = n/a           AC = 5.5nS / 12.2nS
+74HC138     AHC = 10.1nS        AC = 11nS *obsolete
+74HC139     AHC = 9.5nS         AC = 10nS *obsolete
+74HC151     AHC = n/a           AC = 19.6nS
+74HC153     AHC = n/a           AC = 20nS
+74HC157     AHC = 12nS          AC = 14.5nS
+74HC161     AHC = n/a           AC = 6nS / 16.7nS
+74HC174     AHC = 4.5 / 9.6nS   AC = 5.5nS / 9nS
+74HC175     AHC = n/a           AC = ?? / 9.4nS
+74HC193     AHC = n/a           AC = n/a
+74HC240     AHC = 8.7nS         AC = 9nS *obsolete
+74HC244     AHC = 9.3nS         AC = 9nS active
+74HC283     AHC = n/a           AC = 16.5nS
+74HC540     AHC = 9.2nS         AC = 9.4nS
+74HC541     AHC = 15.4nS        AC = 9.5nS *obsolete
+74HC4075    AHC = n/a           AC = n/a
+

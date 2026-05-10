@@ -1,1 +1,1 @@
-chips-10ns.v
+chips-varns.v
