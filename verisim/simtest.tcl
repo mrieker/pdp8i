@@ -40,6 +40,7 @@ set MS_DEPOS 8  ;# memory cycle is for deposit switch
 set MS_EXAM  9  ;# memory cycle is for examine switch
 
 set testcons [getenv testcons 1]  ;# test console functions
+set testdma  [getenv testdma  1]
 set testexar [getenv testexar 1]  ;# test extended arithmetic
 set testxmem [getenv testxmem 1]  ;# test extended memory
 set runquiet [getenv runquiet 1]  ;# tell runstep command to keep quiet
@@ -64,6 +65,7 @@ proc simtest {} {
     global swifpend
     global swregpend
     global testcons
+    global testdma
     global testexar
     global testxmem
     global usemcp
@@ -110,11 +112,13 @@ proc simtest {} {
     set lastopc -1
     set nextfetch 0
 
-    set hasdmatest [expr {([bus set armraddr 044 get armrdata] & 0xFFFFF000) == 0x5A441000}]
-    set hasdmbtest [expr {([bus set armraddr 050 get armrdata] & 0xFFFFF000) == 0x5A441000}]
-    if {! $hasdmatest | ! $hasdmbtest} {error "missing dma tester"}
-    bus set armwaddr 045 armwdata 0x80000000 armwrite 1 armwrite 0
-    bus set armwaddr 051 armwdata 0x80000000 armwrite 1 armwrite 0
+    if {$testdma} {
+        set hasdmatest [expr {([bus set armraddr 044 get armrdata] & 0xFFFFF000) == 0x5A441000}]
+        set hasdmbtest [expr {([bus set armraddr 050 get armrdata] & 0xFFFFF000) == 0x5A441000}]
+        if {! $hasdmatest | ! $hasdmbtest} {error "missing dma tester"}
+        bus set armwaddr 045 armwdata 0x80000000 armwrite 1 armwrite 0
+        bus set armwaddr 051 armwdata 0x80000000 armwrite 1 armwrite 0
+    }
 
     while {! [ctrlcflag]} {
         set ercode [catch {
@@ -129,7 +133,7 @@ proc simtest {} {
             set execst $MS_EXEC
 
             ;# see if any dma granted
-            set dmastat1 [bus set armraddr 045 get armrdata]
+            set dmastat1 [expr {$testdma ? [bus set armraddr 045 get armrdata] : 0}]
 
             ;# maybe do a dma cycle
             if {($dmastat1 & 0x10000) && ! $nextfetch} {
