@@ -821,6 +821,7 @@ module backplane (
 
         .brkcyc (~ _busBRKCYC),
         .busini (~ _busBUSINI),
+        .bwcov  (~ _busBWCOV),
         .tp2    (~ _busTP2),
         .tp3    (~ _busTP3),
         .ts2    (~ _busTS2),
@@ -860,6 +861,7 @@ module backplane (
 
         .brkcyc (~ _busBRKCYC),
         .busini (~ _busBUSINI),
+        .bwcov  (~ _busBWCOV),
         .tp2    (~ _busTP2),
         .tp3    (~ _busTP3),
         .ts2    (~ _busTS2),

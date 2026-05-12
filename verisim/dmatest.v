@@ -27,27 +27,24 @@
         * cainc
         * wrmem
 
-        // our break request has been granted
-        wire isgranted = brkrqst_o & brkgnti;
-
-        // output dma field as long as our break request has been granted
-        // otherwise output zeroes so it doesn't jam up bus
-        assign dmafld_o = isgranted ? brkadr[14:12] : 3'o0;
-
-        assign cycle3_o = isgranted ? cycle3req : 1'b0;
-        assign cainc_o  = isgranted ? caincreq  : 1'b0;
-        assign wrmem_o  = isgranted ? wrmemreq  : 1'b0;
-
     3)
+
+        wait for
+        * TS2 of BREAK cycle
+
+        output
+        * data to INBUS if write cycle
 
         wait for
         * TP2 of BREAK cycle
 
         clock in
-        * mbuf for read data if read cycle
+        * MBUF for read data if read cycle
+        * BWCOV if 3-cycle
 
         output
         * brkrqst negated
+        * remove write data from INBUS
 
     4)
 
@@ -83,13 +80,16 @@ module dmatest (
     // wired-OR of all break requests including our own
     input brkrqst,
 
+    // wordcount overflow for 3-cycle break
+    input bwcov,
+
     // our dma request outputs to be wired-ORd to bus
     output reg brkrqst_o, cycle3_o, cainc_o, wrmem_o,
     output[2:0] dmafld_o,
     output[11:00] inbus_o
 );
 
-    reg enable;
+    reg enable, wcover;
     reg[63:00] lfsr;
     reg[14:00] brkadr;
     reg[11:00] rdata, wdata;
@@ -117,7 +117,7 @@ module dmatest (
                                           dmafld_o,   //12
                                           inbus_o     //00
                                         } :
-                      (armraddr == 2) ? { 5'b0, brkadr, wdata } :
+                      (armraddr == 2) ? { 4'b0, wcover, brkadr, wdata } :
                       (armraddr == 3) ? { 20'b0, rdata } :
                                         32'hDEADBEEF;
 
@@ -161,10 +161,11 @@ module dmatest (
         end else begin
 
             // if our break request has been granted and this is TP2 of a BREAK cycle, drop break request
-            // also clock in read data at TP2
+            // also clock in wordcount overflow and read data at TP2
             if (endofbrk & tp2) begin
                 $display ("dmatest*: %m %x finished mbuf=%o", cyclect, mbuf);
                 brkrqst_o <= 0;
+                wcover <= bwcov;
                 rdata <= mbuf;
             end
 
