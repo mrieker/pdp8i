@@ -802,14 +802,15 @@ module backplane (
         .INT_RQST (ttyintrq)
     );
 
-    wire dmaBRKGNTI, dmaBRKGNTO, dmaBRKRQST, dmaBRKWRM, dmaCAINC, dmaCYCLE3;
+    wire dmaBRKGNTI, dmaBRKGNTO, _dmaBRKRQST, _dmaBRKWRM, _dmaCAINC, _dmaCYCLE3;
     wire dmawrite;
-    wire[2:0] dmaDMAFLD;
-    wire[11:00] dmaINBUS;
+    wire[2:0] _dmaDMAFLD;
+    wire[11:00] _dmaINBUS;
     wire[31:00] dmardata;
 
     dmatest testa (
-        .seed (8'o123),
+        .seed   (1),
+        .yclock (yclock),
         .zclock (zclock),
         .zreset (zreset),
 
@@ -819,37 +820,92 @@ module backplane (
         .armwdata (armwdata),
         .armrdata (dmardata),
 
-        .brkcyc (~ _busBRKCYC),
-        .busini (~ _busBUSINI),
-        .bwcov  (~ _busBWCOV),
-        .tp2    (~ _busTP2),
-        .tp3    (~ _busTP3),
-        .ts2    (~ _busTS2),
-        .ts3    (~ _busTS3),
-        .ts4    (~ _busTS4),
-        .mbuf   (~ _busMBUF),
+        .BRKGNTI     (dmaBRKGNTI),
+        .CLOK2       (busCLOK2),
+        ._BRKCYC     (_busBRKCYC),
+        ._BUSINI     (_busBUSINI),
+        ._BWCOV      (_busBWCOV),
+        ._MBUF_0     (_busMBUF[00]),
+        ._MBUF_1     (_busMBUF[01]),
+        ._MBUF_2     (_busMBUF[02]),
+        ._MBUF_3     (_busMBUF[03]),
+        ._MBUF_4     (_busMBUF[04]),
+        ._MBUF_5     (_busMBUF[05]),
+        ._MBUF_6     (_busMBUF[06]),
+        ._MBUF_7     (_busMBUF[07]),
+        ._MBUF_8     (_busMBUF[08]),
+        ._MBUF_9     (_busMBUF[09]),
+        ._MBUF_10    (_busMBUF[10]),
+        ._MBUF_11    (_busMBUF[11]),
+        ._RESET      (_busRESET),
+        ._TP2        (_busTP2),
+        ._TP3        (_busTP3),
+        ._TS2        (_busTS2),
+        ._TS3        (_busTS3),
+        ._TS4        (_busTS4),
+        ._BRKRQST    (_busBRKRQST),
+        ._BRKWRM     (_busBRKWRM),
+        ._CAINC      (_busCAINC),
+        ._CYCLE3     (_busCYCLE3),
+        ._DMAFLD_0   (_busDMAFLD[0]),
+        ._DMAFLD_1   (_busDMAFLD[1]),
+        ._DMAFLD_2   (_busDMAFLD[2]),
+        ._INBUS_0    (_busINBUS[00]),
+        ._INBUS_1    (_busINBUS[01]),
+        ._INBUS_2    (_busINBUS[02]),
+        ._INBUS_3    (_busINBUS[03]),
+        ._INBUS_4    (_busINBUS[04]),
+        ._INBUS_5    (_busINBUS[05]),
+        ._INBUS_6    (_busINBUS[06]),
+        ._INBUS_7    (_busINBUS[07]),
+        ._INBUS_8    (_busINBUS[08]),
+        ._INBUS_9    (_busINBUS[09]),
+        ._INBUS_10   (_busINBUS[10]),
+        ._INBUS_11   (_busINBUS[11]),
 
-        .brkgnti (dmaBRKGNTI),
-        .brkgnto (dmaBRKGNTO),
-
-        .brkrqst (~ _busBRKRQST),
-
-        .brkrqst_o (dmaBRKRQST),
-        .cycle3_o  (dmaCYCLE3),
-        .cainc_o   (dmaCAINC),
-        .wrmem_o   (dmaBRKWRM),
-        .dmafld_o  (dmaDMAFLD),
-        .inbus_o   (dmaINBUS)
+        .BRKGNTO     (dmaBRKGNTO),
+        .BRKGNTO_o   (dmaBRKGNTO),
+        ._BRKRQST_o  (_dmaBRKRQST),
+        ._BRKWRM_o   (_dmaBRKWRM),
+        ._CAINC_o    (_dmaCAINC),
+        ._CYCLE3_o   (_dmaCYCLE3),
+        ._DMAFLD_0_o (_dmaDMAFLD[0]),
+        ._DMAFLD_1_o (_dmaDMAFLD[1]),
+        ._DMAFLD_2_o (_dmaDMAFLD[2]),
+        ._INBUS_0_o  (_dmaINBUS[00]),
+        ._INBUS_1_o  (_dmaINBUS[01]),
+        ._INBUS_2_o  (_dmaINBUS[02]),
+        ._INBUS_3_o  (_dmaINBUS[03]),
+        ._INBUS_4_o  (_dmaINBUS[04]),
+        ._INBUS_5_o  (_dmaINBUS[05]),
+        ._INBUS_6_o  (_dmaINBUS[06]),
+        ._INBUS_7_o  (_dmaINBUS[07]),
+        ._INBUS_8_o  (_dmaINBUS[08]),
+        ._INBUS_9_o  (_dmaINBUS[09]),
+        ._INBUS_10_o (_dmaINBUS[10]),
+        ._INBUS_11_o (_dmaINBUS[11])
     );
 
-    wire dmbBRKGNTI, dmbBRKGNTO, dmbBRKRQST, dmbBRKWRM, dmbCAINC, dmbCYCLE3;
+    wire dmbBRKGNTI, dmbBRKGNTO, _dmbBRKRQST, _dmbBRKWRM, _dmbCAINC, _dmbCYCLE3;
     wire dmbwrite;
-    wire[2:0] dmbDMAFLD;
-    wire[11:00] dmbINBUS;
+    wire[2:0] _dmbDMAFLD;
+    wire[11:00] _dmbINBUS;
     wire[31:00] dmbrdata;
 
+/***
+    assign  dmbBRKGNTO = dmbBRKGNTI;
+    assign _dmbBRKRQST = 1;
+    assign _dmbBRKWRM  = 1;
+    assign _dmbCAINC   = 1;
+    assign _dmbCYCLE3  = 1;
+    assign _dmbDMAFLD  = 7;
+    assign _dmbINBUS   = 12'o7777;
+    assign dmbrdata    = 0;
+***/
+
     dmatest testb (
-        .seed (8'o234),
+        .seed   (2),
+        .yclock (yclock),
         .zclock (zclock),
         .zreset (zreset),
 
@@ -859,27 +915,70 @@ module backplane (
         .armwdata (armwdata),
         .armrdata (dmbrdata),
 
-        .brkcyc (~ _busBRKCYC),
-        .busini (~ _busBUSINI),
-        .bwcov  (~ _busBWCOV),
-        .tp2    (~ _busTP2),
-        .tp3    (~ _busTP3),
-        .ts2    (~ _busTS2),
-        .ts3    (~ _busTS3),
-        .ts4    (~ _busTS4),
-        .mbuf   (~ _busMBUF),
+        .BRKGNTI     (dmbBRKGNTI),
+        .CLOK2       (busCLOK2),
+        ._BRKCYC     (_busBRKCYC),
+        ._BUSINI     (_busBUSINI),
+        ._BWCOV      (_busBWCOV),
+        ._MBUF_0     (_busMBUF[00]),
+        ._MBUF_1     (_busMBUF[01]),
+        ._MBUF_2     (_busMBUF[02]),
+        ._MBUF_3     (_busMBUF[03]),
+        ._MBUF_4     (_busMBUF[04]),
+        ._MBUF_5     (_busMBUF[05]),
+        ._MBUF_6     (_busMBUF[06]),
+        ._MBUF_7     (_busMBUF[07]),
+        ._MBUF_8     (_busMBUF[08]),
+        ._MBUF_9     (_busMBUF[09]),
+        ._MBUF_10    (_busMBUF[10]),
+        ._MBUF_11    (_busMBUF[11]),
+        ._RESET      (_busRESET),
+        ._TP2        (_busTP2),
+        ._TP3        (_busTP3),
+        ._TS2        (_busTS2),
+        ._TS3        (_busTS3),
+        ._TS4        (_busTS4),
+        ._BRKRQST    (_busBRKRQST),
+        ._BRKWRM     (_busBRKWRM),
+        ._CAINC      (_busCAINC),
+        ._CYCLE3     (_busCYCLE3),
+        ._DMAFLD_0   (_busDMAFLD[0]),
+        ._DMAFLD_1   (_busDMAFLD[1]),
+        ._DMAFLD_2   (_busDMAFLD[2]),
+        ._INBUS_0    (_busINBUS[00]),
+        ._INBUS_1    (_busINBUS[01]),
+        ._INBUS_2    (_busINBUS[02]),
+        ._INBUS_3    (_busINBUS[03]),
+        ._INBUS_4    (_busINBUS[04]),
+        ._INBUS_5    (_busINBUS[05]),
+        ._INBUS_6    (_busINBUS[06]),
+        ._INBUS_7    (_busINBUS[07]),
+        ._INBUS_8    (_busINBUS[08]),
+        ._INBUS_9    (_busINBUS[09]),
+        ._INBUS_10   (_busINBUS[10]),
+        ._INBUS_11   (_busINBUS[11]),
 
-        .brkgnti (dmbBRKGNTI),
-        .brkgnto (dmbBRKGNTO),
-
-        .brkrqst (~ _busBRKRQST),
-
-        .brkrqst_o (dmbBRKRQST),
-        .cycle3_o  (dmbCYCLE3),
-        .cainc_o   (dmbCAINC),
-        .wrmem_o   (dmbBRKWRM),
-        .dmafld_o  (dmbDMAFLD),
-        .inbus_o   (dmbINBUS)
+        .BRKGNTO     (dmbBRKGNTO),
+        .BRKGNTO_o   (dmbBRKGNTO),
+        ._BRKRQST_o  (_dmbBRKRQST),
+        ._BRKWRM_o   (_dmbBRKWRM),
+        ._CAINC_o    (_dmbCAINC),
+        ._CYCLE3_o   (_dmbCYCLE3),
+        ._DMAFLD_0_o (_dmbDMAFLD[0]),
+        ._DMAFLD_1_o (_dmbDMAFLD[1]),
+        ._DMAFLD_2_o (_dmbDMAFLD[2]),
+        ._INBUS_0_o  (_dmbINBUS[00]),
+        ._INBUS_1_o  (_dmbINBUS[01]),
+        ._INBUS_2_o  (_dmbINBUS[02]),
+        ._INBUS_3_o  (_dmbINBUS[03]),
+        ._INBUS_4_o  (_dmbINBUS[04]),
+        ._INBUS_5_o  (_dmbINBUS[05]),
+        ._INBUS_6_o  (_dmbINBUS[06]),
+        ._INBUS_7_o  (_dmbINBUS[07]),
+        ._INBUS_8_o  (_dmbINBUS[08]),
+        ._INBUS_9_o  (_dmbINBUS[09]),
+        ._INBUS_10_o (_dmbINBUS[10]),
+        ._INBUS_11_o (_dmbINBUS[11])
     );
 
     /////////////////////////////
@@ -897,14 +996,14 @@ module backplane (
 
     // active low signals getting wire-anded on the backplane
     assign _busACCLEAR = _eaeACCLEAR  & ~ iACCLEAR   & ~ ttyacclr;
-    assign _busBRKRQST = ~ dmaBRKRQST & ~ dmbBRKRQST & ~ iBRKRQST;
-    assign _busBRKWRM  = ~ dmaBRKWRM  & ~ dmbBRKWRM  & ~ iBRKWRM;
-    assign _busCAINC   = ~ dmaCAINC   & ~ dmbCAINC   & ~ iCAINC;
-    assign _busCYCLE3  = ~ dmaCYCLE3  & ~ dmbCYCLE3  & ~ iCYCLE3;
+    assign _busBRKRQST =  _dmaBRKRQST &  _dmbBRKRQST & ~ iBRKRQST;
+    assign _busBRKWRM  =  _dmaBRKWRM  &  _dmbBRKWRM  & ~ iBRKWRM;
+    assign _busCAINC   =  _dmaCAINC   &  _dmbCAINC   & ~ iCAINC;
+    assign _busCYCLE3  =  _dmaCYCLE3  &  _dmbCYCLE3  & ~ iCYCLE3;
     assign _busDFLD    = _conDFLD     & _memDFLD;
-    assign _busDMAFLD  = ~ dmaDMAFLD  & ~ dmbDMAFLD  & ~ iDMAFLD;
+    assign _busDMAFLD  =  _dmaDMAFLD  &  _dmbDMAFLD  & ~ iDMAFLD;
     assign _busIFLD    = _conIFLD     & _memIFLD;
-    assign _busINBUS   = _conINBUS    & ~ dmaINBUS   & ~ dmbINBUS & _eaeINBUS & ~ iINBUS & _memINBUS & ~ ttyinbus;
+    assign _busINBUS   = _conINBUS    &  _dmaINBUS   &  _dmbINBUS & _eaeINBUS & ~ iINBUS & _memINBUS & ~ ttyinbus;
     assign _busINTRQST = ~ iINTRQST   & ~ ttyintrq;
     assign _busIOSKIP  = _eaeIOSKIP   & ~ iIOSKIP    & ~ ttyioskp;
     assign _busMEMDIS  = ~ memdisab;

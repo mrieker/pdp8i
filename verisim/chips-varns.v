@@ -1961,7 +1961,7 @@ module X74AC283 (input yclock, zclock, zreset,
         , input  p16
 );
 
-    reg[4:0] delay;
+    reg[14:00] delay;   // tp = 16.5nS round up to 20nS
 
     always @(posedge zclock) begin
         { p9, p10, p13, p1, p4, delay } <= { delay, { 1'b0, p12, p14, p3, p5 } + { 1'b0, p11, p15, p2, p6 } + { 4'b0, p7 } };

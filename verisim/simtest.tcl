@@ -112,13 +112,13 @@ proc simtest {} {
     set lastopc -1
     set nextfetch 0
 
-    if {$testdma} {
-        set hasdmatest [expr {([bus set armraddr 044 get armrdata] & 0xFFFFF000) == 0x5A441000}]
-        set hasdmbtest [expr {([bus set armraddr 050 get armrdata] & 0xFFFFF000) == 0x5A441000}]
-        if {! $hasdmatest | ! $hasdmbtest} {error "missing dma tester"}
-        bus set armwaddr 045 armwdata 0x80000000 armwrite 1 armwrite 0
-        bus set armwaddr 051 armwdata 0x80000000 armwrite 1 armwrite 0
-    }
+##  if {$testdma} {
+##      set hasdmatest [expr {([bus set armraddr 044 get armrdata] & 0xFFFFF000) == 0x5A441000}]
+##      set hasdmbtest [expr {([bus set armraddr 050 get armrdata] & 0xFFFFF000) == 0x5A441000}]
+##      if {! $hasdmatest | ! $hasdmbtest} {error "missing dma tester"}
+##      bus set armwaddr 045 armwdata 0x80000000 armwrite 1 armwrite 0
+##      bus set armwaddr 051 armwdata 0x80000000 armwrite 1 armwrite 0
+##  }
 
     while {! [ctrlcflag]} {
         set ercode [catch {

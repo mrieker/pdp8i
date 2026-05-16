@@ -9,6 +9,7 @@ VFILES := \
 	mcp23017.v \
 	pdp8itty.v \
 	../kicads/console/console.v \
+	../kicads/dmatester/dmatester.v \
 	../kicads/extarith/extarith.v \
 	../kicads/extmemory/extmemory.v \
 	../kicads/processor/processor.v \
@@ -55,6 +56,9 @@ obj_dir/Vbackplane.cpp obj_dir/Vbackplane.h obj_dir/Vbackplane.mk: $(VFILES)
 ../kicads/console/console.v: ../kicads/console/console.kicad_pcb
 	cd ../kicads/console ; ../parsepcb.sh console
 
+../kicads/dmatester/dmatester.v: ../kicads/dmatester/dmatester.kicad_pcb
+	cd ../kicads/dmatester ; ../parsepcb.sh dmatester
+
 ../kicads/extarith/extarith.v: ../kicads/extarith/extarith.kicad_pcb
 	cd ../kicads/extarith ; ../parsepcb.sh extarith
 
@@ -66,6 +70,9 @@ obj_dir/Vbackplane.cpp obj_dir/Vbackplane.h obj_dir/Vbackplane.mk: $(VFILES)
 
 ../kicads/console/console.kicad_pcb: ../kicads/console/console.kicad_sch
 	error update console.kicad_pcb
+
+../kicads/dmatester/dmatester.kicad_pcb: ../kicads/dmatester/dmatester.kicad_sch
+	error update dmatester.kicad_pcb
 
 ../kicads/extarith/extarith.kicad_pcb: ../kicads/extarith/extarith.kicad_sch
 	error update extarith.kicad_pcb

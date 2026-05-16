@@ -59,145 +59,221 @@
 // generate random dma requests
 
 module dmatest (
-    input[7:0] seed,
-    input zclock, zreset,
+    input[2:0] seed,
+    input yclock, zclock, zreset,
 
     input armwrite,
     input[1:0] armraddr, armwaddr,
     input[31:00] armwdata,
-    output[31:00] armrdata,
+    output[31:00] armrdata
 
-    // signals from processor
-    input busini, brkcyc, tp2, tp3, ts2, ts3, ts4,
-    input[11:00] mbuf,
+    , input BRKGNTI
+    , input CLOK2
+    , input _BRKCYC
+    , input _BUSINI
+    , input _BWCOV
+    , input _MBUF_0
+    , input _MBUF_1
+    , input _MBUF_2
+    , input _MBUF_3
+    , input _MBUF_4
+    , input _MBUF_5
+    , input _MBUF_6
+    , input _MBUF_7
+    , input _MBUF_8
+    , input _MBUF_9
+    , input _MBUF_10
+    , input _MBUF_11
+    , input _RESET
+    , input _TP2
+    , input _TP3
+    , input _TS2
+    , input _TS3
+    , input _TS4
+    , input BRKGNTO
+    , input _BRKRQST
+    , input _BRKWRM
+    , input _CAINC
+    , input _CYCLE3
+    , input _DMAFLD_0
+    , input _DMAFLD_1
+    , input _DMAFLD_2
+    , input _INBUS_0
+    , input _INBUS_1
+    , input _INBUS_2
+    , input _INBUS_3
+    , input _INBUS_4
+    , input _INBUS_5
+    , input _INBUS_6
+    , input _INBUS_7
+    , input _INBUS_8
+    , input _INBUS_9
+    , input _INBUS_10
+    , input _INBUS_11
 
-    // signal coming from next inner dma board if any or processor
-    input brkgnti,
-
-    // signal going to next outer dma board if any
-    output brkgnto,
-
-    // wired-OR of all break requests including our own
-    input brkrqst,
-
-    // wordcount overflow for 3-cycle break
-    input bwcov,
-
-    // our dma request outputs to be wired-ORd to bus
-    output reg brkrqst_o, cycle3_o, cainc_o, wrmem_o,
-    output[2:0] dmafld_o,
-    output[11:00] inbus_o
+    , output BRKGNTO_o
+    , output _BRKRQST_o
+    , output _BRKWRM_o
+    , output _CAINC_o
+    , output _CYCLE3_o
+    , output _DMAFLD_0_o
+    , output _DMAFLD_1_o
+    , output _DMAFLD_2_o
+    , output _INBUS_0_o
+    , output _INBUS_1_o
+    , output _INBUS_2_o
+    , output _INBUS_3_o
+    , output _INBUS_4_o
+    , output _INBUS_5_o
+    , output _INBUS_6_o
+    , output _INBUS_7_o
+    , output _INBUS_8_o
+    , output _INBUS_9_o
+    , output _INBUS_10_o
+    , output _INBUS_11_o
 );
 
-    reg enable, wcover;
-    reg[63:00] lfsr;
-    reg[14:00] brkadr;
-    reg[11:00] rdata, wdata;
-
-    reg cycle3req, caincreq, wrmemreq;
-
-    // our break request has been granted
-    wire isgranted = brkrqst_o & brkgnti;
- 
-    // end of our break cycle = our break request has been granted and processsor is doing a break cycle
-    wire endofbrk = isgranted & brkcyc;
+    wire[14:00] addr;
+    wire[11:00] rdata, wdata;
+    wire cycl3req, caincreq, wrmemreq, wcover;
 
     // sim can read our status via arm port
-    assign armrdata = (armraddr == 0) ? 32'h5A441001 : // [31:16] = 'ZD'; [15:12] = (log2 nreg) - 1; [11:00] = version
-                      (armraddr == 1) ? { enable,     //31
-                                          1'b0,       //30
+    assign armrdata = (armraddr == 0) ? 32'h5A441002 : // [31:16] = 'ZD'; [15:12] = (log2 nreg) - 1; [11:00] = version
+                      (armraddr == 1) ? { 1'b1,       //31
+                                          6'b0,       //25
                                           seed,       //22
-                                          brkrqst_o,  //21
-                                          cycle3_o,   //20
-                                          cainc_o,    //19
-                                          wrmem_o,    //18
-                                          brkgnto,    //17
-                                          brkgnti,    //16
-                                          brkrqst,    //15
-                                          dmafld_o,   //12
-                                          inbus_o     //00
+                                          1'b0,       //21 
+                                          cycl3req,   //20
+                                          caincreq,   //19
+                                          wrmemreq,   //18
+                                          1'b0,       //17
+                                          BRKGNTI,    //16
+                                          16'b0       //00
                                         } :
-                      (armraddr == 2) ? { 4'b0, wcover, brkadr, wdata } :
+                      (armraddr == 2) ? { 4'b0, wcover, addr, wdata } :
                       (armraddr == 3) ? { 20'b0, rdata } :
                                         32'hDEADBEEF;
 
-    // pass brkgnti to brkgnto unless we are requesting a break
-    reg blockgrantpass;
-    assign brkgnto = brkgnti & ~ blockgrantpass;
+    dmatester dmaboard (
+        .yclock (yclock),
+        .zclock (zclock),
+        .zreset (zreset),
 
-    // output dma field as long as our break request has been granted
-    // otherwise output zeroes so it doesn't jam up bus
-    assign dmafld_o = isgranted ? brkadr[14:12] : 3'o0;
+        .BRKGNTI     (BRKGNTI),
+        .CLOK2       (CLOK2),
+        .GND         (1'b0),
+        .VCC         (1'b1),
+        ._BRKCYC     (_BRKCYC),
+        ._BUSINI     (_BUSINI),
+        ._BWCOV      (_BWCOV),
+        ._MBUF_0     (_MBUF_0),
+        ._MBUF_1     (_MBUF_1),
+        ._MBUF_2     (_MBUF_2),
+        ._MBUF_3     (_MBUF_3),
+        ._MBUF_4     (_MBUF_4),
+        ._MBUF_5     (_MBUF_5),
+        ._MBUF_6     (_MBUF_6),
+        ._MBUF_7     (_MBUF_7),
+        ._MBUF_8     (_MBUF_8),
+        ._MBUF_9     (_MBUF_9),
+        ._MBUF_10    (_MBUF_10),
+        ._MBUF_11    (_MBUF_11),
+        ._RESET      (_RESET),
+        ._TP2        (_TP2),
+        ._TP3        (_TP3),
+        ._TS2        (_TS2),
+        ._TS3        (_TS3),
+        ._TS4        (_TS4),
+        .BRKGNTO     (BRKGNTO),
+        ._BRKRQST    (_BRKRQST),
+        ._BRKWRM     (_BRKWRM),
+        ._CAINC      (_CAINC),
+        ._CYCLE3     (_CYCLE3),
+        ._DMAFLD_0   (_DMAFLD_0),
+        ._DMAFLD_1   (_DMAFLD_1),
+        ._DMAFLD_2   (_DMAFLD_2),
+        ._INBUS_0    (_INBUS_0),
+        ._INBUS_1    (_INBUS_1),
+        ._INBUS_2    (_INBUS_2),
+        ._INBUS_3    (_INBUS_3),
+        ._INBUS_4    (_INBUS_4),
+        ._INBUS_5    (_INBUS_5),
+        ._INBUS_6    (_INBUS_6),
+        ._INBUS_7    (_INBUS_7),
+        ._INBUS_8    (_INBUS_8),
+        ._INBUS_9    (_INBUS_9),
+        ._INBUS_10   (_INBUS_10),
+        ._INBUS_11   (_INBUS_11),
 
-    assign cycle3_o = isgranted ? cycle3req : 1'b0;
-    assign cainc_o  = isgranted ? caincreq  : 1'b0;
-    assign wrmem_o  = isgranted ? wrmemreq  : 1'b0;
+        .BRKGNTO_o   (BRKGNTO_o),
+        ._BRKRQST_o  (_BRKRQST_o),
+        ._BRKWRM_o   (_BRKWRM_o),
+        ._CAINC_o    (_CAINC_o),
+        ._CYCLE3_o   (_CYCLE3_o),
+        ._DMAFLD_0_o (_DMAFLD_0_o),
+        ._DMAFLD_1_o (_DMAFLD_1_o),
+        ._DMAFLD_2_o (_DMAFLD_2_o),
+        ._INBUS_0_o  (_INBUS_0_o),
+        ._INBUS_1_o  (_INBUS_1_o),
+        ._INBUS_2_o  (_INBUS_2_o),
+        ._INBUS_3_o  (_INBUS_3_o),
+        ._INBUS_4_o  (_INBUS_4_o),
+        ._INBUS_5_o  (_INBUS_5_o),
+        ._INBUS_6_o  (_INBUS_6_o),
+        ._INBUS_7_o  (_INBUS_7_o),
+        ._INBUS_8_o  (_INBUS_8_o),
+        ._INBUS_9_o  (_INBUS_9_o),
+        ._INBUS_10_o (_INBUS_10_o),
+        ._INBUS_11_o (_INBUS_11_o),
 
-    // output dma address during TS4 if our break request has been granted
-    // output dma write data during TS2 of BREAK if our break request has been granted
-    // otherwise output zeroes so it doesn't jam up bus
-    assign inbus_o = isgranted & ts4 ? brkadr[11:00] :
-                     endofbrk & wrmem_o & ts2 ? wdata :
-                     12'o0000;
+        .wcover    (wcover),
+        .cycl3req  (cycl3req),
+        .caincreq  (caincreq),
+        .wrmemreq  (wrmemreq),
+        .seed_0    (seed[0]),
+        .seed_1    (seed[1]),
+        .seed_2    (seed[2]),
 
-    reg[31:00] cyclect;
-    reg lastisgranted;
+        .wdata_0   (wdata[00]),
+        .wdata_1   (wdata[01]),
+        .wdata_2   (wdata[02]),
+        .wdata_3   (wdata[03]),
+        .wdata_4   (wdata[04]),
+        .wdata_5   (wdata[05]),
+        .wdata_6   (wdata[06]),
+        .wdata_7   (wdata[07]),
+        .wdata_8   (wdata[08]),
+        .wdata_9   (wdata[09]),
+        .wdata_10  (wdata[10]),
+        .wdata_11  (wdata[11]),
 
-    always @(posedge zclock or posedge armwrite) begin
-        cyclect <= zreset ? 0 : cyclect + 1;
+        .rdata_0   (rdata[00]),
+        .rdata_1   (rdata[01]),
+        .rdata_2   (rdata[02]),
+        .rdata_3   (rdata[03]),
+        .rdata_4   (rdata[04]),
+        .rdata_5   (rdata[05]),
+        .rdata_6   (rdata[06]),
+        .rdata_7   (rdata[07]),
+        .rdata_8   (rdata[08]),
+        .rdata_9   (rdata[09]),
+        .rdata_10  (rdata[10]),
+        .rdata_11  (rdata[11]),
 
-        if (zreset & enable) begin
-            enable <= 0;
-        end else if (armwrite) begin
-
-            // arm writing enable bit
-            case (armwaddr)
-                1: enable <= armwdata[31];
-            endcase
-        end else if (~ enable | busini) begin
-            blockgrantpass <= 0;
-            brkrqst_o <= 0;
-            lfsr <= { seed, 56'h12345678abcde };
-        end else begin
-
-            // if our break request has been granted and this is TP2 of a BREAK cycle, drop break request
-            // also clock in wordcount overflow and read data at TP2
-            if (endofbrk & tp2) begin
-                $display ("dmatest*: %m %x finished mbuf=%o", cyclect, mbuf);
-                brkrqst_o <= 0;
-                wcover <= bwcov;
-                rdata <= mbuf;
-            end
-
-            // allow grant to pass to outer circuit when we are all done and processor has dropped our grant
-            else if (blockgrantpass & ~ brkrqst_o & ~ brkgnti) begin
-                $display ("dmatest*: %m %x all done", cyclect);
-                blockgrantpass <= 0;
-            end
-
-            // otherwise, if nothing, including us, is requesting a break, and break not being granted,
-            // ...request a break from time-to-time
-            // block grant from passing to outer circuit.  if outer circuit starts requesting right now,
-            // ...it can't possibly receive grant from processor before we block it
-            else if (~ brkrqst & ~ brkgnti & ~ blockgrantpass & (lfsr[63:54] == 0)) begin
-                $display ("dmatest*: %m %x request dat=%o 3cy=%b cai=%b wrm=%b adr=%o",
-                    cyclect, lfsr[11:00], lfsr[12], lfsr[13], lfsr[14], lfsr[29:15]);
-                blockgrantpass <= 1;
-                brkrqst_o <= 1;
-                wdata     <= lfsr[11:00];
-                cycle3req <= lfsr[12];
-                caincreq  <= lfsr[13];
-                wrmemreq  <= lfsr[14];
-                brkadr    <= lfsr[29:15];
-            end
-
-            // https://www.xilinx.com/support/documentation/application_notes/xapp052.pdf
-            lfsr <= { lfsr[62:51] ^ (endofbrk & tp2 & ~ wrmem_o ? mbuf : 12'o0000), lfsr[50:00], ~ lfsr[63] ^ lfsr[62] ^ lfsr[60] ^ lfsr[59] };
-        end
-
-        if (~ lastisgranted & isgranted) begin
-            $display ("dmatest*: %m %x granted", cyclect);
-        end
-        lastisgranted <= isgranted;
-    end
+        .addr_0    (addr[00]),
+        .addr_1    (addr[01]),
+        .addr_2    (addr[02]),
+        .addr_3    (addr[03]),
+        .addr_4    (addr[04]),
+        .addr_5    (addr[05]),
+        .addr_6    (addr[06]),
+        .addr_7    (addr[07]),
+        .addr_8    (addr[08]),
+        .addr_9    (addr[09]),
+        .addr_10   (addr[10]),
+        .addr_11   (addr[11]),
+        .addr_12   (addr[12]),
+        .addr_13   (addr[13]),
+        .addr_14   (addr[14])
+    );
 endmodule
