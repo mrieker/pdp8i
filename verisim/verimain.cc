@@ -806,6 +806,33 @@ static void iicupdate ()
 }
 
 // direct internal memory access
+static int mungememaddr (int addr)
+{
+    int munged = addr & 070037;
+    if (addr & 00040) munged |= 04000;
+    if (addr & 00100) munged |= 02000;
+    if (addr & 00200) munged |= 01000;
+    if (addr & 00400) munged |= 00400;
+    if (addr & 01000) munged |= 00200;
+    if (addr & 02000) munged |= 00100;
+    if (addr & 04000) munged |= 00040;
+    return munged;
+}
+static int mungemembyte (int data)
+{
+    data &= 0077;
+    if (data & 0010) data ^= 0210;
+    if (data & 0020) data ^= 0120;
+    return data;
+}
+static int demngmembyte (int data)
+{
+    data &= 0347;
+    if (data & 0200) data ^= 0210;
+    if (data & 0100) data ^= 0120;
+    return data;
+}
+
 static int cmd_mem (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
 #ifdef VERLTR
@@ -820,8 +847,9 @@ static int cmd_mem (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj
                 Tcl_SetResultF (interp, "bad address %d", addr);
                 return TCL_ERROR;
             }
-            int datalo = vbkpl->backplane__DOT__meminst__DOT__U175__DOT__array[addr] & 077;
-            int datahi = vbkpl->backplane__DOT__meminst__DOT__U177__DOT__array[addr] & 077;
+            addr = mungememaddr (addr);
+            int datalo = demngmembyte (vbkpl->backplane__DOT__meminst__DOT__U175__DOT__array[addr]);
+            int datahi = demngmembyte (vbkpl->backplane__DOT__meminst__DOT__U177__DOT__array[addr]);
             Tcl_SetObjResult (interp, Tcl_NewIntObj ((datahi << 6) | datalo));
             return TCL_OK;
         }
@@ -842,8 +870,9 @@ static int cmd_mem (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj
                 Tcl_SetResultF (interp, "bad data %d", data);
                 return TCL_ERROR;
             }
-            vbkpl->backplane__DOT__meminst__DOT__U175__DOT__array[addr] = data & 077;
-            vbkpl->backplane__DOT__meminst__DOT__U177__DOT__array[addr] = (data >> 6) & 077;
+            addr = mungememaddr (addr);
+            vbkpl->backplane__DOT__meminst__DOT__U175__DOT__array[addr] = mungemembyte (data);
+            vbkpl->backplane__DOT__meminst__DOT__U177__DOT__array[addr] = mungemembyte (data >> 6);
             return TCL_OK;
         }
 
