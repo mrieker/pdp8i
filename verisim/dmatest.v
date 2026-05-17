@@ -67,7 +67,7 @@ module dmatest (
     input[31:00] armwdata,
     output[31:00] armrdata
 
-    , input BRKGNTI
+    , input _BRKGNTI
     , input CLOK2
     , input _BRKCYC
     , input _BUSINI
@@ -90,7 +90,7 @@ module dmatest (
     , input _TS2
     , input _TS3
     , input _TS4
-    , input BRKGNTO
+    , input _BRKGNTO
     , input _BRKRQST
     , input _BRKWRM
     , input _CAINC
@@ -111,7 +111,7 @@ module dmatest (
     , input _INBUS_10
     , input _INBUS_11
 
-    , output BRKGNTO_o
+    , output _BRKGNTO_o
     , output _BRKRQST_o
     , output _BRKWRM_o
     , output _CAINC_o
@@ -147,7 +147,7 @@ module dmatest (
                                           caincreq,   //19
                                           wrmemreq,   //18
                                           1'b0,       //17
-                                          BRKGNTI,    //16
+                                          ~ _BRKGNTI, //16
                                           16'b0       //00
                                         } :
                       (armraddr == 2) ? { 4'b0, wcover, addr, wdata } :
@@ -159,7 +159,7 @@ module dmatest (
         .zclock (zclock),
         .zreset (zreset),
 
-        .BRKGNTI     (BRKGNTI),
+        ._BRKGNTI    (_BRKGNTI),
         .CLOK2       (CLOK2),
         .GND         (1'b0),
         .VCC         (1'b1),
@@ -184,7 +184,7 @@ module dmatest (
         ._TS2        (_TS2),
         ._TS3        (_TS3),
         ._TS4        (_TS4),
-        .BRKGNTO     (BRKGNTO),
+        ._BRKGNTO    (_BRKGNTO),
         ._BRKRQST    (_BRKRQST),
         ._BRKWRM     (_BRKWRM),
         ._CAINC      (_CAINC),
@@ -205,7 +205,7 @@ module dmatest (
         ._INBUS_10   (_INBUS_10),
         ._INBUS_11   (_INBUS_11),
 
-        .BRKGNTO_o   (BRKGNTO_o),
+        ._BRKGNTO_o  (_BRKGNTO_o),
         ._BRKRQST_o  (_BRKRQST_o),
         ._BRKWRM_o   (_BRKWRM_o),
         ._CAINC_o    (_CAINC_o),

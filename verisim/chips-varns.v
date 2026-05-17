@@ -2383,3 +2383,6 @@ endmodule
 
 module X47K (input yclock, zclock, input zreset, input p1, input p2);
 endmodule
+
+module XC (input yclock, zclock, input zreset, input p1, input p2);
+endmodule

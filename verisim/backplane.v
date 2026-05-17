@@ -113,7 +113,6 @@ module backplane (
         .GND    (1'b0),
         .VCC    (1'b1),
 
-        .BRKGNTI  (),
 
         .CONSCK   (consck),
         .CONSDA   (consdai),
@@ -320,7 +319,6 @@ module backplane (
         .GND    (1'b0),
         .VCC    (1'b1),
 
-        .BRKGNTI  (),
 
         ._ACUM_0    (_busACUM[0]),
         ._ACUM_1    (_busACUM[1]),
@@ -453,7 +451,6 @@ module backplane (
         .GND    (1'b0),
         .VCC    (1'b1),
 
-        .BRKGNTI  (),
 
         ._BUSINI   (_busBUSINI),
 
@@ -565,7 +562,7 @@ module backplane (
     //  PROCESSOR  //
     /////////////////
 
-    wire cpuBRKGNTO;
+    wire _cpuBRKGNTO;
 
     processor procboard (
         .yclock (yclock),
@@ -575,8 +572,8 @@ module backplane (
         .GND    (1'b0),
         .VCC    (1'b1),
 
-        .BRKGNTO    (cpuBRKGNTO),
-        .BRKGNTO_o  (cpuBRKGNTO),
+        ._BRKGNTO   (_cpuBRKGNTO),
+        ._BRKGNTO_o (_cpuBRKGNTO),
 
         ._ACCLEAR   (_busACCLEAR),
         ._BRKRQST   (_busBRKRQST),
@@ -802,7 +799,7 @@ module backplane (
         .INT_RQST (ttyintrq)
     );
 
-    wire dmaBRKGNTI, dmaBRKGNTO, _dmaBRKRQST, _dmaBRKWRM, _dmaCAINC, _dmaCYCLE3;
+    wire _dmaBRKGNTI, _dmaBRKGNTO, _dmaBRKRQST, _dmaBRKWRM, _dmaCAINC, _dmaCYCLE3;
     wire dmawrite;
     wire[2:0] _dmaDMAFLD;
     wire[11:00] _dmaINBUS;
@@ -820,7 +817,7 @@ module backplane (
         .armwdata (armwdata),
         .armrdata (dmardata),
 
-        .BRKGNTI     (dmaBRKGNTI),
+        ._BRKGNTI    (_dmaBRKGNTI),
         .CLOK2       (busCLOK2),
         ._BRKCYC     (_busBRKCYC),
         ._BUSINI     (_busBUSINI),
@@ -863,8 +860,8 @@ module backplane (
         ._INBUS_10   (_busINBUS[10]),
         ._INBUS_11   (_busINBUS[11]),
 
-        .BRKGNTO     (dmaBRKGNTO),
-        .BRKGNTO_o   (dmaBRKGNTO),
+        ._BRKGNTO    (_dmaBRKGNTO),
+        ._BRKGNTO_o  (_dmaBRKGNTO),
         ._BRKRQST_o  (_dmaBRKRQST),
         ._BRKWRM_o   (_dmaBRKWRM),
         ._CAINC_o    (_dmaCAINC),
@@ -886,14 +883,14 @@ module backplane (
         ._INBUS_11_o (_dmaINBUS[11])
     );
 
-    wire dmbBRKGNTI, dmbBRKGNTO, _dmbBRKRQST, _dmbBRKWRM, _dmbCAINC, _dmbCYCLE3;
+    wire _dmbBRKGNTI, _dmbBRKGNTO, _dmbBRKRQST, _dmbBRKWRM, _dmbCAINC, _dmbCYCLE3;
     wire dmbwrite;
     wire[2:0] _dmbDMAFLD;
     wire[11:00] _dmbINBUS;
     wire[31:00] dmbrdata;
 
 /***
-    assign  dmbBRKGNTO = dmbBRKGNTI;
+    assign _dmbBRKGNTO = ~ _dmbBRKGNTI;
     assign _dmbBRKRQST = 1;
     assign _dmbBRKWRM  = 1;
     assign _dmbCAINC   = 1;
@@ -915,7 +912,7 @@ module backplane (
         .armwdata (armwdata),
         .armrdata (dmbrdata),
 
-        .BRKGNTI     (dmbBRKGNTI),
+        ._BRKGNTI    (_dmbBRKGNTI),
         .CLOK2       (busCLOK2),
         ._BRKCYC     (_busBRKCYC),
         ._BUSINI     (_busBUSINI),
@@ -958,8 +955,8 @@ module backplane (
         ._INBUS_10   (_busINBUS[10]),
         ._INBUS_11   (_busINBUS[11]),
 
-        .BRKGNTO     (dmbBRKGNTO),
-        .BRKGNTO_o   (dmbBRKGNTO),
+        ._BRKGNTO    (_dmbBRKGNTO),
+        ._BRKGNTO_o  (_dmbBRKGNTO),
         ._BRKRQST_o  (_dmbBRKRQST),
         ._BRKWRM_o   (_dmbBRKWRM),
         ._CAINC_o    (_dmbCAINC),
@@ -1010,8 +1007,8 @@ module backplane (
     assign _busPAUSE   = _eaePAUSE    & ~ iPAUSE;
 
     // break grant chain
-    assign dmaBRKGNTI = cpuBRKGNTO;
-    assign dmbBRKGNTI = dmaBRKGNTO;
-    assign   oBRKGNTO = dmbBRKGNTO;
+    assign _dmaBRKGNTI =   _cpuBRKGNTO;
+    assign _dmbBRKGNTI =   _dmaBRKGNTO;
+    assign    oBRKGNTO = ~ _dmbBRKGNTO;
 
 endmodule
