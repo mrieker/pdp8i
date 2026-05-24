@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#  create the BOOT.BIN file for pdp8i
+#  create the BOOT.BIN file for pdp8l
 #  assumes the .bit bitstream file is up-to-date (compiled with vivado)
 #  assumes hostname zturn points to zturn board all booted up with an existing BOOT.BIN file
 #    zturn root .ssh/authorized_keys should have this user's .ssh public key so don't need to enter its password
@@ -20,10 +20,10 @@ cd ../zplin
 source petadevel/settings.sh
 source /tools/Xilinx/Vivado/2018.3/settings64.sh
 cd petakernl/zturn
-if [ images/linux/BOOT.BIN -ot $mydir/pdp8i.runs/impl_1/myboard_wrapper.bit ]
+if [ images/linux/BOOT.BIN -ot $mydir/pdp8l.runs/impl_1/myboard_wrapper.bit ]
 then
     rm -f images/linux/BOOT.BIN
-    petalinux-package --boot --force --fsbl ./images/linux/zynq_fsbl.elf --fpga $mydir/pdp8i.runs/impl_1/myboard_wrapper.bit --u-boot
+    petalinux-package --boot --force --fsbl ./images/linux/zynq_fsbl.elf --fpga $mydir/pdp8l.runs/impl_1/myboard_wrapper.bit --u-boot
 fi
 
 if [ $mydir/BOOT.BIN.gz -ot images/linux/BOOT.BIN ]
@@ -45,6 +45,6 @@ ssh root@zturn$hostnum reboot
 ping -c 90 zturn$hostnum
 
 # ssh zturn$hostnum
-# cd .../pdp8i/pipan8l
+# cd .../pdp8l/pipan8l
 # ./z8lsim run-d01b.tcl
 
