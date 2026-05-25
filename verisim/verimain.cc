@@ -837,7 +837,7 @@ static int findev (char const *ident)
 // read word from the ARM bus
 static uint32_t armread (uint32_t armaddr)
 {
-    vbkpl->saxi_ARADDR  = armaddr;
+    vbkpl->saxi_ARADDR  = armaddr << 2;
     vbkpl->saxi_ARVALID = 1;
     vbkpl->saxi_RREADY  = 1;
     uint32_t armdata = 0;
@@ -857,7 +857,7 @@ static uint32_t armread (uint32_t armaddr)
 // write word to the ARM bus
 static void armwrite (uint32_t armaddr, uint32_t armdata)
 {
-    vbkpl->saxi_AWADDR  = armaddr;
+    vbkpl->saxi_AWADDR  = armaddr << 2;
     vbkpl->saxi_AWVALID = 1;
     vbkpl->saxi_WDATA   = armdata;
     vbkpl->saxi_WVALID  = 1;

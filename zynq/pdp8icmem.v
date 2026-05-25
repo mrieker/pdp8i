@@ -66,28 +66,30 @@ module pdp8icmem (
     reg[14:00] ctladdr;
     reg[11:00] ctldata;
     reg[31:00] armlock;
+    wire blkgntpass;
 
     assign armrdata = (armraddr == 0) ? 32'h434D1019 :  // [31:16] = 'CM'; [15:12] = (log2 nreg) - 1; [11:00] = version
                       (armraddr == 1) ? { ctlbusy, ctlwcovf, ctl3cycl, ctlcainc, ctldata, ctlwrite, ctladdr } :
-                      (armraddr == 2) ? 32'b0 :
+                      (armraddr == 2) ? { 31'b0, brkgnti & blkgntpass } :
                       armlock;
 
     wire clockinreaddata, gateaddressout, gatecontrolsout, gatewrdataout;
     dmareq dmareqinst (
-        .CLOCK     (CLOCK),                 // 100MHz clock
-        .RESET     (RESET),                 // fpga reset
-        .dorequest (ctlbusy),               // start a request
-        .wrmemreq  (ctlwrite),              // - it writes memory
-        .busini    (busini),                // bus initialize
-        .brkcyc    (brkcycle),              // break cycle in progress
-        .brkgnti   (brkgnti),               // break grant input from next inner (or processor)
-        .brkrqsti  (brkrqsti),              // break request line from bus
-        .tp2       (brktp2),                // timing pulse and states
-        .ts2       (brkts2),
-        .ts4       (brkts4),
+        .CLOCK      (CLOCK),                // 100MHz clock
+        .RESET      (RESET),                // fpga reset
+        .dorequest  (ctlbusy),              // start a request
+        .wrmemreq   (ctlwrite),             // - it writes memory
+        .busini     (busini),               // bus initialize
+        .brkcyc     (brkcycle),             // break cycle in progress
+        .brkgnti    (brkgnti),              // break grant input from next inner (or processor)
+        .brkrqsti   (brkrqsti),             // break request line from bus
+        .tp2        (brktp2),               // timing pulse and states
+        .ts2        (brkts2),
+        .ts4        (brkts4),
 
-        .brkgnto   (brkgnto),               // break grant output to next outer (or nothing)
-        .brkrqsto  (brkrqsto),              // break request line to bus
+        .brkgnto    (brkgnto),              // break grant output to next outer (or nothing)
+        .brkrqsto   (brkrqsto),             // break request line to bus
+        .blkgntpass (blkgntpass),           // blocking passing grant along
         .clockinreaddata (clockinreaddata), // clock in memory read data from mbuf (also indicates end of write cycle)
         .gateaddressout  (gateaddressout),  // gate address out to inbus
         .gatecontrolsout (gatecontrolsout), // gate controls (dmafld, cycle3, cainc, brkwrm) out to bus
@@ -114,14 +116,14 @@ module pdp8icmem (
                         ctladdr   <= armwdata[14:00];
                         ctlwrite  <= armwdata[15];
                         ctldata   <= armwdata[27:16];
+                        ctlcainc  <= armwdata[28];
+                        ctl3cycl  <= armwdata[29];
                         ctlbusy   <= armwdata[31];
                     end
                 end
 
                 2: begin
                     if (~ ctlbusy) begin
-                        ctl3cycl <= armwdata[31];
-                        ctlcainc <= armwdata[30];
                     end
                 end
 

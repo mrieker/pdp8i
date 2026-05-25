@@ -194,7 +194,7 @@ module Zynq (
 
     reg[9:0] meminprog;
 
-    reg bareit, simit, lastts1, lastts3, didio;
+    reg simit, lastts1, lastts3, didio;
     reg nanocontin, nanocstep, nanotrigger, fpgareset;
     wire acclr, intrq, ioskp;
     reg[3:0] iopsetcount;               // count fpga cycles where an IOP is on
@@ -248,13 +248,6 @@ module Zynq (
 
     // front panel i2c interface
     wire[31:00] fpi2crdata;
-
-    // extended memory interface wires
-    wire[31:00] xmardata;
-    wire[11:00] xmibus;
-    wire[11:00] xmmem;
-    wire[2:0] xmfield;
-    wire xm_intinh, xm_mrdone, xm_mwdone, xm_ea;
 
     // core memory interface wires
     wire[31:00] cmardata;
@@ -325,14 +318,13 @@ module Zynq (
         (readaddr[11:05] ==  7'b0000101)    ? vcardata   :
         (readaddr[11:05] ==  7'b0000110)    ? fpi2crdata :
         (readaddr[11:05] ==  7'b0000111)    ? pbardata   :
-        (readaddr[11:05] ==  7'b0001000)    ? xmardata   :
-        (readaddr[11:05] ==  7'b0001001)    ? shardata   :
-        (readaddr[11:05] ==  7'b0001010)    ? dcardata   :
-        (readaddr[11:04] ==  8'b00010110)   ? cmardata   :
-        (readaddr[11:04] ==  8'b00010111)   ? ttardata   :
-        (readaddr[11:03] ==  9'b000110000)  ? prardata   :
-        (readaddr[11:03] ==  9'b000110001)  ? ppardata   :
-        (readaddr[11:03] ==  9'b000110010)  ? tcardata   :
+        (readaddr[11:05] ==  7'b0001000)    ? shardata   :
+        (readaddr[11:05] ==  7'b0001001)    ? dcardata   :
+        (readaddr[11:04] ==  8'b00010100)   ? cmardata   :
+        (readaddr[11:04] ==  8'b00010101)   ? ttardata   :
+        (readaddr[11:03] ==  9'b000101100)  ? prardata   :
+        (readaddr[11:03] ==  9'b000101101)  ? ppardata   :
+        (readaddr[11:03] ==  9'b000101110)  ? tcardata   :
         32'hDEADBEEF;
 
     wire armwrite   = saxi_WREADY & saxi_WVALID;    // arm is writing a register (single fpga clock cycle)
@@ -340,14 +332,13 @@ module Zynq (
     wire vcawrite   = armwrite & writeaddr[11:05] == 7'b0000101;
     wire fpi2cwrite = armwrite & writeaddr[11:05] == 7'b0000110;
     wire pbawrite   = armwrite & writeaddr[11:05] == 7'b0000111;
-    wire xmawrite   = armwrite & writeaddr[11:05] == 7'b0001000;
-    wire shawrite   = armwrite & writeaddr[11:05] == 7'b0001001;
-    wire dcawrite   = armwrite & writeaddr[11:05] == 7'b0001010;
-    wire cmawrite   = armwrite & writeaddr[11:04] == 8'b00010110;
-    wire ttawrite   = armwrite & writeaddr[11:04] == 8'b00010111;
-    wire prawrite   = armwrite & writeaddr[11:03] == 9'b000110000;
-    wire ppawrite   = armwrite & writeaddr[11:03] == 9'b000110001;
-    wire tcawrite   = armwrite & writeaddr[11:03] == 9'b000110010;
+    wire shawrite   = armwrite & writeaddr[11:05] == 7'b0001000;
+    wire dcawrite   = armwrite & writeaddr[11:05] == 7'b0001001;
+    wire cmawrite   = armwrite & writeaddr[11:04] == 8'b00010100;
+    wire ttawrite   = armwrite & writeaddr[11:04] == 8'b00010101;
+    wire prawrite   = armwrite & writeaddr[11:03] == 9'b000101100;
+    wire ppawrite   = armwrite & writeaddr[11:03] == 9'b000101101;
+    wire tcawrite   = armwrite & writeaddr[11:03] == 9'b000101110;
 
     // A3.3.1 Read transaction dependencies
     // A3.3.1 Write transaction dependencies
@@ -364,7 +355,6 @@ module Zynq (
             simit       <= 0;                           // assume want to access real PDP-8/I by default
             fpgareset   <= 0;                           // we are resetting FPGA, don't do infinite reset loop
             nanocontin  <= 1;                           // turn on 100MHz FPGA clocking
-            bareit      <= 0;                           // normal signals by default (not manual override)
 
         end else begin
 
@@ -423,7 +413,6 @@ module Zynq (
                         simit        <= saxi_WDATA[00];
                         fpgareset    <= saxi_WDATA[01];
                         nanocontin   <= saxi_WDATA[02];
-                        bareit       <= saxi_WDATA[06];
                     end
 
                     default: begin end
@@ -610,7 +599,7 @@ module Zynq (
     assign regctle[03]    = nanotrigger;
     assign regctle[04]    = nanocstep;
     assign regctle[05]    = 0;
-    assign regctle[06]    = bareit;
+    assign regctle[06]    = 0;
     assign regctle[31:07] = 0;
 
     assign regctlf[11:00] = dev_oACUM;
@@ -685,20 +674,17 @@ module Zynq (
         end
     end
 
-    // internal pio busses - wire-ored(active high)/-anded(active low) from device to processor
-    // block device outputs if bareit so pins can be directly controlled by arm
-    wire[2:0]   barei3 = {  3 { bareit } };
-    wire[11:00] bare12 = { 12 { bareit } };
-    assign dev_iACCLEAR = arm_iACCLEAR | bareit & (ttacclr | rkacclr | vcacclr | tcacclr | pracclr | pbacclr | dcacclr);
-    assign dev_iBRKRQST = arm_iBRKRQST | bareit & cmbrkrqst;
-    assign dev_iBRKWRM  = arm_iBRKWRM  | bareit & cmbrkwrite;
-    assign dev_iCAINC   = arm_iCAINC   | bareit & cmbrkcainc;
-    assign dev_iCYCLE3  = arm_iCYCLE3  | bareit & cmbrk3cycl;
-    assign dev_iDMAFLD  = arm_iDMAFLD  | barei3 & cmbrkema;
-    assign dev_iINBUS   = arm_iINBUS   | bare12 & (ttibus  | rkibus | vcibus | xmibus | tcibus | pribus | pbibus | dcibus | cmbrkinbus);
-    assign dev_iINTRQST = arm_iINTRQST | bareit & (ttintrq | rkintrq | vcintrq | tcintrq | printrq | ppintrq | dcintrq);
-    assign dev_iIOSKIP  = arm_iIOSKIP  | bareit & (ttioskp | rkioskp | vcioskp | tcioskp | prioskp | ppioskp | pbioskp | dcioskp);
-    assign dev_iPAUSE   = arm_iPAUSE   | bareit & xm_mwdone;
+    // internal pio busses - wire-ored (active high) from device to processor
+    assign dev_iACCLEAR = arm_iACCLEAR | ttacclr | rkacclr | vcacclr | tcacclr | pracclr | pbacclr | dcacclr;
+    assign dev_iBRKRQST = arm_iBRKRQST | cmbrkrqst;
+    assign dev_iBRKWRM  = arm_iBRKWRM  | cmbrkwrite;
+    assign dev_iCAINC   = arm_iCAINC   | cmbrkcainc;
+    assign dev_iCYCLE3  = arm_iCYCLE3  | cmbrk3cycl;
+    assign dev_iDMAFLD  = arm_iDMAFLD  | cmbrkema;
+    assign dev_iINBUS   = arm_iINBUS   | ttibus  | rkibus  | vcibus  | tcibus  | pribus  | pbibus  | dcibus  | cmbrkinbus;
+    assign dev_iINTRQST = arm_iINTRQST | ttintrq | rkintrq | vcintrq | tcintrq | printrq | ppintrq | dcintrq;
+    assign dev_iIOSKIP  = arm_iIOSKIP  | ttioskp | rkioskp | vcioskp | tcioskp | prioskp | ppioskp | dcioskp | pbioskp;
+    assign dev_iPAUSE   = arm_iPAUSE;
 
     ///////////////////////////////////
     //  simulated PDP-8/I processor  //

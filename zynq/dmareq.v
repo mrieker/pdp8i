@@ -12,14 +12,14 @@ module dmareq (
     input  tp2, ts2, ts4,   // timing pulse and states
     output brkgnto,         // break grant output to next outer (or nothing)
     output reg brkrqsto,    // break request line to bus
+    output reg blkgntpass,  // when set, blocks passing grant signal along
     output clockinreaddata, // clock in memory read data from mbuf
                             // also clocks for write cycles to indicate end of cycle
     output gateaddressout,  // gate address out to inbus
     output gatecontrolsout, // gate controls (dmafld, cycle3, cainc, brkwrm) out to bus
     output gatewrdataout);  // gate write data out to bus
 
-    // when set, blocks passing grant signal along
-    reg blkgntpass;
+
     assign brkgnto = brkgnti & ~ blkgntpass;
 
     // our request is being granted whenever we are requesting and we are receiving the grant

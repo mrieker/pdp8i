@@ -5,7 +5,11 @@
 ;#  > simtest
 
 set acum         0
+set cmat1        0
+set cmat2        0
+set cmdmarqst    0
 set dmarqst      0
+set dmawdata     0
 set haltdelay    0
 set haltwhy      ""
 set hasmemcmd    0
@@ -49,6 +53,10 @@ set clockns  [expr {[clk ratio] * 5}]
 
 proc simtest {} {
     global acum
+    global cmat1
+    global cmat2
+    global cmdmarqst
+    global dmarqst
     global dma3cycle
     global dmacainc
     global dmawrmem
@@ -102,11 +110,16 @@ proc simtest {} {
     set usemcp [getenv usemcp 0]
     puts "simtest: usemcp=$usemcp"
     hardreset
+    set cmat0 [arm find CM]
     startat 0
     waitassert TS1
     verify12 [bus oMADR] 0 "bad start PC"
     set acum [bus oACUM]
     set linc [bus oLINK]
+
+    set cmat1 [expr {$cmat0 + 1}]
+    set cmat2 [expr {$cmat0 + 2}]
+    puts [format "simtest*: cmat0=%X cmat1=%X cmat2=%X" $cmat0 $cmat1 $cmat2]
 
     ;# set switches for OSR/LDAD testing
     set swdfpend  [expr {$testxmem ? [randbits 3] : 0}]
@@ -132,43 +145,27 @@ proc simtest {} {
             set execst $MS_EXEC
 
             ;# maybe do a dma cycle
-            if {! $nextfetch && [bus oBRKGNTO]} {
+            if {! $nextfetch && $cmdmarqst && [arm $cmat2]} {
 
-                puts -nonewline "DMA"
-                if {$dma3cycle} {
-
-                    ;# WC state reads wordcount from dmaaddr field 0, increments it and writes it back
-                    ;# make wordcount overflow somewhat common for testing
-                    set oldwordcount [randbits 12]
-                    if {$oldwordcount & 04000} {set oldwordcount [expr {$oldwordcount | 07770}]}
-                    set newwordcount [expr {($oldwordcount + 1) & 07777}]
-                    puts -nonewline [format "  WCT:%04o / %04o => %04o" $dmaaddr $oldwordcount $newwordcount]
-                    memorycycle $MS_WRDCT 0 $dmaaddr $oldwordcount $newwordcount
-                    checkhalted
-
-                    set wcshouldover [expr {$newwordcount == 0}]
-                    verifybit $memcycwcover $wcshouldover "BWC OVERFLOW mismatch"
-
-                    ;# CA state reads pointer from dmaaddr + 1 field 0, increments it and writes it back
-                    ;# then we use the incremented pointer for the transfer address
-                    set dmaaddr [expr {($dmaaddr + 1) & 07777}]
-                    set oldcuraddr [randbits 12]
-                    set newcuraddr [expr {($oldcuraddr + $dmacainc) & 07777}]
-                    puts -nonewline [format "  CAD:%04o / %04o => %04o" $dmaaddr $oldcuraddr $newcuraddr]
-                    memorycycle $MS_CURAD 0 $dmaaddr $oldcuraddr $newcuraddr
-                    checkhalted
-                    set dmaaddr $newcuraddr
+                ;# dma requested via arm interface of pdp8icmem.v
+                puts -nonewline "CMDMA"
+                set rd [dodmacycle \
+                        [expr {($cmdmarqst >> 29)    & 1}] \
+                        [expr { $cmdmarqst        & 4095}] \
+                        [expr {($cmdmarqst >> 28)    & 1}] \
+                        [expr {($cmdmarqst >> 15)    & 1}] \
+                        [expr {($cmdmarqst >> 16) & 4095}] \
+                        [expr {($cmdmarqst >> 12) &    7}]]
+                if {! ($cmdmarqst & 0x8000)} {
+                    set cmdmarqst [arm $cmat1]
+                    verify12 $rd [expr {($cmdmarqst >> 16) & 4095}] "pdp8icmem capture read data"
                 }
+                set cmdmarqst 0
+            } elseif {! $nextfetch && $dmarqst && [bus oBRKGNTO]} {
 
-                ;# transfer word at address dmafield:dmaaddr
-                set dmardata [randbits 12]                  ;# random value that will be sent to processor as content of memory location dmafield:dmaaddr
-                if {! $dmawrmem} {set dmawdata $dmardata}   ;# if writing, write will be value from dmastat2; if reading, write will be same as dmardata
-
-                puts -nonewline [format "  BRK:%o%04o / %04o" $dmafield $dmaaddr $dmardata]
-                if {$dmawrmem} {
-                    puts -nonewline [format " => %04o" $dmawdata]
-                }
-                memorycycle $MS_BREAK $dmafield $dmaaddr $dmardata $dmawdata
+                ;# dma requested via pins at top of backplane.v
+                puts -nonewline "DMA  "
+                dodmacycle $dma3cycle $dmaaddr $dmacainc $dmawrmem $dmawdata $dmafield
             } else {
 
                 ;# maybe interrupt request is next
@@ -425,6 +422,49 @@ proc finishline {} {
     puts [format "  (%u.%03u uS)" [expr {$clocks / 1000}] [expr {$clocks % 1000}]]
 }
 
+;# perform DMA (1 or 3) cycle
+proc dodmacycle {dma3cycle dmaaddr dmacainc dmawrmem dmawdata dmafield} {
+    global MS_WRDCT MS_CURAD MS_BREAK
+    global memcycwcover
+
+    if {$dma3cycle} {
+
+        ;# WC state reads wordcount from dmaaddr field 0, increments it and writes it back
+        ;# make wordcount overflow somewhat common for testing
+        set oldwordcount [randbits 12]
+        if {$oldwordcount & 04000} {set oldwordcount [expr {$oldwordcount | 07770}]}
+        set newwordcount [expr {($oldwordcount + 1) & 07777}]
+        puts -nonewline [format "  WCT:%04o / %04o => %04o" $dmaaddr $oldwordcount $newwordcount]
+        memorycycle $MS_WRDCT 0 $dmaaddr $oldwordcount $newwordcount
+        checkhalted
+
+        set wcshouldover [expr {$newwordcount == 0}]
+        verifybit $memcycwcover $wcshouldover "BWC OVERFLOW mismatch"
+
+        ;# CA state reads pointer from dmaaddr + 1 field 0, increments it and writes it back
+        ;# then we use the incremented pointer for the transfer address
+        set dmaaddr [expr {($dmaaddr + 1) & 07777}]
+        set oldcuraddr [randbits 12]
+        set newcuraddr [expr {($oldcuraddr + $dmacainc) & 07777}]
+        puts -nonewline [format "  CAD:%04o / %04o => %04o" $dmaaddr $oldcuraddr $newcuraddr]
+        memorycycle $MS_CURAD 0 $dmaaddr $oldcuraddr $newcuraddr
+        checkhalted
+        set dmaaddr $newcuraddr
+    }
+
+    ;# transfer word at address dmafield:dmaaddr
+    set dmardata [randbits 12]                  ;# random value that will be sent to processor as content of memory location dmafield:dmaaddr
+    if {! $dmawrmem} {set dmawdata $dmardata}   ;# if writing, write will be value from dmastat2; if reading, write will be same as dmardata
+
+    puts -nonewline [format "  BRK:%o%04o / %04o" $dmafield $dmaaddr $dmardata]
+    if {$dmawrmem} {
+        puts -nonewline [format " => %04o" $dmawdata]
+    }
+    memorycycle $MS_BREAK $dmafield $dmaaddr $dmardata $dmawdata
+
+    return $dmardata
+}
+
 ;# clock through a memory cycle, verifying the address and data
 ;#  input:
 ;#   state = MS_state
@@ -442,6 +482,7 @@ proc finishline {} {
 ;#         update accumulator
 ;#   TS4 = update to next state
 proc memorycycle {state field addr rdata wdata} {
+    global cmat1 cmdmarqst
     global dma3cycle dmacainc dmarqst dmawrmem dmawdata dmaaddr dmafield
     global hasmemcmd memcycwcover opcode
     global MS_BREAK MS_CURAD MS_DEPOS MS_EXAM MS_EXEC MS_FETCH MS_INTAK MS_WRDCT
@@ -486,6 +527,14 @@ proc memorycycle {state field addr rdata wdata} {
         mem $expaddr $rdata
     }
 
+    ;# maybe generate a dma request via pdp8icmem.v
+    ;# these have higher priority than plain dmarqsts
+    if {! $cmdmarqst && ([randbits 6] == 0)} {
+        set cmdmarqst [expr {[randbits 30] | 0x80000000}]
+        arm set $cmat1 $cmdmarqst
+        puts -nonewline " <<cmdmarqst>>"
+    }
+
     waitassert TP1
 
     ;# cpu should be outputting address we expect
@@ -506,20 +555,19 @@ proc memorycycle {state field addr rdata wdata} {
     }
 
     ;# maybe request a dma (break) cycle
-    if {! $dmarqst} {
-        set dmarqst [expr {[randbits 5] == 0}]
-        if {$dmarqst} {
-            set dma3cycle [randbits 1]
-            set dmacainc  [randbits 1]
-            set dmawrmem  [randbits 1]
-            set dmaaddr   [randbits 12]
-            set dmafield  [randbits 3]
-            if {$dmawrmem} {
-                set dmawdata [randbits 12]
-            }
-            bus set iBRKRQST 1
-            puts -nonewline " <<dma request>>"
+    ;# these have lower priority than cmdmarqsts
+    if {! $dmarqst && ([randbits 6] == 0)} {
+        set dmarqst   1
+        set dma3cycle [randbits 1]
+        set dmacainc  [randbits 1]
+        set dmawrmem  [randbits 1]
+        set dmaaddr   [randbits 12]
+        set dmafield  [randbits 3]
+        if {$dmawrmem} {
+            set dmawdata [randbits 12]
         }
+        bus set iBRKRQST 1
+        puts -nonewline " <<dmarqst>>"
     }
 
     ;# MB should now have the value we wrote to the memory location or to the iINBUS
@@ -966,7 +1014,7 @@ proc waitnegate {sig {n 100}} {
 }
 
 proc runsimstep {} {
-    global dma3cycle dmacainc dmarqst dmawrmem dmawdata dmaaddr dmafield
+    global dma3cycle dmacainc dmarqst dmawrmem dmafield
 
     if {$dmarqst && [bus oBRKGNTO]} {
         bus set iCYCLE3 $dma3cycle iCAINC $dmacainc iBRKWRM $dmawrmem iDMAFLD $dmafield
