@@ -259,7 +259,8 @@ module Zynq (
     // core memory interface wires
     wire[31:00] cmardata;
     wire cmbrkrqst, cmbrkwrite, cmbrk3cycl, cmbrkcainc;
-    wire[11:00] cmbrkaddr, cmbrkwdat;
+    wire cmbrkgnti, cmbrkgnto;
+    wire[11:00] cmbrkinbus;
     wire[2:0] cmbrkema;
 
     // tape interface wires
@@ -694,7 +695,7 @@ module Zynq (
     assign dev_iCAINC   = arm_iCAINC   | bareit & cmbrkcainc;
     assign dev_iCYCLE3  = arm_iCYCLE3  | bareit & cmbrk3cycl;
     assign dev_iDMAFLD  = arm_iDMAFLD  | barei3 & cmbrkema;
-    assign dev_iINBUS   = arm_iINBUS   | bare12 & (ttibus  | rkibus | vcibus | xmibus | tcibus | pribus | pbibus | dcibus);
+    assign dev_iINBUS   = arm_iINBUS   | bare12 & (ttibus  | rkibus | vcibus | xmibus | tcibus | pribus | pbibus | dcibus | cmbrkinbus);
     assign dev_iINTRQST = arm_iINTRQST | bareit & (ttintrq | rkintrq | vcintrq | tcintrq | printrq | ppintrq | dcintrq);
     assign dev_iIOSKIP  = arm_iIOSKIP  | bareit & (ttioskp | rkioskp | vcioskp | tcioskp | prioskp | ppioskp | pbioskp | dcioskp);
     assign dev_iPAUSE   = arm_iPAUSE   | bareit & xm_mwdone;
@@ -807,7 +808,8 @@ module Zynq (
     //  DMA grant chain  //
     ///////////////////////
 
-    assign dev_iBRKGNTO = dev_oBRKGNTI;
+    assign cmbrkgnti = dev_oBRKGNTI;    // pass grant from inner devs to cmem
+    assign dev_iBRKGNTO = cmbrkgnto;    // pass grant from cmem to outer devs
 
     ////////////////////////////////
     //  shadow PDP-8/I processor  //
@@ -970,12 +972,8 @@ module Zynq (
     // pdp must be running for this to work
     // does not process any pdp io instructions
 
-    wire cmnobrkopt;
-    wire[4:0] cmbusyonarm;
-
-    pdp8lcmem cminst (
+    pdp8icmem cminst (
         .CLOCK (CLOCK),
-        .CSTEP (nanocstep),
         .RESET (pwronreset),
 
         .armwrite (cmawrite),                   //< arm writing to backside register
@@ -984,20 +982,23 @@ module Zynq (
         .armwdata (saxi_WDATA),                 //< data to write to backside register
         .armrdata (cmardata),                   //> data being read from backside register
 
-        .brkrqst  (cmbrkrqst),                  //> dma cycle being requested
-        .brkwrite (cmbrkwrite),                 //> dma cycle wants to write memory
         .brk3cycl (cmbrk3cycl),                 //> dma 3-cycle
         .brkcainc (cmbrkcainc),                 //> increment current address in 3-cycle
+        .brkwrite (cmbrkwrite),                 //> dma cycle wants to write memory
         .brkema   (cmbrkema),                   //> upper address bits
-        .brkaddr  (cmbrkaddr),                  //> lower address bits
-        .brkwdat  (cmbrkwdat),                  //> data to write to memory
-        .brkrdat  (dev_oMBUF),                  //< data read from memory
-        .brkcycle (dev_oBRKCYC),                //< this is the BREAK cycle
-        .brkts1   (dev_oTS1),                   //< TS1 of memory cycle (memory read occurring)
-        .brkts3   (dev_oTS3),                   //< TS3 of memory cycle (memory writeback occurring)
-        .brkwcovf (dev_oBWCOV),                 //< wordcount overflow for 3-cycle
+        .brkinbus (cmbrkinbus),                 //> address and write data
+        .brkrqsto (cmbrkrqst),                  //> requesting dma cycle
+        .brkgnto  (cmbrkgnto),                  //> outgoing dma grant
 
-        .busyonarm (cmbusyonarm)
+        .busini   (iobusreset),
+        .brkrqsti (dev_oBRKRQST),               //< something is requesting dma cycle
+        .brkgnti  (cmbrkgnti),                  //< incoming dma grant
+        .brkmbuf  (dev_oMBUF),                  //< data read from memory
+        .brkwcovf (dev_oBWCOV),                 //< wordcount overflow for 3-cycle
+        .brkcycle (dev_oBRKCYC),                //< this is the BREAK cycle
+        .brktp2   (dev_oTP2),
+        .brkts2   (dev_oTS2),
+        .brkts4   (dev_oTS4)
     );
 
     // tape interface

@@ -829,6 +829,7 @@ static int findev (char const *ident)
         uint32_t nwords = 2 << ((i >> 12) & 15);
         if (i + nwords > 1024) break;
         if (((char)(id >> 24) == ident[0]) && ((char)(id >> 16) == ident[1])) return i;
+        i += nwords;
     }
     return -1;
 }

@@ -13,6 +13,7 @@ module dmareq (
     output brkgnto,         // break grant output to next outer (or nothing)
     output reg brkrqsto,    // break request line to bus
     output clockinreaddata, // clock in memory read data from mbuf
+                            // also clocks for write cycles to indicate end of cycle
     output gateaddressout,  // gate address out to inbus
     output gatecontrolsout, // gate controls (dmafld, cycle3, cainc, brkwrm) out to bus
     output gatewrdataout);  // gate write data out to bus
@@ -29,10 +30,10 @@ module dmareq (
     wire endofbrk = isgranted & brkcyc;
 
     // clock in read data at TP2 of the break cycle
-    wire clockinreaddata = endofbrk & ~ wrmemreq & tp2;
+    assign clockinreaddata = endofbrk & tp2;
 
     // gate control signals out as long as our request is being granted
-    assign gatecontolsout = isgranted;
+    assign gatecontrolsout = isgranted;
 
     // gate address out during TS4 and our request is being granted
     assign gateaddressout = ts4 & isgranted;

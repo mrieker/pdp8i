@@ -15,13 +15,14 @@ VFILES := \
 	../zynq/zynq.v \
 	../zynq/pdp8ldc02.v \
 	../zynq/pdp8lrk8je.v \
-	../zynq/pdp8lcmem.v \
+	../zynq/pdp8icmem.v \
 	../zynq/pdp8ltc08.v \
 	../zynq/pdp8lfpi2c.v \
 	../zynq/pdp8lptr.v \
 	../zynq/pdp8lpbit.v \
 	../zynq/pdp8lptp.v \
 	../zynq/pdp8ltty.v \
+	../zynq/dmareq.v \
 	../zynq/i2cmaster.v \
 
 OFILES := \
