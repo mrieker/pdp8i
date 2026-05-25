@@ -108,7 +108,7 @@ module pdp8lcmem (
                         ctldata   <= armwdata[27:16];
                         ctldone   <= 0;
                         ctlwcovf  <= 0;
-                        busyonarm <= { 3'b000, armwdata[31] };
+                        busyonarm <= { 4'b0000, armwdata[31] };
                     end
                 end
 

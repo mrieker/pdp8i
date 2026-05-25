@@ -232,6 +232,8 @@ module pdp8ldc02
                         if (mtonreg[07]) begin prflags[4] <= 0; prfulls[4] <= 1; prchars[4] <= cputodev; end
                         if (mtonreg[06]) begin prflags[5] <= 0; prfulls[5] <= 1; prchars[5] <= cputodev; end
                     end
+
+                    default: begin end
                 endcase
             end
 

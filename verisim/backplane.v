@@ -40,15 +40,22 @@ module backplane (
     output swstart, swldad, swdepos, swexam,
     output swcont, swsstep, swsinst
 
-    ,input  consck                  // console I2C bus
-    ,input  consdai
-    ,output consdao
-
-    ,input armwrite
-    ,input[31:00] armwdata
-    ,input[11:02] armwaddr
-    ,input[11:02] armraddr
-    ,output[31:00] armrdata
+    ,input[11:00]  saxi_ARADDR
+    ,output reg    saxi_ARREADY
+    ,input         saxi_ARVALID
+    ,input[11:00]  saxi_AWADDR
+    ,output reg    saxi_AWREADY
+    ,input         saxi_AWVALID
+    ,input         saxi_BREADY
+    ,output[1:0]   saxi_BRESP
+    ,output reg    saxi_BVALID
+    ,output[31:00] saxi_RDATA
+    ,input         saxi_RREADY
+    ,output[1:0]   saxi_RRESP
+    ,output reg    saxi_RVALID
+    ,input[31:00]  saxi_WDATA
+    ,output reg    saxi_WREADY
+    ,input         saxi_WVALID
 );
 
     // combined bus signals
@@ -63,6 +70,8 @@ module backplane (
     wire[4:0] _busSCTR;
     wire[11:00] _busACUM, _busMADR, _busMBUF, _busMQUO, _busPCTR, _busINBUS;
     wire[11:09] _busIREG;
+
+    wire zynCONSCK, zynCONSDA, conCONSDA;
 
     // power-on reset driven by sim
     assign _busRESET = ~ reset;
@@ -113,10 +122,9 @@ module backplane (
         .GND    (1'b0),
         .VCC    (1'b1),
 
-
-        .CONSCK   (consck),
-        .CONSDA   (consdai),
-        .CONSDA_o (consdao),
+        .CONSCK   (zynCONSCK),
+        .CONSDA   (zynCONSDA),
+        .CONSDA_o (conCONSDA),
 
         .bGPIO_4    (gpin[04] & gpout[04]),
         .bGPIO_5    (gpin[05] & gpout[05]),
@@ -771,9 +779,88 @@ module backplane (
         ._TS4_o     (_busTS4)
     );
 
+    //////////////////////////////////
+    //  Zynq board has I/O devices  //
+    //////////////////////////////////
+
+    wire zynACCLEAR, zynBRKGNTI, zynBRKGNTO, zynBRKRQST, zynBRKWRM, zynCAINC, zynCYCLE3, zynINTRQST, zynIOSKIP, zynPAUSE;
+    wire[2:0] zynDMAFLD;
+    wire[11:00] zynINBUS;
+
+    Zynq zynqinst (
+        .CLOCK   (zclock),
+        .RESET_N (~ zreset),
+        .LEDoutR (),      // IO_B34_LN6 R14
+        .LEDoutG (),      // IO_B34_LP7 Y16
+        .LEDoutB (),      // IO_B34_LN7 Y17
+
+        // io bus connections
+        .hdw_oACUM    (~ _busACUM),
+        .hdw_oBRKCYC  (~ _busBRKCYC),
+        .hdw_oBRKGNTI (   zynBRKGNTI),
+        .hdw_oBRKRQST (~ _busBRKRQST),
+        .hdw_oBUSINI  (~ _busBUSINI),
+        .hdw_oBWCOV   (~ _busBWCOV),
+        .hdw_oCLOCK   (   yclock),
+        .hdw_oIOP     (~ _busIOP),
+        .hdw_oMBUF    (~ _busMBUF),
+        .hdw_oRESET   (~ _busRESET),
+        .hdw_oTP1     (~ _busTP1),
+        .hdw_oTP2     (~ _busTP2),
+        .hdw_oTP3     (~ _busTP3),
+        .hdw_oTP4     (~ _busTP4),
+        .hdw_oTS1     (~ _busTS1),
+        .hdw_oTS2     (~ _busTS2),
+        .hdw_oTS3     (~ _busTS3),
+        .hdw_oTS4     (~ _busTS4),
+
+        .hdw_iACCLEAR (zynACCLEAR),
+        .hdw_iBRKGNTO (zynBRKGNTO),
+        .hdw_iBRKRQST (zynBRKRQST),
+        .hdw_iBRKWRM  (zynBRKWRM),
+        .hdw_iCAINC   (zynCAINC),
+        .hdw_iCYCLE3  (zynCYCLE3),
+        .hdw_iDMAFLD  (zynDMAFLD),
+        .hdw_iINBUS   (zynINBUS),
+        .hdw_iINTRQST (zynINTRQST),
+        .hdw_iIOSKIP  (zynIOSKIP),
+        .hdw_iPAUSE   (zynPAUSE),
+
+        // i2c interface to hardware front panel
+        .fpi2c_clock  (zynCONSCK),
+        .fpi2c_datao  (zynCONSDA),
+        .fpi2c_datai  (conCONSDA),
+
+        // arm processor memory bus interface (AXI)
+        // we are a slave for accessing the control registers (read and write)
+        .saxi_ARADDR  (saxi_ARADDR),
+        .saxi_ARREADY (saxi_ARREADY),
+        .saxi_ARVALID (saxi_ARVALID),
+        .saxi_AWADDR  (saxi_AWADDR),
+        .saxi_AWREADY (saxi_AWREADY),
+        .saxi_AWVALID (saxi_AWVALID),
+        .saxi_BREADY  (saxi_BREADY),
+        .saxi_BRESP   (saxi_BRESP),
+        .saxi_BVALID  (saxi_BVALID),
+        .saxi_RDATA   (saxi_RDATA),
+        .saxi_RREADY  (saxi_RREADY),
+        .saxi_RRESP   (saxi_RRESP),
+        .saxi_RVALID  (saxi_RVALID),
+        .saxi_WDATA   (saxi_WDATA),
+        .saxi_WREADY  (saxi_WREADY),
+        .saxi_WVALID  (saxi_WVALID)
+    );
+
+/***
     ////////////////
     //  TELETYPE  //
     ////////////////
+
+    ,input armwrite
+    ,input[31:00] armwdata
+    ,input[11:02] armwaddr
+    ,input[11:02] armraddr
+    ,output[31:00] armrdata
 
     wire[31:00] ttyrdata;
     wire[11:00] ttyinbus;
@@ -889,7 +976,6 @@ module backplane (
     wire[11:00] _dmbINBUS;
     wire[31:00] dmbrdata;
 
-/***
     assign _dmbBRKGNTO = ~ _dmbBRKGNTI;
     assign _dmbBRKRQST = 1;
     assign _dmbBRKWRM  = 1;
@@ -898,7 +984,6 @@ module backplane (
     assign _dmbDMAFLD  = 7;
     assign _dmbINBUS   = 12'o7777;
     assign dmbrdata    = 0;
-***/
 
     dmatest testb (
         .seed   (2),
@@ -977,38 +1062,29 @@ module backplane (
         ._INBUS_10_o (_dmbINBUS[10]),
         ._INBUS_11_o (_dmbINBUS[11])
     );
+***/
 
     /////////////////////////////
     //  COMBINING BUS SIGNALS  //
     /////////////////////////////
 
-    assign ttywrite = armwrite & (armwaddr[11:04] == 8'b00001000);
-    assign dmawrite = armwrite & (armwaddr[11:04] == 8'b00001001);
-    assign dmbwrite = armwrite & (armwaddr[11:04] == 8'b00001010);
-
-    assign armrdata = (armraddr[11:04] == 8'b00001000) ? ttyrdata :
-                      (armraddr[11:04] == 8'b00001001) ? dmardata :
-                      (armraddr[11:04] == 8'b00001010) ? dmbrdata :
-                      32'hDEADBEEF;
-
     // active low signals getting wire-anded on the backplane
-    assign _busACCLEAR = _eaeACCLEAR  & ~ iACCLEAR   & ~ ttyacclr;
-    assign _busBRKRQST =  _dmaBRKRQST &  _dmbBRKRQST & ~ iBRKRQST;
-    assign _busBRKWRM  =  _dmaBRKWRM  &  _dmbBRKWRM  & ~ iBRKWRM;
-    assign _busCAINC   =  _dmaCAINC   &  _dmbCAINC   & ~ iCAINC;
-    assign _busCYCLE3  =  _dmaCYCLE3  &  _dmbCYCLE3  & ~ iCYCLE3;
+    assign _busACCLEAR = _eaeACCLEAR  & ~ iACCLEAR   & ~ zynACCLEAR;
+    assign _busBRKRQST =   ~ iBRKRQST & ~ zynBRKRQST;
+    assign _busBRKWRM  =   ~ iBRKWRM  & ~ zynBRKWRM;
+    assign _busCAINC   =  ~ iCAINC   & ~ zynCAINC;
+    assign _busCYCLE3  =  ~ iCYCLE3  & ~ zynCYCLE3;
     assign _busDFLD    = _conDFLD     & _memDFLD;
-    assign _busDMAFLD  =  _dmaDMAFLD  &  _dmbDMAFLD  & ~ iDMAFLD;
+    assign _busDMAFLD  =  ~ iDMAFLD  & ~ zynDMAFLD;
     assign _busIFLD    = _conIFLD     & _memIFLD;
-    assign _busINBUS   = _conINBUS    &  _dmaINBUS   &  _dmbINBUS & _eaeINBUS & ~ iINBUS & _memINBUS & ~ ttyinbus;
-    assign _busINTRQST = ~ iINTRQST   & ~ ttyintrq;
-    assign _busIOSKIP  = _eaeIOSKIP   & ~ iIOSKIP    & ~ ttyioskp;
+    assign _busINBUS   = _conINBUS    &  _eaeINBUS & ~ iINBUS & _memINBUS & ~ zynINBUS;
+    assign _busINTRQST = ~ iINTRQST   & ~ zynINTRQST;
+    assign _busIOSKIP  = _eaeIOSKIP   & ~ iIOSKIP    & ~ zynIOSKIP;
     assign _busMEMDIS  = ~ memdisab;
-    assign _busPAUSE   = _eaePAUSE    & ~ iPAUSE;
+    assign _busPAUSE   = _eaePAUSE    & ~ iPAUSE     & ~ zynPAUSE;
 
     // break grant chain
-    assign _dmaBRKGNTI =   _cpuBRKGNTO;
-    assign _dmbBRKGNTI =   _dmaBRKGNTO;
-    assign    oBRKGNTO = ~ _dmbBRKGNTO;
+    assign zynBRKGNTI = ~ _cpuBRKGNTO;
+    assign   oBRKGNTO =    zynBRKGNTO;
 
 endmodule

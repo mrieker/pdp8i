@@ -46,8 +46,8 @@ module pdp8ltty
     output INT_RQST
 );
 
-    localparam[11:00] kbio = 12'o6000 + (KBDEV << 3);
-    localparam[11:00] ttio = 12'o6010 + (KBDEV << 3);
+    localparam[11:00] kbio = 12'o6000 + ({ 6'b0, KBDEV } << 3);
+    localparam[11:00] ttio = 12'o6010 + ({ 6'b0, KBDEV } << 3);
 
     reg enable, intenab, kbflag, prflag, prfull;
     reg[11:00] kbchar, prchar;

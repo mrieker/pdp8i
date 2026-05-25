@@ -192,6 +192,8 @@ module pdp8lrk8je (
                             status   <= 0;
                         end
                     end
+
+                    default: begin end
                 endcase
             end
 

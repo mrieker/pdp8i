@@ -347,6 +347,8 @@ module i2cmaster (CLOCK, RESET, CSTEP, wrcmd, command, comand, status, sclo, scl
                         endcase
                     end
                 end
+
+            default: begin end
             endcase
         end
     end

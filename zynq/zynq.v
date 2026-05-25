@@ -18,6 +18,7 @@
 //
 //    http://www.gnu.org/licenses/gpl-2.0.html
 
+// synchronize input signal to the clock
 module synk (input CLOCK, output reg q, input o);
     reg eo, p;
     always @(posedge CLOCK) begin
@@ -71,10 +72,9 @@ module Zynq (
     output        hdw_iPAUSE,
 
     // i2c interface to hardware front panel
-    inout         bFPI2CLOCK,   // bi-dir clock bus
-    inout         bFPI2CDATA,   // bi-dir data bus
-    output reg    i_FPI2CDENA,  // low to turn on bi-dir driver; high to shut off
-    output reg    iFPI2CDDIR,   // high when sending; low when receiving
+    output        fpi2c_clock,
+    output        fpi2c_datao,
+    input         fpi2c_datai,
 
     // arm processor memory bus interface (AXI)
     // we are a slave for accessing the control registers (read and write)
@@ -158,7 +158,6 @@ module Zynq (
     wire        sim_lbLINK;
     wire[11:00] sim_lbMA;
     wire[11:00] sim_lbMB;
-    wire        sim_lbPRTE;
     wire        sim_lbRUN;
     wire        sim_lbWC;
 
@@ -216,9 +215,9 @@ module Zynq (
     reg        arm_iPAUSE;
     reg        arm_swCONT;
     reg        arm_swDEP;
-    reg        arm_swDFLD;
+    reg[2:0]   arm_swDFLD;
     reg        arm_swEXAM;
-    reg        arm_swIFLD;
+    reg[2:0]   arm_swIFLD;
     reg        arm_swLDAD;
     reg        arm_swSINST;
     reg        arm_swSSTEP;
@@ -325,9 +324,9 @@ module Zynq (
         (readaddr[11:05] ==  7'b0000101)    ? vcardata   :
         (readaddr[11:05] ==  7'b0000110)    ? fpi2crdata :
         (readaddr[11:05] ==  7'b0000111)    ? pbardata   :
-        (readaddr[11:05] ==  8'b0001000)    ? xmardata   :
-        (readaddr[11:05] ==  8'b0001001)    ? shardata   :
-        (readaddr[11:05] ==  8'b0001010)    ? dcardata   :
+        (readaddr[11:05] ==  7'b0001000)    ? xmardata   :
+        (readaddr[11:05] ==  7'b0001001)    ? shardata   :
+        (readaddr[11:05] ==  7'b0001010)    ? dcardata   :
         (readaddr[11:04] ==  8'b00010110)   ? cmardata   :
         (readaddr[11:04] ==  8'b00010111)   ? ttardata   :
         (readaddr[11:03] ==  9'b000110000)  ? prardata   :
@@ -425,6 +424,8 @@ module Zynq (
                         nanocontin   <= saxi_WDATA[02];
                         bareit       <= saxi_WDATA[06];
                     end
+
+                    default: begin end
                 endcase
                 saxi_AWREADY <= 1;                          // we are ready to accept an address again
                 saxi_WREADY  <= 0;                          // we are no longer accepting write data
@@ -534,7 +535,7 @@ module Zynq (
     assign sim_iPAUSE   = simit ? dev_iPAUSE   : 0;
 
     assign hdw_iACCLEAR = simit ? 0 : dev_iACCLEAR;
-    assign hdw_iBRKGNTO = simit ? 0 : dev_iBRKGNTO;
+    assign hdw_iBRKGNTO = simit ? hdw_oBRKGNTI : dev_iBRKGNTO;
     assign hdw_iBRKRQST = simit ? 0 : dev_iBRKRQST;
     assign hdw_iBRKWRM  = simit ? 0 : dev_iBRKWRM;
     assign hdw_iCAINC   = simit ? 0 : dev_iCAINC;
@@ -586,21 +587,21 @@ module Zynq (
 
     assign regctlb[00]    = arm_swCONT;
     assign regctlb[01]    = arm_swDEP;
-    assign regctlb[02]    = arm_swDFLD;
-    assign regctlb[03]    = arm_swEXAM;
-    assign regctlb[04]    = arm_swIFLD;
-    assign regctlb[05]    = arm_swLDAD;
-    assign regctlb[06]    = arm_swSINST;
-    assign regctlb[07]    = arm_swSSTEP;
-    assign regctlb[08]    = arm_swSTOP;
-    assign regctlb[09]    = arm_swSTART;
-    assign regctlb[19:10] = 0;
-    assign regctlb[31:20] = arm_swSR;
+    assign regctlb[04:02] = arm_swDFLD;
+    assign regctlb[05]    = arm_swEXAM;
+    assign regctlb[08:06] = arm_swIFLD;
+    assign regctlb[09]    = arm_swLDAD;
+    assign regctlb[10]    = arm_swSINST;
+    assign regctlb[11]    = arm_swSSTEP;
+    assign regctlb[12]    = arm_swSTOP;
+    assign regctlb[13]    = arm_swSTART;
+    assign regctlb[25:14] = arm_swSR;
+    assign regctlb[31:26] = 0;
 
     assign regctlc[15:00] = 0;
     assign regctlc[31:16] = 0;
-    assign regctld[15:00] = 0;
-    assign regctld[31:16] = 0;
+    assign regctld[11:00] = dev_oMBUF;
+    assign regctld[31:12] = 0;
 
     assign regctle[00]    = simit;
     assign regctle[01]    = fpgareset;
@@ -619,17 +620,16 @@ module Zynq (
     assign regctlf[16]    = dev_oBWCOV;
     assign regctlf[17]    = dev_oCLOCK;
     assign regctlf[18]    = dev_oIOP;
-    assign regctlf[20:19] = dev_oMBUF;
-    assign regctlf[21]    = dev_oRESET;
-    assign regctlf[22]    = dev_oTP1;
-    assign regctlf[23]    = dev_oTP2;
-    assign regctlf[24]    = dev_oTP3;
-    assign regctlf[25]    = dev_oTP4;
-    assign regctlf[26]    = dev_oTS1;
-    assign regctlf[27]    = dev_oTS2;
-    assign regctlf[28]    = dev_oTS3;
-    assign regctlf[29]    = dev_oTS4;
-    assign regctlf[31:30] = 0;
+    assign regctlf[19]    = dev_oRESET;
+    assign regctlf[20]    = dev_oTP1;
+    assign regctlf[21]    = dev_oTP2;
+    assign regctlf[22]    = dev_oTP3;
+    assign regctlf[23]    = dev_oTP4;
+    assign regctlf[24]    = dev_oTS1;
+    assign regctlf[25]    = dev_oTS2;
+    assign regctlf[26]    = dev_oTS3;
+    assign regctlf[27]    = dev_oTS4;
+    assign regctlf[31:28] = 0;
 
     assign regctlg[00]    = sim_lbBRK;
     assign regctlg[01]    = sim_lbCA;
@@ -645,7 +645,7 @@ module Zynq (
     assign regctlg[11]    = lastswLDAD;
     assign regctlg[12]    = lastswSTART;
     assign regctlg[13]    = simmemen;
-    assign regctlg[14]    = sim_lbPRTE;
+    assign regctlg[14]    = 0;
     assign regctlg[15]    = 0;
     assign regctlg[27:16] = { sim_lbIR, 9'b000000000 };
     assign regctlg[31:28] = 0;
@@ -693,7 +693,7 @@ module Zynq (
     assign dev_iBRKWRM  = arm_iBRKWRM  | bareit & cmbrkwrite;
     assign dev_iCAINC   = arm_iCAINC   | bareit & cmbrkcainc;
     assign dev_iCYCLE3  = arm_iCYCLE3  | bareit & cmbrk3cycl;
-    assign dev_iDMAFLD  = arm_iDMAFLD  | barei3 & cmbrkaddr;
+    assign dev_iDMAFLD  = arm_iDMAFLD  | barei3 & cmbrkema;
     assign dev_iINBUS   = arm_iINBUS   | bare12 & (ttibus  | rkibus | vcibus | xmibus | tcibus | pribus | pbibus | dcibus);
     assign dev_iINTRQST = arm_iINTRQST | bareit & (ttintrq | rkintrq | vcintrq | tcintrq | printrq | ppintrq | dcintrq);
     assign dev_iIOSKIP  = arm_iIOSKIP  | bareit & (ttioskp | rkioskp | vcioskp | tcioskp | prioskp | ppioskp | pbioskp | dcioskp);
@@ -775,7 +775,6 @@ module Zynq (
         .lbLINK         (sim_lbLINK),
         .lbMA           (sim_lbMA),
         .lbMB           (sim_lbMB),
-        .lbPRTE         (sim_lbPRTE),
         .lbRUN          (sim_lbRUN),
         .lbWC           (sim_lbWC),
 
@@ -803,6 +802,12 @@ module Zynq (
     );
 ***/
     assign regctlk[31:29] = 0;
+
+    ///////////////////////
+    //  DMA grant chain  //
+    ///////////////////////
+
+    assign dev_iBRKGNTO = dev_oBRKGNTI;
 
     ////////////////////////////////
     //  shadow PDP-8/I processor  //
@@ -1055,42 +1060,6 @@ module Zynq (
 ***/
     // real PDP-8/I front panel i2c interface
     // connects to pipan8l/pcb board i2c interface
-
-    reg fpi2cdathiz;
-    wire fpi2cclo, fpi2cdao;
-
-    assign bFPI2CLOCK = fpi2cclo;                   // clock line 74AXP245 is wired as totem pole always on
-    assign bFPI2CDATA = fpi2cdathiz ? 1'bZ : 1'b0;  // FPGA data pin is always either in hi-Z or sending a zero
-
-    always @(posedge CLOCK) begin
-        if (~ RESET_N) begin
-            i_FPI2CDENA <= 1;
-            iFPI2CDDIR  <= 1;
-            fpi2cdathiz <= 1;
-        end else begin
-
-            // send out a zero whenever dataout is zero
-            if (~ fpi2cdao) begin
-                if (~ iFPI2CDDIR) begin
-                    iFPI2CDDIR  <= 1;               // 74AXP4T245 was receiving, change to sending first
-                end else begin
-                    fpi2cdathiz <= 0;               // now it is safe to turn on FPGA pin and drive a zero
-                    i_FPI2CDENA <= 0;               // make sure 74AXP4T245 is turned on
-                end
-            end
-
-            // receive whenever dataout is one
-            else begin
-                if (~ fpi2cdathiz) begin
-                    fpi2cdathiz <= 1;              // FPGA was sending, change to receiving first
-                end else begin
-                    iFPI2CDDIR  <= 0;              // make sure 74AXP4T245 is receiving
-                    i_FPI2CDENA <= 0;              // make sure 74AXP4T245 is turned on
-                end
-            end
-        end
-    end
-
     wire[2:0] i2cstate;
     wire[14:00] i2ccount;
     wire[63:00] i2cstatus;
@@ -1104,13 +1073,15 @@ module Zynq (
         .armwdata (saxi_WDATA),
         .armrdata (fpi2crdata),
 
-        .i2cclo (fpi2cclo),
-        .i2ccli (bFPI2CLOCK),
-        .i2cdao (fpi2cdao),
-        .i2cdai (bFPI2CDATA),
+        .i2cclo (fpi2c_clock),
+        .i2ccli (fpi2c_clock),
+        .i2cdao (fpi2c_datao),
+        .i2cdai (fpi2c_datai),
+
         .i2cstate (i2cstate),
         .i2ccount (i2ccount),
-        .status (i2cstatus)
+        .status (i2cstatus),
+        .comand ()
     );
 
     // paper tape reader interface
@@ -1207,8 +1178,6 @@ module Zynq (
                 // capture signals while before trigger and for ilaafter cycles thereafter
                 if (ilaarmed | (ilaafter != 0)) begin
                     ilaarray[ilaindex] <= {
-                        sim_lbPRTE,
-                        arm_swSSTEP,
                         sim_iDMAFLD,
                         sim_iINBUS
                     };
@@ -1219,7 +1188,7 @@ module Zynq (
 
                 // check trigger condition
                 // - disk controller requesting dma cycle
-                if (sim_lbPRTE) begin
+                if (sim_iDMAFLD != 0) begin
                     ilaarmed <= 0;
                 end
             end

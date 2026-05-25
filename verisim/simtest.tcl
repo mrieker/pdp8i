@@ -5,6 +5,7 @@
 ;#  > simtest
 
 set acum         0
+set dmarqst      0
 set haltdelay    0
 set haltwhy      ""
 set hasmemcmd    0
@@ -48,6 +49,12 @@ set clockns  [expr {[clk ratio] * 5}]
 
 proc simtest {} {
     global acum
+    global dma3cycle
+    global dmacainc
+    global dmawrmem
+    global dmawdata
+    global dmaaddr
+    global dmafield
     global hasmemcmd
     global instrno
     global intdelayed
@@ -112,14 +119,6 @@ proc simtest {} {
     set lastopc -1
     set nextfetch 0
 
-##  if {$testdma} {
-##      set hasdmatest [expr {([bus set armraddr 044 get armrdata] & 0xFFFFF000) == 0x5A441000}]
-##      set hasdmbtest [expr {([bus set armraddr 050 get armrdata] & 0xFFFFF000) == 0x5A441000}]
-##      if {! $hasdmatest | ! $hasdmbtest} {error "missing dma tester"}
-##      bus set armwaddr 045 armwdata 0x80000000 armwrite 1 armwrite 0
-##      bus set armwaddr 051 armwdata 0x80000000 armwrite 1 armwrite 0
-##  }
-
     while {! [ctrlcflag]} {
         set ercode [catch {
 
@@ -132,24 +131,10 @@ proc simtest {} {
             set randsr  0
             set execst $MS_EXEC
 
-            ;# see if any dma granted
-            set dmastat1 [expr {$testdma ? [bus set armraddr 045 get armrdata] : 0}]
-
             ;# maybe do a dma cycle
-            if {($dmastat1 & 0x10000) && ! $nextfetch} {
+            if {! $nextfetch && [bus oBRKGNTO]} {
 
-                set dmbstat1 [bus set armraddr 051 get armrdata]
-                if {$dmbstat1 & 0x10000} {set dmastat1 $dmbstat1}
-                set dmastat2 [bus set armraddr [expr {($dmbstat1 & 0x10000) ? 052 : 046}] get armrdata]
-
-                set dma3cycle [expr {($dmastat1 >> 20) & 1}]
-                set dmacainc  [expr {($dmastat1 >> 19) & 1}]
-                set dmawrmem  [expr {($dmastat1 >> 18) & 1}]
-                set dmawdata  [expr {$dmastat2 & 07777}]
-                set dmaaddr   [expr {($dmastat2 >> 12) & 07777}]
-                set dmafield  [expr {($dmastat2 >> 24) & 7}]
-
-                puts -nonewline [format "DM%s %d-cycle" [expr {($dmbstat1 & 0x10000) ? "B" : "A"}] [expr {($dma3cycle ? 3 : 1)}]]
+                puts -nonewline "DMA"
                 if {$dma3cycle} {
 
                     ;# WC state reads wordcount from dmaaddr field 0, increments it and writes it back
@@ -184,11 +169,6 @@ proc simtest {} {
                     puts -nonewline [format " => %04o" $dmawdata]
                 }
                 memorycycle $MS_BREAK $dmafield $dmaaddr $dmardata $dmawdata
-                if {! $dmawrmem} {
-                    set dmastat3 [bus set armraddr [expr {($dmbstat1 & 0x10000) ? 053 : 047}] get armrdata]
-                    set dmavdata [expr {$dmastat3 & 07777}]
-                    verify12 $dmavdata $dmardata "value read by dmatest.v"
-                }
             } else {
 
                 ;# maybe interrupt request is next
@@ -462,6 +442,7 @@ proc finishline {} {
 ;#         update accumulator
 ;#   TS4 = update to next state
 proc memorycycle {state field addr rdata wdata} {
+    global dma3cycle dmacainc dmarqst dmawrmem dmawdata dmaaddr dmafield
     global hasmemcmd memcycwcover opcode
     global MS_BREAK MS_CURAD MS_DEPOS MS_EXAM MS_EXEC MS_FETCH MS_INTAK MS_WRDCT
     global haltdelay haltwhy memcycno panelhalt testcons
@@ -519,6 +500,28 @@ proc memorycycle {state field addr rdata wdata} {
         bus set iINBUS 0
     }
 
+    ;# maybe put dma write data out on the inbus during TS2
+    if {$dmarqst && $dmawrmem && ($state == $MS_BREAK) && [bus oBRKGNTO]} {
+        bus set iINBUS $dmawdata
+    }
+
+    ;# maybe request a dma (break) cycle
+    if {! $dmarqst} {
+        set dmarqst [expr {[randbits 5] == 0}]
+        if {$dmarqst} {
+            set dma3cycle [randbits 1]
+            set dmacainc  [randbits 1]
+            set dmawrmem  [randbits 1]
+            set dmaaddr   [randbits 12]
+            set dmafield  [randbits 3]
+            if {$dmawrmem} {
+                set dmawdata [randbits 12]
+            }
+            bus set iBRKRQST 1
+            puts -nonewline " <<dma request>>"
+        }
+    }
+
     ;# MB should now have the value we wrote to the memory location or to the iINBUS
     verify12 [bus oMBUF] $rdata "MB during read"
 
@@ -533,8 +536,11 @@ proc memorycycle {state field addr rdata wdata} {
     waitassert TS3
 
     ;# break grant should clear at TP2 of a BREAK cycle
+    ;# also time to drop request and dma write data
     if {$state == $MS_BREAK} {
         verifybit [bus oBRKGNTO] 0 "break grant after TP2 of BREAK cycle"
+        set dmarqst 0
+        bus set iBRKRQST 0 iINBUS 0
     }
 
     ;# maybe perform i/o
@@ -578,9 +584,17 @@ proc memorycycle {state field addr rdata wdata} {
         verify12 [mem $expaddr] $wdata [format "address %05o mismatch" $expaddr]
     }
 
+    ;# if requesting break and it is granted, output address during all TS4s
+    if {$dmarqst && [bus oBRKGNTO]} {
+        bus set iINBUS $dmaaddr
+    }
+
     ;# step to end of cycle
     waitassert TP4
     waitnegate TP4
+
+    ;# stop outputting dma address so it doesn't jam up bus
+    bus set iINBUS 0
 
     ;# check for halted/running
     if {$haltwhy != ""} {error "unprocessed haltwhy $haltwhy}
@@ -652,7 +666,7 @@ proc checkhalted {} {
                             if {$i > 20000} {       ;# 1.68mS @ 10MHz
                                 error "timed out waiting for switches to soak in"
                             }
-                            runstep
+                            runsimstep
                         }
                         startline
                         swtchwait ldad 1            ;# press and hold ldad
@@ -684,7 +698,7 @@ proc checkhalted {} {
                             if {$i > 20000} {       ;# 1.68mS @ 10MHz
                                 error "timed out waiting for switches to soak in"
                             }
-                            runstep
+                            runsimstep
                         }
                         startline
                         set busda [swtch reg]
@@ -758,7 +772,7 @@ proc checkhalted {} {
             ;# if SSTEP is on, it should remain halted
             if $sstep {
                 for {set i 0} {$i < 100} {incr i} {
-                    runstep
+                    runsimstep
                     if {[bus oRUN]} {
                         error "started running with start/sstep"
                     }
@@ -939,7 +953,7 @@ proc extendedarithmetic {yreg} {
 proc waitassert {sig {n 100}} {
     for {set i 0} {! [bus o$sig]} {incr i} {
         if {$i > $n} {error "timed out waiting for $sig asserted"}
-        runstep
+        runsimstep
     }
 }
 
@@ -947,8 +961,20 @@ proc waitassert {sig {n 100}} {
 proc waitnegate {sig {n 100}} {
     for {set i 0} {[bus o$sig]} {incr i} {
         if {$i > $n} {error "timed out waiting for $sig negated"}
-        runstep
+        runsimstep
     }
+}
+
+proc runsimstep {} {
+    global dma3cycle dmacainc dmarqst dmawrmem dmawdata dmaaddr dmafield
+
+    if {$dmarqst && [bus oBRKGNTO]} {
+        bus set iCYCLE3 $dma3cycle iCAINC $dmacainc iBRKWRM $dmawrmem iDMAFLD $dmafield
+    } else {
+        bus set iCYCLE3 0 iCAINC 0 iBRKWRM 0 iDMAFLD 0
+    }
+
+    runstep
 }
 
 ;# maybe request interrupt

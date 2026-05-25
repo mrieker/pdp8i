@@ -50,6 +50,7 @@ static Vbackplane *vbkpl;
 static uint32_t volatile *zpage;
 #endif
 
+static Tcl_ObjCmdProc cmd_arm;
 static Tcl_ObjCmdProc cmd_asmop;
 static Tcl_ObjCmdProc cmd_bus;
 static Tcl_ObjCmdProc cmd_clk;
@@ -64,6 +65,10 @@ static Tcl_ObjCmdProc cmd_randbits;
 static uint32_t scramgpio (uint32_t x);
 static void kerchunk ();
 static int cmdpintable (int pincount, Pin const *pintable, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
+static int findev (char const *ident);
+static uint32_t armread (uint32_t armaddr);
+static void armwrite (uint32_t armaddr, uint32_t armdata);
+static void armclock ();
 static void Tcl_SetResultF (Tcl_Interp *interp, char const *fmt, ...);
 static void siginthand (int signum);
 
@@ -88,6 +93,7 @@ int main (int argc, char **argv)
         ABORT ();
     }
 
+    if (Tcl_CreateObjCommand (interp, "arm",  cmd_arm,  NULL, NULL) == NULL) ABORT ();
     if (Tcl_CreateObjCommand (interp, "asmop", cmd_asmop, NULL, NULL) == NULL) ABORT ();
     if (Tcl_CreateObjCommand (interp, "bus",  cmd_bus,  NULL, NULL) == NULL) ABORT ();
     if (Tcl_CreateObjCommand (interp, "clk",  cmd_clk,  NULL, NULL) == NULL) ABORT ();
@@ -108,8 +114,6 @@ int main (int argc, char **argv)
 #ifdef VERLTR
     Vbackplane vbackplane;
     vbkpl = &vbackplane;
-    vbkpl->consck  = 1;
-    vbkpl->consdai = 1;
 #endif
 #ifdef ZTURN
     int zfd = open ("/proc/zynqpdp8i", O_RDWR);
@@ -134,9 +138,15 @@ int main (int argc, char **argv)
     fprintf (stderr, "magic number %08X\n", zpage[0]);
 #endif
 
+    vbkpl->zreset = 1;
+    for (int i = 0; i < 100; i ++) {
+        armclock ();
+    }
+    vbkpl->zreset = 0;
+
     rc = Tcl_EvalFile (interp, "verimain.tcl");
     if (rc != TCL_OK) {
-        Tcl_EvalEx (interp, "puts $::errorInfo", -1, TCL_EVAL_GLOBAL);
+        Tcl_EvalEx (interp, "puts stderr $::errorInfo", -1, TCL_EVAL_GLOBAL);
         return 1;
     }
 
@@ -161,7 +171,7 @@ int main (int argc, char **argv)
             char const *res = Tcl_GetStringResult (interp);
             if ((res == NULL) || (res[0] == 0)) fprintf (stderr, "error %d evaluating script %s\n", rc, scriptfn);
                                   else fprintf (stderr, "error %d evaluating script %s: %s\n", rc, scriptfn, res);
-            Tcl_EvalEx (interp, "puts $::errorInfo", -1, TCL_EVAL_GLOBAL);
+            Tcl_EvalEx (interp, "puts stderr $::errorInfo", -1, TCL_EVAL_GLOBAL);
             return 1;
         }
     }
@@ -181,24 +191,81 @@ int main (int argc, char **argv)
         memcpy (rer, res, rel);
         rer[rel] = 0;
 
-        char const *eri = Tcl_GetVar (interp, "::errorInfo", TCL_GLOBAL_ONLY);
-        int erl = (eri == NULL) ? 0 : strlen (eri);
-        char err[erl+1];
-        memcpy (err, eri, erl);
-        err[erl] = 0;
-
         Tcl_EvalEx (interp, "flush stdout", -1, TCL_EVAL_GLOBAL);
         Tcl_EvalEx (interp, "flush stderr", -1, TCL_EVAL_GLOBAL);
 
         if (rc != TCL_OK) {
-            if (rer[0] == 0) fprintf (stderr, "\nerror %d evaluating command\n", rc);
-               else fprintf (stderr, "\nerror %d evaluating command: %s\n", rc, rer);
-            if (err[0] != 0) fprintf (stderr, "%s\n", err);
+            int i, j;
+            for (i = 0; (rer[i] != 0) && (rer[i] != '\n'); i ++) { }
+            for (j = 0; j < i; j ++) if (rer[j] != rer[j+i/2+1]) break;
+            if (rer[j] == ' ') j ++;
+            if (rer[j] == 0) fprintf (stderr, "\nerror %d evaluating command\n", rc);
+            else fprintf (stderr, "\nerror %d evaluating command: %s\n", rc, rer + j);
         }
         else if (rer[0] != 0) puts (rer);
     }
 
     return 0;
+}
+
+// arm [get] addr addr ... set addr data addr data ... [find xx]
+static int cmd_arm (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
+{
+    bool setmode = false;
+    int ngetobjs = 0;
+    Tcl_Obj *getobjs[objc];
+
+    for (int i = 0; ++ i < objc;) {
+        char const *arg = Tcl_GetString (objv[i]);
+        if (strcasecmp (arg, "find") == 0) {
+            if (++ i >= objc) {
+                Tcl_SetResultF (interp, "missing 2-char device code for find");
+                return TCL_ERROR;
+            }
+            char const *ident = Tcl_GetString (objv[i]);
+            int x = findev (ident);
+            if (x < 0) {
+                Tcl_SetResultF (interp, "unknown 2-char device code %s", ident);
+                return TCL_ERROR;
+            }
+            getobjs[ngetobjs++] = Tcl_NewIntObj (x);
+            continue;
+        }
+        if (strcasecmp (arg, "get") == 0) {
+            setmode = false;
+            continue;
+        }
+        if (strcasecmp (arg, "set") == 0) {
+            setmode = true;
+            continue;
+        }
+        char *p;
+        uint32_t addr = strtoul (arg, &p, 0);
+        if ((*p != 0) || (addr > 1023)) {
+            Tcl_SetResultF (interp, "address %s not integer in range 0..1023", arg);
+            return TCL_ERROR;
+        }
+        if (setmode) {
+            if (++ i >= objc) {
+                Tcl_SetResultF (interp, "missing value for address 0x%X", addr);
+                return TCL_ERROR;
+            }
+            int data;
+            int rc = Tcl_GetIntFromObj (interp, objv[i], &data);
+            if (rc != TCL_OK) return rc;
+            armwrite (addr, data);
+        } else {
+            uint32_t data = armread (addr);
+            getobjs[ngetobjs++] = Tcl_NewIntObj (data);
+        }
+    }
+    if (ngetobjs == 1) {
+        Tcl_SetObjResult (interp, getobjs[0]);
+    }
+    if (ngetobjs > 1) {
+        Tcl_SetObjResult (interp, Tcl_NewListObj (ngetobjs, getobjs));
+    }
+    return TCL_OK;
 }
 
 // asmop address mnemonic operands...
@@ -283,15 +350,6 @@ static int cmd_bus (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj
             {  1, OFFS (swldad),   false, "swldad"   },
             {  1, OFFS (swexam),   false, "swexam"   },
             {  1, OFFS (swdepos),  false, "swdepos"  },
-
-#ifdef VERLTR
-            { 10, OFFS (armraddr), true,  "armraddr" },
-            { 32, OFFS (armrdata), false, "armrdata" },
-            { 10, OFFS (armwaddr), true,  "armwaddr" },
-            { 32, OFFS (armwdata), true,  "armwdata" },
-            {  1, OFFS (armwrite), true,  "armwrite" },
-#endif
-
 #ifdef ZTURN
             { 12, OFFS (businbus), false, "businbus" },
             {  1, OFFS (busacclr), false, "busacclr" },
@@ -450,35 +508,30 @@ static int cmd_help (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Ob
 #define IICWR 3ULL
 #define IICRD 2ULL
 #define IICRS 1ULL
-#define IIC_IDLE  0
-#define IIC_START 1
-#define IIC_BEGIN 2
-#define IIC_STOP  3
-#define IIC_READ  4
-#define IIC_WRITE 5
-#define IIC_RSTRT 6
-#define IICCMDSZ 64
-static uint8_t iiccmd[IICCMDSZ];
-static uint32_t iicrep;
-static int iiccix;
-static bool iic_debug;
-static int iic_count;
-static int iic_state = IIC_IDLE;
 static int cmd_iic (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
+    static int fpat = -1;
+
+    if (fpat < 0) {
+        fpat = findev ("FP");
+        if (fpat < 0) ABORT ();
+    }
+
+    uint32_t statushi = armread (fpat + 4);
     if (objc < 2) {
-        if (iic_state == IIC_IDLE) {
-            Tcl_SetResultF (interp, "%llu", iicrep);
+        if ((statushi & 0xC0000000U) != 0) {
+            uint32_t statuslo = armread (fpat + 3);
+            Tcl_SetResultF (interp, "%llu", ((uint64_t) statushi << 32) | statuslo);
         }
         return TCL_OK;
     }
-    if (iic_state != IIC_IDLE) {
-        Tcl_SetResultF (interp, "busy with previous command %d", iic_state);
+    if ((statushi & 0xC0000000U) == 0) {
+        Tcl_SetResultF (interp, "busy with previous command");
         return TCL_ERROR;
     }
-    if (iic_debug) printf ("cmd_iic*:");
-    memset (iiccmd, 0, sizeof iiccmd);
-    int nn = 0;
+
+    uint64_t comand = 0;
+    int nn = 64;
     for (int i = 0; ++ i < objc;) {
         char const *arg = Tcl_GetString (objv[i]);
         if (strcasecmp (arg, "wr") == 0) {
@@ -493,319 +546,43 @@ static int cmd_iic (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj
                 Tcl_SetResultF (interp, "wr value %d out of range 0..255", val);
                 return TCL_ERROR;
             }
-            if (nn + 2 >= IICCMDSZ) {
+            if (nn < 10) {
                 Tcl_SetResultF (interp, "command too long");
                 return TCL_ERROR;
             }
-            iiccmd[nn++] = IICWR;
-            iiccmd[nn++] = val;
-            if (iic_debug) printf (" WR %03o", val);
+            nn -= 2;
+            comand |= IICWR << nn;
+            nn -= 8;
+            comand |= ((uint64_t) val) << nn;
             continue;
         }
         if (strcasecmp (arg, "rd") == 0) {
-            if (nn + 1 >= IICCMDSZ) {
+            if (nn < 2) {
                 Tcl_SetResultF (interp, "command too long");
                 return TCL_ERROR;
             }
-            iiccmd[nn++] = IICRD;
-            if (iic_debug) printf (" RD");
+            nn -= 2;
+            comand |= IICRD << nn;
             continue;
         }
         if (strcasecmp (arg, "rs") == 0) {
-            if (nn + 1 >= IICCMDSZ) {
+            if (nn < 2) {
                 Tcl_SetResultF (interp, "command too long");
                 return TCL_ERROR;
             }
-            iiccmd[nn++] = IICRS;
-            if (iic_debug) printf (" RS");
+            nn -= 2;
+            comand |= IICRS << nn;
             continue;
         }
         Tcl_SetResultF (interp, "unknown subcommand %s", arg);
         return TCL_ERROR;
     }
-    if (iic_debug) printf (" =>");
-    iic_count = 0;
-    vbkpl->consck  = 1;
-    vbkpl->consdai = 1;
-    iic_state = IIC_START;
-    iiccix    = 0;
-    iicrep    = 0;
+    armwrite (fpat + 1, comand);
+    armwrite (fpat + 2, comand >> 32);
     return TCL_OK;
 }
 
-// call every 10nS to update iic state
-//  note: consdai = input from perspective of mcp23017
-//        consdao = output from perspective of mcp23017
-#define countloend ((iic_count & 1023) == 29)  // 499=100KHz 124=400KHz 29=1.7MHz
-#define countloinc (iic_count + 1)
-#define counthiinc ((iic_count & - 1024) + 1024)
-#define counthi (iic_count >> 10)
-static void iicupdate ()
-{
-    switch (iic_state) {
-
-        case IIC_IDLE: break;
-
-        // send out start bit, starts with clock and data both high
-        // wait 5uS, data down
-        // wait 5uS, clock down
-        case IIC_START: {
-            if (! countloend) {
-                iic_count = countloinc;
-            } else {
-                switch (counthi) {
-                    case 0: {
-                        if (! vbkpl->consdao) ABORT ();
-                        iic_count = counthiinc;
-                        vbkpl->consdai = 0; // data line high, drive it low with clock still high for start bit
-                        break;
-                    }
-                    case 1: {
-                        iic_count = counthiinc;
-                        vbkpl->consck = 0;
-                        break;
-                    }
-                    case 2: {
-                        iic_state = IIC_BEGIN;
-                        break;
-                    }
-                    default: ABORT ();
-                }
-            }
-            break;
-        }
-
-        // begin processing command in iiccmd[iiccix]
-        // assumes sck = 0
-        case IIC_BEGIN: {
-            iic_count = 0;
-            switch (iiccmd[iiccix++]) {
-                case 0: {       // 00 - start sending STOP bit
-                    vbkpl->consdai = 0;
-                    iic_state = IIC_STOP;
-                    break;
-                }
-                case IICRS: {   // 01 - start sending a RESTART bit
-                    iic_state = IIC_RSTRT;
-                    break;
-                }
-                case IICRD: {   // 10 - start reading 8 bits from slave
-                    vbkpl->consdai = 1;
-                    iic_state = IIC_READ;
-                    break;
-                }
-                case IICWR: {   // 11 - start sending 8 bits to slave
-                    vbkpl->consdai = iiccmd[iiccix] >> 7;
-                    iic_state = IIC_WRITE;
-                    break;
-                }
-                default: ABORT ();
-            }
-            break;
-        }
-
-        // send stop bit
-        // clock, count and data all zero to start
-        // wait 5uS, clock up
-        // wait 5uS, data up
-        // wait 5uS, done
-        case IIC_STOP: {
-            if (! countloend) {
-                iic_count = countloinc;
-            } else {
-                switch (counthi) {
-                    case 0: {
-                        iic_count = counthiinc;
-                        vbkpl->consck = 1;
-                        break;
-                    }
-                    case 1: {
-                        iic_count = counthiinc;
-                        vbkpl->consdai = 1;
-                        break;
-                    }
-                    case 2: {
-                        if (! vbkpl->consdao) ABORT (); // vbkpl->consdao should be 1, 0 means a MCP23017 is jamming line low
-                        iic_state = IIC_IDLE;           // wait for command register to be written with new command
-                        if (iic_debug) printf (" .\n");
-                        break;
-                    }
-                    default: ABORT ();
-                }
-            }
-            break;
-        }
-
-        // clock and count all zero to start
-        // data is one to start (to open-drain the data line)
-        // repeat 7 times:
-        //  wait 5uS, clock up
-        //  wait 5uS, clock down, shift in data bits 7..1
-        // wait 5uS, clock up
-        // wait 5uS, clock down, shift in data bit 0
-        // wait 5uS, another read next ? data down : data up
-        // wait 5uS, clock up
-        // wait 5uS, clock down
-        // wait 5uS, done
-        case IIC_READ: {
-            if (! countloend) {
-                iic_count = countloinc;
-            } else {
-                switch (counthi) {
-                    case 0: case 2: case 4: case 6: case 8: case 10: case 12: case 14: {
-                        iic_count = counthiinc;
-                        vbkpl->consck = 1;
-                        break;
-                    }
-                    case 1: case 3: case 5: case 7: case 9: case 11: case 13: case 15: {
-                        iic_count = counthiinc;
-                        vbkpl->consck = 0;
-                        iicrep += iicrep + vbkpl->consdao;
-                        break;
-                    }
-                    case 16: {
-                        iic_count = counthiinc;
-                        vbkpl->consdai = (iiccmd[iiccix] != IICRD);
-                        break;
-                    }
-                    case 17: {
-                        iic_count = counthiinc;
-                        vbkpl->consck = 1;
-                        break;
-                    }
-                    case 18: {
-                        iic_count = counthiinc;
-                        vbkpl->consck = 0;
-                        break;
-                    }
-                    case 19: {
-                        iic_state = IIC_BEGIN;
-                        if (iic_debug) printf (" %03o", iicrep & 255);
-                        break;
-                    }
-                    default: ABORT ();
-                }
-            }
-            break;
-        }
-
-        // clock and count all zero to start
-        // data is data bit 7 to start
-        // repeat 7 times:
-        //   0,3,6,9,12,15,18: wait 5uS, clock up
-        //  1,4,7,10,13,16,19: wait 5uS, clock down
-        //  2,5,8,11,14,17,20: wait 5uS, send data bits 6..0
-        // 21: wait 5uS, clock up
-        // 22: wait 5uS, clock down
-        // 23: wait 5uS, data up to open-drain data line
-        // 24: wait 5uS, clock up
-        // 25: wait 5uS, data high (no ack) means error
-        //               clock down
-        // 26: wait 5uS, data down
-        //               done (stop if error, else next command)
-        case IIC_WRITE: {
-            if (! countloend) {
-                iic_count = countloinc;
-            } else {
-                switch (counthi) {
-                    case 0: case 3: case 6: case 9: case 12: case 15: case 18: case 21: {
-                        iic_count = counthiinc;
-                        vbkpl->consck = 1;
-                        break;
-                    }
-                    case 1: case 4: case 7: case 10: case 13: case 16: case 19: case 22:
-                    {
-                        iic_count = counthiinc;
-                        vbkpl->consck = 0;
-                        break;
-                    }
-                    case 2: case 5: case 8: case 11: case 14: case 17: case 20:
-                    {
-                        iic_count = counthiinc;
-                        uint8_t val = iiccmd[iiccix] << 1;
-                        iiccmd[iiccix] = val;
-                        vbkpl->consdai = val >> 7;
-                        break;
-                    }
-                    case 23:
-                    {
-                        iic_count = counthiinc;
-                        vbkpl->consdai = 1;
-                        break;
-                    }
-                    case 24:
-                    {
-                        iic_count = counthiinc;
-                        vbkpl->consck = 1;
-                        break;
-                    }
-                    case 25:
-                    {
-                        if (vbkpl->consdao) ABORT ();       // error if no ack rcvd
-                        iiccix ++;                          // skip over data byte
-                        vbkpl->consck = 0;                  // drop clock
-                        iic_count = counthiinc;
-                        break;
-                    }
-                    case 26:
-                    {
-                        iic_state = IIC_BEGIN;              // begin next command
-                        break;
-                    }
-                    default: ABORT ();
-                }
-            }
-            break;
-        }
-
-        // send restart bit
-        // clock, count and data all zero to start
-        // wait 5uS, data up
-        // wait 5uS, clock up
-        // wait 5uS, data down
-        // wait 5uS, clock down
-        // wait 5uS, done
-        case IIC_RSTRT: {
-            if (! countloend) {
-                iic_count = countloinc;
-            } else {
-                switch (counthi) {
-                    case 0: {
-                        iic_count = counthiinc;
-                        vbkpl->consdai = 1;
-                        break;
-                    }
-                    case 1: {
-                        iic_count = counthiinc;
-                        vbkpl->consck = 1;
-                        break;
-                    }
-                    case 2: {
-                        iic_count = counthiinc;
-                        vbkpl->consdai = 0;
-                        break;
-                    }
-                    case 3: {
-                        iic_count = counthiinc;
-                        vbkpl->consck = 0;
-                        break;
-                    }
-                    case 4: {
-                        iic_state = IIC_BEGIN;
-                        break;
-                    }
-                    default: ABORT ();
-                }
-            }
-            break;
-        }
-
-        // bad state
-        default: ABORT ();
-    }
-}
-
-// direct internal memory access
+// direct internal memory access - accesses 32KW 12-bit chip on extmemory.v board
 static int mungememaddr (int addr)
 {
     int munged = addr & 070037;
@@ -952,14 +729,12 @@ static void kerchunk ()
     uint32_t ctla = zpage[zclock_I];
 #endif
     for (int i = 0; i < clkratio; i ++) {
-        iicupdate ();
 #ifdef VERLTR
         vbkpl->eval ();     // let input signals soak in
         vbkpl->yclock = (i * 2 >= clkratio);
         vbkpl->zclock = 1;  // clock progress through gates and flipflops
         vbkpl->eval ();     // let new state settle in
         vbkpl->zclock = 0;
-        vbkpl->armwrite = 0;
 #endif
 #ifdef ZTURN
         zpage[zclock_I] = ctla | zclock_M;
@@ -1039,6 +814,70 @@ static int cmdpintable (int pincount, Pin const *pintable, Tcl_Interp *interp, i
         Tcl_SetObjResult (interp, Tcl_NewListObj (ngetobjs, getobjs));
     }
     return TCL_OK;
+}
+
+////////////////////////////////
+//  simulated ARM bus access  //
+////////////////////////////////
+
+// find device on the ARM bus (within zynq.v)
+static int findev (char const *ident)
+{
+    if (strlen (ident) != 2) return -1;
+    for (uint32_t i = 0; i < 1024;) {
+        uint32_t id = armread (i);
+        uint32_t nwords = 2 << ((i >> 12) & 15);
+        if (i + nwords > 1024) break;
+        if (((char)(id >> 24) == ident[0]) && ((char)(id >> 16) == ident[1])) return i;
+    }
+    return -1;
+}
+
+// read word from the ARM bus
+static uint32_t armread (uint32_t armaddr)
+{
+    vbkpl->saxi_ARADDR  = armaddr;
+    vbkpl->saxi_ARVALID = 1;
+    vbkpl->saxi_RREADY  = 1;
+    uint32_t armdata = 0;
+    for (int i = 0; vbkpl->saxi_ARVALID | vbkpl->saxi_RREADY; i ++) {
+        if (i > 100) ABORT ();
+        bool arready = vbkpl->saxi_ARREADY;
+        armclock ();
+        if (arready) vbkpl->saxi_ARVALID = 0;
+        if (vbkpl->saxi_RVALID & vbkpl->saxi_RREADY) {
+            armdata = vbkpl->saxi_RDATA;
+            vbkpl->saxi_RREADY = 0;
+        }
+    }
+    return armdata;
+}
+
+// write word to the ARM bus
+static void armwrite (uint32_t armaddr, uint32_t armdata)
+{
+    vbkpl->saxi_AWADDR  = armaddr;
+    vbkpl->saxi_AWVALID = 1;
+    vbkpl->saxi_WDATA   = armdata;
+    vbkpl->saxi_WVALID  = 1;
+    vbkpl->saxi_BREADY  = 1;
+    for (int i = 0; vbkpl->saxi_AWVALID | vbkpl->saxi_WVALID | vbkpl->saxi_RREADY; i ++) {
+        if (i > 100) ABORT ();
+        bool awready = vbkpl->saxi_AWREADY;
+        bool wready  = vbkpl->saxi_WREADY;
+        armclock ();
+        if (awready) vbkpl->saxi_AWVALID = 0;
+        if (wready)  vbkpl->saxi_WVALID  = 0;
+        if (vbkpl->saxi_BVALID) vbkpl->saxi_BREADY = 0;
+    }
+}
+
+static void armclock ()
+{
+    vbkpl->eval ();     // let pre-clock signals soak into fpga
+    vbkpl->zclock = 1;  // drive clock high
+    vbkpl->eval ();     // let fpga generate post-clock signals
+    vbkpl->zclock = 0;  // get ready for 2nd half of cycle
 }
 
 // set result to formatted string
