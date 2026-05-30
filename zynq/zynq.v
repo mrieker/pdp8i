@@ -116,7 +116,7 @@ module Zynq (
     //  arm_i... : signals from arm processor as an internal io device (merged onto dev_i... bus)
     //  arm uses dev_o... signals instead of having arm_o... signals
 
-    wire[31:00] regctla, regctlb, regctlc, regctld, regctle, regctlf, regctlg, regctlh, regctli, regctlj, regctlk;
+    wire[31:00] regctla, regctlb, regctlc, regctle, regctlf, regctlg, regctlh, regctli;
 
     wire[11:00] sim_oACUM;
     wire        sim_oBRKCYC;
@@ -305,43 +305,40 @@ module Zynq (
         (readaddr        == 10'b0000000001) ? regctla    :
         (readaddr        == 10'b0000000010) ? regctlb    :
         (readaddr        == 10'b0000000011) ? regctlc    :
-        (readaddr        == 10'b0000000100) ? regctld    :
         (readaddr        == 10'b0000000101) ? regctle    :
         (readaddr        == 10'b0000000110) ? regctlf    :
         (readaddr        == 10'b0000000111) ? regctlg    :
         (readaddr        == 10'b0000001000) ? regctlh    :
         (readaddr        == 10'b0000001001) ? regctli    :
-        (readaddr        == 10'b0000001010) ? regctlj    :
-        (readaddr        == 10'b0000001011) ? regctlk    :
         (readaddr        == 10'b0000001110) ? memcycctr  :
         (readaddr        == 10'b0000010001) ? { ilaarmed, 3'b0, ilaafter, 4'b0, ilaindex } :
         (readaddr        == 10'b0000010010) ? { 17'b0, ilardata[14:00] } :
         (readaddr        == 10'b0000010011) ? { 32'b0                  } :
-        (readaddr[11:05] ==  7'b0000100)    ? rkardata   :
-        (readaddr[11:05] ==  7'b0000101)    ? vcardata   :
-        (readaddr[11:05] ==  7'b0000110)    ? fpi2crdata :
-        (readaddr[11:05] ==  7'b0000111)    ? pbardata   :
-        (readaddr[11:05] ==  7'b0001000)    ? shardata   :
-        (readaddr[11:05] ==  7'b0001001)    ? dcardata   :
-        (readaddr[11:04] ==  8'b00010100)   ? cmardata   :
-        (readaddr[11:04] ==  8'b00010101)   ? ttardata   :
-        (readaddr[11:03] ==  9'b000101100)  ? prardata   :
-        (readaddr[11:03] ==  9'b000101101)  ? ppardata   :
-        (readaddr[11:03] ==  9'b000101110)  ? tcardata   :
+        (readaddr[11:06] ==  6'b000010)     ? fpi2crdata :
+        (readaddr[11:05] ==  7'b0000110)    ? rkardata   :
+        (readaddr[11:05] ==  7'b0000111)    ? vcardata   :
+        (readaddr[11:05] ==  7'b0001001)    ? pbardata   :
+        (readaddr[11:05] ==  7'b0001010)    ? shardata   :
+        (readaddr[11:05] ==  7'b0001011)    ? dcardata   :
+        (readaddr[11:04] ==  8'b00011000)   ? cmardata   :
+        (readaddr[11:04] ==  8'b00011001)   ? ttardata   :
+        (readaddr[11:03] ==  9'b000110100)  ? prardata   :
+        (readaddr[11:03] ==  9'b000110101)  ? ppardata   :
+        (readaddr[11:03] ==  9'b000110110)  ? tcardata   :
         32'hDEADBEEF;
 
     wire armwrite   = saxi_WREADY & saxi_WVALID;    // arm is writing a register (single fpga clock cycle)
-    wire rkawrite   = armwrite & writeaddr[11:05] == 7'b0000100;
-    wire vcawrite   = armwrite & writeaddr[11:05] == 7'b0000101;
-    wire fpi2cwrite = armwrite & writeaddr[11:05] == 7'b0000110;
-    wire pbawrite   = armwrite & writeaddr[11:05] == 7'b0000111;
-    wire shawrite   = armwrite & writeaddr[11:05] == 7'b0001000;
-    wire dcawrite   = armwrite & writeaddr[11:05] == 7'b0001001;
-    wire cmawrite   = armwrite & writeaddr[11:04] == 8'b00010100;
-    wire ttawrite   = armwrite & writeaddr[11:04] == 8'b00010101;
-    wire prawrite   = armwrite & writeaddr[11:03] == 9'b000101100;
-    wire ppawrite   = armwrite & writeaddr[11:03] == 9'b000101101;
-    wire tcawrite   = armwrite & writeaddr[11:03] == 9'b000101110;
+    wire fpi2cwrite = armwrite & writeaddr[11:06] == 6'b000010;
+    wire rkawrite   = armwrite & writeaddr[11:05] == 7'b0000110;
+    wire vcawrite   = armwrite & writeaddr[11:05] == 7'b0000111;
+    wire pbawrite   = armwrite & writeaddr[11:05] == 7'b0001001;
+    wire shawrite   = armwrite & writeaddr[11:05] == 7'b0001010;
+    wire dcawrite   = armwrite & writeaddr[11:05] == 7'b0001011;
+    wire cmawrite   = armwrite & writeaddr[11:04] == 8'b00011000;
+    wire ttawrite   = armwrite & writeaddr[11:04] == 8'b00011001;
+    wire prawrite   = armwrite & writeaddr[11:03] == 9'b000110100;
+    wire ppawrite   = armwrite & writeaddr[11:03] == 9'b000110101;
+    wire tcawrite   = armwrite & writeaddr[11:03] == 9'b000110110;
 
     // A3.3.1 Read transaction dependencies
     // A3.3.1 Write transaction dependencies
@@ -401,15 +398,15 @@ module Zynq (
 
                     10'b0000000010: begin
                         arm_swCONT   <= saxi_WDATA[00];
-                        arm_swDEPOS    <= saxi_WDATA[01];
+                        arm_swDEPOS  <= saxi_WDATA[01];
                         arm_swDFLD   <= saxi_WDATA[04:02];
                         arm_swEXAM   <= saxi_WDATA[05];
                         arm_swIFLD   <= saxi_WDATA[08:06];
                         arm_swLDAD   <= saxi_WDATA[09];
                         arm_swSINST  <= saxi_WDATA[10];
                         arm_swSSTEP  <= saxi_WDATA[11];
-                        arm_swSTART  <= saxi_WDATA[13];
-                        arm_swSREG   <= saxi_WDATA[25:14];
+                        arm_swSTART  <= saxi_WDATA[12];
+                        arm_swSREG   <= saxi_WDATA[24:13];
                     end
 
                     10'b0000000101: begin
@@ -559,21 +556,17 @@ module Zynq (
     assign dev_oTS3     = simit ? sim_oTS3     : hsy_oTS3;
     assign dev_oTS4     = simit ? sim_oTS4     : hsy_oTS4;
 
-    // reading arm registers gets device bus signals
-    //  for 'i' signals: wired-or of all devices and what was written to arm registers
-    //  for 'o' signals: selected signal from simulated PDP-8/I or real PDP-8/I
-
-    assign regctla[00]    = dev_iACCLEAR;
-    assign regctla[01]    = dev_iBRKGNTO;
-    assign regctla[02]    = dev_iBRKRQST;
-    assign regctla[03]    = dev_iBRKWRM;
-    assign regctla[04]    = dev_iCAINC;
-    assign regctla[05]    = dev_iCYCLE3;
-    assign regctla[08:06] = dev_iDMAFLD;
-    assign regctla[20:09] = dev_iINBUS;
-    assign regctla[21]    = dev_iINTRQST;
-    assign regctla[22]    = dev_iIOSKIP;
-    assign regctla[23]    = dev_iPAUSE;
+    assign regctla[00]    = arm_iACCLEAR;
+    assign regctla[01]    = arm_iBRKGNTO;
+    assign regctla[02]    = arm_iBRKRQST;
+    assign regctla[03]    = arm_iBRKWRM;
+    assign regctla[04]    = arm_iCAINC;
+    assign regctla[05]    = arm_iCYCLE3;
+    assign regctla[08:06] = arm_iDMAFLD;
+    assign regctla[20:09] = arm_iINBUS;
+    assign regctla[21]    = arm_iINTRQST;
+    assign regctla[22]    = arm_iIOSKIP;
+    assign regctla[23]    = arm_iPAUSE;
     assign regctla[31:24] = 0;
 
     assign regctlb[00]    = arm_swCONT;
@@ -584,24 +577,30 @@ module Zynq (
     assign regctlb[09]    = arm_swLDAD;
     assign regctlb[10]    = arm_swSINST;
     assign regctlb[11]    = arm_swSSTEP;
-    assign regctlb[12]    = 0;
-    assign regctlb[13]    = arm_swSTART;
-    assign regctlb[25:14] = arm_swSREG;
-    assign regctlb[31:26] = 0;
+    assign regctlb[12]    = arm_swSTART;
+    assign regctlb[24:13] = arm_swSREG;
+    assign regctlb[31:25] = 0;
 
-    assign regctlc[15:00] = 0;
-    assign regctlc[31:16] = 0;
-    assign regctld[11:00] = dev_oMBUF;
-    assign regctld[31:12] = 0;
+    assign regctlc[00]    = dev_iACCLEAR;
+    assign regctlc[01]    = dev_iBRKGNTO;
+    assign regctlc[02]    = dev_iBRKRQST;
+    assign regctlc[03]    = dev_iBRKWRM;
+    assign regctlc[04]    = dev_iCAINC;
+    assign regctlc[05]    = dev_iCYCLE3;
+    assign regctlc[08:06] = dev_iDMAFLD;
+    assign regctlc[20:09] = dev_iINBUS;
+    assign regctlc[21]    = dev_iINTRQST;
+    assign regctlc[22]    = dev_iIOSKIP;
+    assign regctlc[23]    = dev_iPAUSE;
+    assign regctlc[31:24] = 0;
 
     assign regctle[00]    = simit;
     assign regctle[01]    = fpgareset;
     assign regctle[02]    = nanocontin;
     assign regctle[03]    = nanotrigger;
     assign regctle[04]    = nanocstep;
-    assign regctle[05]    = 0;
-    assign regctle[06]    = 0;
-    assign regctle[31:07] = 0;
+    assign regctle[19:05] = 0;
+    assign regctle[31:20] = dev_oMBUF;
 
     assign regctlf[11:00] = dev_oACUM;
     assign regctlf[12]    = dev_oBRKCYC;
@@ -640,9 +639,6 @@ module Zynq (
     assign regctli[17:15] = sim_lbEA;
     assign regctli[20:18] = sim_lbIF;
     assign regctli[31:21] = 0;
-
-    assign regctlj = 0;
-    assign regctlk = 0;
 
     // count memory cycles
     // dectape uses it for timing in z8ltc08.cc
@@ -855,7 +851,6 @@ module Zynq (
         end else begin
             iopstart <= 0;
         end
-        
     end
 
     wire iopstop = ~ dev_oIOP;
@@ -1028,18 +1023,15 @@ module Zynq (
         .viddatab (viddatab)
     );
 ***/
+
     // real PDP-8/I front panel i2c interface
-    // connects to pipan8l/pcb board i2c interface
-    wire[2:0] i2cstate;
-    wire[14:00] i2ccount;
-    wire[63:00] i2cstatus;
-    pdp8lfpi2c fpi2cinst (
+    pdp8ifpi2c fpi2cinst (
         .CLOCK (CLOCK),
         .RESET (~ RESET_N),
 
         .armwrite (fpi2cwrite),
-        .armraddr (readaddr[4:2]),
-        .armwaddr (writeaddr[4:2]),
+        .armraddr (readaddr[5:2]),
+        .armwaddr (writeaddr[5:2]),
         .armwdata (saxi_WDATA),
         .armrdata (fpi2crdata),
 
@@ -1048,10 +1040,10 @@ module Zynq (
         .i2cdao (fpi2c_datao),
         .i2cdai (fpi2c_datai),
 
-        .i2cstate (i2cstate),
-        .i2ccount (i2ccount),
-        .status (i2cstatus),
-        .comand ()
+        .i2ccount (),
+        .i2cstate (),
+        .comand (),
+        .status ()
     );
 
     // paper tape reader interface

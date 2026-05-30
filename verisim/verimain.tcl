@@ -549,7 +549,7 @@ proc runstep {} {
                                 lset swrowsents $mcpswrow $swval
                                 ;# set data pins value to switch row and value:
                                 ;#  0x14 <=    2'b10 val<11:06>
-                                ;#  0x14 <= row<1:0> val<05:00>
+                                ;#  0x15 <= row<1:0> val<05:00>
                                 ;# only changes one iicsel bit (sets iicsel_3) to avoid glitching ldswrow<n>
                                 ;#  smoothly drives ldswrow<n> low
                                 set aout [expr {0x80 | ($swval & 63)}]
