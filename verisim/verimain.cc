@@ -12,6 +12,7 @@
 
 #ifdef VERLTR
 #include "obj_dir/Vbackplane.h"
+#include "obj_dir/Vbackplane_extmemory.h"
 #endif
 #ifdef ZTURN
 #include <sys/file.h>
@@ -625,8 +626,8 @@ static int cmd_mem (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj
                 return TCL_ERROR;
             }
             addr = mungememaddr (addr);
-            int datalo = demngmembyte (vbkpl->backplane__DOT__meminst__DOT__U175__DOT__array[addr]);
-            int datahi = demngmembyte (vbkpl->backplane__DOT__meminst__DOT__U177__DOT__array[addr]);
+            int datalo = demngmembyte (vbkpl->__PVT__backplane__DOT__meminst->__PVT__U175__DOT__array[addr]);
+            int datahi = demngmembyte (vbkpl->__PVT__backplane__DOT__meminst->__PVT__U177__DOT__array[addr]);
             Tcl_SetObjResult (interp, Tcl_NewIntObj ((datahi << 6) | datalo));
             return TCL_OK;
         }
@@ -648,8 +649,8 @@ static int cmd_mem (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj
                 return TCL_ERROR;
             }
             addr = mungememaddr (addr);
-            vbkpl->backplane__DOT__meminst__DOT__U175__DOT__array[addr] = mungemembyte (data);
-            vbkpl->backplane__DOT__meminst__DOT__U177__DOT__array[addr] = mungemembyte (data >> 6);
+            vbkpl->__PVT__backplane__DOT__meminst->__PVT__U175__DOT__array[addr] = mungemembyte (data);
+            vbkpl->__PVT__backplane__DOT__meminst->__PVT__U177__DOT__array[addr] = mungemembyte (data >> 6);
             return TCL_OK;
         }
 

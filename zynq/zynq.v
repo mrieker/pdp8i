@@ -33,8 +33,8 @@ endmodule
 // it also has an I2C connection to the PDP-8/I front panel
 
 module Zynq (
-    input         CLOCK,
-    input         RESET_N,
+    input         CLOCK,        // 100MHz
+    input         RESET_N,      // FPGA reset
     output        LEDoutR,      // IO_B34_LN6 R14
     output        LEDoutG,      // IO_B34_LP7 Y16
     output        LEDoutB,      // IO_B34_LN7 Y17
@@ -42,14 +42,14 @@ module Zynq (
     // io bus connections
     input[11:00]  hdw_oACUM,
     input         hdw_oBRKCYC,
-    input         hdw_oBRKGNTI,
+    input         hdw_oBRKGNTI, // grant coming in from processor-side of bus
     input         hdw_oBRKRQST,
-    input         hdw_oBUSINI,
+    input         hdw_oBUSINI,  // external boards power-on reset + start switch
     input         hdw_oBWCOV,
-    input         hdw_oCLOCK,
+    input         hdw_oCLOCK,   // 10MHz from external processor
     input         hdw_oIOP,
     input[11:00]  hdw_oMBUF,
-    input         hdw_oRESET,
+    input         hdw_oRESET,   // external boards power-on reset
     input         hdw_oTP1,
     input         hdw_oTP2,
     input         hdw_oTP3,
@@ -60,7 +60,7 @@ module Zynq (
     input         hdw_oTS4,
 
     output        hdw_iACCLEAR,
-    output        hdw_iBRKGNTO,
+    output        hdw_iBRKGNTO, // grant going out to end-side of bus
     output        hdw_iBRKRQST,
     output        hdw_iBRKWRM,
     output        hdw_iCAINC,
@@ -110,8 +110,11 @@ module Zynq (
     //  sim_i... : signals going to simulated PDP-8/I (pdp8isim.v)
     //  sim_o... : signals coming from simulated PDP-8/I (pdp8isim.v)
 
-    //  dev_i... : signals from io devices going to both hdw_i... and sim_i...
-    //  dev_o... : selected from hdw_o... or sim_o... going to io devices
+    //  dev_i... : signals from internal io devices going to both hdw_i... and sim_i...
+    //  dev_o... : selected from hdw_o... or sim_o... going to internal io devices
+
+    //  arm_i... : signals from arm processor as an internal io device (merged onto dev_i... bus)
+    //  arm uses dev_o... signals instead of having arm_o... signals
 
     wire[31:00] regctla, regctlb, regctlc, regctld, regctle, regctlf, regctlg, regctlh, regctli, regctlj, regctlk;
 
@@ -147,19 +150,20 @@ module Zynq (
     wire        sim_iPAUSE;
 
     wire[11:00] sim_lbAC;
-    wire        sim_lbBRK;
-    wire        sim_lbCA;
-    wire        sim_lbDEF;
-    wire        sim_lbEA;
-    wire        sim_lbEXE;
-    wire        sim_lbFET;
+    wire[2:0]   sim_lbDF;
+    wire[2:0]   sim_lbEA;
+    wire[2:0]   sim_lbIF;
     wire        sim_lbION;
     wire[2:0]   sim_lbIR;
     wire        sim_lbLINK;
     wire[11:00] sim_lbMA;
     wire[11:00] sim_lbMB;
+    wire[11:00] sim_lbMQ;
+    wire[3:0]   sim_lbMS;
+    wire        sim_lbPAU;
+    wire[11:00] sim_lbPC;
     wire        sim_lbRUN;
-    wire        sim_lbWC;
+    wire[4:0]   sim_lbSC;
 
     wire[11:00] dev_oACUM;
     wire        dev_oBRKCYC;
@@ -214,16 +218,15 @@ module Zynq (
     reg        arm_iIOSKIP;
     reg        arm_iPAUSE;
     reg        arm_swCONT;
-    reg        arm_swDEP;
+    reg        arm_swDEPOS;
     reg[2:0]   arm_swDFLD;
     reg        arm_swEXAM;
     reg[2:0]   arm_swIFLD;
     reg        arm_swLDAD;
     reg        arm_swSINST;
     reg        arm_swSSTEP;
-    reg        arm_swSTOP;
     reg        arm_swSTART;
-    reg[11:00] arm_swSR;
+    reg[11:00] arm_swSREG;
 
     reg arm_hizmembus, dev_hizmembus;
     wire hizmembus;
@@ -366,12 +369,13 @@ module Zynq (
             if (saxi_ARREADY & saxi_ARVALID) begin
                 readaddr <= saxi_ARADDR[11:02];             // save address bits we care about
                 saxi_ARREADY <= 0;                          // we are no longer accepting a read address
-                saxi_RVALID <= 1;                           // we are sending out the corresponding data
+                saxi_RVALID  <= 1;                          // we are sending out the corresponding data
+            end
 
             // check for PS acknowledging receipt of data
-            end else if (saxi_RVALID & saxi_RREADY) begin
+            else if (saxi_RVALID & saxi_RREADY) begin
                 saxi_ARREADY <= 1;                          // we are ready to accept an address again
-                saxi_RVALID <= 0;                           // we are no longer sending out data
+                saxi_RVALID  <= 0;                          // we are no longer sending out data
             end
 
             //////////////////////
@@ -397,16 +401,15 @@ module Zynq (
 
                     10'b0000000010: begin
                         arm_swCONT   <= saxi_WDATA[00];
-                        arm_swDEP    <= saxi_WDATA[01];
+                        arm_swDEPOS    <= saxi_WDATA[01];
                         arm_swDFLD   <= saxi_WDATA[04:02];
                         arm_swEXAM   <= saxi_WDATA[05];
                         arm_swIFLD   <= saxi_WDATA[08:06];
                         arm_swLDAD   <= saxi_WDATA[09];
                         arm_swSINST  <= saxi_WDATA[10];
                         arm_swSSTEP  <= saxi_WDATA[11];
-                        arm_swSTOP   <= saxi_WDATA[12];
                         arm_swSTART  <= saxi_WDATA[13];
-                        arm_swSR     <= saxi_WDATA[25:14];
+                        arm_swSREG   <= saxi_WDATA[25:14];
                     end
 
                     10'b0000000101: begin
@@ -449,16 +452,15 @@ module Zynq (
             arm_iIOSKIP  <= 0;
             arm_iPAUSE   <= 0;
             arm_swCONT   <= 0;
-            arm_swDEP    <= 0;
+            arm_swDEPOS  <= 0;
             arm_swDFLD   <= 0;
             arm_swEXAM   <= 0;
             arm_swIFLD   <= 0;
             arm_swLDAD   <= 0;
             arm_swSINST  <= 0;
             arm_swSSTEP  <= 0;
-            arm_swSTOP   <= 0;
             arm_swSTART  <= 0;
-            arm_swSR     <= 0;
+            arm_swSREG   <= 0;
         end
     end
 
@@ -513,7 +515,6 @@ module Zynq (
     // when not simming, send signals from devices on to the hardware PDP-8/I
 
     assign sim_iACCLEAR = simit ? dev_iACCLEAR : 0;
-    assign sim_iBRKGNTO = simit ? dev_iBRKGNTO : 0;
     assign sim_iBRKRQST = simit ? dev_iBRKRQST : 0;
     assign sim_iBRKWRM  = simit ? dev_iBRKWRM  : 0;
     assign sim_iCAINC   = simit ? dev_iCAINC   : 0;
@@ -536,8 +537,8 @@ module Zynq (
     assign hdw_iIOSKIP  = simit ? 0 : dev_iIOSKIP;
     assign hdw_iPAUSE   = simit ? 0 : dev_iPAUSE;
 
-    // when simulating, send signals from the simulated PDP-8/I on to the devices
-    // when not simming, send signals from the hardware PDP-8/I on to the devices
+    // when simulating, send signals from the simulated PDP-8/I on to the internal devices
+    // when not simming, send signals from the hardware PDP-8/I on to the internal devices
 
     assign dev_oACUM    = simit ? sim_oACUM    : hdw_oACUM;
     assign dev_oBRKCYC  = simit ? sim_oBRKCYC  : hdw_oBRKCYC;
@@ -576,16 +577,16 @@ module Zynq (
     assign regctla[31:24] = 0;
 
     assign regctlb[00]    = arm_swCONT;
-    assign regctlb[01]    = arm_swDEP;
+    assign regctlb[01]    = arm_swDEPOS;
     assign regctlb[04:02] = arm_swDFLD;
     assign regctlb[05]    = arm_swEXAM;
     assign regctlb[08:06] = arm_swIFLD;
     assign regctlb[09]    = arm_swLDAD;
     assign regctlb[10]    = arm_swSINST;
     assign regctlb[11]    = arm_swSSTEP;
-    assign regctlb[12]    = arm_swSTOP;
+    assign regctlb[12]    = 0;
     assign regctlb[13]    = arm_swSTART;
-    assign regctlb[25:14] = arm_swSR;
+    assign regctlb[25:14] = arm_swSREG;
     assign regctlb[31:26] = 0;
 
     assign regctlc[15:00] = 0;
@@ -621,31 +622,27 @@ module Zynq (
     assign regctlf[27]    = dev_oTS4;
     assign regctlf[31:28] = 0;
 
-    assign regctlg[00]    = sim_lbBRK;
-    assign regctlg[01]    = sim_lbCA;
-    assign regctlg[02]    = sim_lbDEF;
-    assign regctlg[03]    = sim_lbEA;
-    assign regctlg[04]    = sim_lbEXE;
-    assign regctlg[05]    = sim_lbFET;
-    assign regctlg[06]    = sim_lbION;
-    assign regctlg[07]    = sim_lbLINK;
-    assign regctlg[08]    = sim_lbRUN;
-    assign regctlg[09]    = sim_lbWC;
-    assign regctlg[10]    = debounced;
-    assign regctlg[11]    = lastswLDAD;
-    assign regctlg[12]    = lastswSTART;
-    assign regctlg[13]    = simmemen;
-    assign regctlg[14]    = 0;
-    assign regctlg[15]    = 0;
-    assign regctlg[27:16] = { sim_lbIR, 9'b000000000 };
-    assign regctlg[31:28] = 0;
+    assign regctlg[11:00] = sim_lbAC;
+    assign regctlg[23:12] = sim_lbMA;
+    assign regctlg[28:24] = sim_lbSC;
+    assign regctlg[29]    = sim_lbION;
+    assign regctlg[30]    = sim_lbLINK;
+    assign regctlg[31]    = sim_lbPAU;
 
-    assign regctlh[15:00] = 0;
-    assign regctlh[31:16] = 0;
-    assign regctli[15:00] = 0;
-    assign regctli[31:16] = { 4'b0, sim_lbAC };
-    assign regctlj[15:00] = { 4'b0, sim_lbMA };
-    assign regctlj[31:16] = { 4'b0, sim_lbMB };
+    assign regctlh[11:00] = sim_lbMB;
+    assign regctlh[23:12] = sim_lbMQ;
+    assign regctlh[27:24] = sim_lbMS;
+    assign regctlh[30:28] = sim_lbIR;
+    assign regctlh[31]    = sim_lbRUN;
+
+    assign regctli[11:00] = sim_lbPC;
+    assign regctli[14:12] = sim_lbDF;
+    assign regctli[17:15] = sim_lbEA;
+    assign regctli[20:18] = sim_lbIF;
+    assign regctli[31:21] = 0;
+
+    assign regctlj = 0;
+    assign regctlk = 0;
 
     // count memory cycles
     // dectape uses it for timing in z8ltc08.cc
@@ -701,26 +698,25 @@ module Zynq (
     always @(posedge CLOCK) begin
         if (~ RESET_N) begin
             nanotrigger <= 0;
-            nanocstep   <= 0;
+            nanocstep   <= 1;////0;
         end else begin
             // we can shift nanotrigger only when it is not being written by the arm
             nanotrigger <= (armwrite & (writeaddr == 10'b0000000101)) ? saxi_WDATA[03] : nanocontin;
             // nanocstep is read-only to the arm so can always be shifted other than reset
-            nanocstep   <= nanotrigger;
+            nanocstep   <= 1;////nanotrigger;
         end
     end
 
     assign LEDoutR = simit;
     assign LEDoutG = ~ (dev_oTS1 | dev_oTS2 | dev_oTS3 | dev_oTS4);
     assign LEDoutB = 1;
-/***
+
     pdp8isim siminst (
         .CLOCK          (CLOCK),
         .CSTEP          (nanocstep),
         .RESET          (pwronreset | ~ simit),
 
         .iACCLEAR       (sim_iACCLEAR),
-        .iBRKGNTO       (sim_iBRKGNTO),
         .iBRKRQST       (sim_iBRKRQST),
         .iBRKWRM        (sim_iBRKWRM),
         .iCAINC         (sim_iCAINC),
@@ -733,14 +729,13 @@ module Zynq (
 
         .oACUM          (sim_oACUM),
         .oBRKCYC        (sim_oBRKCYC),
-        .oBRKGNTI       (sim_oBRKGNTI),
-        .oBRKRQST       (sim_oBRKRQST),
+        .oBRKGNTO       (sim_oBRKGNTI),
         .oBUSINI        (sim_oBUSINI),
         .oBWCOV         (sim_oBWCOV),
-        .oCLOCK         (sim_oCLOCK),
+        .oCLOCK         (sim_oCLOCK),   // 10MHz generated by pdp8isim.v
         .oIOP           (sim_oIOP),
         .oMBUF          (sim_oMBUF),
-        .oRESET         (sim_oRESET),
+        .oRESET         (sim_oRESET),   // copy of pdp8isim's RESET input
         .oTP1           (sim_oTP1),
         .oTP2           (sim_oTP2),
         .oTP3           (sim_oTP3),
@@ -750,45 +745,33 @@ module Zynq (
         .oTS3           (sim_oTS3),
         .oTS4           (sim_oTS4),
 
-        .lbAC           (sim_lbAC),
-        .lbBRK          (sim_lbBRK),
-        .lbCA           (sim_lbCA),
-        .lbDEF          (sim_lbDEF),
-        .lbEA           (sim_lbEA),
-        .lbEXE          (sim_lbEXE),
-        .lbFET          (sim_lbFET),
-        .lbION          (sim_lbION),
-        .lbIR           (sim_lbIR),
-        .lbLINK         (sim_lbLINK),
-        .lbMA           (sim_lbMA),
-        .lbMB           (sim_lbMB),
-        .lbRUN          (sim_lbRUN),
-        .lbWC           (sim_lbWC),
-
         .swCONT         (arm_swCONT),
-        .swDEP          (arm_swDEP),
+        .swDEPOS        (arm_swDEPOS),
         .swDFLD         (arm_swDFLD),
         .swEXAM         (arm_swEXAM),
         .swIFLD         (arm_swIFLD),
         .swLDAD         (arm_swLDAD),
         .swSINST        (arm_swSINST),
         .swSSTEP        (arm_swSSTEP),
-        .swSTOP         (arm_swSTOP),
-        .swSR           (arm_swSR),
+        .swSREG         (arm_swSREG),
         .swSTART        (arm_swSTART),
 
-        .majstate       (regctlk[03:00]),
-        .timedelay      (regctlk[09:04]),
-        .timestate      (regctlk[14:10]),
-        .cyclectr       (regctlk[24:15]),
-        .nextmajst      (regctlk[28:25]),
-        .debounced      (debounced),
-        .lastswLDAD     (lastswLDAD),
-        .lastswSTART    (lastswSTART),
-        .memen          (simmemen)
+        .lbAC           (sim_lbAC),
+        .lbDF           (sim_lbDF),
+        .lbEA           (sim_lbEA),
+        .lbIF           (sim_lbIF),
+        .lbION          (sim_lbION),
+        .lbIR           (sim_lbIR),
+        .lbLINK         (sim_lbLINK),
+        .lbMA           (sim_lbMA),
+        .lbMB           (sim_lbMB),
+        .lbMQ           (sim_lbMQ),
+        .lbMS           (sim_lbMS),
+        .lbPAU          (sim_lbPAU),
+        .lbPC           (sim_lbPC),
+        .lbRUN          (sim_lbRUN),
+        .lbSC           (sim_lbSC)
     );
-***/
-    assign regctlk[31:29] = 0;
 
     ///////////////////////
     //  DMA grant chain  //
@@ -866,9 +849,9 @@ module Zynq (
 
     reg iopstart, lasttp2;
     always @(posedge CLOCK) begin
-        if (armwrite) begin
-            iopstart <= ~ lasttp2 & dev_oTS3 & dev_oIOP;
-            lastts3  <= dev_oTP2;
+        if (~ armwrite) begin
+            iopstart <= ~ lasttp2 & dev_oTP2 & dev_oIOP;
+            lasttp2  <= dev_oTP2;
         end else begin
             iopstart <= 0;
         end

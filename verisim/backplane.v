@@ -59,12 +59,11 @@ module backplane (
 );
 
     // combined bus signals
-    wire _busION, _busLINK, _busPAUSE, _busREADSR, _busRESET, _busRUN, _busBRKRQST,
+    wire _busCLOCK, _busION, _busLINK, _busPAUSE, _busREADSR, _busRESET, _busRUN, _busBRKRQST,
         _busBRKWRM, _busCAINC, _busCYCLE3, _busINTRQST, _busBUSINI, _busACCLEAR,
         _busIOSKIP, _busLNKTOG, _busIOP, _busMEMDIS, _busINTINH, _busBWCOV, _busBRKCYC;
     wire _busSWCONT, _busSWDEPOS, _busSWEXAM, _busSWLDAD, _busSWSINST, _busSWSSTEP, _busSWSTART;
     wire _busTP1, _busTP2, _busTP3, _busTP4, _busTS1, _busTS2, _busTS3, _busTS4;
-    wire busCLOK2;
     wire[2:0] _busDFLD, _busIFLD, _busDMAFLD, _busFIELD;
     wire[3:0] _busMAJST;
     wire[4:0] _busSCTR;
@@ -252,8 +251,8 @@ module backplane (
         ._SCTR_3   (_busSCTR[3]),
         ._SCTR_4   (_busSCTR[4]),
 
-        .CLOK2     (busCLOK2),
-        .CLOK2_o   (busCLOK2),
+        ._CLOCK    (_busCLOCK),
+        ._CLOCK_o  (_busCLOCK),
 
         ._DFLD_0   (_busDFLD[0]),
         ._DFLD_1   (_busDFLD[1]),
@@ -323,7 +322,6 @@ module backplane (
         .yclock (yclock),
         .zclock (zclock),
         .zreset (zreset),
-        .CLOK2  (busCLOK2),
         .GND    (1'b0),
         .VCC    (1'b1),
 
@@ -342,6 +340,7 @@ module backplane (
         ._ACUM_11   (_busACUM[11]),
 
         ._BUSINI    (_busBUSINI),
+        ._CLOCK     (_busCLOCK),
         ._LINK      (_busLINK),
 
         ._MAJST_0   (_busMAJST[0]),
@@ -455,12 +454,12 @@ module backplane (
         .yclock (yclock),
         .zclock (zclock),
         .zreset (zreset),
-        .CLOK2  (busCLOK2),
         .GND    (1'b0),
         .VCC    (1'b1),
 
 
         ._BUSINI   (_busBUSINI),
+        ._CLOCK    (_busCLOCK),
 
         ._DMAFLD_0 (_busDMAFLD[0]),
         ._DMAFLD_1 (_busDMAFLD[1]),
@@ -576,7 +575,6 @@ module backplane (
         .yclock (yclock),
         .zclock (zclock),
         .zreset (zreset),
-        .CLOK2  (busCLOK2),
         .GND    (1'b0),
         .VCC    (1'b1),
 
@@ -632,6 +630,7 @@ module backplane (
         ._BRKCYC    (_busBRKCYC),
         ._BUSINI    (_busBUSINI),
         ._BWCOV     (_busBWCOV),
+        ._CLOCK     (_busCLOCK),
         ._ION       (_busION),
         ._IOP       (_busIOP),
 
@@ -905,10 +904,10 @@ module backplane (
         .armrdata (dmardata),
 
         ._BRKGNTI    (_dmaBRKGNTI),
-        .CLOK2       (busCLOK2),
         ._BRKCYC     (_busBRKCYC),
         ._BUSINI     (_busBUSINI),
         ._BWCOV      (_busBWCOV),
+        ._CLOCK      (_busCLOCK),
         ._MBUF_0     (_busMBUF[00]),
         ._MBUF_1     (_busMBUF[01]),
         ._MBUF_2     (_busMBUF[02]),
@@ -998,10 +997,10 @@ module backplane (
         .armrdata (dmbrdata),
 
         ._BRKGNTI    (_dmbBRKGNTI),
-        .CLOK2       (busCLOK2),
         ._BRKCYC     (_busBRKCYC),
         ._BUSINI     (_busBUSINI),
         ._BWCOV      (_busBWCOV),
+        ._CLOCK      (_busCLOCK),
         ._MBUF_0     (_busMBUF[00]),
         ._MBUF_1     (_busMBUF[01]),
         ._MBUF_2     (_busMBUF[02]),

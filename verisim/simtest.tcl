@@ -26,6 +26,14 @@ set panelhalt    0
 set perclock     0
 set pctr         0
 set sctr         0
+set ttat1        0
+set ttat2        0
+set ttinten      1
+set ttkbchar     0
+set ttkbflag     0
+set ttprchar     0
+set ttprflag     0
+set ttprfull     0
 
 set xmem_dfld                 0
 set xmem_ifld                 0
@@ -83,6 +91,7 @@ proc simtest {} {
     global testdma
     global testexar
     global testxmem
+    global ttat1 ttat2 ttkbchar ttkbflag ttprchar ttprflag ttprfull
     global usemcp
     global xmem_dfld
     global xmem_ifld
@@ -111,15 +120,19 @@ proc simtest {} {
     puts "simtest: usemcp=$usemcp"
     hardreset
     set cmat0 [arm find CM]
+    set ttat0 [arm find TT]
     startat 0
     waitassert TS1
     verify12 [bus oMADR] 0 "bad start PC"
     set acum [bus oACUM]
     set linc [bus oLINK]
 
+    ;# pdp8icmem.v ARM-side register indices in the 4K page
     set cmat1 [expr {$cmat0 + 1}]
     set cmat2 [expr {$cmat0 + 2}]
-    puts [format "simtest*: cmat0=%X cmat1=%X cmat2=%X" $cmat0 $cmat1 $cmat2]
+    ;# pdp8ltty.v ARM-side register indices in the 4K page
+    set ttat1 [expr {$ttat0 + 1}]
+    set ttat2 [expr {$ttat0 + 2}]
 
     ;# set switches for OSR/LDAD testing
     set swdfpend  [expr {$testxmem ? [randbits 3] : 0}]
@@ -138,6 +151,31 @@ proc simtest {} {
             ;# once through this loop per instruction, dma transfer or interrupt acknowledge
             ;# processor should be at beginning of TS1 in FETCH, WDCNT, BREAK or INTAK cycle
 
+            set oldttintrq [ttintrq]
+            if {[randbits 6] == 0} {
+                set r [randbits 2]
+                switch $r {
+                    0 {
+                        verify32 [arm $ttat1] [expr {($ttkbflag << 31) | 0x40000000 | $ttkbchar}] "arm ttkb register"
+                    }
+                    1 {
+                        verify32 [arm $ttat2] [expr {($ttprflag << 31) | ($ttprfull << 30) | $ttprchar}] "arm ttpr register"
+                    }
+                    2 {
+                        set ttkbchar [randbits 12]
+                        set ttkbflag 1
+                        puts [format "                                                       ttkbflag <= 1; ttkbchar <= %04o" $ttkbchar]
+                        arm set $ttat1 [expr {0xC0000000 | $ttkbchar}]
+                    }
+                    3 {
+                        set ttprflag 1
+                        set ttprfull 0
+                        puts "                                                       ttprflag <= 1; ttprfull <= 0"
+                        arm set $ttat2 0x80000000
+                    }
+                }
+            }
+
             startline
 
             set effaddr 0
@@ -148,7 +186,7 @@ proc simtest {} {
             if {! $nextfetch && $cmdmarqst && [arm $cmat2]} {
 
                 ;# dma requested via arm interface of pdp8icmem.v
-                puts -nonewline "CMDMA"
+                puts -nonewline "         CMDMA"
                 set rd [dodmacycle \
                         [expr {($cmdmarqst >> 29)    & 1}] \
                         [expr { $cmdmarqst        & 4095}] \
@@ -164,14 +202,14 @@ proc simtest {} {
             } elseif {! $nextfetch && $dmarqst && [bus oBRKGNTO]} {
 
                 ;# dma requested via pins at top of backplane.v
-                puts -nonewline "DMA  "
+                puts -nonewline "         DMA  "
                 dodmacycle $dma3cycle $dmaaddr $dmacainc $dmawrmem $dmawdata $dmafield
             } else {
 
                 ;# maybe interrupt request is next
                 set datafield $xmem_ifld
-                if {$intrequest && ! $xmem_intdisableduntiljump && $intenabled && ! $nextfetch} {
-                    puts -nonewline "interrupt acknowledge"
+                if {! $xmem_intdisableduntiljump && $intenabled && ! $nextfetch && ($intrequest || $oldttintrq)} {
+                    puts -nonewline "INTAK"
 
                     set intrequest 0        ;#TODO: drop request random number of cycles later
                     bus set iINTRQST 0
@@ -194,7 +232,6 @@ proc simtest {} {
                     set intenabled $intdelayed
 
                     ;# send random opcode
-                    ;# for IOs, only allow processor (600x) and xmem (62xx)
                     while true {
                         set opcode [randbits 12]
                         if {($opcode & 06000) != 06000} break       ;# and,tad,isz,dca,jms,jmp
@@ -205,6 +242,8 @@ proc simtest {} {
                             if {($opcode & 07704) == 06200} break
                             if {($opcode & 07707) == 06204} break
                         }
+                        if {($opcode & 07770) == 06030} break       ;# tty keyboard opcodes
+                        if {($opcode & 07770) == 06040} break       ;# tty printer opcodes
                         if {($opcode & 07400) == 07000} {           ;# group 1
                             ##if {($opcode & 016) == 002} continue    ;# bsw
                             if {($opcode & 014) == 014} continue    ;# 6,7
@@ -434,7 +473,7 @@ proc dodmacycle {dma3cycle dmaaddr dmacainc dmawrmem dmawdata dmafield} {
         set oldwordcount [randbits 12]
         if {$oldwordcount & 04000} {set oldwordcount [expr {$oldwordcount | 07770}]}
         set newwordcount [expr {($oldwordcount + 1) & 07777}]
-        puts -nonewline [format "  WCT:%04o / %04o => %04o" $dmaaddr $oldwordcount $newwordcount]
+        puts -nonewline [format " WCT:%04o / %04o => %04o" $dmaaddr $oldwordcount $newwordcount]
         memorycycle $MS_WRDCT 0 $dmaaddr $oldwordcount $newwordcount
         checkhalted
 
@@ -446,7 +485,7 @@ proc dodmacycle {dma3cycle dmaaddr dmacainc dmawrmem dmawdata dmafield} {
         set dmaaddr [expr {($dmaaddr + 1) & 07777}]
         set oldcuraddr [randbits 12]
         set newcuraddr [expr {($oldcuraddr + $dmacainc) & 07777}]
-        puts -nonewline [format "  CAD:%04o / %04o => %04o" $dmaaddr $oldcuraddr $newcuraddr]
+        puts -nonewline [format " CAD:%04o / %04o => %04o" $dmaaddr $oldcuraddr $newcuraddr]
         memorycycle $MS_CURAD 0 $dmaaddr $oldcuraddr $newcuraddr
         checkhalted
         set dmaaddr $newcuraddr
@@ -456,7 +495,7 @@ proc dodmacycle {dma3cycle dmaaddr dmacainc dmawrmem dmawdata dmafield} {
     set dmardata [randbits 12]                  ;# random value that will be sent to processor as content of memory location dmafield:dmaaddr
     if {! $dmawrmem} {set dmawdata $dmardata}   ;# if writing, write will be value from dmastat2; if reading, write will be same as dmardata
 
-    puts -nonewline [format "  BRK:%o%04o / %04o" $dmafield $dmaaddr $dmardata]
+    puts -nonewline [format " BRK:%o%04o / %04o" $dmafield $dmaaddr $dmardata]
     if {$dmawrmem} {
         puts -nonewline [format " => %04o" $dmawdata]
     }
@@ -687,6 +726,7 @@ proc checkhalted {} {
     global haltdelay haltwhy panelhalt pctr swdfpend swifpend swregpend testcons testxmem
     global acum linc mquo sctr xmem_intdisableduntiljump intdelayed intenabled intrequest
     global xmem_dfld xmem_ifld xmem_ifldafterjump xmem_saveddfld xmem_savedifld
+    global ttinten ttkbflag ttprflag ttprfull
 
     ;# if halted, turn off stop/step switches and press continue
     ;# maybe do some ldad/exam/depos
@@ -724,7 +764,7 @@ proc checkhalted {} {
                         set addr $swregpend         ;# madr should be loaded with swreg contents
                         set pctr $addr              ;# circuit also sets pctr to the address
                         set rdata [randbits 12]     ;# get random value for it to examine
-                        puts -nonewline [format "LDAD  %o%04o / %04o" $xmem_ifld $addr $rdata]
+                        puts -nonewline [format "         LDAD  %o%04o / %04o" $xmem_ifld $addr $rdata]
                         swtchwait ldad 0            ;# release ldad
                         waitassert RUN              ;# wait for processor to start an exam cycle
                         memorycycle $MS_EXAM $xmem_ifld $addr $rdata $rdata
@@ -757,7 +797,7 @@ proc checkhalted {} {
                         swtchwait depos 1
                         set rdata [randbits 12]
                         set wdata $swregpend
-                        puts -nonewline [format "DEPOS %o%04o / %04o <= %04o" $xmem_ifld $addr $rdata $wdata]
+                        puts -nonewline [format "         DEPOS %o%04o / %04o <= %04o" $xmem_ifld $addr $rdata $wdata]
                         swtchwait depos 0
                         waitassert RUN
                         memorycycle $MS_DEPOS $xmem_ifld $addr $rdata $wdata
@@ -777,7 +817,7 @@ proc checkhalted {} {
                         }
                         swtchwait exam 1
                         set rdata [randbits 12]
-                        puts -nonewline [format "EXAM  %o%04o / %04o" $xmem_ifld $addr $rdata]
+                        puts -nonewline [format "         EXAM  %o%04o / %04o" $xmem_ifld $addr $rdata]
                         swtchwait exam 0
                         waitassert RUN
                         memorycycle $MS_EXAM $xmem_ifld $addr $rdata $rdata
@@ -804,17 +844,7 @@ proc checkhalted {} {
             }
             ;# press START button, it should reset a bunch of things
             swtchwait start 1
-            set acum 0
-            set linc 0
-            set mquo 0
-            set sctr 0
-            set xmem_saveddfld 0
-            set xmem_savedifld 0
-            set xmem_intdisableduntiljump 0
-            set intdelayed 0
-            set intenabled 0
-            bus set iINTRQST 0
-            set intrequest 0
+            dobusinit
             ;# release START button
             swtchwait start 0
             ;# if SSTEP is on, it should remain halted
@@ -848,6 +878,7 @@ proc doioinstr {opcode} {
     global acum intdelayed intenabled linc pctr
     global xmem_dfld xmem_ifld xmem_savedifld xmem_saveddfld xmem_ifldafterjump
     global xmem_intdisableduntiljump
+    global ttkbflag ttkbchar ttinten ttprflag ttprchar ttprfull ttprflag
 
     ;# it should be sending the accumulator out
     verify12 [bus oACUM] $acum "AC invalid going out during IOP"
@@ -868,6 +899,54 @@ proc doioinstr {opcode} {
         set ioskip  [randbits 1]
         set acbits [randbits 12]
         bus set iACCLEAR $acclear iIOSKIP $ioskip iINBUS $acbits
+    } elseif {($opcode & 07770) == 06030} {
+
+        ;# - keyboard opcodes (see pdp8ltty.v)
+        set r [expr {$opcode & 7}]
+        switch $r {
+            1 {
+                set ioskip $ttkbflag
+            }
+            2 {
+                set acclear 1
+                set ttkbflag 0
+            }
+            4 {
+                set acbits $ttkbchar
+            }
+            5 {
+                set ttinten [expr {$acum & 1}]
+            }
+            6 {
+                set acclear 1
+                set ttkbflag 0
+                set acbits $ttkbchar
+            }
+        }
+    } elseif {($opcode & 07770) == 06040} {
+
+        ;# - printer opcodes (see pdp8ltty.v)
+        set r [expr {$opcode & 7}]
+        switch $r {
+            1 {
+                set ioskip $ttprflag
+            }
+            2 {
+                set ttprflag 0
+            }
+            4 {
+                set ttprchar $acum
+                set ttprfull 1
+            }
+            5 {
+                set ioskip [ttintrq]
+            }
+            6 {
+                set ttprflag 0
+                set ttprchar $acum
+                set ttprfull 1
+            }
+        }
     } elseif {($opcode & 07700) == 06200} {
 
         ;# - memext.v processes these io opcodes (manipulate memory field bits)
@@ -907,6 +986,35 @@ proc doioinstr {opcode} {
     if {$acclear} {set acum 0}
     if {$ioskip}  {set pctr [expr {($pctr + 1) & 07777}]}
     set acum [expr {$acum | $acbits}]
+}
+
+proc ttintrq {} {
+    global ttinten ttkbflag ttprflag
+    return [expr {$ttinten && ($ttkbflag || $ttprflag)}]
+}
+
+;# reset everything for a businit
+proc dobusinit {} {
+    global acum linc mquo sctr
+    global xmem_saveddfld xmem_savedifld xmem_intdisableduntiljump 
+    global intdelayed intenabled iINTRQST intrequest 
+    global ttinten ttkbflag ttprflag ttprfull
+
+    set acum 0
+    set linc 0
+    set mquo 0
+    set sctr 0
+    set xmem_saveddfld 0
+    set xmem_savedifld 0
+    set xmem_intdisableduntiljump 0
+    set intdelayed 0
+    set intenabled 0
+    bus set iINTRQST 0
+    set intrequest 0
+    set ttinten  1
+    set ttkbflag 0
+    set ttprflag 0
+    set ttprfull 0
 }
 
 ;# perform extended arithmetic
@@ -1054,6 +1162,13 @@ proc g2skip {opcode} {
 
 ;# see if actual matches expected
 ;# if not, print error message then abort
+proc verify32 {actual expect msg} {
+    set a [expr {$actual & 0xFFFFFFFF}]
+    set x [expr {$expect & 0xFFFFFFFF}]
+    if {$a != $x} {
+        error [format "%s, is %08X should be %08X" $msg $a $x]
+    }
+}
 proc verify15 {actual expect msg} {
     if {$actual != $expect} {
         error [format "%s, is %05o should be %05o" $msg $actual $expect]

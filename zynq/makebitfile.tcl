@@ -1,5 +1,5 @@
 
-open_project pdp8l.xpr
+open_project pdp8i.xpr
 update_compile_order -fileset sources_1
 update_module_reference myboard_Zynq_0_0
 

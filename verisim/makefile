@@ -16,6 +16,7 @@ VFILES := \
 	../zynq/pdp8ldc02.v \
 	../zynq/pdp8lrk8je.v \
 	../zynq/pdp8icmem.v \
+	../zynq/pdp8isim.v \
 	../zynq/pdp8ltc08.v \
 	../zynq/pdp8lfpi2c.v \
 	../zynq/pdp8lptr.v \
