@@ -72,9 +72,8 @@ module Zynq (
     output        hdw_iPAUSE,
 
     // i2c interface to hardware front panel
-    output        fpi2c_clock,
-    output        fpi2c_datao,
-    input         fpi2c_datai,
+    output        hdw_iCONSCK,
+    inout         hdw_bCONSDA,
 
     // arm processor memory bus interface (AXI)
     // we are a slave for accessing the control registers (read and write)
@@ -149,21 +148,9 @@ module Zynq (
     wire        sim_iIOSKIP;
     wire        sim_iPAUSE;
 
-    wire[11:00] sim_lbAC;
-    wire[2:0]   sim_lbDF;
-    wire[2:0]   sim_lbEA;
-    wire[2:0]   sim_lbIF;
-    wire        sim_lbION;
-    wire[2:0]   sim_lbIR;
-    wire        sim_lbLINK;
-    wire[11:00] sim_lbMA;
-    wire[11:00] sim_lbMB;
-    wire[11:00] sim_lbMQ;
-    wire[3:0]   sim_lbMS;
-    wire        sim_lbPAU;
-    wire[11:00] sim_lbPC;
-    wire        sim_lbRUN;
-    wire[4:0]   sim_lbSC;
+    wire        sim_iCONSCK;
+    wire        sim_iCONSDA;
+    wire        sim_oCONSDA;
 
     wire[11:00] dev_oACUM;
     wire        dev_oBRKCYC;
@@ -621,24 +608,9 @@ module Zynq (
     assign regctlf[27]    = dev_oTS4;
     assign regctlf[31:28] = 0;
 
-    assign regctlg[11:00] = sim_lbAC;
-    assign regctlg[23:12] = sim_lbMA;
-    assign regctlg[28:24] = sim_lbSC;
-    assign regctlg[29]    = sim_lbION;
-    assign regctlg[30]    = sim_lbLINK;
-    assign regctlg[31]    = sim_lbPAU;
-
-    assign regctlh[11:00] = sim_lbMB;
-    assign regctlh[23:12] = sim_lbMQ;
-    assign regctlh[27:24] = sim_lbMS;
-    assign regctlh[30:28] = sim_lbIR;
-    assign regctlh[31]    = sim_lbRUN;
-
-    assign regctli[11:00] = sim_lbPC;
-    assign regctli[14:12] = sim_lbDF;
-    assign regctli[17:15] = sim_lbEA;
-    assign regctli[20:18] = sim_lbIF;
-    assign regctli[31:21] = 0;
+    assign regctlg = 0;
+    assign regctlh = 0;
+    assign regctli = 0;
 
     // count memory cycles
     // dectape uses it for timing in z8ltc08.cc
@@ -741,32 +713,9 @@ module Zynq (
         .oTS3           (sim_oTS3),
         .oTS4           (sim_oTS4),
 
-        .swCONT         (arm_swCONT),
-        .swDEPOS        (arm_swDEPOS),
-        .swDFLD         (arm_swDFLD),
-        .swEXAM         (arm_swEXAM),
-        .swIFLD         (arm_swIFLD),
-        .swLDAD         (arm_swLDAD),
-        .swSINST        (arm_swSINST),
-        .swSSTEP        (arm_swSSTEP),
-        .swSREG         (arm_swSREG),
-        .swSTART        (arm_swSTART),
-
-        .lbAC           (sim_lbAC),
-        .lbDF           (sim_lbDF),
-        .lbEA           (sim_lbEA),
-        .lbIF           (sim_lbIF),
-        .lbION          (sim_lbION),
-        .lbIR           (sim_lbIR),
-        .lbLINK         (sim_lbLINK),
-        .lbMA           (sim_lbMA),
-        .lbMB           (sim_lbMB),
-        .lbMQ           (sim_lbMQ),
-        .lbMS           (sim_lbMS),
-        .lbPAU          (sim_lbPAU),
-        .lbPC           (sim_lbPC),
-        .lbRUN          (sim_lbRUN),
-        .lbSC           (sim_lbSC)
+        .iCONSCK        (sim_iCONSCK),
+        .iCONSDA        (sim_iCONSDA),
+        .oCONSDA        (sim_oCONSDA)
     );
 
     ///////////////////////
@@ -1024,7 +973,15 @@ module Zynq (
     );
 ***/
 
-    // real PDP-8/I front panel i2c interface
+    wire fpi2c_clock, fpi2c_datao, fpi2c_datai;
+
+    assign hdw_iCONSCK = simit ? 1'b1 : fpi2c_clock;
+    assign hdw_bCONSDA = simit ? 1'bZ : fpi2c_datao ? 1'bZ : 1'b0;
+    assign sim_iCONSCK = simit ? fpi2c_clock : 1'b1;
+    assign sim_iCONSDA = simit ? fpi2c_datao : 1'b1;
+    assign fpi2c_datai = simit ? sim_oCONSDA : hdw_bCONSDA;
+
+    // PDP-8/I front panel i2c interface
     pdp8ifpi2c fpi2cinst (
         .CLOCK (CLOCK),
         .RESET (~ RESET_N),

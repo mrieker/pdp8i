@@ -8,5 +8,5 @@ then
     export usemcp=0
 fi
 id=$$
-rm -f last.err.$id last.out.$id
-time ./simtest.sh 2>&1 | ./last16k.`uname -m` 2> last.err.$id | ./bgrep '00 : L' | tee last.out.$id
+rm -f ~/last.err.$id ~/last.out.$id
+time ./simtest.sh 2>&1 | ./last16k.`uname -m` 2> ~/last.err.$id | ./bgrep '00 : L' | tee ~/last.out.$id

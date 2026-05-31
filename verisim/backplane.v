@@ -826,9 +826,8 @@ module backplane (
         .hdw_iPAUSE   (zynPAUSE),
 
         // i2c interface to hardware front panel
-        .fpi2c_clock  (zynCONSCK),
-        .fpi2c_datao  (zynCONSDA),
-        .fpi2c_datai  (conCONSDA),
+        .hdw_iCONSCK  (zynCONSCK),
+        .hdw_bCONSDA  (zynCONSDA),
 
         // arm processor memory bus interface (AXI)
         // we are a slave for accessing the control registers (read and write)

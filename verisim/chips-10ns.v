@@ -1765,6 +1765,9 @@ module XMCP23017_SP (input yclock, zclock, zreset,
 endmodule
 
 module X47K (input yclock, zclock, zreset, input p1, input p2);
+    // dummy loop to make vivado happy
+    always @(posedge yclock) begin
+    end
 endmodule
 
 module XC (input yclock, zclock, input zreset, input p1, input p2);
