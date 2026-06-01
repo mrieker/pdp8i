@@ -306,28 +306,30 @@ module Zynq #(parameter BIDIRCONSDA=1) (
         (readaddr[11:06] ==  6'b000010)     ? fpi2crdata :
         (readaddr[11:05] ==  7'b0000110)    ? rkardata   :
         (readaddr[11:05] ==  7'b0000111)    ? vcardata   :
-        (readaddr[11:05] ==  7'b0001001)    ? pbardata   :
-        (readaddr[11:05] ==  7'b0001010)    ? shardata   :
-        (readaddr[11:05] ==  7'b0001011)    ? dcardata   :
-        (readaddr[11:04] ==  8'b00011000)   ? cmardata   :
-        (readaddr[11:04] ==  8'b00011001)   ? ttardata   :
-        (readaddr[11:03] ==  9'b000110100)  ? prardata   :
-        (readaddr[11:03] ==  9'b000110101)  ? ppardata   :
-        (readaddr[11:03] ==  9'b000110110)  ? tcardata   :
+        (readaddr[11:05] ==  7'b0001000)    ? pbardata   :
+        (readaddr[11:05] ==  7'b0001001)    ? dcardata   :
+        (readaddr[11:04] ==  8'b00010100)   ? cmardata   :
+        (readaddr[11:04] ==  8'b00010101)   ? ttardata   :
+        (readaddr[11:03] ==  9'b000101100)  ? prardata   :
+        (readaddr[11:03] ==  9'b000101101)  ? ppardata   :
+        (readaddr[11:03] ==  9'b000101110)  ? tcardata   :
         32'hDEADBEEF;
+
+    ////(readaddr[11:05] ==  7'b0001001)    ? shardata   :
 
     wire armwrite   = saxi_WREADY & saxi_WVALID;    // arm is writing a register (single fpga clock cycle)
     wire fpi2cwrite = armwrite & writeaddr[11:06] == 6'b000010;
     wire rkawrite   = armwrite & writeaddr[11:05] == 7'b0000110;
     wire vcawrite   = armwrite & writeaddr[11:05] == 7'b0000111;
-    wire pbawrite   = armwrite & writeaddr[11:05] == 7'b0001001;
-    wire shawrite   = armwrite & writeaddr[11:05] == 7'b0001010;
-    wire dcawrite   = armwrite & writeaddr[11:05] == 7'b0001011;
-    wire cmawrite   = armwrite & writeaddr[11:04] == 8'b00011000;
-    wire ttawrite   = armwrite & writeaddr[11:04] == 8'b00011001;
-    wire prawrite   = armwrite & writeaddr[11:03] == 9'b000110100;
-    wire ppawrite   = armwrite & writeaddr[11:03] == 9'b000110101;
-    wire tcawrite   = armwrite & writeaddr[11:03] == 9'b000110110;
+    wire pbawrite   = armwrite & writeaddr[11:05] == 7'b0001000;
+    wire dcawrite   = armwrite & writeaddr[11:05] == 7'b0001001;
+    wire cmawrite   = armwrite & writeaddr[11:04] == 8'b00010100;
+    wire ttawrite   = armwrite & writeaddr[11:04] == 8'b00010101;
+    wire prawrite   = armwrite & writeaddr[11:03] == 9'b000101100;
+    wire ppawrite   = armwrite & writeaddr[11:03] == 9'b000101101;
+    wire tcawrite   = armwrite & writeaddr[11:03] == 9'b000101110;
+
+    //// shawrite   = armwrite & writeaddr[11:05] == 7'b0001001;
 
     // A3.3.1 Read transaction dependencies
     // A3.3.1 Write transaction dependencies
@@ -942,7 +944,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     );
 
     // video interface
-/***
+
     pdp8lvc8 vcinst (
         .CLOCK (CLOCK),
         .CSTEP (nanocstep),
@@ -965,15 +967,14 @@ module Zynq #(parameter BIDIRCONSDA=1) (
         .IO_SKIP  (vcioskp),
         .INT_RQST (vcintrq),
 
-        .vidaddra (vidaddra),
-        .vidaddrb (vidaddrb),
-        .viddataa (viddataa),
-        .videnaba (videnaba),
-        .vidwrena (vidwrena),
-        .videnabb (videnabb),
-        .viddatab (viddatab)
+        .vidaddra (),
+        .vidaddrb (),
+        .viddataa (),
+        .videnaba (),
+        .vidwrena (),
+        .videnabb (),
+        .viddatab ()
     );
-***/
 
     wire fpi2c_clock, fpi2c_datao, fpi2c_datai;
 

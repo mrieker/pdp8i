@@ -20,10 +20,10 @@ cd ../zplin
 source petadevel/settings.sh
 source /tools/Xilinx/Vivado/2018.3/settings64.sh
 cd petakernl/zturn
-if [ images/linux/BOOT.BIN -ot $mydir/pdp8l.runs/impl_1/myboard_wrapper.bit ]
+if [ images/linux/BOOT.BIN -ot $mydir/pdp8i.runs/impl_1/myboard_wrapper.bit ]
 then
     rm -f images/linux/BOOT.BIN
-    petalinux-package --boot --force --fsbl ./images/linux/zynq_fsbl.elf --fpga $mydir/pdp8l.runs/impl_1/myboard_wrapper.bit --u-boot
+    petalinux-package --boot --force --fsbl ./images/linux/zynq_fsbl.elf --fpga $mydir/pdp8i.runs/impl_1/myboard_wrapper.bit --u-boot
 fi
 
 if [ $mydir/BOOT.BIN.gz -ot images/linux/BOOT.BIN ]
@@ -45,6 +45,6 @@ ssh root@zturn$hostnum reboot
 ping -c 90 zturn$hostnum
 
 # ssh zturn$hostnum
-# cd .../pdp8l/pipan8l
+# cd .../pdp8i/ccode
 # ./z8lsim run-d01b.tcl
 

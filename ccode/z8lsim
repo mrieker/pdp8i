@@ -1,0 +1,12 @@
+#!/bin/bash
+#
+#  Start z8lpanel on the zturn board programmed with the PDP-8/L simulator
+#
+dd=`dirname $0`
+dbg=
+if [ "$1" == "-gdb" ]
+then
+    dbg='-gdb'
+    shift
+fi
+exec $dd/z8lpanel $dbg -sim "$@"
