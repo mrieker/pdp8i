@@ -291,7 +291,26 @@ module pdp8isim (
         ._SWEXAM_o  (_busSWEXAM),     //button examine (debounced)
         ._SWCONT_o  (_busSWCONT),     //button continue (debounced)
         ._SWSSTEP_o (_busSWSSTEP),    //toggle single cycle
-        ._SWSINST_o (_busSWSINST)     //toggle single instruction
+        ._SWSINST_o (_busSWSINST),    //toggle single instruction
+
+        .swdfld_0 (),
+        .swdfld_1 (),
+        .swdfld_2 (),
+        .swifld_0 (),
+        .swifld_1 (),
+        .swifld_2 (),
+        .swreg_0  (),
+        .swreg_1  (),
+        .swreg_2  (),
+        .swreg_3  (),
+        .swreg_4  (),
+        .swreg_5  (),
+        .swreg_6  (),
+        .swreg_7  (),
+        .swreg_8  (),
+        .swreg_9  (),
+        .swreg_10 (),
+        .swreg_11 ()
     );
 
     ///////////////////////////

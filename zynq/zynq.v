@@ -32,7 +32,7 @@ endmodule
 // it operates as an I/O device for the PDP-8/I
 // it also has an I2C connection to the PDP-8/I front panel
 
-module Zynq (
+module Zynq #(parameter BIDIRCONSDA=1) (
     input         CLOCK,        // 100MHz
     input         RESET_N,      // FPGA reset
     output        LEDoutR,      // IO_B34_LN6 R14
@@ -74,6 +74,8 @@ module Zynq (
     // i2c interface to hardware front panel
     output        hdw_iCONSCK,
     inout         hdw_bCONSDA,
+    output        hdw_iCONSDA,
+    input         hdw_oCONSDA,
 
     // arm processor memory bus interface (AXI)
     // we are a slave for accessing the control registers (read and write)
@@ -977,14 +979,15 @@ module Zynq (
 
     assign hdw_iCONSCK = simit ? 1'b1 : fpi2c_clock;
     assign hdw_bCONSDA = simit ? 1'bZ : fpi2c_datao ? 1'bZ : 1'b0;
+    assign hdw_iCONSDA = simit ? 1'b1 : fpi2c_datao;
     assign sim_iCONSCK = simit ? fpi2c_clock : 1'b1;
     assign sim_iCONSDA = simit ? fpi2c_datao : 1'b1;
-    assign fpi2c_datai = simit ? sim_oCONSDA : hdw_bCONSDA;
+    assign fpi2c_datai = simit ? sim_oCONSDA : BIDIRCONSDA ? hdw_bCONSDA : hdw_oCONSDA;
 
     // PDP-8/I front panel i2c interface
     pdp8ifpi2c fpi2cinst (
         .CLOCK (CLOCK),
-        .RESET (~ RESET_N),
+        .RESET (dev_oRESET),
 
         .armwrite (fpi2cwrite),
         .armraddr (readaddr[5:2]),

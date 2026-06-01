@@ -41,7 +41,9 @@ module pdp8ifpi2c (
     output[63:00] comand, status
 );
 
-    reg clear, manclo, mandao, manual, startbit, stepon;
+    localparam[14:00] LIGHTDELAY = 64; //// 20480;
+
+    reg clear, manual, startbit;
     reg[31:00] armlock;
     reg[31:00] commandlo;
     reg[63:00] command;
@@ -49,6 +51,7 @@ module pdp8ifpi2c (
     localparam[1:0] RS = 1; // restart
     localparam[1:0] RD = 2; // read
     localparam[1:0] WR = 3; // write
+
     reg[1:0]   mcpswrow;    // switch row being processed 0..2
     reg[2:0]   mcpltrow;    // light row being processed 0..7
     reg[3:0]   mcpstate;    // processing state
@@ -62,7 +65,7 @@ module pdp8ifpi2c (
                       (armraddr ==  2) ? { comand[63:32] } :
                       (armraddr ==  3) ? { status[31:00] } :
                       (armraddr ==  4) ? { status[63:32] } :
-                      (armraddr ==  5) ? { i2cclo, i2cdao, i2cdai, i2ccli, 6'b0, i2cstate, i2ccount, manual, clear, stepon, 1'b0 } :
+                      (armraddr ==  5) ? { i2cclo, i2cdao, i2cdai, i2ccli, 6'b0, i2cstate, i2ccount, manual, clear, 2'b0 } :
                       (armraddr ==  6) ? armlock :
                       (armraddr ==  7) ? { mcpassno, mcpltrow, mcpswrow, mcpstate } :
 
@@ -110,7 +113,7 @@ module pdp8ifpi2c (
     i2cmaster fpi2cintf (
         .CLOCK (CLOCK),
         .RESET (RESET | clear),
-        .CSTEP (~ stepon | (armwrite & (armwaddr == 5) & armwdata[0])),
+        .CSTEP (1'b1),
         .wrcmd (startbit),
         .command (command),
         .comand (comand),
@@ -126,11 +129,11 @@ module pdp8ifpi2c (
         if (RESET) begin
             armlock  <= 0;
             clear    <= 0;
-            manual   <= 0;
+            manual   <= 1;  // let console scan on its own by default
             mcpassno <= 0;
-            mcpltrow <= 0;
-            mcpstate <= 0;
-            stepon   <= 0;
+            mcpltime <= 0;
+            mcpltrow <= 7;
+            mcpstate <= 15;
             startbit <= 0;
         end else if (armwrite) begin
 
@@ -142,11 +145,8 @@ module pdp8ifpi2c (
                     startbit <= 1;
                 end
                 5: begin
-                    stepon <= armwdata[01];     // 0=clock i2cmaster normally; 1=clock i2cmaster with armwdata[00]
                     clear  <= armwdata[02];     // reset i2cmaster module
-                    manual <= armwdata[03];     // 0=use i2cmaster module for cli2ck,i2cdao; 1=use manclk,mandao bits
-                    manclo <= armwdata[31];     // if manual mode, use this for i2cclk
-                    mandao <= armwdata[30];     // if manual mode, use this for i2cdao
+                    manual <= armwdata[03];     // 0=scan console automatically; 1=arm must issue i2c commands to scan
                 end
 
                 // test-and-set cell for arm processor use
@@ -161,12 +161,17 @@ module pdp8ifpi2c (
                     end
                 end
 
+                // save switch value bits that are enabled for override
+                // otherwise retain latest sensed physical switch value bits
                 11: begin
-                    switchrows[2][11:04] <= armwdata[25:18];
-                    switchrows[1][11:06] <= armwdata[17:12];
-                    switchrows[0][11:00] <= armwdata[11:00];
+                    switchrows[2][11:04] <= switchovrs[2][11:04] & armwdata[25:18] | ~ switchovrs[2][11:04] & switchrows[2][11:04];
+                    switchrows[1][11:06] <= switchovrs[1][11:06] & armwdata[17:12] | ~ switchovrs[1][11:06] & switchrows[1][11:06];
+                    switchrows[0][11:00] <= switchovrs[0][11:00] & armwdata[11:00] | ~ switchovrs[0][11:00] & switchrows[0][11:00];
                 end
 
+                // save mask of which switch bits are being overridden by arm
+                //  0=use physical switch sensed via front panel gpio connector
+                //  1=use value written to switchrows by arm processor
                 12: begin
                     switchovrs[2][11:04] <= armwdata[25:18];
                     switchovrs[1][11:06] <= armwdata[17:12];
@@ -199,7 +204,7 @@ module pdp8ifpi2c (
                 // send command to set iicsel selection pins to the light row
                 1: begin
                     mcpltime <= mcpltime + 1;
-                    if (status[63:61] == 0) begin
+                    if (status[63:60] == 0) begin
                         // set iicsel selection pins to the light row
                         //  0x14 <= 1'b0 row<2> 6'b000000
                         //  0x15 <=    row<1:0> 6'b000000
@@ -212,9 +217,9 @@ module pdp8ifpi2c (
                 // send command to read light pins from bGPIO lines
                 2: begin
                     mcpltime <= mcpltime + 1;
-                    if (status[63:61] == 0) begin
+                    if (status[63:60] == 0) begin
                         // read light pins from bGPIO: 0x12,0x13
-                        command  <= { WR, 8'h40, WR, 8'h12, RS, RD, RD, 38'b0 };
+                        command  <= { WR, 8'h40, WR, 8'h12, RS, WR, 8'h41, RD, RD, 28'b0 };
                         startbit <= 1;
                         mcpstate <= 3;
                     end
@@ -224,7 +229,7 @@ module pdp8ifpi2c (
                 3: begin
                     mcpswrow <= mcpltrow[1:0];
                     mcpltime <= mcpltime + 1;
-                    if (status[63:61] == 0) begin
+                    if (status[63:60] == 0) begin
                         lightrows[mcpltrow][11:00] <= ~ { status[05:00], status[13:08] };
                         mcpstate <= 4;
                     end
@@ -236,7 +241,7 @@ module pdp8ifpi2c (
                 4: begin
                     mcpltime <= mcpltime + 1;
                     // wait for light row displayed for 200uS
-                    if (mcpltime >= 20480) begin
+                    if (mcpltime >= LIGHTDELAY) begin
                         // update like-numbered switch row
                         //  if just displayed light row 0, update switch row 0
                         //  if just displayed light row 1, update switch row 1
@@ -253,7 +258,7 @@ module pdp8ifpi2c (
                             mcpstate <= 5;
                         end
 
-                        // if not overriding physical switches, read like-numbered physical switch row
+                        // read like-numbered physical switch row
                         //  if just displayed light row 4, sense switch row 0
                         //  if just displayed light row 5, sense switch row 1
                         //  if just displayed light row 6, sense switch row 2
@@ -281,7 +286,7 @@ module pdp8ifpi2c (
                 5: begin
                     // waiting for mcp to get the
                     // and for ldswrow<n> to go low
-                    if (status[63:61] == 0) begin
+                    if (status[63:60] == 0) begin
                         // set data pins to output mode: 0x00 <= 0x0000
                         // gates dadta pins to flipflop inputs
                         command  <= { WR, 8'h40, WR, 8'h00, WR, 8'h00, WR, 8'h00, 24'b0 };
@@ -293,7 +298,7 @@ module pdp8ifpi2c (
                 // waiting for mcp to turn output data pins on so flipflops will get data
                 // then go to iicsel=4'b1011 which drives ldswrow<n> high, clocking data into flipflops
                 6: begin
-                    if (status[63:61] == 0) begin
+                    if (status[63:60] == 0) begin
                         // data outputs turned on, kerchunk value into flipflops
                         if (mcpswrow == 0) begin
                             // doing swrow 0, transition iicsel from 1000 to 1011 might glitch
@@ -317,7 +322,7 @@ module pdp8ifpi2c (
 
                 // waiting for mcp to receive iicsel=4'b1011 command, which clocked data into mcpswrow flipflops
                 7: begin
-                    if (status[63:61] == 0) begin
+                    if (status[63:60] == 0) begin
                         // new switch value has been clocked into switch flipflops
                         // resume doing lights
                         mcpstate <= 0;
@@ -327,7 +332,7 @@ module pdp8ifpi2c (
                 // waiting for mcp to receive iicsel=4'b1010 command, which clocked data into swrow 0 flipflops,
                 // ...and is now cocked to clock into row 2
                 8: begin
-                    if (status[63:61] == 0) begin
+                    if (status[63:60] == 0) begin
                         // ldswrow2 is now low after driving ldswrow0 high
                         // we must clock in proper swrow2 contents to drive ldswrow2 high
                         // ...as idle state of ldswrow0,1,2 is high
@@ -340,20 +345,28 @@ module pdp8ifpi2c (
 
                 // send command to read physical switch pins from bGPIO lines
                 10: begin
-                    if (status[63:61] == 0) begin
+                    if (status[63:60] == 0) begin
                         // read switch pins from bGPIO: 0x12,0x13
-                        command  <= { WR, 8'h40, WR, 8'h12, RS, RD, RD, 38'b0 };
+                        command  <= { WR, 8'h40, WR, 8'h12, RS, WR, 8'h41, RD, RD, 28'b0 };
                         startbit <= 1;
                         mcpstate <= 11;
                     end
                 end
 
-                // capture physical switch row bits that have the override bit set
+                // capture physical switch row bits that aren't being overridden by bits from the arm
                 // then go on to display next light row
                 11: begin
-                    if (status[63:61] == 0) begin
-                        switchrows[mcpswrow][11:00] <= switchovrs[mcpswrow][11:00] & { status[05:00], status[13:08] } |
-                                                     ~ switchovrs[mcpswrow][11:00] & switchrows[mcpswrow][11:00];
+                    if (status[63:60] == 0) begin
+                        switchrows[mcpswrow] <= switchovrs[mcpswrow] & switchrows[mcpswrow] |
+                                              ~ switchovrs[mcpswrow] & { status[05:00], status[13:08] };
+                        mcpstate <= 0;
+                    end
+                end
+
+                // startup delay after power-on reset
+                15: begin
+                    mcpltime <= mcpltime + 1;
+                    if (mcpltime >= LIGHTDELAY) begin
                         mcpstate <= 0;
                     end
                 end

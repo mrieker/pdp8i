@@ -351,6 +351,9 @@ static int cmd_bus (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj
             {  1, OFFS (swldad),   false, "swldad"   },
             {  1, OFFS (swexam),   false, "swexam"   },
             {  1, OFFS (swdepos),  false, "swdepos"  },
+            { 12, OFFS (swreg),    false, "swreg"    },
+            {  3, OFFS (swdf),     false, "swdf"     },
+            {  3, OFFS (swif),     false, "swif"     },
 #ifdef ZTURN
             { 12, OFFS (businbus), false, "businbus" },
             {  1, OFFS (busacclr), false, "busacclr" },

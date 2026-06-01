@@ -92,7 +92,7 @@ proc simtest {} {
     global testexar
     global testxmem
     global ttat1 ttat2 ttkbchar ttkbflag ttprchar ttprflag ttprfull
-    global usemcp
+    global usefpi2c
     global xmem_dfld
     global xmem_ifld
     global xmem_ifldafterjump
@@ -116,8 +116,8 @@ proc simtest {} {
     set hasmemcmd [expr {$ercode == 0}]
 
     ;# reset then start processor
-    set usemcp [getenv usemcp 0]
-    puts "simtest: usemcp=$usemcp"
+    set usefpi2c [getenv usefpi2c 0]
+    puts "simtest: usefpi2c=$usefpi2c"
     hardreset
     set cmat0 [arm find CM]
     set ttat0 [arm find TT]
@@ -706,7 +706,7 @@ proc memorycycle {state field addr rdata wdata} {
         if {$isrunning == $sbhalted} {
             set is [expr {$isrunning ? "running" : "halted"}]
             set sb [expr {$sbhalted ? "halted" : "running"}]
-            error "processor is $is, should be $sb ($haltwhy sinst=$latsinst sstep=$latsstep oldstate=$state newstate=$newstate)"
+            error "processor is $is, should be $sb ($haltwhy oldstate=$state newstate=$newstate)"
         }
     } elseif {$isrunning} {
         error "processor is running, should be halted (oldstate=$state newstate=$newstate)"
@@ -751,7 +751,7 @@ proc checkhalted {} {
                             set busif [swtch if]
                             set busda [swtch reg]
                             if {($busdf == $swdfpend) && ($busif == $swifpend) && ($busda == $swregpend)} break
-                            if {$i > 20000} {       ;# 1.68mS @ 10MHz
+                            if {$i > 200000} {
                                 error "timed out waiting for switches to soak in"
                             }
                             runsimstep
@@ -783,7 +783,7 @@ proc checkhalted {} {
                         for {set i 0} true {incr i} {
                             set busda [swtch reg]
                             if {$busda == $swregpend} break
-                            if {$i > 20000} {       ;# 1.68mS @ 10MHz
+                            if {$i > 200000} {
                                 error "timed out waiting for switches to soak in"
                             }
                             runsimstep

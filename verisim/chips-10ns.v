@@ -1496,7 +1496,7 @@ module X74AHC540 (input yclock, zclock, zreset,
 
 endmodule
 
-module X74AHC540 (input yclock, zclock, zreset,
+module X74AC540 (input yclock, zclock, zreset,
           input  p1
         , input  p2
         , input  p3
