@@ -33,47 +33,6 @@
 #include "i2czlib.h"
 #include "z8ldefs.h"
 
-#define fp8_lbFET    (1U << 29)
-#define fp8_lbEXE    (1U << 28)
-#define fp8_lbDEF    (1U << 27)
-#define fp8_lbWCT    (1U << 26)
-#define fp8_lbCAD    (1U << 25)
-#define fp8_lbBRK    (1U << 24)
-#define fp8_lbMA (07777U << 12)
-#define fp8_lbPC (07777U <<  0)
-
-#define fp9_lbAND    (1U << 31)
-#define fp9_lbTAD    (1U << 30)
-#define fp9_lbISZ    (1U << 29)
-#define fp9_lbDCA    (1U << 28)
-#define fp9_lbJMS    (1U << 27)
-#define fp9_lbJMP    (1U << 26)
-#define fp9_lbIOT    (1U << 25)
-#define fp9_lbOPR    (1U << 24)
-#define fp9_lbAC (07777U << 12)
-#define fp9_lbMB (07777U <<  0)
-
-#define fp10_lbDF     (1U << 24)
-#define fp10_lbIF     (1U << 21)
-#define fp10_lbLINK   (1U << 20)
-#define fp10_lbION    (1U << 19)
-#define fp10_lbPAU    (1U << 18)
-#define fp10_lbRUN    (1U << 17)
-#define fp10_lbSC   (037U << 12)
-#define fp10_lbMQ (07777U <<  0)
-
-#define fp11_swSTART  (1U << 25)
-#define fp11_swLDAD   (1U << 24)
-#define fp11_swDEPOS  (1U << 23)
-#define fp11_swEXAM   (1U << 22)
-#define fp11_swCONT   (1U << 21)
-#define fp11_swSTOP   (1U << 20)
-#define fp11_swSSTEP  (1U << 19)
-#define fp11_swSINST  (1U << 18)
-#define fp11_swDFLD   (7U << 15)
-#define fp11_swIFLD   (7U << 12)
-#define fp11_swSR (07777U <<  0)
-
 I2CZLib::I2CZLib ()
 {
     z8p   = NULL;
@@ -172,9 +131,9 @@ halted:;
 // release our override of all switches
 void I2CZLib::relall ()
 {
-    if (! (pdpat[Z_RE] & e_simit)) {
-        fpat[12] = 0;
-    }
+    Z8LPanel pads;
+    memset (&pads, 0, sizeof pads);
+    writepads (&pads);
 }
 
 // read light bulbs and switches
@@ -276,4 +235,20 @@ void I2CZLib::writepads (Z8LPanel const *pads)
         INS (pads->togval.dfld, fp11_swDFLD) |
         INS (pads->togval.ifld, fp11_swIFLD) |
         INS (pads->togval.sr,   fp11_swSR);
+
+    // wait for them to get all clocked in
+    // waits for an whole pass through all the rows
+    ASSERT (fp7_mcpassno == 0xFFFFFE00U);
+    ASSERT (fp7_mcpltrow == 0x000001C0U);
+    uint32_t begnum = fpat[7] & 0xFFFFFFC0U;
+    uint32_t nownum;
+    int i = 0;
+    do {
+        if (++ i > 100) {
+            fprintf (stderr, "I2CZLib::writepads: timed out\n");
+            ABORT ();   // should take 1.68mS
+        }
+        usleep (345);
+        nownum = fpat[7] & 0xFFFFFFC0U;
+    } while (nownum - begnum <= 0x200U);
 }

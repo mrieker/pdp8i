@@ -39,9 +39,10 @@
 //   sclo = i2c bus clock output
 //   sdao = i2c bus data output
 
-module i2cmaster (CLOCK, RESET, CSTEP, wrcmd, command, comand, status, sclo, scli, sdao, sdai, state, count);
+module i2cmaster (CLOCK, RESET, CSTEP, wrcmd, command, comand, status, sclo, scli, sdao, sdai, speed, state, count);
     input CLOCK, RESET, CSTEP, wrcmd, scli, sdai;
     output reg sclo, sdao;
+    input[9:0] speed;
     input[63:00] command;
     output reg[63:00] comand;
     output reg[63:00] status;
@@ -51,7 +52,7 @@ module i2cmaster (CLOCK, RESET, CSTEP, wrcmd, command, comand, status, sclo, scl
 
     wire[9:0] countlo = count[09:00];
     wire[4:0] counthi = count[14:10];
-    wire countloend = countlo == 499;
+    wire countloend = countlo >= speed;
 
     wire[14:00] countloinc = { count[14:10], count[09:00] + 10'b1 };
     wire[14:00] counthiinc = { count[14:10] + 5'b1, 10'b0 };

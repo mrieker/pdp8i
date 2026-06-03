@@ -68,6 +68,8 @@ static TclFunDef const fundefs[] = {
     { NULL, NULL, NULL }
 };
 
+static char const *const msnames[] = { MS_NAMES };
+
 static Z8LPanel pads;
 
 struct Switch {
@@ -254,16 +256,19 @@ static int cmd_getreg (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_
                 puts (" getreg <registername>");
                 puts ("   multi-bit registers:");
                 puts ("      ac - accumulator");
+                puts ("      df - data field 0..7");
+                puts ("      ea - extended address 0..7");
+                puts ("      if - instruction field 0..7");
                 puts ("      ir - instruction register 0..7");
                 puts ("      ma - memory address");
                 puts ("      mb - memory buffer");
-                puts ("      df - data field 0..7");
-                puts ("      if - instruction field 0..7");
-                puts ("      ea - extended address 0..7");
-                puts ("   state - which of F E D WC CA B are lit");
+                puts ("      mq - multiplier quotient");
+                puts ("      ms - major state");
+                puts ("      pc - program counter");
+                puts ("      sc - shift count");
                 puts ("   single-bit registers:");
-                puts ("    link - link bit");
                 puts ("     ion - interrupts enabled");
+                puts ("    link - link bit");
                 puts ("     run - executing instructions");
                 puts ("");
                 return TCL_OK;
@@ -274,27 +279,33 @@ static int cmd_getreg (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_
 
             uint16_t regval = 0xFFFFU;
             if (strcasecmp (regname, "ac")   == 0) regval = pads.light.ac;
-            if (strcasecmp (regname, "pc")   == 0) regval = pads.light.pc;
-            if (strcasecmp (regname, "sc")   == 0) regval = pads.light.sc;
+            if (strcasecmp (regname, "df")   == 0) regval = pads.light.dfld;
+            if (strcasecmp (regname, "ea")   == 0) regval = pads.light.ema;
             if (strcasecmp (regname, "ir")   == 0) regval = pads.light.ir;
             if (strcasecmp (regname, "ma")   == 0) regval = pads.light.ma;
             if (strcasecmp (regname, "mb")   == 0) regval = pads.light.mb;
             if (strcasecmp (regname, "mq")   == 0) regval = pads.light.mq;
-            if (strcasecmp (regname, "ea")   == 0) regval = pads.light.ema;
+            if (strcasecmp (regname, "if")   == 0) regval = pads.light.ifld;
             if (strcasecmp (regname, "ion")  == 0) regval = pads.light.ion;
             if (strcasecmp (regname, "link") == 0) regval = pads.light.link;
-            if (strcasecmp (regname, "df")   == 0) regval = pads.light.dfld;
-            if (strcasecmp (regname, "if")   == 0) regval = pads.light.ifld;
+            if (strcasecmp (regname, "pc")   == 0) regval = pads.light.pc;
             if (strcasecmp (regname, "run")  == 0) regval = pads.light.run;
+            if (strcasecmp (regname, "sc")   == 0) regval = pads.light.sc;
             if (regval != 0xFFFFU) {
                 if (pthread_mutex_unlock (&padmutex) != 0) ABORT ();
                 Tcl_SetObjResult (interp, Tcl_NewIntObj (regval));
                 return TCL_OK;
             }
 
-            if (strcasecmp (regname, "state") == 0) {
-                static char const *const msnames[] = { MS_NAMES };
-                Tcl_SetResult (interp, (char *)msnames[pads.light.ms], TCL_STATIC);
+            if (strcasecmp (regname, "ms") == 0) {
+                regval = pads.light.ms;
+                if (pthread_mutex_unlock (&padmutex) != 0) ABORT ();
+                if (regval >= sizeof msnames / sizeof msnames[0]) {
+                    Tcl_SetObjResult (interp, Tcl_NewIntObj (regval));
+                } else {
+                    char const *msname = msnames[regval];
+                    Tcl_SetResult (interp, (char *)msname, TCL_STATIC);
+                }
                 return TCL_OK;
             }
 
