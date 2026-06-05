@@ -155,12 +155,12 @@ int main (int argc, char **argv)
 
         if (! oncemode) printf (ESC_HOMEC);
 
-        char const *mode = FLD(Z_RE,e_simit) ? "SIM " : "REAL";
+        char const *mode = FLD(Z_RE,e_simit) ? "SIM" : "REAL";
         uint32_t timepulse = (FLD(Z_RF,f_oTP1) << 9) | (FLD(Z_RF,f_oTP2) << 6) | (FLD(Z_RF,f_oTP3) << 3) | FLD(Z_RF,f_oTP4);
         uint32_t timestate = (FLD(Z_RF,f_oTS1) << 9) | (FLD(Z_RF,f_oTS2) << 6) | (FLD(Z_RF,f_oTS3) << 3) | FLD(Z_RF,f_oTS4);
 
         // zynq.v register dump
-        printf ("VERSION=%08X %c%c%s", z8ls[0], (char)(z8ls[0] >> 24), (char)(z8ls[0] >> 16), eol);
+        printf ("VERSION=%08X %c%c  %s%s", z8ls[0], (char)(z8ls[0] >> 24), (char)(z8ls[0] >> 16), mode, eol);
 
         printf ("  oACUM=%04o    iACCLEAR=%o     lbAC=%04o    swCONT=%o  %s", FLD(Z_RF,f_oACUM),    FLD(Z_RC,c_dev_iACCLEAR), pads.light.ac,   pads.button.cont,  eol);
         printf ("  oBRKCYC=%o     iBRKGNTO=%o     lbMA=%04o    swDEPOS=%o %s", FLD(Z_RF,f_oBRKCYC),  FLD(Z_RC,c_dev_iBRKGNTO), pads.light.ma,   pads.button.dep,   eol);
@@ -175,8 +175,9 @@ int main (int argc, char **argv)
         printf ("  oTP=%04o      iPAUSE=%o       lbRUN=%o                %s", timepulse,            FLD(Z_RC,c_dev_iPAUSE),   pads.light.run,                     eol);
         printf ("  oTS=%04o                     lbPC=%04o               %s", timestate,                                      pads.light.pc,                      eol);
         printf ("                               lbDF=%o                 %s",                                                 pads.light.dfld,                    eol);
-        printf ("  %s                         lbEA=%o                 %s", mode,                                           pads.light.ema,                     eol);
-        printf ("                               lbIF=%o                 %s",                                                 pads.light.ifld,                    eol);
+        printf ("  memcycctr=%08X           lbEA=%o                 %s", z8ls[14],                                           pads.light.ema,                     eol);
+        printf ("  regctld=%08X             lbIF=%o                 %s", z8ls[4],                                            pads.light.ifld,                    eol);
+        printf ("  regctlg=%08X%s", z8ls[7], eol);
 
         for (int i = 0; i < 1024;) {
             uint32_t idver = z8ls[i];

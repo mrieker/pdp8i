@@ -1364,7 +1364,7 @@ module X74AC244 (input yclock, zclock, zreset,
         , input  p20
 );
 
-    X74HC244 hc (yclock, zclock, zreset, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20);
+    X74HC244 hc (yclock, zclock, zreset, p1, p2, p3i, p3o, p4, p5i, p5o, p6, p7i, p7o, p8, p9i, p9o, p10, p11, p12i, p12o, p13, p14i, p14o, p15, p16i, p16o, p17, p18i, p18o, p19, p20);
 
 endmodule
 
@@ -1492,7 +1492,7 @@ module X74AHC540 (input yclock, zclock, zreset,
         , input  p20
 );
 
-    X74HC540 hc (yclock, zclock, zreset, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20);
+    X74HC540 hc (yclock, zclock, zreset, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11i, p11o, p12i, p12o, p13i, p13o, p14i, p14o, p15i, p15o, p16i, p16o, p17i, p17o, p18i, p18o, p19, p20);
 
 endmodule
 
@@ -1527,9 +1527,9 @@ module X74AC540 (input yclock, zclock, zreset,
         , input  p20
 );
 
-    X74HC540 hc (yclock, zclock, zreset, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20);
+    X74HC540 hc (yclock, zclock, zreset, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11i, p11o, p12i, p12o, p13i, p13o, p14i, p14o, p15i, p15o, p16i, p16o, p17i, p17o, p18i, p18o, p19, p20);
 
-endmodule
+ endmodule
 
 module X74HC541 (input yclock, zclock, zreset,
           input  p1
@@ -1602,7 +1602,7 @@ module X74AHC541 (input yclock, zclock, zreset,
         , input  p20
 );
 
-    X74HC541 hc (yclock, zclock, zreset, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20);
+    X74HC541 hc (yclock, zclock, zreset, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11i, p11o, p12i, p12o, p13i, p13o, p14i, p14o, p15i, p15o, p16i, p16o, p17i, p17o, p18i, p18o, p19, p20);
 
 endmodule
 

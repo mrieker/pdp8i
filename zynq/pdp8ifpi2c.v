@@ -50,7 +50,7 @@ module pdp8ifpi2c (
     localparam[1:0] RD = 2; // read
     localparam[1:0] WR = 3; // write
 
-    reg[2:0]   mcpswrow;    // switch row being processed 0..2
+    reg[1:0]   mcpswrow;    // switch row being processed 0..2
     reg[2:0]   mcpltrow;    // light row being processed 0..7
     reg[3:0]   mcpstate;    // processing state
     reg[22:00] mcpassno;
@@ -140,8 +140,8 @@ module pdp8ifpi2c (
             mcpltrow <= 7;
             mcpstate <= 15;
             startbit <= 0;
-            ltspeed  <= 20479;  // each light row stays on for 204.8uS
-            i2cspeed <= 499;    // operate i2c at 100KHz
+            ltspeed  <= 19999;  // each light row stays on for 200uS
+            i2cspeed <= 29;     // operate i2c at 1.667MHz
         end else if (armwrite) begin
 
             // writing register from arm
@@ -149,7 +149,6 @@ module pdp8ifpi2c (
                 1: commandlo <= armwdata;       // save lo-order command word
                 2: begin
                     command  <= { armwdata, commandlo };
-                    startbit <= 1;
                 end
                 5: begin
                     clear  <= armwdata[02];     // reset i2cmaster module
@@ -190,6 +189,8 @@ module pdp8ifpi2c (
                     i2cspeed <= armwdata[09:00];
                 end
             endcase
+
+            startbit <= (armwaddr == 2);
         end else if (startbit) begin
 
             // startbit stays on for only one fpga clock cycle
@@ -215,6 +216,9 @@ module pdp8ifpi2c (
             // total cycle time = 8*ltspeed + (160-48)*20*i2cspeed = 1600uS + 2240*300nS = 1600+672uS = 2272uS
             // total light time = 8*ltspeed +       24*20*i2cspeed                       = 1600+144uS = 1744uS
             //  total dark time =                   88*20*i2cspeed                                    =  528uS
+            // each light row stays on 218uS/2272uS = 9.6% of time
+            // assumes ltspeed = 19999 = 200uS = time light row stays on
+            //        i2cspeed = 29 = 300nS = time to transmit half a bit (1.667MHz, 6uS per byte)
 
             case (mcpstate)
 
@@ -240,6 +244,7 @@ module pdp8ifpi2c (
                 1: begin
                     mcpltime <= mcpltime + 1;
                     if (status[63:60] == 0) begin
+                        ////$display ("pdp8ifpi2c*: selecting light row %o", mcpltrow);
                         // set iicsel selection pins to the light row
                         //  0x14 <= 1'b0 row<2> 6'b000000
                         //  0x15 <=    row<1:0> 6'b000000
@@ -252,6 +257,7 @@ module pdp8ifpi2c (
                 // send command to read light pins from bGPIO lines
                 2: begin
                     if (status[63:60] == 0) begin
+                        ////$display ("pdp8ifpi2c*: reading light row %o", mcpltrow);
                         mcpltime <= 0;
                         // read light pins from bGPIO: 0x12,0x13
                         command  <= { WR, 8'h40, WR, 8'h12, RS, WR, 8'h41, RD, RD, 28'b0 };
@@ -265,6 +271,7 @@ module pdp8ifpi2c (
                     mcpswrow <= mcpltrow[1:0];
                     mcpltime <= mcpltime + 1;
                     if (status[63:60] == 0) begin
+                        ////$display ("pdp8ifpi2c*: capture light row %o = %o", mcpltrow, ~ { status[05:00], status[13:08] });
                         lightrows[mcpltrow][11:00] <= ~ { status[05:00], status[13:08] };
                         mcpstate <= 4;
                     end
@@ -282,6 +289,7 @@ module pdp8ifpi2c (
                         //  if just displayed light row 1, update switch row 1
                         //  if just displayed light row 2, update switch row 2
                         if (mcpltrow <= 2) begin
+                            ////$display ("pdp8ifpi2c*: sending switch row %o = %o", mcpswrow, switchrows[mcpswrow]);
                             // at this point, ldswrow0,1,2 are all high
                             // set data pins value to switch row and value:
                             //  0x14 <=    2'b10 swval<11:06>
@@ -318,11 +326,12 @@ module pdp8ifpi2c (
                 // ...and for ldswrow<n> to go low
                 // then set data pins to output mode so bits get sent out the mcp to flipflop inpts
                 5: begin
-                    // waiting for mcp to get the
+                    // waiting for mcp to get the data
                     // and for ldswrow<n> to go low
                     if (status[63:60] == 0) begin
+                        ////$display ("pdp8ifpi2c*: set data pins to output mode");
                         // set data pins to output mode: 0x00 <= 0x0000
-                        // gates dadta pins to flipflop inputs
+                        // gates data pins to flipflop inputs
                         command  <= { WR, 8'h40, WR, 8'h00, WR, 8'h00, WR, 8'h00, 24'b0 };
                         startbit <= 1;
                         inmode   <= 0;
@@ -345,6 +354,7 @@ module pdp8ifpi2c (
                             startbit <= 1;
                             mcpstate <= 8;
                         end else begin
+                            ////$display ("pdp8ifpi2c*: clock switch %o data %o info flipflops", mcpswrow, switchrows[mcpswrow]);
                             // doing swrow 1 or 2, transition iicsel from 1001 or 1010 to 1011 won't glitch
                             // drives ldswrow<n> high
                             // so do 0x15 <= 2'b11 val<05:00>
@@ -358,6 +368,7 @@ module pdp8ifpi2c (
                 // waiting for mcp to receive iicsel=4'b1011 command, which clocked data into mcpswrow flipflops
                 7: begin
                     if (status[63:60] == 0) begin
+                        ////$display ("pdp8ifpi2c*: clocking complete");
                         // new switch value has been clocked into switch flipflops
                         // resume doing lights
                         mcpstate <= 0;
@@ -398,10 +409,10 @@ module pdp8ifpi2c (
                     end
                 end
 
-                // startup delay 100uS after power-on reset
+                // startup delay 1uS after power-on reset
                 15: begin
                     mcpltime <= mcpltime + 1;
-                    if (mcpltime >= 10000) begin
+                    if (mcpltime >= 100) begin
                         mcpstate <= 0;
                     end
                 end

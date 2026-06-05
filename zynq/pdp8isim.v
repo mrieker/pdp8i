@@ -21,71 +21,63 @@
 // PDP-8/I processor, including console, extended arithmetic, memory extension and 32KW memory
 
 module pdp8isim (
-    input CLOCK,
+    input CLOCK,                    // zynq 100MHz clock
     input CSTEP,
-    input RESET,
+    input RESET,                    // zynq power-on reset
 
     input iACCLEAR,                 // io pulse clears AC
     input iBRKRQST,                 // requesting break
     input iBRKWRM,                  // break cycle writes memory
     input iCAINC,                   // curad cycle increments address word
+    input iCLOCK,                   // 10MHz
     input iCYCLE3,                  // do 3-cycle break
     input[2:0] iDMAFLD,             // device sending address for DMA
     input[11:00] iINBUS,            // device sending data for PIO or DMA
     input iINTRQST,                 // request interrupt
     input iIOSKIP,                  // increment PC at end of IO pulse
     input iPAUSE,                   // pause processor clocking (stretch cycle)
+    input iRESET,                   // zynq power-on reset + arm-commanded hard reset
 
     output[11:00] oACUM,
     output oBRKCYC,                 // break cycle
     output oBRKGNTO,                // chained break grant
     output oBUSINI,                 // initialize bus devices
     output oBWCOV,                  // 3-cycle DMA wordcount overflowed
-    output oCLOCK,                  // 10MHz
     output oIOP,                    // io instruction pulse
     output[11:00] oMBUF,
-    output oRESET,
     output oTP1, oTP2, oTP3, oTP4,
     output oTS1, oTS2, oTS3, oTS4,
 
     input  iCONSCK,                 // console I2C
     input  iCONSDA,
     output oCONSDA
+
+    ,output[3:0] majst              // debug
+    ,output run
+    ,output swldad
 );
 
     wire zclock = CLOCK;
     wire zreset = RESET;
-    wire reset  = RESET;
-
-    reg yclock;
-    reg[2:0] div5;
-    always @(posedge zclock) begin
-        if (zreset) begin
-            div5 <= 0;
-            yclock <= 0;
-        end else if (div5 != 4) begin
-            div5 <= div5 + 1;
-        end else begin
-            div5 <= 0;
-            yclock <= ~ yclock;
-        end
-    end
+    wire yclock = iCLOCK;
 
     // combined bus signals
-    wire _busION, _busLINK, _busPAUSE, _busREADSR, _busRESET, _busRUN, _busBRKRQST,
+    wire _busION, _busLINK, _busPAUSE, _busREADSR, _busRUN, _busBRKRQST,
         _busBRKWRM, _busCAINC, _busCYCLE3, _busINTRQST, _busBUSINI, _busACCLEAR,
         _busIOSKIP, _busLNKTOG, _busIOP, _busINTINH, _busBWCOV, _busBRKCYC;
     wire _busSWCONT, _busSWDEPOS, _busSWEXAM, _busSWLDAD, _busSWSINST, _busSWSSTEP, _busSWSTART;
     wire _busTP1, _busTP2, _busTP3, _busTP4, _busTS1, _busTS2, _busTS3, _busTS4;
-    wire _busCLOCK;
     wire[2:0] _busDFLD, _busIFLD, _busDMAFLD, _busFIELD;
     wire[3:0] _busMAJST;
     wire[4:0] _busSCTR;
     wire[11:00] _busACUM, _busMADR, _busMBUF, _busMQUO, _busPCTR, _busINBUS;
     wire[11:09] _busIREG;
 
-    // power-on reset driven by sim
-    assign _busRESET = ~ reset;
+    // 10MHz clock
+    wire _busCLOCK = ~ iCLOCK;
+
+    // power-on reset (zynq power-on reset + arm-commanded hard reset)
+    wire _busRESET = ~ iRESET;
 
     ///////////////
     //  CONSOLE  //
@@ -157,6 +149,7 @@ module pdp8isim (
         ._ACUM_10  (_busACUM[10]),
         ._ACUM_11  (_busACUM[11]),
 
+        ._CLOCK    (_busCLOCK),
         ._ION      (_busION),
 
         ._IREG_9   (_busIREG[9]),
@@ -233,9 +226,6 @@ module pdp8isim (
         ._SCTR_2   (_busSCTR[2]),
         ._SCTR_3   (_busSCTR[3]),
         ._SCTR_4   (_busSCTR[4]),
-
-        ._CLOCK    (_busCLOCK),
-        ._CLOCK_o  (_busCLOCK),
 
         ._DFLD_0   (_busDFLD[0]),
         ._DFLD_1   (_busDFLD[1]),
@@ -782,12 +772,15 @@ module pdp8isim (
     //  COMBINING BUS SIGNALS  //
     /////////////////////////////
 
+    assign majst  = ~ _busMAJST;
+    assign run    = ~ _busRUN;
+    assign swldad = ~ _busSWLDAD;
+
     // active low signals getting wire-anded on the backplane
     assign _busACCLEAR = _eaeACCLEAR  & ~ iACCLEAR;
     assign _busBRKRQST =                ~ iBRKRQST;
     assign _busBRKWRM  =                ~ iBRKWRM;
     assign _busCAINC   =                ~ iCAINC;
-    assign _busCLOCK   = ~ yclock;
     assign _busCYCLE3  =                ~ iCYCLE3;
     assign _busDFLD    =                              _memDFLD  & _conDFLD;
     assign _busDMAFLD  =                ~ iDMAFLD;
@@ -803,10 +796,8 @@ module pdp8isim (
     assign oBRKGNTO = ~ _cpuBRKGNTO;
     assign oBUSINI  = ~ _busBUSINI;
     assign oBWCOV   = ~ _busBWCOV;
-    assign oCLOCK   = ~ _busCLOCK;
     assign oIOP     = ~ _busIOP;
     assign oMBUF    = ~ _busMBUF;
-    assign oRESET   = ~ _busRESET;
     assign oTP1     = ~ _busTP1;
     assign oTP2     = ~ _busTP2;
     assign oTP3     = ~ _busTP3;

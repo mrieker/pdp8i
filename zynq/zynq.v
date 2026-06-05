@@ -32,7 +32,16 @@ endmodule
 // it operates as an I/O device for the PDP-8/I
 // it also has an I2C connection to the PDP-8/I front panel
 
-module Zynq #(parameter BIDIRCONSDA=1) (
+// RESETS
+//     RESET_N = fpga power-on reset
+//   fpgareset = arm-commanded reset
+//  dev_iRESET = ~ RESET_N | fpgareset
+
+// CLOCKS
+//       CLOCK = fpga 100MHz clock
+//  dev_iCLOCK = 10MHz PDP clock
+
+module Zynq #(parameter BIDIRCONSDA=1, parameter CLOCKDIVIDE=5) (
     input         CLOCK,        // 100MHz
     input         RESET_N,      // FPGA reset
     output        LEDoutR,      // IO_B34_LN6 R14
@@ -44,12 +53,10 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     input         hdw_oBRKCYC,
     input         hdw_oBRKGNTI, // grant coming in from processor-side of bus
     input         hdw_oBRKRQST,
-    input         hdw_oBUSINI,  // external boards power-on reset + start switch
+    input         hdw_oBUSINI,  // hdw_iRESET + start switch
     input         hdw_oBWCOV,
-    input         hdw_oCLOCK,   // 10MHz from external processor
     input         hdw_oIOP,
     input[11:00]  hdw_oMBUF,
-    input         hdw_oRESET,   // external boards power-on reset
     input         hdw_oTP1,
     input         hdw_oTP2,
     input         hdw_oTP3,
@@ -64,12 +71,14 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     output        hdw_iBRKRQST,
     output        hdw_iBRKWRM,
     output        hdw_iCAINC,
+    output        hdw_iCLOCK,   // 10MHz from external processor
     output        hdw_iCYCLE3,
     output[2:0]   hdw_iDMAFLD,
     output[11:00] hdw_iINBUS,
     output        hdw_iINTRQST,
     output        hdw_iIOSKIP,
     output        hdw_iPAUSE,
+    output        hdw_iRESET,   // external boards should do a power-on reset
 
     // i2c interface to hardware front panel
     output        hdw_iCONSCK,
@@ -117,7 +126,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     //  arm_i... : signals from arm processor as an internal io device (merged onto dev_i... bus)
     //  arm uses dev_o... signals instead of having arm_o... signals
 
-    wire[31:00] regctla, regctlb, regctlc, regctle, regctlf, regctlg, regctlh, regctli;
+    wire[31:00] regctla, regctlb, regctlc, regctld, regctle, regctlf, regctlg, regctlh, regctli;
 
     wire[11:00] sim_oACUM;
     wire        sim_oBRKCYC;
@@ -125,10 +134,8 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     wire        sim_oBRKRQST;
     wire        sim_oBUSINI;
     wire        sim_oBWCOV;
-    wire        sim_oCLOCK;
     wire        sim_oIOP;
     wire[11:00] sim_oMBUF;
-    wire        sim_oRESET;
     wire        sim_oTP1;
     wire        sim_oTP2;
     wire        sim_oTP3;
@@ -143,12 +150,14 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     wire        sim_iBRKRQST;
     wire        sim_iBRKWRM;
     wire        sim_iCAINC;
+    wire        sim_iCLOCK;
     wire        sim_iCYCLE3;
     wire[2:0]   sim_iDMAFLD;
     wire[11:00] sim_iINBUS;
     wire        sim_iINTRQST;
     wire        sim_iIOSKIP;
     wire        sim_iPAUSE;
+    wire        sim_iRESET;
 
     wire        sim_iCONSCK;
     wire        sim_iCONSDA;
@@ -160,10 +169,8 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     wire        dev_oBRKRQST;
     wire        dev_oBUSINI;
     wire        dev_oBWCOV;
-    wire        dev_oCLOCK;
     wire        dev_oIOP;
     wire[11:00] dev_oMBUF;
-    wire        dev_oRESET;
     wire        dev_oTP1;
     wire        dev_oTP2;
     wire        dev_oTP3;
@@ -178,12 +185,14 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     wire        dev_iBRKRQST;
     wire        dev_iBRKWRM;
     wire        dev_iCAINC;
+    wire        dev_iCLOCK;
     wire        dev_iCYCLE3;
     wire[2:0]   dev_iDMAFLD;
     wire[11:00] dev_iINBUS;
     wire        dev_iINTRQST;
     wire        dev_iIOSKIP;
     wire        dev_iPAUSE;
+    wire        dev_iRESET;
 
     reg[9:0] meminprog;
 
@@ -277,13 +286,29 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     assign saxi_BRESP = 0;  // A3.4.4/A10.3 transfer OK
     assign saxi_RRESP = 0;  // A3.4.4/A10.3 transfer OK
 
-    reg[14:00] ilaarray[4095:0], ilardata;
+    reg[18:00] ilaarray[4095:0], ilardata;
     reg[11:00] ilaafter, ilaindex;
     reg ilaarmed;
 
-    // some arm program is resetting or zynq is powering up
-    // - resets devices
-    wire pwronreset = fpgareset | ~ RESET_N;
+    // some arm program is commanding reset or zynq is powering up
+    // - resets PDP and devices
+    assign dev_iRESET = fpgareset | ~ RESET_N;
+
+    // generate 10MHz PDP clock
+    reg[5:0] clkdiv;
+    reg yclock;
+    always @(posedge CLOCK) begin
+        if (~ RESET_N) begin
+            clkdiv <= 0;
+            yclock <= 0;
+        end else if (clkdiv != CLOCKDIVIDE-1) begin
+            clkdiv <= clkdiv + 1;
+        end else begin
+            clkdiv <= 0;
+            yclock <= ~ yclock;
+        end
+    end
+    assign dev_iCLOCK = yclock;
 
     /////////////////////////////////////
     // send register being read to ARM //
@@ -294,6 +319,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
         (readaddr        == 10'b0000000001) ? regctla    :
         (readaddr        == 10'b0000000010) ? regctlb    :
         (readaddr        == 10'b0000000011) ? regctlc    :
+        (readaddr        == 10'b0000000100) ? regctld    :
         (readaddr        == 10'b0000000101) ? regctle    :
         (readaddr        == 10'b0000000110) ? regctlf    :
         (readaddr        == 10'b0000000111) ? regctlg    :
@@ -301,7 +327,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
         (readaddr        == 10'b0000001001) ? regctli    :
         (readaddr        == 10'b0000001110) ? memcycctr  :
         (readaddr        == 10'b0000010001) ? { ilaarmed, 3'b0, ilaafter, 4'b0, ilaindex } :
-        (readaddr        == 10'b0000010010) ? { 17'b0, ilardata[14:00] } :
+        (readaddr        == 10'b0000010010) ? { 13'b0, ilardata[18:00] } :
         (readaddr        == 10'b0000010011) ? { 32'b0                  } :
         (readaddr[11:06] ==  6'b000010)     ? fpi2crdata :
         (readaddr[11:05] ==  7'b0000110)    ? rkardata   :
@@ -427,7 +453,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
             end
         end
 
-        if (~ armwrite & pwronreset) begin
+        if (~ armwrite & dev_iRESET) begin
             arm_iACCLEAR <= 0;
             arm_iBRKGNTO <= 0;
             arm_iBRKRQST <= 0;
@@ -456,15 +482,13 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     //  synchronize signals output by the PDP-8/I  //
     /////////////////////////////////////////////////
 
-    wire hsy_oBRKGNTI, hsy_oBRKRQST, hsy_oBUSINI, hsy_oCLOCK, hsy_oIOP, hsy_oRESET, hsy_oTP1;
-    wire hsy_oTP2,     hsy_oTP3,     hsy_oTP4,    hsy_oTS1,   hsy_oTS2, hsy_oTS3,   hsy_oTS4;
+    wire hsy_oBRKGNTI, hsy_oBRKRQST, hsy_oBUSINI, hsy_oIOP, hsy_oTP1, hsy_oTP2;
+    wire hsy_oTP3,     hsy_oTP4,     hsy_oTS1,    hsy_oTS2, hsy_oTS3, hsy_oTS4;
 
     synk synkbg (CLOCK, hsy_oBRKGNTI, hdw_oBRKGNTI);
     synk synkbr (CLOCK, hsy_oBRKRQST, hdw_oBRKRQST);
     synk synkbi (CLOCK, hsy_oBUSINI,  hdw_oBUSINI);
-    synk synkcl (CLOCK, hsy_oCLOCK,   hdw_oCLOCK);
     synk synkip (CLOCK, hsy_oIOP,     hdw_oIOP);
-    synk synkrs (CLOCK, hsy_oRESET,   hdw_oRESET);
     synk synkp1 (CLOCK, hsy_oTP1,     hdw_oTP1);
     synk synkp2 (CLOCK, hsy_oTP2,     hdw_oTP2);
     synk synkp3 (CLOCK, hsy_oTP3,     hdw_oTP3);
@@ -506,24 +530,28 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     assign sim_iBRKRQST = simit ? dev_iBRKRQST : 0;
     assign sim_iBRKWRM  = simit ? dev_iBRKWRM  : 0;
     assign sim_iCAINC   = simit ? dev_iCAINC   : 0;
+    assign sim_iCLOCK   = simit ? dev_iCLOCK   : 0;
     assign sim_iCYCLE3  = simit ? dev_iCYCLE3  : 0;
     assign sim_iDMAFLD  = simit ? dev_iDMAFLD  : 0;
     assign sim_iINBUS   = simit ? dev_iINBUS   : 0;
     assign sim_iINTRQST = simit ? dev_iINTRQST : 0;
     assign sim_iIOSKIP  = simit ? dev_iIOSKIP  : 0;
     assign sim_iPAUSE   = simit ? dev_iPAUSE   : 0;
+    assign sim_iRESET   = simit ? dev_iRESET   : 1;
 
     assign hdw_iACCLEAR = simit ? 0 : dev_iACCLEAR;
     assign hdw_iBRKGNTO = simit ? hdw_oBRKGNTI : dev_iBRKGNTO;
     assign hdw_iBRKRQST = simit ? 0 : dev_iBRKRQST;
     assign hdw_iBRKWRM  = simit ? 0 : dev_iBRKWRM;
     assign hdw_iCAINC   = simit ? 0 : dev_iCAINC;
+    assign hdw_iCLOCK   = simit ? 0 : dev_iCLOCK;
     assign hdw_iCYCLE3  = simit ? 0 : dev_iCYCLE3;
     assign hdw_iDMAFLD  = simit ? 0 : dev_iDMAFLD;
     assign hdw_iINBUS   = simit ? 0 : dev_iINBUS;
     assign hdw_iINTRQST = simit ? 0 : dev_iINTRQST;
     assign hdw_iIOSKIP  = simit ? 0 : dev_iIOSKIP;
     assign hdw_iPAUSE   = simit ? 0 : dev_iPAUSE;
+    assign hdw_iRESET   = simit ? 1 : dev_iRESET;
 
     // when simulating, send signals from the simulated PDP-8/I on to the internal devices
     // when not simming, send signals from the hardware PDP-8/I on to the internal devices
@@ -534,10 +562,8 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     assign dev_oBRKRQST = simit ? sim_oBRKRQST : hsy_oBRKRQST;
     assign dev_oBUSINI  = simit ? sim_oBUSINI  : hsy_oBUSINI;
     assign dev_oBWCOV   = simit ? sim_oBWCOV   : hdw_oBWCOV;
-    assign dev_oCLOCK   = simit ? sim_oCLOCK   : hsy_oCLOCK;
     assign dev_oIOP     = simit ? sim_oIOP     : hsy_oIOP;
     assign dev_oMBUF    = simit ? sim_oMBUF    : hdw_oMBUF;
-    assign dev_oRESET   = simit ? sim_oRESET   : hsy_oRESET;
     assign dev_oTP1     = simit ? sim_oTP1     : hsy_oTP1;
     assign dev_oTP2     = simit ? sim_oTP2     : hsy_oTP2;
     assign dev_oTP3     = simit ? sim_oTP3     : hsy_oTP3;
@@ -583,7 +609,9 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     assign regctlc[21]    = dev_iINTRQST;
     assign regctlc[22]    = dev_iIOSKIP;
     assign regctlc[23]    = dev_iPAUSE;
-    assign regctlc[31:24] = 0;
+    assign regctlc[24]    = dev_iCLOCK;
+    assign regctlc[25]    = dev_iRESET;
+    assign regctlc[31:26] = 0;
 
     assign regctle[00]    = simit;
     assign regctle[01]    = fpgareset;
@@ -599,9 +627,9 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     assign regctlf[14]    = dev_oBRKRQST;
     assign regctlf[15]    = dev_oBUSINI;
     assign regctlf[16]    = dev_oBWCOV;
-    assign regctlf[17]    = dev_oCLOCK;
+    assign regctlf[17]    = 0;
     assign regctlf[18]    = dev_oIOP;
-    assign regctlf[19]    = dev_oRESET;
+    assign regctlf[19]    = 0;
     assign regctlf[20]    = dev_oTP1;
     assign regctlf[21]    = dev_oTP2;
     assign regctlf[22]    = dev_oTP3;
@@ -612,7 +640,6 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     assign regctlf[27]    = dev_oTS4;
     assign regctlf[31:28] = 0;
 
-    assign regctlg = 0;
     assign regctlh = 0;
     assign regctli = 0;
 
@@ -632,7 +659,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     // ...restarting whenever we see memstart
     // this is kind of like RUN, but takes into account cycles initiated by the console
     always @(posedge CLOCK) begin
-        if (pwronreset) begin
+        if (dev_iRESET) begin
             meminprog <= 0;
         end else if (nanocstep) begin
             if (dev_oTS1) begin
@@ -683,31 +710,45 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     assign LEDoutG = ~ (dev_oTS1 | dev_oTS2 | dev_oTS3 | dev_oTS4);
     assign LEDoutB = 1;
 
+    wire[3:0] sim_majst;
+    wire sim_run, sim_swldad, __swldad, __gpout;
+
+    assign regctld[00]    = dev_iRESET;
+    assign regctld[01]    = simit;
+    assign regctld[02]    = nanocstep;
+    assign regctld[03]    = sim_run;
+    assign regctld[07:04] = sim_majst;
+    assign regctld[08]    = sim_swldad;
+    assign regctld[09]    = __swldad;
+    assign regctld[31:28] = 4'h3;
+
+    assign regctlg[31:24] = 8'h11;
+
     pdp8isim siminst (
         .CLOCK          (CLOCK),
         .CSTEP          (nanocstep),
-        .RESET          (pwronreset | ~ simit),
+        .RESET          (~ RESET_N),
 
         .iACCLEAR       (sim_iACCLEAR),
         .iBRKRQST       (sim_iBRKRQST),
         .iBRKWRM        (sim_iBRKWRM),
         .iCAINC         (sim_iCAINC),
+        .iCLOCK         (sim_iCLOCK),   // 10MHz generated by pdp8isim.v
         .iCYCLE3        (sim_iCYCLE3),
         .iDMAFLD        (sim_iDMAFLD),
         .iINBUS         (sim_iINBUS),
         .iINTRQST       (sim_iINTRQST),
         .iIOSKIP        (sim_iIOSKIP),
         .iPAUSE         (sim_iPAUSE),
+        .iRESET         (sim_iRESET),   // copy of pdp8isim's RESET input
 
         .oACUM          (sim_oACUM),
         .oBRKCYC        (sim_oBRKCYC),
         .oBRKGNTO       (sim_oBRKGNTI),
         .oBUSINI        (sim_oBUSINI),
         .oBWCOV         (sim_oBWCOV),
-        .oCLOCK         (sim_oCLOCK),   // 10MHz generated by pdp8isim.v
         .oIOP           (sim_oIOP),
         .oMBUF          (sim_oMBUF),
-        .oRESET         (sim_oRESET),   // copy of pdp8isim's RESET input
         .oTP1           (sim_oTP1),
         .oTP2           (sim_oTP2),
         .oTP3           (sim_oTP3),
@@ -720,6 +761,10 @@ module Zynq #(parameter BIDIRCONSDA=1) (
         .iCONSCK        (sim_iCONSCK),
         .iCONSDA        (sim_iCONSDA),
         .oCONSDA        (sim_oCONSDA)
+
+        ,.majst         (sim_majst)
+        ,.run           (sim_run)
+        ,.swldad        (sim_swldad)
     );
 
     ///////////////////////
@@ -740,7 +785,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     pdp8ishad shadinst (
         .CLOCK (CLOCK),
         .CSTEP (nanocstep),
-        .RESET (pwronreset),
+        .RESET (~ RESET_N),
 
         .armwrite (shawrite),
         .armraddr (readaddr[4:2]),
@@ -753,12 +798,14 @@ module Zynq #(parameter BIDIRCONSDA=1) (
         .iBRKRQST       (dev_iBRKRQST),
         .iBRKWRM        (dev_iBRKWRM),
         .iCAINC         (dev_iCAINC),
+        .iCLOCK         (dev_iCLOCK),
         .iCYCLE3        (dev_iCYCLE3),
         .iDMAFLD        (dev_iDMAFLD),
         .iINBUS         (dev_iINBUS),
         .iINTRQST       (dev_iINTRQST),
         .iIOSKIP        (dev_iIOSKIP),
         .iPAUSE         (dev_iPAUSE),
+        .iRESET         (dev_iRESET),
 
         .oACUM          (dev_oACUM),
         .oBRKCYC        (dev_oBRKCYC),
@@ -766,10 +813,8 @@ module Zynq #(parameter BIDIRCONSDA=1) (
         .oBRKRQST       (dev_oBRKRQST),
         .oBUSINI        (dev_oBUSINI),
         .oBWCOV         (dev_oBWCOV),
-        .oCLOCK         (dev_oCLOCK),
         .oIOP           (dev_oIOP),
         .oMBUF          (dev_oMBUF),
-        .oRESET         (dev_oRESET),
         .oTP1           (dev_oTP1),
         .oTP2           (dev_oTP2),
         .oTP3           (dev_oTP3),
@@ -788,8 +833,6 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     /////////////////////
     //  io interfaces  //
     /////////////////////
-
-    wire iobusreset = pwronreset | dev_oBUSINI;     // power on reset or start switch
 
     // generate iopstart pulse for an io instruction followed by iopstop
     //  iopstart is pulsed at beginning of TP2, long after the dev_oACUM and dev_oMBUF bits are valid
@@ -813,8 +856,8 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     pdp8ltty ttinst (
         .CLOCK (CLOCK),
         .CSTEP (nanocstep),
-        .RESET (pwronreset),
-        .BINIT (iobusreset),
+        .RESET (dev_iRESET),
+        .BINIT (dev_oBUSINI),
 
         .armwrite (ttawrite),
         .armraddr (readaddr[3:2]),
@@ -838,8 +881,8 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     pdp8ldc02 dcinst (
         .CLOCK (CLOCK),
         .CSTEP (nanocstep),
-        .RESET (pwronreset),
-        .BINIT (iobusreset),
+        .RESET (dev_iRESET),
+        .BINIT (dev_oBUSINI),
 
         .armwrite (dcawrite),
         .armraddr (readaddr[4:2]),
@@ -863,8 +906,8 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     pdp8lrk8je rkinst (
         .CLOCK (CLOCK),
         .CSTEP (nanocstep),
-        .RESET (pwronreset),
-        .BINIT (iobusreset),
+        .RESET (dev_iRESET),
+        .BINIT (dev_oBUSINI),
 
         .armwrite (rkawrite),
         .armraddr (readaddr[4:2]),
@@ -891,7 +934,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
 
     pdp8icmem cminst (
         .CLOCK (CLOCK),
-        .RESET (pwronreset),
+        .RESET (dev_iRESET),
 
         .armwrite (cmawrite),                   //< arm writing to backside register
         .armraddr (readaddr[3:2]),              //< arm reading from backside register
@@ -907,7 +950,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
         .brkrqsto (cmbrkrqst),                  //> requesting dma cycle
         .brkgnto  (cmbrkgnto),                  //> outgoing dma grant
 
-        .busini   (iobusreset),
+        .busini   (dev_oBUSINI),
         .brkrqsti (dev_oBRKRQST),               //< something is requesting dma cycle
         .brkgnti  (cmbrkgnti),                  //< incoming dma grant
         .brkmbuf  (dev_oMBUF),                  //< data read from memory
@@ -923,8 +966,8 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     pdp8ltc08 tcinst (
         .CLOCK (CLOCK),
         .CSTEP (nanocstep),
-        .RESET (pwronreset),
-        .BINIT (iobusreset),
+        .RESET (dev_iRESET),
+        .BINIT (dev_oBUSINI),
 
         .armwrite (tcawrite),
         .armraddr (readaddr[2]),
@@ -948,8 +991,8 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     pdp8lvc8 vcinst (
         .CLOCK (CLOCK),
         .CSTEP (nanocstep),
-        .RESET (pwronreset),
-        .BINIT (iobusreset),
+        .RESET (dev_iRESET),
+        .BINIT (dev_oBUSINI),
 
         .armwrite (vcawrite),
         .armraddr (readaddr[4:2]),
@@ -988,7 +1031,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     // PDP-8/I front panel i2c interface
     pdp8ifpi2c fpi2cinst (
         .CLOCK (CLOCK),
-        .RESET (dev_oRESET),
+        .RESET (dev_iRESET),
 
         .armwrite (fpi2cwrite),
         .armraddr (readaddr[5:2]),
@@ -1011,8 +1054,8 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     pdp8lptr prinst (
         .CLOCK (CLOCK),
         .CSTEP (nanocstep),
-        .RESET (pwronreset),
-        .BINIT (iobusreset),
+        .RESET (dev_iRESET),
+        .BINIT (dev_oBUSINI),
 
         .armwrite (prawrite),
         .armraddr (readaddr[2]),
@@ -1035,7 +1078,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     pdp8lpbit pbinst (
         .CLOCK (CLOCK),
         .CSTEP (nanocstep),
-        .RESET (pwronreset),
+        .RESET (dev_iRESET),
 
         .armwrite (pbawrite),
         .armraddr (readaddr[4:2]),
@@ -1059,8 +1102,8 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     pdp8lptp ppinst (
         .CLOCK (CLOCK),
         .CSTEP (nanocstep),
-        .RESET (pwronreset),
-        .BINIT (iobusreset),
+        .RESET (dev_iRESET),
+        .BINIT (dev_oBUSINI),
 
         .armwrite (ppawrite),
         .armraddr (readaddr[2]),
@@ -1083,6 +1126,8 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     //  ilaafter = number of cycles to record after trigger condition satisfied
     //  ilaindex = next entry in ilaarray to write
 
+    reg lastldad;
+
     always @(posedge CLOCK) begin
         if (~ RESET_N) begin
             ilaarmed <= 0;
@@ -1101,8 +1146,17 @@ module Zynq #(parameter BIDIRCONSDA=1) (
                 // capture signals while before trigger and for ilaafter cycles thereafter
                 if (ilaarmed | (ilaafter != 0)) begin
                     ilaarray[ilaindex] <= {
-                        sim_iDMAFLD,
-                        sim_iINBUS
+                        clkdiv,
+                        sim_iCLOCK,
+                        sim_majst,
+                        sim_oTP1,
+                        sim_oTP2,
+                        sim_oTP3,
+                        sim_oTP4,
+                        sim_oTS1,
+                        sim_oTS2,
+                        sim_oTS3,
+                        sim_oTS4
                     };
 
                     ilaindex <= ilaindex + 1;
@@ -1110,11 +1164,12 @@ module Zynq #(parameter BIDIRCONSDA=1) (
                 end
 
                 // check trigger condition
-                // - disk controller requesting dma cycle
-                if (sim_iDMAFLD != 0) begin
+                if (lastldad & ~ sim_swldad) begin
                     ilaarmed <= 0;
                 end
             end
         end
+
+        lastldad <= sim_swldad;
     end
 endmodule

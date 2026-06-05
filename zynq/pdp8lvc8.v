@@ -178,6 +178,8 @@ module pdp8lvc8 (
                             devtocpu <= eflags;
                             AC_CLEAR <= 1;
                         end
+
+                        default: begin end
                     endcase
                 end else begin
 

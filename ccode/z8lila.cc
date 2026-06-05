@@ -34,7 +34,7 @@
 #include "z8lutil.h"
 
 #define DEPTH 4096  // total number of elements in ilaarray
-#define AFTER 2048  // number of samples to take after sample containing trigger
+#define AFTER 4000  // number of samples to take after sample containing trigger
 
 #define ILACTL 021
 #define ILADAT 022
@@ -70,7 +70,7 @@ int main (int argc, char **argv)
     }
 
     Z8LPage z8p;
-    uint32_t volatile *pdpat = z8p.findev ("8L", NULL, NULL, false);
+    uint32_t volatile *pdpat = z8p.findev ("8I", NULL, NULL, false);
 
     uint32_t ctl;
     if (asisflag) {
@@ -104,13 +104,20 @@ int main (int argc, char **argv)
         if (nodots || (i == 0) || (i == DEPTH - 1) ||
                 (thisentry != preventry) || (thisentry != nextentry)) {
 
-            printf ("%6.2f  %o %o %o  %04o\n",
+            printf ("%6.2f  %o %o %X %o%o%o%o %o%o%o%o\n",
                 (i - DEPTH + AFTER + 1) / 100.0,        // trigger shows as 0.00uS
 
-                (unsigned) (thisentry >> 14) & 1,       // lbPRTE
-                (unsigned) (thisentry >> 13) & 1,       // swMPRT
-                (unsigned) (thisentry >> 12) & 1,       // iBEMA
-                (unsigned) (thisentry >>  0) & 07777    // oMA
+                (unsigned) (thisentry >> 13) & 7,       // div5
+                (unsigned) (thisentry >> 12) & 1,       // clock
+                (unsigned) (thisentry >>  8) & 15,      // majst
+                (unsigned) (thisentry >>  7) & 1,       // tp1
+                (unsigned) (thisentry >>  6) & 1,       // tp2
+                (unsigned) (thisentry >>  5) & 1,       // tp3
+                (unsigned) (thisentry >>  4) & 1,       // tp4
+                (unsigned) (thisentry >>  3) & 1,       // ts1
+                (unsigned) (thisentry >>  2) & 1,       // ts2
+                (unsigned) (thisentry >>  1) & 1,       // ts3
+                (unsigned) (thisentry >>  0) & 1        // ts4
             );
             indotdotdot = false;
         } else if (! indotdotdot) {

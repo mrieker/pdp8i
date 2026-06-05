@@ -74,9 +74,6 @@ module backplane (
 
     wire zynCONSCK, zynCONSDA, conCONSDA;
 
-    // power-on reset driven by sim
-    assign _busRESET = ~ reset;
-
     // output some bus signals to simulator
     assign oACUM    = ~ _busACUM;
     assign oBRKCYC  = ~ _busBRKCYC;
@@ -176,6 +173,7 @@ module backplane (
         ._ACUM_10  (_busACUM[10]),
         ._ACUM_11  (_busACUM[11]),
 
+        ._CLOCK    (_busCLOCK),
         ._ION      (_busION),
 
         ._IREG_9   (_busIREG[9]),
@@ -252,9 +250,6 @@ module backplane (
         ._SCTR_2   (_busSCTR[2]),
         ._SCTR_3   (_busSCTR[3]),
         ._SCTR_4   (_busSCTR[4]),
-
-        ._CLOCK    (_busCLOCK),
-        ._CLOCK_o  (_busCLOCK),
 
         ._DFLD_0   (_busDFLD[0]),
         ._DFLD_1   (_busDFLD[1]),
@@ -803,11 +798,12 @@ module backplane (
     //  Zynq board has I/O devices  //
     //////////////////////////////////
 
-    wire zynACCLEAR, zynBRKGNTI, zynBRKGNTO, zynBRKRQST, zynBRKWRM, zynCAINC, zynCYCLE3, zynINTRQST, zynIOSKIP, zynPAUSE;
+    wire zynACCLEAR, zynBRKGNTI, zynBRKGNTO, zynBRKRQST, zynBRKWRM, zynCAINC;
+    wire zynCLOCK, zynCYCLE3, zynINTRQST, zynIOSKIP, zynPAUSE, zynRESET;
     wire[2:0] zynDMAFLD;
     wire[11:00] zynINBUS;
 
-    Zynq #(.BIDIRCONSDA (0)) zynqinst (
+    Zynq #(.BIDIRCONSDA (0), .CLOCKDIVIDE (10)) zynqinst (
         .CLOCK   (zclock),
         .RESET_N (~ zreset),
         .LEDoutR (),      // IO_B34_LN6 R14
@@ -821,10 +817,8 @@ module backplane (
         .hdw_oBRKRQST (~ _busBRKRQST),
         .hdw_oBUSINI  (~ _busBUSINI),
         .hdw_oBWCOV   (~ _busBWCOV),
-        .hdw_oCLOCK   (   yclock),
         .hdw_oIOP     (~ _busIOP),
         .hdw_oMBUF    (~ _busMBUF),
-        .hdw_oRESET   (~ _busRESET),
         .hdw_oTP1     (~ _busTP1),
         .hdw_oTP2     (~ _busTP2),
         .hdw_oTP3     (~ _busTP3),
@@ -839,12 +833,14 @@ module backplane (
         .hdw_iBRKRQST (zynBRKRQST),
         .hdw_iBRKWRM  (zynBRKWRM),
         .hdw_iCAINC   (zynCAINC),
+        .hdw_iCLOCK   (zynCLOCK),       // zynq.v generates 10MHz clock
         .hdw_iCYCLE3  (zynCYCLE3),
         .hdw_iDMAFLD  (zynDMAFLD),
         .hdw_iINBUS   (zynINBUS),
         .hdw_iINTRQST (zynINTRQST),
         .hdw_iIOSKIP  (zynIOSKIP),
         .hdw_iPAUSE   (zynPAUSE),
+        .hdw_iRESET   (zynRESET),       // zreset + arm regctle<fpgareset>
 
         // i2c interface to hardware front panel
         .hdw_iCONSCK  (zynCONSCK),
@@ -1093,16 +1089,18 @@ module backplane (
     assign _busACCLEAR = _eaeACCLEAR  & ~ iACCLEAR   & ~ zynACCLEAR;
     assign _busBRKRQST =   ~ iBRKRQST & ~ zynBRKRQST;
     assign _busBRKWRM  =   ~ iBRKWRM  & ~ zynBRKWRM;
-    assign _busCAINC   =  ~ iCAINC   & ~ zynCAINC;
-    assign _busCYCLE3  =  ~ iCYCLE3  & ~ zynCYCLE3;
-    assign _busDFLD    = _conDFLD     & _memDFLD;
-    assign _busDMAFLD  =  ~ iDMAFLD  & ~ zynDMAFLD;
-    assign _busIFLD    = _conIFLD     & _memIFLD;
+    assign _busCAINC   =  ~ iCAINC    & ~ zynCAINC;
+    assign _busCLOCK   =                ~ zynCLOCK;
+    assign _busCYCLE3  =  ~ iCYCLE3   & ~ zynCYCLE3;
+    assign _busDFLD    = _conDFLD     &  _memDFLD;
+    assign _busDMAFLD  =  ~ iDMAFLD   & ~ zynDMAFLD;
+    assign _busIFLD    = _conIFLD     &  _memIFLD;
     assign _busINBUS   = _conINBUS    &  _eaeINBUS & ~ iINBUS & _memINBUS & ~ zynINBUS;
     assign _busINTRQST = ~ iINTRQST   & ~ zynINTRQST;
-    assign _busIOSKIP  = _eaeIOSKIP   & ~ iIOSKIP    & ~ zynIOSKIP;
+    assign _busIOSKIP  = _eaeIOSKIP   & ~ iIOSKIP  & ~ zynIOSKIP;
     assign _busMEMDIS  = ~ memdisab;
-    assign _busPAUSE   = _eaePAUSE    & ~ iPAUSE     & ~ zynPAUSE;
+    assign _busPAUSE   = _eaePAUSE    & ~ iPAUSE   & ~ zynPAUSE;
+    assign _busRESET   =                ~ zynRESET;
 
     // break grant chain
     assign zynBRKGNTI = ~ _cpuBRKGNTO;

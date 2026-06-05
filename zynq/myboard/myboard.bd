@@ -288,6 +288,9 @@
           "hdw_iCAINC": {
             "direction": "O"
           },
+          "hdw_iCLOCK": {
+            "direction": "O"
+          },
           "hdw_iCONSCK": {
             "direction": "O"
           },
@@ -316,6 +319,9 @@
           "hdw_iPAUSE": {
             "direction": "O"
           },
+          "hdw_iRESET": {
+            "direction": "O"
+          },
           "hdw_oACUM": {
             "direction": "I",
             "left": "11",
@@ -336,9 +342,6 @@
           "hdw_oBWCOV": {
             "direction": "I"
           },
-          "hdw_oCLOCK": {
-            "direction": "I"
-          },
           "hdw_oCONSDA": {
             "direction": "I"
           },
@@ -349,9 +352,6 @@
             "direction": "I",
             "left": "11",
             "right": "0"
-          },
-          "hdw_oRESET": {
-            "direction": "I"
           },
           "hdw_oTP1": {
             "direction": "I"
@@ -2027,8 +2027,7 @@
       },
       "hdw_oCLOCK_0_1": {
         "ports": [
-          "hdw_oCLOCK_0",
-          "Zynq_0/hdw_oCLOCK"
+          "hdw_oCLOCK_0"
         ]
       },
       "hdw_oIOP_0_1": {
@@ -2045,8 +2044,7 @@
       },
       "hdw_oRESET_0_1": {
         "ports": [
-          "hdw_oRESET_0",
-          "Zynq_0/hdw_oRESET"
+          "hdw_oRESET_0"
         ]
       },
       "hdw_oTP1_0_1": {

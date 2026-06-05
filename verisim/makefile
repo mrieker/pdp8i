@@ -23,6 +23,7 @@ VFILES := \
 	../zynq/pdp8lpbit.v \
 	../zynq/pdp8lptp.v \
 	../zynq/pdp8ltty.v \
+	../zynq/pdp8lvc8.v \
 	../zynq/dmareq.v \
 	../zynq/i2cmaster.v \
 

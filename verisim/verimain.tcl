@@ -56,12 +56,24 @@ proc hardreset {} {
     clk 100
     bus set reset 0
 
-    ;# if use pdp8ifpi2c.v to scan panel, turn it on
+    ;# maybe use pdp8ifpi2c.v to scan panel
     ;# switch and light access very slow
     ;# otherwise console.kicad_sch internal counters scan panel quickly
     if {$usefpi2c} {
         set fpat [arm find FP]
-        arm set [expr {$fpat + 5}] 0
+        ;# turn pdp8ifpi2c.v scanning on
+        arm set [expr {$fpat +  5}] 0       ;# fp_manual=0
+        ;# tell it to scan quickly (sim mcp23017 is fast and we don't use gpio lights)
+        arm set [expr {$fpat + 13}] 0x3C0F  ;# fp_ltspeed=15; fp_i2cspeed=15
+        ;# wait for state 2 meaning the mcp23017 has received a command,
+        ;#  shutting off console.kicad_sch internal scanners
+        for {set i 0} {true} {incr i} {
+            set fp7 [arm [expr {$fpat + 7}]]
+            if {($fp7 & 15) == 2} break     ;# fp_mcpstate==2
+            if {$i > 2000} {                ;# usually takes 914
+                error "pdp8ifpi2c startup timed out"
+            }
+        }
     }
 }
 
