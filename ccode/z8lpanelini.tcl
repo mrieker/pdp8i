@@ -199,7 +199,7 @@ proc dumpit {} {
     set run  [getreg run]
     set sc   [getreg sc]
 
-    set sw "SR=[octal [getsw sr]] DF=[getsw dfld] IF=[getsww ifld]"
+    set sw "SR=[octal [getsw sr]] DF=[getsw dfld] IF=[getsw ifld]"
     set sw [expr {[getsw cont]  ? "$sw CONT"  : "$sw"}]
     set sw [expr {[getsw dep]   ? "$sw DEP"   : "$sw"}]
     set sw [expr {[getsw exam]  ? "$sw EXAM"  : "$sw"}]
@@ -747,7 +747,7 @@ proc sendtottykb {str} {
 }
 
 # put in real mode
-proc simon {} {
+proc simoff {} {
     pin set simit 0
     pin set fp_manual 0
     pin set fp_i2cspeed 29      ;# 1.667MHz

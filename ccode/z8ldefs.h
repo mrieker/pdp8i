@@ -265,7 +265,7 @@
 #define FP2_CMDHI 0xFFFFFFFFU
 #define FP3_STSLO 0xFFFFFFFFU
 #define FP4_STSHI 0xFFFFFFFFU
-#define FP5_STEPON       (1U << 1)
+#define FP5_INMODE       (1U << 1)
 #define FP5_CLEAR        (1U << 2)
 #define FP5_MANUAL       (1U << 3)
 #define FP5_I2CCOUNT (32767U << 4)

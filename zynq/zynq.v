@@ -1048,6 +1048,8 @@ module Zynq #(parameter BIDIRCONSDA=1, parameter CLOCKDIVIDE=5) (
         .i2cstate (),
         .comand (),
         .status ()
+
+        ,.__swldad (__swldad)
     );
 
     // paper tape reader interface

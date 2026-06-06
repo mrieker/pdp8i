@@ -1219,7 +1219,7 @@ module X74HC193 (input yclock, zclock, zreset,
     assign p3 = qa;
     assign p2 = qb;
     assign p6 = qc;
-    assign p6 = qd;
+    assign p7 = qd;
 
     // carry out and borrow out
     assign p12 = ~ (  qa &   qb &   qc &   qd & ~ _up);

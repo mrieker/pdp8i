@@ -150,7 +150,7 @@ static PinDef const pindefs[] = {
     { "FP_CMDHI",        DEV_FP,  2, FP2_CMDHI,            true  },
     { "FP_STSLO",        DEV_FP,  3, FP3_STSLO,            false },
     { "FP_STSHI",        DEV_FP,  4, FP4_STSHI,            false },
-    { "FP_STEPON",       DEV_FP,  5, FP5_STEPON,           true  },
+    { "FP_INMODE",       DEV_FP,  5, FP5_INMODE,           false },
     { "FP_CLEAR",        DEV_FP,  5, FP5_CLEAR,            true  },
     { "FP_MANUAL",       DEV_FP,  5, FP5_MANUAL,           true  },
     { "FP_I2CCOUNT",     DEV_FP,  5, FP5_I2CCOUNT,         false },
@@ -278,7 +278,7 @@ int cmd_pin (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj *const
             int val;
             int rc  = Tcl_GetIntFromObj (interp, objv[i], &val);
             if (rc != TCL_OK) return rc;
-            if ((val < 0) || ((uint32_t) val >= 1ULL << width)) {
+            if ((width < 32) && ((val < 0) || ((uint32_t) val >= 1ULL << width))) {
                 Tcl_SetResultF (interp, "value 0%o too big for %s", val, name);
                 return TCL_ERROR;
             }

@@ -39,6 +39,8 @@ module pdp8ifpi2c (
     output[2:0] i2cstate,
     output[14:00] i2ccount,
     output[63:00] comand, status
+
+    ,output __swldad
 );
 
     reg clear, inmode, manual, startbit;
@@ -112,6 +114,8 @@ module pdp8ifpi2c (
                       (armraddr == 13) ? { 6'b0, ltspeed, i2cspeed } :
 
                        32'hDEADBEEF;
+
+    assign __swldad = switchrows[2][10];
 
     i2cmaster fpi2cintf (
         .CLOCK (CLOCK),

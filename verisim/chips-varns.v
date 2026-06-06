@@ -1612,7 +1612,7 @@ module X74HC193 (input yclock, zclock, zreset,
     assign p3 = qa;
     assign p2 = qb;
     assign p6 = qc;
-    assign p6 = qd;
+    assign p7 = qd;
 
     always @(posedge zclock) begin
         if (clr) begin
