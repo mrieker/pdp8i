@@ -127,6 +127,8 @@ static PinDef const pindefs[] = {
     { "lbIF",            DEV_8I, Z_RI, i_lbIF,         false },
 #endif
 
+    { "memcycctr",       DEV_8I, Z_RN, 0xFFFFFFFFU,    false },
+
     { "CM_ADDR",         DEV_CM, 1, CM_ADDR,               true  },
     { "CM_WRITE",        DEV_CM, 1, CM_WRITE,              true  },
     { "CM_DATA",         DEV_CM, 1, CM_DATA,               true  },
@@ -160,6 +162,10 @@ static PinDef const pindefs[] = {
     { "FP_I2CDAO",       DEV_FP,  5, FP5_I2CDAO,           true  },
     { "FP_I2CCLO",       DEV_FP,  5, FP5_I2CCLO,           true  },
     { "FP_LOCK",         DEV_FP,  6, FP6_LOCK,             true  },
+    { "FP_SETSSTEP",     DEV_FP, 11, fp11_swSSTEP,         true  },
+    { "FP_SETSTART",     DEV_FP, 11, fp11_swSTART,         true  },
+    { "FP_OVRSSTEP",     DEV_FP, 12, fp11_swSSTEP,         true  },
+    { "FP_OVRSTART",     DEV_FP, 12, fp11_swSTART,         true  },
     { "FP_MCPASSNO",     DEV_FP,  7, fp7_mcpassno,         true  },
     { "FP_I2CSPEED",     DEV_FP, 13, fp13_i2cspeed,        true  },
     { "FP_LTSPEED",      DEV_FP, 13, fp13_ltspeed,         true  },

@@ -63,7 +63,6 @@ void *Z8LU32::veriopen (int *fd_r)
         void *ptr = mmap (NULL, sizeof *pageptr, PROT_READ | PROT_WRITE, MAP_SHARED, shmfd, 0);
         if (ptr == MAP_FAILED) ABORT ();
         pageptr = (VeriPage *) ptr;
-        fprintf (stderr, "Z8LU32::veriopen*: pageptr=%p\n", pageptr);
 
         // make sure server process is running
         // user will have to restart it if not
@@ -78,7 +77,6 @@ void *Z8LU32::veriopen (int *fd_r)
         ptr = mmap (NULL, 4096, PROT_NONE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
         if (ptr == MAP_FAILED) ABORT ();
         nullpage = (Z8LU32 *) ptr;
-        fprintf (stderr, "Z8LU32::veriopen*: nullpage=%p\n", nullpage);
     }
     return (void *) nullpage;
 }

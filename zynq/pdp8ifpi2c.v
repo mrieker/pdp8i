@@ -39,8 +39,6 @@ module pdp8ifpi2c (
     output[2:0] i2cstate,
     output[14:00] i2ccount,
     output[63:00] comand, status
-
-    ,output __swldad
 );
 
     reg clear, inmode, manual, startbit;
@@ -115,8 +113,6 @@ module pdp8ifpi2c (
 
                        32'hDEADBEEF;
 
-    assign __swldad = switchrows[2][10];
-
     i2cmaster fpi2cintf (
         .CLOCK (CLOCK),
         .RESET (RESET | clear),
@@ -138,7 +134,7 @@ module pdp8ifpi2c (
             armlock  <= 0;
             clear    <= 0;
             inmode   <= 0;      // data pins not known to be in input mode
-            manual   <= 1;      // let console scan on its own by default
+            manual   <= 0;
             mcpassno <= 0;
             mcpltime <= 0;
             mcpltrow <= 7;
@@ -204,17 +200,17 @@ module pdp8ifpi2c (
             // ltrow  states...               i2c bytes...
             //    0    0 1 2 3 4 5 6 8 5 6 7   0+4+6+0+4+4+3+4+4+3+0 = 32
             //    1    0 1 2 3 4 5 6 7         4+4+6+0+4+4+3+0       = 25
-            //    2    0 1 2 3 4 5 6 7         4+4+6+0+4+4+3+0       = 25
-            //    3    0 1 2 3 4               4+4+6+0+0             = 14 = 1.4mS @ 100KHz; 83uS @ 1.7MHz
+            //    2    0 1 2 3 4               4+4+6+0+0             = 14 = 1.4mS @ 100KHz; 83uS @ 1.7MHz
+            //    3    0 1 2 3 4               0+4+6+0+0             = 10
             //    4    0 1 2 3 4 10 11         0+4+6+0+3+5+0         = 18
             //    5    0 1 2 3 4 10 11         0+4+6+0+3+5+0         = 18
             //    6    0 1 2 3 4 10 11         0+4+6+0+3+5+0         = 18
             //    7    0 1 2 3 4               0+4+6+0+0             = 10
-            //                                                  total 160 = 16mS @ 100KHz
+            //                                                  total 145 = 14.5mS @ 100KHz
 
-            //ltrow:    0                                  1                           2                           3                4                    5                    6                    7
-            //state:    1111222222...444455556668888555566600001111222222...4444555566600001111222222...4444555566600001111222222...1111222222...444AAAAA1111222222...444AAAAA1111222222...444AAAAA1111222222...
-            //liteon:   777 000000000000                           111111111111                222222222222                333333333333 444444444444         555555555555         666666666666         777777777
+            //ltrow:    0                                  1                           2                3            4                    5                    6                    7
+            //state:    1111222222...444455556668888555566600001111222222...4444555566600001111222222...1111222222...1111222222...444AAAAA1111222222...444AAAAA1111222222...444AAAAA1111222222...
+            //liteon:   777 000000000000                           111111111111                222222222222 333333333333 444444444444         555555555555         666666666666         777777777
             //              ^........^ ltspeed                              ^..^ 60*i2cspeed
 
             // total cycle time = 8*ltspeed + (160-48)*20*i2cspeed = 1600uS + 2240*300nS = 1600+672uS = 2272uS
@@ -288,11 +284,10 @@ module pdp8ifpi2c (
                     mcpltime <= mcpltime + 1;
                     // wait for light row displayed for 200uS
                     if (mcpltime >= ltspeed) begin
-                        // update like-numbered switch row
-                        //  if just displayed light row 0, update switch row 0
-                        //  if just displayed light row 1, update switch row 1
-                        //  if just displayed light row 2, update switch row 2
-                        if (mcpltrow <= 2) begin
+                        // update like-numbered switch row flipflops
+                        //  if just displayed light row 0, update switch row 0 then row 2 flipflops
+                        //  if just displayed light row 1, update switch row 1 flipflops
+                        if (mcpltrow <= 1) begin
                             ////$display ("pdp8ifpi2c*: sending switch row %o = %o", mcpswrow, switchrows[mcpswrow]);
                             // at this point, ldswrow0,1,2 are all high
                             // set data pins value to switch row and value:
@@ -310,6 +305,7 @@ module pdp8ifpi2c (
                         //  if just displayed light row 5, sense switch row 1
                         //  if just displayed light row 6, sense switch row 2
                         else if ((mcpltrow >= 4) & (mcpltrow <= 6)) begin
+                            ////$display ("pdp8ifpi2c*: sense physical switch row %o", mcpswrow);
                             // at this point, ldswrow0,1,2 are all high
                             // set data pins value to switch row:
                             //  0x14 <= 2'b11 6'b000000
@@ -349,6 +345,7 @@ module pdp8ifpi2c (
                     if (status[63:60] == 0) begin
                         // data outputs turned on, kerchunk value into flipflops
                         if (mcpswrow == 0) begin
+                            ////$display ("pdp8ifpi2c*: intermediate from switch row 0 to 2 (clocks data %o into swrow 0 flipflops)", switchrows[0]);
                             // doing swrow 0, transition iicsel from 1000 to 1011 might glitch
                             // so transition iicsel from 1000 to 1010 first
                             // by doing 0x15 <= 2'b10 val<05:00>
@@ -358,7 +355,7 @@ module pdp8ifpi2c (
                             startbit <= 1;
                             mcpstate <= 8;
                         end else begin
-                            ////$display ("pdp8ifpi2c*: clock switch %o data %o info flipflops", mcpswrow, switchrows[mcpswrow]);
+                            ////$display ("pdp8ifpi2c*: clock switch %o data %o into flipflops", mcpswrow, switchrows[mcpswrow]);
                             // doing swrow 1 or 2, transition iicsel from 1001 or 1010 to 1011 won't glitch
                             // drives ldswrow<n> high
                             // so do 0x15 <= 2'b11 val<05:00>
@@ -383,6 +380,7 @@ module pdp8ifpi2c (
                 // ...and is now cocked to clock into row 2
                 8: begin
                     if (status[63:60] == 0) begin
+                        ////$display ("pdp8ifpi2c*: clock switch 2 data %o into flipflops", switchrows[2]);
                         // ldswrow2 is now low after driving ldswrow0 high
                         // we must clock in proper swrow2 contents to drive ldswrow2 high
                         // ...as idle state of ldswrow0,1,2 is high
@@ -396,6 +394,7 @@ module pdp8ifpi2c (
                 // send command to read physical switch pins from bGPIO lines
                 10: begin
                     if (status[63:60] == 0) begin
+                        ////$display ("pdp8ifpi2c*: start reading physical switch row %o", mcpswrow);
                         // read switch pins from bGPIO: 0x12,0x13
                         command  <= { WR, 8'h40, WR, 8'h12, RS, WR, 8'h41, RD, RD, 28'b0 };
                         startbit <= 1;
@@ -407,6 +406,7 @@ module pdp8ifpi2c (
                 // then go on to display next light row
                 11: begin
                     if (status[63:60] == 0) begin
+                        ////$display ("pdp8ifpi2c*: read switch row %o got data %o", mcpswrow, { status[05:00], status[13:08] });
                         switchrows[mcpswrow] <= switchovrs[mcpswrow] & switchrows[mcpswrow] |
                                               ~ switchovrs[mcpswrow] & { status[05:00], status[13:08] };
                         mcpstate <= 0;

@@ -59,16 +59,6 @@ module pdp8isim (
     ,output swexam
     ,output swstart
     ,output swcont
-
-    ,output _ffreset
-    ,output ffswcont
-    ,output ffswdepos
-    ,output ffswexam
-    ,output ffswldad
-    ,output ffswsinst
-    ,output ffswsstep
-    ,output ffswstart
-    ,output ffswstop
 );
 
     wire zclock = CLOCK;
@@ -317,15 +307,15 @@ module pdp8isim (
         .swreg_10 (),
         .swreg_11 ()
 
-        ,._reset  (_ffreset)
-        ,.swcont  (ffswcont)
-        ,.swdepos (ffswdepos)
-        ,.swexam  (ffswexam)
-        ,.swldad  (ffswldad)
-        ,.swsinst (ffswsinst)
-        ,.swsstep (ffswsstep)
-        ,.swstart (ffswstart)
-        ,.swstop  (ffswstop)
+        ,._reset  ()
+        ,.swcont  ()
+        ,.swdepos ()
+        ,.swexam  ()
+        ,.swldad  ()
+        ,.swsinst ()
+        ,.swsstep ()
+        ,.swstart ()
+        ,.swstop  ()
     );
 
     ///////////////////////////

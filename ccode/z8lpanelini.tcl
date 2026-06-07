@@ -228,9 +228,7 @@ proc escapechr {ch} {
 # flick momentary switch on then off
 proc flicksw {swname} {
     setsw $swname 1
-    after 100
     setsw $swname 0
-    after 100
 }
 
 # get environment variable, return default value if not defined
@@ -257,8 +255,15 @@ proc getrestofttyline {{tmsec 30000}} {
 
 # halt and reset the CPU
 proc hardreset {} {
-    pin set nanocontin 1 fpgareset 1    ;# turn on fpga clocking, pulse fpga reset
-    pin set fpgareset 0 fp_manual 0     ;# enable automatic light/switch scanning
+    set oldsstep [pin fp_setsstep]
+    pin set nanocontin 1 fp_manual 0
+    pin set fp_ovrsstep 1 fp_ovrstart 1     ;# set START + SSTEP
+    pin set fp_setsstep 1 fp_setstart 1     ;# ...holds processor in reset state
+    pin set fpgareset 1 fpgareset 0         ;# pulse fpga reset
+    setsw start 0                           ;# release START
+    if {! $oldsstep} {
+        setsw sstep 0                       ;# release SSTEP
+    }
 }
 
 # convert integer to character
@@ -268,12 +273,15 @@ proc inttochar {ii} {
 }
 
 # deposit simple isz/iac test in memory
+#  then do 'startat 020' to start it
 proc isziactest {} {
+    hardreset
     assem 020 isz 030
     assem 021 jmp 020
     assem 022 iac
     assem 023 jmp 020
     disas 020 023
+    puts "do 'startat 020' to start it"
 }
 
 # load bin format tape file, return start address
@@ -709,8 +717,17 @@ proc rdmem {addr} {
     setsw ifld [expr {$addr >> 12}]
     setsw dfld [expr {$addr >> 12}]
     setsw sr [expr {$addr & 07777}]
+    set oldmc [pin memcycctr]
     flicksw ldad
-    return [getreg mb]
+    for {set i 0} {[pin memcycctr] == $oldmc} {incr i} {
+        after 1
+        if {$i > 1000} {error "timed out reading memory"}
+    }
+    for {set i 0} {[pin ots1]} {incr i} {
+        after 1
+        if {$i > 1000} {error "timed out reading memory"}
+    }
+    return [pin ombuf]
 }
 
 # send character to tty keyboard pipe
