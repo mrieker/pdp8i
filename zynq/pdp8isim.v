@@ -55,6 +55,20 @@ module pdp8isim (
     ,output[3:0] majst              // debug
     ,output run
     ,output swldad
+    ,output swdepos
+    ,output swexam
+    ,output swstart
+    ,output swcont
+
+    ,output _ffreset
+    ,output ffswcont
+    ,output ffswdepos
+    ,output ffswexam
+    ,output ffswldad
+    ,output ffswsinst
+    ,output ffswsstep
+    ,output ffswstart
+    ,output ffswstop
 );
 
     wire zclock = CLOCK;
@@ -302,6 +316,16 @@ module pdp8isim (
         .swreg_9  (),
         .swreg_10 (),
         .swreg_11 ()
+
+        ,._reset  (_ffreset)
+        ,.swcont  (ffswcont)
+        ,.swdepos (ffswdepos)
+        ,.swexam  (ffswexam)
+        ,.swldad  (ffswldad)
+        ,.swsinst (ffswsinst)
+        ,.swsstep (ffswsstep)
+        ,.swstart (ffswstart)
+        ,.swstop  (ffswstop)
     );
 
     ///////////////////////////
@@ -773,9 +797,13 @@ module pdp8isim (
     //  COMBINING BUS SIGNALS  //
     /////////////////////////////
 
-    assign majst  = ~ _busMAJST;
-    assign run    = ~ _busRUN;
-    assign swldad = ~ _busSWLDAD;
+    assign majst   = ~ _busMAJST;
+    assign run     = ~ _busRUN;
+    assign swldad  = ~ _busSWLDAD;
+    assign swdepos = ~ _busSWDEPOS;
+    assign swexam  = ~ _busSWEXAM;
+    assign swstart = ~ _busSWSTART;
+    assign swcont  = ~ _busSWCONT;
 
     // active low signals getting wire-anded on the backplane
     assign _busACCLEAR = _eaeACCLEAR  & ~ iACCLEAR;

@@ -286,7 +286,7 @@ module Zynq #(parameter BIDIRCONSDA=1, parameter CLOCKDIVIDE=5) (
     assign saxi_BRESP = 0;  // A3.4.4/A10.3 transfer OK
     assign saxi_RRESP = 0;  // A3.4.4/A10.3 transfer OK
 
-    reg[18:00] ilaarray[4095:0], ilardata;
+    reg[31:00] ilaarray[4095:0], ilardata;
     reg[11:00] ilaafter, ilaindex;
     reg ilaarmed;
 
@@ -327,8 +327,8 @@ module Zynq #(parameter BIDIRCONSDA=1, parameter CLOCKDIVIDE=5) (
         (readaddr        == 10'b0000001001) ? regctli    :
         (readaddr        == 10'b0000001110) ? memcycctr  :
         (readaddr        == 10'b0000010001) ? { ilaarmed, 3'b0, ilaafter, 4'b0, ilaindex } :
-        (readaddr        == 10'b0000010010) ? { 13'b0, ilardata[18:00] } :
-        (readaddr        == 10'b0000010011) ? { 32'b0                  } :
+        (readaddr        == 10'b0000010010) ? { ilardata[31:00] } :
+        (readaddr        == 10'b0000010011) ? { 32'b0           } :
         (readaddr[11:06] ==  6'b000010)     ? fpi2crdata :
         (readaddr[11:05] ==  7'b0000110)    ? rkardata   :
         (readaddr[11:05] ==  7'b0000111)    ? vcardata   :
@@ -711,7 +711,7 @@ module Zynq #(parameter BIDIRCONSDA=1, parameter CLOCKDIVIDE=5) (
     assign LEDoutB = 1;
 
     wire[3:0] sim_majst;
-    wire sim_run, sim_swldad, __swldad, __gpout;
+    wire sim_run, sim_swldad, sim_swdepos, sim_swexam, sim_swstart, sim_swcont;
 
     assign regctld[00]    = dev_iRESET;
     assign regctld[01]    = simit;
@@ -719,8 +719,11 @@ module Zynq #(parameter BIDIRCONSDA=1, parameter CLOCKDIVIDE=5) (
     assign regctld[03]    = sim_run;
     assign regctld[07:04] = sim_majst;
     assign regctld[08]    = sim_swldad;
-    assign regctld[09]    = __swldad;
-    assign regctld[31:28] = 4'h3;
+    assign regctld[09]    = sim_swdepos;
+    assign regctld[10]    = sim_swexam;
+    assign regctld[11]    = sim_swstart;
+    assign regctld[12]    = sim_swcont;
+    assign regctld[31:28] = 5'h3;
 
     assign regctlg[31:24] = 8'h11;
 
@@ -765,6 +768,20 @@ module Zynq #(parameter BIDIRCONSDA=1, parameter CLOCKDIVIDE=5) (
         ,.majst         (sim_majst)
         ,.run           (sim_run)
         ,.swldad        (sim_swldad)
+        ,.swdepos       (sim_swdepos)
+        ,.swexam        (sim_swexam)
+        ,.swstart       (sim_swstart)
+        ,.swcont        (sim_swcont)
+
+        ,._ffreset    (regctld[16])
+        ,.ffswcont    (regctld[17])
+        ,.ffswdepos   (regctld[18])
+        ,.ffswexam    (regctld[19])
+        ,.ffswldad    (regctld[20])
+        ,.ffswsinst   (regctld[21])
+        ,.ffswsstep   (regctld[22])
+        ,.ffswstart   (regctld[23])
+        ,.ffswstop    (regctld[24])
     );
 
     ///////////////////////
@@ -1049,7 +1066,7 @@ module Zynq #(parameter BIDIRCONSDA=1, parameter CLOCKDIVIDE=5) (
         .comand (),
         .status ()
 
-        ,.__swldad (__swldad)
+        ,.__swldad ()
     );
 
     // paper tape reader interface
@@ -1148,6 +1165,14 @@ module Zynq #(parameter BIDIRCONSDA=1, parameter CLOCKDIVIDE=5) (
                 // capture signals while before trigger and for ilaafter cycles thereafter
                 if (ilaarmed | (ilaafter != 0)) begin
                     ilaarray[ilaindex] <= {
+                        fpgareset,
+                        regctld[24:16],
+                        sim_iRESET,
+                        sim_swldad,
+                        sim_swdepos,
+                        sim_swexam,
+                        sim_swstart,
+                        sim_swcont,
                         clkdiv,
                         sim_iCLOCK,
                         sim_majst,
@@ -1166,7 +1191,7 @@ module Zynq #(parameter BIDIRCONSDA=1, parameter CLOCKDIVIDE=5) (
                 end
 
                 // check trigger condition
-                if (lastldad & ~ sim_swldad) begin
+                if (sim_run) begin
                     ilaarmed <= 0;
                 end
             end
