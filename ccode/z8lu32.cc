@@ -36,6 +36,7 @@
 #include "z8lutil.h"
 
 static int mypid, serverpid;
+static int shmfd = -1;
 static Z8LU32 *nullpage;
 static VeriPage *pageptr;
 
@@ -54,7 +55,7 @@ void *Z8LU32::veriopen (int *fd_r)
 
         // access VeriPage struct at beginning of shared memory page
         // user will have to start verizynq daemon if not there
-        int shmfd = shm_open (VERIZYNQ_SHMNM, O_RDWR, 0);
+        shmfd = shm_open (VERIZYNQ_SHMNM, O_RDWR, 0);
         if (shmfd < 0) {
             fprintf (stderr, "Z8LU32::veriopen: error opening %s: %m\n", VERIZYNQ_SHMNM);
             ABORT ();
@@ -78,6 +79,12 @@ void *Z8LU32::veriopen (int *fd_r)
         if (ptr == MAP_FAILED) ABORT ();
         nullpage = (Z8LU32 *) ptr;
     }
+
+    // return fd for locking
+    // return a dup() in case caller closes it
+    *fd_r = dup (shmfd);
+    if (*fd_r < 0) ABORT ();
+
     return (void *) nullpage;
 }
 

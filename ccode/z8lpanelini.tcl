@@ -36,6 +36,7 @@ proc helpini {} {
     puts "  startat <addr>          - load pc and start at given address"
     puts "  stepit                  - step one cycle then dump"
     puts "  steploop                - step one cycle, dump, then loop on enter key"
+    puts "  ttyprtest               - deposit simple tty printer test in memory"
     puts "  wait                    - wait for CTRLC or STOP"
     puts "  waitforttypr            - wait for prompt string on tty"
     puts "  wrmem <addr> <data>     - write memory at the given address"
@@ -789,6 +790,25 @@ proc steploop {} {
         set line [gets stdin]
         if {$line != ""} break
     }
+}
+
+# load a simple tty test program into memory
+proc ttyprtest {} {
+    hardreset
+    assem 040 tad 060   ;# load 0040 in acum
+    assem 041 iot 06046 ;# start printing char
+    assem 042 iot 06041 ;# skip if printer ready
+    assem 043 jmp 042   ;# repeat if not ready
+    assem 044 iac       ;# inc acum
+    assem 045 and 061   ;# mask to 7 bits
+    assem 046 sza       ;# see if wrapped
+    assem 047 jmp 041   ;# no wrap, print next char
+    assem 050 jmp 040   ;# wrap, skip control chars
+    wrmem 060 00040
+    wrmem 061 00177
+    disas 040 050
+    puts "do './z8ltty' on another screen"
+    puts "do 'startat 040' to start test"
 }
 
 # wait for control-C or processor stopped
