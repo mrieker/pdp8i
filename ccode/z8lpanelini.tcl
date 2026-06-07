@@ -306,8 +306,6 @@ proc loadbin {fname} {
     set verify [dict create]
 
     set field 0
-    setsw ifld 0
-    setsw dfld 0
 
     puts "loadbin: loading $fname..."
 
@@ -364,25 +362,8 @@ proc loadbin {fname} {
             puts -nonewline [format "  %05o / %04o\r" $addr $data]
             flush stdout
 
-            # do 'load address' if not sequential
-            if {$nextaddr != $addr} {
-                setsw dfld [expr {$addr >> 12}]
-                setsw ifld [expr {$addr >> 12}]
-                setsw sr [expr {$addr & 07777}]
-                flicksw ldad
-            }
-
-            # deposit the data
-            setsw sr $data
-            flicksw dep
-
-            # verify resultant lights
-            set actma [getreg ma]
-            set actmb [getreg mb]
-            if {($actma != ($addr & 007777)) || ($actmb != $data)} {
-                close $fp
-                error [format "%04o %04o showed %04o %04o" $addr $data $actma $actmb]
-            }
+            # deposit data
+            wrmem $addr $data
 
             # set up for next byte
             set addr [expr {($addr & 070000) | (($addr + 1) & 007777)}]
