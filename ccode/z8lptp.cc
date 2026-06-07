@@ -157,7 +157,7 @@ int main (int argc, char **argv)
     }
 
     Z8LPage z8p;
-    uint32_t volatile *ptpat = z8p.findev ("PP", NULL, NULL, true, killit);
+    Z8LU32 *ptpat = z8p.findev ("PP", NULL, NULL, true, killit);
     if (clear) {
         ptpat[1]  = PTP_ENAB;   // enable pdp8lptp.v to process io instructions
     } else {

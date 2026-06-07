@@ -60,7 +60,7 @@
 #define SOUNDRATE 8000
 #define UDPPORT 13287
 
-static uint32_t volatile *pbat;
+static Z8LU32 *pbat;
 
 static int soundclient (char const *hostname);
 static void soundserver ();

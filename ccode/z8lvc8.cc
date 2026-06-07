@@ -199,7 +199,7 @@ static void thread ()
 {
     // access pdp8lvc8.v registers
     Z8LPage z8p;
-    uint32_t volatile *vcat = z8p.findev ("VC", NULL, NULL, true);
+    Z8LU32 *vcat = z8p.findev ("VC", NULL, NULL, true);
     switch (vc8type) {
         case VC8TypeE: {
             vcat[2] = VC2_TYPEE;

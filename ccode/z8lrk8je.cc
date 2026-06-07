@@ -93,7 +93,7 @@ static TclFunDef const fundefs[] = {
 static bool volatile exiting;
 static pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
 static pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
-static uint32_t volatile *rkat;
+static Z8LU32 *rkat;
 static Z8LPage *z8p;
 
 static int loaddisk (bool readwrite, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);

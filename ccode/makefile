@@ -1,11 +1,51 @@
 CFLAGS ?= -O2 -Werror
 MACH   := $(shell uname -m)
-TCLINC := -I$(shell ./tclinc.sh)
-GPP    := g++ $(CFLAGS) $(TCLINC) -std=c++11 -g -Wall -fPIC
 LNKFLG := -lpthread -lreadline -lrt -l$(shell ./tcllib.sh)
 
+EXECUTEABLES := z8ldump.$(MACH) \
+	z8lila.$(MACH) z8lpanel.$(MACH) z8lpbit.$(MACH) \
+	z8lptp.$(MACH) z8lptr.$(MACH) z8lrk8je.$(MACH) \
+	z8ltc08.$(MACH) z8ltty.$(MACH) z8lvc8.$(MACH)
+
+LIBOBJS := \
+	assemble.$(MACH).o \
+	cmd_pin.$(MACH).o \
+	disassemble.$(MACH).o \
+	i2czlib.$(MACH).o \
+	readprompt.$(MACH).o \
+	tclmain.$(MACH).o \
+	z8lutil.$(MACH).o
+
+VFILES := \
+	../verisim/chips-10ns.v \
+	../verisim/mcp23017.v \
+	../kicads/console/console.v \
+	../kicads/extarith/extarith.v \
+	../kicads/extmemory/extmemory.v \
+	../kicads/processor/processor.v \
+	../zynq/zynq.v \
+	../zynq/pdp8ldc02.v \
+	../zynq/pdp8lrk8je.v \
+	../zynq/pdp8icmem.v \
+	../zynq/pdp8isim.v \
+	../zynq/pdp8ltc08.v \
+	../zynq/pdp8ifpi2c.v \
+	../zynq/pdp8lptr.v \
+	../zynq/pdp8lpbit.v \
+	../zynq/pdp8lptp.v \
+	../zynq/pdp8ltty.v \
+	../zynq/pdp8lvc8.v \
+	../zynq/dmareq.v \
+	../zynq/i2cmaster.v
+
 ifeq ($(MACH),armv7l)
-	LNKFLG := $(LNKFLG) -latomic
+	LNKFLG  := $(LNKFLG) -latomic
+endif
+
+ifeq ($(MACH),x86_64)
+	CFLAGS  := $(CFLAGS) -DVERIZYNQ
+	EXECUTEABLES := $(EXECUTEABLES) verizynq.$(MACH)
+	LIBOBJS := $(LIBOBJS) z8lu32.$(MACH).o
 endif
 
 ifneq (,$(wildcard /usr/include/pulse/simple.h))
@@ -16,21 +56,14 @@ else
 	PALIB :=
 endif
 
-LIBS = lib.$(MACH).a
+LIBS   := lib.$(MACH).a
 
-default: z8ldump.$(MACH) \
-	z8lila.$(MACH) z8lpanel.$(MACH) z8lpbit.$(MACH) \
-	z8lptp.$(MACH) z8lptr.$(MACH) z8lrk8je.$(MACH) \
-	z8ltc08.$(MACH) z8ltty.$(MACH) z8lvc8.$(MACH)
+TCLINC := -I$(shell ./tclinc.sh)
+GPP    := g++ $(CFLAGS) $(TCLINC) -std=c++11 -g -Wall -fPIC
 
-lib.$(MACH).a: \
-		assemble.$(MACH).o \
-		cmd_pin.$(MACH).o \
-		disassemble.$(MACH).o \
-		i2czlib.$(MACH).o \
-		readprompt.$(MACH).o \
-		tclmain.$(MACH).o \
-		z8lutil.$(MACH).o
+default: $(EXECUTEABLES)
+
+lib.$(MACH).a: $(LIBOBJS)
 	rm -f lib.$(MACH).a
 	ar rc $@ $^
 
@@ -44,41 +77,33 @@ dttest.bin: dttest.asm
 	pdp8v/asm/link -o dttest.oct dttest.obj > dttest.map
 	pdp8v/asm/octtobin < dttest.oct > dttest.bin
 
-z8ldump.$(MACH): z8ldump.$(MACH).o $(LIBS)
-	$(GPP) -o $@ $^ -lpthread
+verizynq.$(MACH): verizynq.$(MACH).o verilated.$(MACH).o obj_dir/VZynq__ALL.a $(LIBS)
+	$(GPP) -o $@ $^ obj_dir/VZynq__ALL.a $(LNKFLG)
 
-z8lila.$(MACH): z8lila.$(MACH).o $(LIBS)
-	$(GPP) -o $@ $^ -lpthread
+verizynq.$(MACH).o: verizynq.cc *.h obj_dir/VZynq.h
+	$(GPP) -I/usr/share/verilator/include/ -c -o $@ $<
 
-z8lpanel.$(MACH): z8lpanel.$(MACH).o $(LIBS)
-	$(GPP) -o $@ $^ $(LNKFLG)
+verilated.$(MACH).o: /usr/share/verilator/include/verilated.cpp
+	$(GPP) -Wno-sign-compare -c -o verilated.$(MACH).o -I/usr/share/verilator/include/ /usr/share/verilator/include/verilated.cpp
 
 z8lpbit.$(MACH): z8lpbit.$(MACH).o $(LIBS)
 	$(GPP) -o $@ $^ $(LNKFLG) $(PALIB)
 
-z8lptp.$(MACH): z8lptp.$(MACH).o $(LIBS)
-	$(GPP) -o $@ $^ $(LNKFLG)
-
-z8lptr.$(MACH): z8lptr.$(MACH).o $(LIBS)
-	$(GPP) -o $@ $^ $(LNKFLG)
-
-z8lrk8je.$(MACH): z8lrk8je.$(MACH).o $(LIBS)
-	$(GPP) -o $@ $^ $(LNKFLG)
-
-z8ltc08.$(MACH): z8ltc08.$(MACH).o $(LIBS)
-	$(GPP) -o $@ $^ $(LNKFLG)
-
-z8ltrace.$(MACH): z8ltrace.$(MACH).o $(LIBS)
-	$(GPP) -o $@ $^ -lpthread
-
-z8ltty.$(MACH): z8ltty.$(MACH).o $(LIBS)
-	$(GPP) -o $@ $^ $(LNKFLG)
-
 z8lvc8.$(MACH): z8lvc8.$(MACH).o $(LIBS)
-	$(GPP) -o $@ $^ -lX11
+	$(GPP) -o $@ $^ $(LNKFLG) -lX11
+
+%.$(MACH): %.$(MACH).o $(LIBS)
+	$(GPP) -o $@ $^ $(LNKFLG)
 
 %.$(MACH).o: %.cc *.h
 	$(GPP) -DHASPA=$(HASPA) -c -o $@ $<
+
+obj_dir/VZynq__ALL.a: obj_dir/VZynq.mk
+	make -C obj_dir -f VZynq.mk
+
+obj_dir/VZynq.cpp obj_dir/VZynq.h obj_dir/VZynq.mk: $(VFILES)
+	rm -rf obj_dir
+	verilator --cc --top-module Zynq $(VFILES)
 
 doubleroll-8l.bin: doubleroll-8l.asm
 	pdp8v/asm/assemble doubleroll-8l.asm doubleroll-8l.obj > doubleroll-8l.lis

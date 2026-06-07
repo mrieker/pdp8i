@@ -70,7 +70,7 @@ int main (int argc, char **argv)
     }
 
     Z8LPage z8p;
-    uint32_t volatile *pdpat = z8p.findev ("8I", NULL, NULL, false);
+    Z8LU32 *pdpat = z8p.findev ("8I", NULL, NULL, false);
 
     uint32_t ctl;
     if (asisflag) {

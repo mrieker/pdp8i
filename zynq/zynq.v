@@ -126,7 +126,8 @@ module Zynq #(parameter BIDIRCONSDA=1, parameter CLOCKDIVIDE=5) (
     //  arm_i... : signals from arm processor as an internal io device (merged onto dev_i... bus)
     //  arm uses dev_o... signals instead of having arm_o... signals
 
-    wire[31:00] regctla, regctlb, regctlc, regctld, regctle, regctlf, regctlg, regctlh, regctli;
+    wire[31:00] regctla, regctlb, regctlc, regctld, regctle, regctlf, regctlg, regctli;
+    reg[31:00] regctlh;
 
     wire[11:00] sim_oACUM;
     wire        sim_oBRKCYC;
@@ -640,12 +641,12 @@ module Zynq #(parameter BIDIRCONSDA=1, parameter CLOCKDIVIDE=5) (
     assign regctlf[27]    = dev_oTS4;
     assign regctlf[31:28] = 0;
 
-    assign regctlh = 0;
     assign regctli = 0;
 
     // count memory cycles
     // dectape uses it for timing in z8ltc08.cc
     always @(posedge CLOCK) begin
+        regctlh <= RESET_N ? regctlh + 1 : 0;
         if (~ RESET_N) begin
             memcycctr <= 0;
         end else if (~ lastts3 & dev_oTS3) begin
@@ -723,7 +724,7 @@ module Zynq #(parameter BIDIRCONSDA=1, parameter CLOCKDIVIDE=5) (
     assign regctld[10]    = sim_swexam;
     assign regctld[11]    = sim_swstart;
     assign regctld[12]    = sim_swcont;
-    assign regctld[31:28] = 5'h3;
+    assign regctld[31:28] = 4'h3;
 
     assign regctlg[31:24] = 8'h11;
 
@@ -1170,9 +1171,6 @@ module Zynq #(parameter BIDIRCONSDA=1, parameter CLOCKDIVIDE=5) (
                         sim_iRESET,
                         sim_swldad,
                         sim_swdepos,
-                        sim_swexam,
-                        sim_swstart,
-                        sim_swcont,
                         clkdiv,
                         sim_iCLOCK,
                         sim_majst,

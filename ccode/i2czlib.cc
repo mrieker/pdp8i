@@ -242,9 +242,9 @@ void I2CZLib::writepads (Z8LPanel const *pads)
     ASSERT (fp7_mcpltrow == 0x000001C0U);
     uint32_t begnum = fpat[7] & 0xFFFFFFC0U;
     uint32_t nownum;
-    int i = 0;
+    uint32_t zrh = pdpat[Z_RH];
     do {
-        if (++ i > 100) {
+        if (pdpat[Z_RH] - zrh > 1000000) {  // give it 10mS
             fprintf (stderr, "I2CZLib::writepads: timed out\n");
             ABORT ();   // should take 1.68mS
         }

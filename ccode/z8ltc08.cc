@@ -133,9 +133,9 @@ static pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 static uint16_t ocarray[4096];
 static uint16_t status_a, status_b;
 static uint32_t cycles;
-static uint32_t volatile *pdpat;
-static uint32_t volatile *tcat;
-static uint32_t volatile *xmemat;
+static Z8LU32 *pdpat;
+static Z8LU32 *tcat;
+static Z8LU32 *xmemat;
 static Z8LPage *z8p;
 
 static int loadtape (bool readwrite, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);

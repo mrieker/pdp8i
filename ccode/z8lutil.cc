@@ -36,14 +36,15 @@ uint32_t Z8LPage::mypid = getpid ();
 
 Z8LPage::Z8LPage ()
 {
-    extmemptr = NULL;
     zynqpage = NULL;
     zynqptr = NULL;
 
     cmemat = NULL;
     xmemat = NULL;
-    extmemat = NULL;
 
+#ifdef VERIZYNQ
+    zynqptr = Z8LU32::veriopen (&zynqfd);
+#else
     zynqfd = open ("/proc/zynqpdp8l", O_RDWR);
     if (zynqfd < 0) {
         fprintf (stderr, "Z8LPage::Z8LPage: error opening /proc/zynqpdp8l: %m\n");
@@ -55,22 +56,20 @@ Z8LPage::Z8LPage ()
         fprintf (stderr, "Z8LPage::Z8LPage: error mmapping /proc/zynqpdp8l: %m\n");
         ABORT ();
     }
+#endif
 
-    zynqpage = (uint32_t volatile *) zynqptr;
+    zynqpage = (Z8LU32 *) zynqptr;
 }
 
 Z8LPage::~Z8LPage ()
 {
     if (zynqptr != NULL) munmap (zynqptr, 4096);
-    if (extmemptr != NULL) munmap (extmemptr, 0x20000);
     close (zynqfd);
     zynqpage = NULL;
     zynqptr = NULL;
-    extmemptr = NULL;
     zynqfd = -1;
     cmemat = NULL;
     xmemat = NULL;
-    extmemat = NULL;
 }
 
 // find a device in the Z8L page
@@ -84,10 +83,10 @@ Z8LPage::~Z8LPage ()
 //         false: don't bother locking
 //  output:
 //   returns pointer to dev
-uint32_t volatile *Z8LPage::findev (char const *id, bool (*entry) (void *param, uint32_t volatile *dev), void *param, bool lockit, bool killit)
+Z8LU32 *Z8LPage::findev (char const *id, bool (*entry) (void *param, Z8LU32 *dev), void *param, bool lockit, bool killit)
 {
     for (int idx = 0; idx < 1024;) {
-        uint32_t volatile *dev = &zynqpage[idx];
+        Z8LU32 *dev = &zynqpage[idx];
         int len = 2 << ((*dev >> 12) & 15);
         if (idx + len > 1024) break;
         if ((id == NULL) || (((*dev >> 24) == (uint8_t) id[0]) && (((*dev >> 16) & 255) == (uint8_t) id[1]))) {
@@ -106,31 +105,17 @@ uint32_t volatile *Z8LPage::findev (char const *id, bool (*entry) (void *param, 
     return NULL;
 }
 
-// get a pointer to the 32K-word memory chip in the FPGA
-// this mapping is created by extmemmap.v
-uint32_t volatile *Z8LPage::extmem ()
-{
-    if (extmemptr == NULL) {
-        extmemptr = mmap (NULL, 0x20000, PROT_READ | PROT_WRITE, MAP_SHARED, zynqfd, 0x20000);
-        if (extmemptr == MAP_FAILED) {
-            fprintf (stderr, "Z8LPage::extmem: error mmapping /proc/zynqpdp8l: %m\n");
-            ABORT ();
-        }
-    }
-    return (uint32_t volatile *) extmemptr;
-}
-
 // lock a sub-device
 //  input:
 //   start = first register of sub-device to lock
 //   nwords = number of registers starting at 'start'
 //   killit = true: try to kill other process if locked
 //           false: abort if already locked
-void Z8LPage::locksubdev (uint32_t volatile *start, int nwords, bool killit)
+void Z8LPage::locksubdev (Z8LU32 *start, int nwords, bool killit)
 {
     // find device that contains the start word
     int len, ofs;
-    uint32_t volatile *dev;
+    Z8LU32 *dev;
     for (int idx = 0; idx < 1024;) {
         dev = &zynqpage[idx];
         len = 2 << ((*dev >> 12) & 15);
@@ -265,7 +250,7 @@ void Z8LPage::cmunlk ()
 }
 
 // format shadow string
-char *formatshadow (uint32_t volatile *shat)
+char *formatshadow (uint32_t *shat)
 {
     static char const *const msstr[] = { "--", "F ", "D ", "E ", "WC", "CA", "BR", "IA",
                                          "ST", "09", "10", "11", "12", "13", "14", "15" };

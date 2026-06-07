@@ -78,12 +78,12 @@ static uint32_t cps = 10;
 static uint32_t punchbytes;
 static uint32_t readerbytes;
 static uint32_t readersize;
-static uint32_t volatile *dcreg;
-static uint32_t volatile *ttyat;
+static Z8LU32 *dcreg;
+static Z8LU32 *ttyat;
 static uint8_t punchmask;
 static uint8_t readermask;
 
-static bool findtt (void *param, uint32_t volatile *ttyat);
+static bool findtt (void *param, Z8LU32 *ttyat);
 static bool stoponcheck (TTYStopOn *const stopon, char prchar);
 static void sigrunhand (int signum);
 
@@ -174,7 +174,7 @@ int main (int argc, char **argv)
             fprintf (stderr, "port number %o must be in range 0..5\n", port);
             return 1;
         }
-        uint32_t volatile *dcat = z8p.findev ("DC", NULL, NULL, false, killit);
+        Z8LU32 *dcat = z8p.findev ("DC", NULL, NULL, false, killit);
         dcat[1]   = 0x80000000U;    // enable board to process io instructions
         dcreg     = &dcat[2+port];  // point to register for this terminal
         getprchar = dc_getprchar;   // set up get/put functions
@@ -204,7 +204,7 @@ int main (int argc, char **argv)
 
 
 
-static bool findtt (void *param, uint32_t volatile *ttyat)
+static bool findtt (void *param, Z8LU32 *ttyat)
 {
     int port = *(int *) param;
     if (ttyat == NULL) {

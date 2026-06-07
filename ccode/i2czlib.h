@@ -85,8 +85,8 @@ struct I2CZLib {
     void loop52 ();
 
 private:
-    uint32_t volatile *pdpat;
-    uint32_t volatile *fpat;
+    Z8LU32 *pdpat;
+    Z8LU32 *fpat;
     Z8LPage *z8p;
 };
 

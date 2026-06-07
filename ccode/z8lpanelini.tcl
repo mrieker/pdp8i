@@ -257,10 +257,8 @@ proc getrestofttyline {{tmsec 30000}} {
 
 # halt and reset the CPU
 proc hardreset {} {
-    set simit [pin get simit]                       ;# save simit
-    pin set nanocontin 1 fpgareset 1 fpgareset 0    ;# turn on fpga clocking, pulse fpga reset
-    pin set simit $simit                            ;# restore simit
-    pin set fp_manual 0                             ;# enable automatic light/switch scanning
+    pin set nanocontin 1 fpgareset 1    ;# turn on fpga clocking, pulse fpga reset
+    pin set fpgareset 0 fp_manual 0     ;# enable automatic light/switch scanning
 }
 
 # convert integer to character

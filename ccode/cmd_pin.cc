@@ -41,7 +41,7 @@ struct PinDef {
 #define DEV_TT 2
 #define DEV_FP 3
 
-static uint32_t volatile *devs[4];
+static Z8LU32 *devs[4];
 
 static PinDef const pindefs[] = {
 
@@ -193,7 +193,7 @@ int cmd_pin (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj *const
 
     if ((objc == 2) && (strcasecmp (Tcl_GetString (objv[1]), "list") == 0)) {
         for (PinDef const *pte = pindefs; pte->name[0] != 0; pte ++) {
-            uint32_t volatile *ptr = devs[pte->dev];
+            Z8LU32 *ptr = devs[pte->dev];
             printf ("  %-16s  %c%c[%2u]  %08X\n",
                 pte->name, (ptr[0] >> 24) & 0xFFU, (ptr[0] >> 16) & 0xFFU, pte->reg, pte->mask);
         }
@@ -237,7 +237,7 @@ int cmd_pin (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj *const
         bool writeable;
         int width;
         uint32_t mask;
-        uint32_t volatile *ptr;
+        Z8LU32 *ptr;
 
         // signalname
         {

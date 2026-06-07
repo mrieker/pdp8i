@@ -118,7 +118,7 @@ int main (int argc, char **argv)
     uint32_t fsize = statbuf.st_size;
 
     Z8LPage z8p;
-    uint32_t volatile *ptrat = z8p.findev ("PR", NULL, NULL, true, killit);
+    Z8LU32 *ptrat = z8p.findev ("PR", NULL, NULL, true, killit);
     if (clear) {
         ptrat[1]  = PTR_ENAB;   // enable pdp8lptr.v to process io instructions
     } else {

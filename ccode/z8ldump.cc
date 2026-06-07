@@ -115,7 +115,7 @@ int main (int argc, char **argv)
     }
 
     Z8LPage z8p;
-    uint32_t volatile *pdpat = z8p.findev ("8I", NULL, NULL, false);
+    Z8LU32 *pdpat = z8p.findev ("8I", NULL, NULL, false);
 
     // maybe just dump the page and exit
     if (pagemode) {
@@ -179,8 +179,13 @@ int main (int argc, char **argv)
         printf ("  regctld=%08X             lbIF=%o                 %s", z8ls[4],                                            pads.light.ifld,                    eol);
         printf ("  regctlg=%08X%s", z8ls[7], eol);
 
-        for (int i = 0; i < 1024;) {
+        for (int i = 0; i < pagelen;) {
             uint32_t idver = z8ls[i];
+            if (idver == 0xDEADBEEF) {
+                pagelen = i;
+                if (oncemode) printf ("\npagelen=%d\n", pagelen);
+                break;
+            }
             if (((idver >> 24) == 'X') && (((idver >> 16) & 255) == 'M')) {
                 printf ("%sVERSION=%08X XM  enlo4k=%o  enable=%o  ifld=%o  dfld=%o  field=%o  _mwdone=%o  _mrdone=%o  os8zap=%o,step=%o%s",
                     eol,
