@@ -21,6 +21,7 @@
 #ifndef _Z8LUTIL_H
 #define _Z8LUTIL_H
 
+#include <pthread.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -78,20 +79,21 @@ struct Z8LPage {
     Z8LU32 *findev (char const *id, bool (*entry) (void *param, Z8LU32 *dev), void *param, bool lockit, bool killit = false);
     void locksubdev (Z8LU32 *start, int nwords, bool killit);
 
-    uint32_t dmacycle (uint32_t cm, uint32_t cm2);
-    void dmaflush ();
+    uint32_t dmacycle (uint32_t cm);
     void cmlock ();
     void cmunlk ();
 
 private:
+    int mypid;
     int zynqfd;
-    Z8LU32 *cmemat;
-    Z8LU32 *xmemat;
-    Z8LU32 *zynqpage;
+    pthread_mutex_t dmamtx;
     void *zynqptr;
-
-    static uint32_t mypid;
+    Z8LU32 *cmemat;
+    Z8LU32 *pdpat;
+    Z8LU32 *zynqpage;
 };
+
+extern Z8LPage z8lpage;
 
 char *formatshadow (uint32_t *shat);
 uint32_t randbits (int nbits);

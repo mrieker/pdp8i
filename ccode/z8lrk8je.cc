@@ -94,7 +94,6 @@ static bool volatile exiting;
 static pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
 static pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 static Z8LU32 *rkat;
-static Z8LPage *z8p;
 
 static int loaddisk (bool readwrite, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
 static bool loadfile (Tcl_Interp *interp, bool readwrite, int diskno, char const *filenm);
@@ -158,8 +157,7 @@ int main (int argc, char **argv)
         break;
     }
 
-    z8p  = new Z8LPage ();
-    rkat = z8p->findev ("RK", NULL, NULL, true, killit);
+    rkat = z8lpage.findev ("RK", NULL, NULL, true, killit);
     rkat[RK_FLG] = F_ENABLE;    // enable board to process io instructions
 
     nsperus = 1000;
@@ -428,10 +426,9 @@ void *thread (void *dummy)
                     }
                     for (icnt = 0; icnt < wcnt; icnt ++) {
                         uint16_t xaddr = (xma & 070000) | ((xma + icnt) & 007777);
-                        z8p->dmacycle (CM_ENAB | (temp[icnt] & 07777) * CM_DATA0 | CM_WRITE | xaddr * CM_ADDR0, 0);
+                        z8lpage.dmacycle (INS (temp[icnt], CM_DATA) | CM_WRITE | INS (xaddr, CM_ADDR));
                     }
                     memaddr = (memaddr + wcnt) & 07777;
-                    z8p->dmaflush ();
                     SETST (ST_DONE);                                            // done
                     break;
                 }
@@ -456,8 +453,8 @@ void *thread (void *dummy)
                     ASSERT (wcnt * 2 <= sizeof temp);
                     for (icnt = 0; icnt < wcnt; icnt ++) {
                         uint16_t xaddr = (xma & 070000) | ((xma + icnt) & 007777);
-                        uint32_t cm = z8p->dmacycle (CM_ENAB | xaddr * CM_ADDR0, 0);
-                        temp[icnt] = (cm & CM_DATA) / CM_DATA0;
+                        uint32_t cm = z8lpage.dmacycle (INS (xaddr, CM_ADDR));
+                        temp[icnt] = EXT (cm, CM_DATA);
                     }
                     if (wcnt < 256) memset (&temp[wcnt], 0, 512 - 2 * wcnt);
                     rc = pwrite (fd, temp, 512, blknum * 512);

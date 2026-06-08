@@ -124,8 +124,7 @@ int main (int argc, char **argv)
         return 1;
     }
 
-    Z8LPage z8p;
-    pbat = z8p.findev ("PB", NULL, NULL, false);
+    pbat = z8lpage.findev ("PB", NULL, NULL, false);
     pbat[1] = (doiszac ? (1U << 31) : 0) | (width << 13);
 
     if (sound != NULL) {

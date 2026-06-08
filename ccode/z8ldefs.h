@@ -142,22 +142,17 @@
 
 #define MS_NAMES "????0","FETCH","DEFER","EXEC","WRDCT","CURAD","BREAK","INTAK","DEPOS","EXAM","???10","???11","???12","???13","???14","???15"
 
-// pdp8lcmem.v registers
+// pdp8icmem.v registers
 #define CM_ADDR  (077777U << 0)
 #define CM_WRITE (1U << 15)
 #define CM_DATA  (07777U << 16)
-#define CM_BUSY  (1U << 28)
-#define CM_DONE  (1U << 29)
+#define CM_CAINC (1U << 28)
+#define CM_3CYCL (1U << 29)
 #define CM_WCOVF (1U << 30)
-#define CM_ENAB  (1U << 31)
-#define CM_ADDR0 (1U <<  0)
-#define CM_DATA0 (1U << 16)
+#define CM_BUSY  (1U << 31)
 
-#define CM2_NOBRK (1U << 29)
-#define CM2_CAINC (1U << 30)
-#define CM2_3CYCL (1U << 31)
-
-#define CM3 (0xFFFFFFFFU)
+#define CM2_BGNT (1U << 0)
+#define CM3_LOCK (0xFFFFFFFFU)
 
 // pdp8ltty.v registers
 #define Z_TTYVER 0

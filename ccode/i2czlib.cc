@@ -35,21 +35,14 @@
 
 I2CZLib::I2CZLib ()
 {
-    z8p   = NULL;
     pdpat = NULL;
     fpat  = NULL;
-
-    z8p   = new Z8LPage ();
-    pdpat = z8p->findev ("8I", NULL, NULL, false);
-    fpat  = z8p->findev ("FP", NULL, NULL, false);
+    pdpat = z8lpage.findev ("8I", NULL, NULL, false);
+    fpat  = z8lpage.findev ("FP", NULL, NULL, false);
 }
 
 I2CZLib::~I2CZLib ()
 {
-    if (z8p != NULL) {
-        delete z8p;
-    }
-    z8p   = NULL;
     pdpat = NULL;
     fpat  = NULL;
 }

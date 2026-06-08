@@ -136,7 +136,6 @@ static uint32_t cycles;
 static Z8LU32 *pdpat;
 static Z8LU32 *tcat;
 static Z8LU32 *xmemat;
-static Z8LPage *z8p;
 
 static int loadtape (bool readwrite, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
 static bool loadfile (Tcl_Interp *interp, bool readwrite, int driveno, char const *filenm);
@@ -224,10 +223,9 @@ int main (int argc, char **argv)
         break;
     }
 
-    z8p    = new Z8LPage ();
-    pdpat  = z8p->findev ("8L", NULL, NULL, false);
-    tcat   = z8p->findev ("TC", NULL, NULL, true, killit);
-    xmemat = z8p->findev ("XM", NULL, NULL, false);
+    pdpat  = z8lpage.findev ("8L", NULL, NULL, false);
+    tcat   = z8lpage.findev ("TC", NULL, NULL, true, killit);
+    xmemat = z8lpage.findev ("XM", NULL, NULL, false);
 
     tcat[1] = TC_ENABLE;    // enable board to process io instructions
 
@@ -501,11 +499,11 @@ static void *thread (void *dummy)
                         // increment word count and write new tape position to memory
                         uint32_t tp = drive->tapepos / 4;
                         if (debug >= 3) {
-                            uint16_t wc = (z8p->dmacycle (CM_ENAB | IDWC * CM_ADDR0, 0) & CM_DATA) / CM_DATA0;
-                            uint16_t ca = (z8p->dmacycle (CM_ENAB | IDCA * CM_ADDR0, 0) & CM_DATA) / CM_DATA0;
+                            uint16_t wc = EXT (z8lpage.dmacycle (INS (IDWC, CM_ADDR)), CM_DATA);
+                            uint16_t ca = EXT (z8lpage.dmacycle (INS (IDCA, CM_ADDR)), CM_DATA);
                             DBGPR (3, "thread: skip writing tp=%04o to wc=%04o ca=%04o\n", tp, wc, ca);
                         }
-                        cm = z8p->dmacycle (CM_ENAB | tp * CM_DATA0 | CM_WRITE | (field | IDWC) * CM_ADDR0, CM2_3CYCL);
+                        cm = z8lpage.dmacycle (INS (tp, CM_DATA) | INS (field | IDWC, CM_ADDR) | CM_WRITE | CM_3CYCL);
                         DBGPR (2, "thread: skip cm=%08X tp=%04o\n", cm, tp);
                     } while (CONTIN && ! (cm & CM_WCOVF));
                     goto success;
@@ -538,14 +536,14 @@ static void *thread (void *dummy)
                                 uint16_t ocdat = buff[i] & 07777;
                                 uint16_t data  = ocarray[ocdat];
                                 DBGPR (4, "thread:  rev memory[] = %04o = ocarray[%04o]\n", data, ocdat);
-                                cm = z8p->dmacycle (CM_ENAB | data * CM_DATA0 | CM_WRITE | (field | IDWC) * CM_ADDR0, CM2_3CYCL | CM2_CAINC);
+                                cm = z8lpage.dmacycle (INS (data, CM_DATA) | CM_WRITE | INS (field | IDWC, CM_ADDR) | CM_3CYCL | CM_CAINC);
                                 if (cm & CM_WCOVF) break;
                             }
                         } else {
                             // madness: TC08 OS/8 boot block changes from data field 0 to data field 1 mid-read
                             // so pass data s-l-o-w-l-y when booting
-                            uint16_t idwc = (z8p->dmacycle (CM_ENAB | IDWC * CM_ADDR0, 0) & CM_DATA) / CM_DATA0;
-                            uint16_t idca = (z8p->dmacycle (CM_ENAB | IDCA * CM_ADDR0, 0) & CM_DATA) / CM_DATA0;
+                            uint16_t idwc = EXT (z8lpage.dmacycle (INS (IDWC, CM_ADDR)), CM_DATA);
+                            uint16_t idca = EXT (z8lpage.dmacycle (INS (IDCA, CM_ADDR)), CM_DATA);
                             bool slow = dmareadoverwritesinstructions (field, idca, idwc);
                             for (int i = 0; i < WORDSPERBLOCK; i ++) {
                                 if (slow) {
@@ -556,11 +554,11 @@ static void *thread (void *dummy)
                                     field    = (status_b & 070) << 9;
                                 }
                                 if (debug >= 4) {
-                                    idwc = (z8p->dmacycle (CM_ENAB | IDWC * CM_ADDR0, 0) & CM_DATA) / CM_DATA0;
-                                    idca = (z8p->dmacycle (CM_ENAB | IDCA * CM_ADDR0, 0) & CM_DATA) / CM_DATA0;
+                                    idwc = EXT (z8lpage.dmacycle (INS (IDWC, CM_ADDR)), CM_DATA);
+                                    idca = EXT (z8lpage.dmacycle (INS (IDCA, CM_ADDR)), CM_DATA);
                                 }
                                 uint16_t data = buff[i] & 07777;
-                                cm = z8p->dmacycle (CM_ENAB | data * CM_DATA0 | CM_WRITE | (field | IDWC) * CM_ADDR0, CM2_3CYCL | CM2_CAINC);
+                                cm = z8lpage.dmacycle (INS (data, CM_DATA) | INS (field | IDWC, CM_ADDR) | CM_WRITE | CM_3CYCL | CM_CAINC);
                                 DBGPR (4, "thread:  %s idwc=%04o idca=%04o memory[%o.%04o] = %04o => wcovf=%o\n",
                                     (slow ? "slo" : "fwd"), idwc, idca, field >> 12, (idca + 1) & 07777, data, (cm / CM_WCOVF) & 1);
                                 if (cm & CM_WCOVF) break;
@@ -633,18 +631,18 @@ static void *thread (void *dummy)
                                 uint16_t ocdat = buff[i] & 07777;
                                 uint16_t data  = ocarray[ocdat];
                                 DBGPR (4, "thread:  rev memory[] = %04o = ocarray[%04o]\n", data, ocdat);
-                                cm = z8p->dmacycle (CM_ENAB | data * CM_DATA0 | CM_WRITE | (field | IDWC) * CM_ADDR0, CM2_3CYCL | CM2_CAINC);
+                                cm = z8lpage.dmacycle (INS (data, CM_DATA) | INS (field | IDWC, CM_ADDR) | CM_WRITE | CM_3CYCL | CM_CAINC);
                                 if (cm & CM_WCOVF) break;
                             }
                         } else {
                             uint16_t idwc = 0, idca = 0;
                             for (int i = 0; i < 5 + WORDSPERBLOCK + 5; i ++) {
                                 if (debug >= 4) {
-                                    idwc = (z8p->dmacycle (CM_ENAB | IDWC * CM_ADDR0, 0) & CM_DATA) / CM_DATA0;
-                                    idca = (z8p->dmacycle (CM_ENAB | IDCA * CM_ADDR0, 0) & CM_DATA) / CM_DATA0;
+                                    idwc = EXT (z8lpage.dmacycle (INS (IDWC, CM_ADDR)), CM_DATA);
+                                    idca = EXT (z8lpage.dmacycle (INS (IDCA, CM_ADDR)), CM_DATA);
                                 }
                                 uint16_t data = buff[i] & 07777;
-                                cm = z8p->dmacycle (CM_ENAB | data * CM_DATA0 | CM_WRITE | (field | IDWC) * CM_ADDR0, CM2_3CYCL | CM2_CAINC);
+                                cm = z8lpage.dmacycle (INS (data, CM_DATA) | INS (field | IDWC, CM_ADDR) | CM_WRITE | CM_3CYCL | CM_CAINC);
                                 DBGPR (4, "thread:  fwd idwc=%04o idca=%04o memory[%o.%04o] = %04o => wcovf=%o\n",
                                     idwc, idca, field >> 12, (idca + 1) & 07777, data, (cm / CM_WCOVF) & 1);
                                 if (cm & CM_WCOVF) break;
@@ -671,8 +669,8 @@ static void *thread (void *dummy)
                         DBGPR (2, "thread: write block=%04o\n", drive->tapepos / 4);
                         if (REVERS) {
                             for (int i = WORDSPERBLOCK; i > 0;) {
-                                cm = z8p->dmacycle (CM_ENAB | (field | IDWC) * CM_ADDR0, CM2_3CYCL | CM2_CAINC);
-                                uint16_t data = (cm & CM_DATA) / CM_DATA0;
+                                cm = z8lpage.dmacycle (INS (field | IDWC, CM_ADDR) | CM_3CYCL | CM_CAINC);
+                                uint16_t data = EXT (cm, CM_DATA);
                                 buff[--i] = ocarray[data];
                                 if (cm & CM_WCOVF) {
                                     while (-- i >= 0) buff[i] = 07777;
@@ -681,8 +679,8 @@ static void *thread (void *dummy)
                             }
                         } else {
                             for (int i = 0; i < WORDSPERBLOCK;) {
-                                cm = z8p->dmacycle (CM_ENAB | (field | IDWC) * CM_ADDR0, CM2_3CYCL | CM2_CAINC);
-                                uint16_t data = (cm & CM_DATA) / CM_DATA0;
+                                cm = z8lpage.dmacycle (INS (field | IDWC, CM_ADDR) | CM_3CYCL | CM_CAINC);
+                                uint16_t data = EXT (cm, CM_DATA);
                                 buff[i++] = data;
                                 if (cm & CM_WCOVF) {
                                     memset (&buff[i], 0, (WORDSPERBLOCK - i) * 2);

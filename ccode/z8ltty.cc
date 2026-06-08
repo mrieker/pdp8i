@@ -167,26 +167,25 @@ int main (int argc, char **argv)
         }
     }
 
-    Z8LPage z8p;
     if (dc02) {
         if (port < 0) port = 0;
         if (port > 5) {
             fprintf (stderr, "port number %o must be in range 0..5\n", port);
             return 1;
         }
-        Z8LU32 *dcat = z8p.findev ("DC", NULL, NULL, false, killit);
+        Z8LU32 *dcat = z8lpage.findev ("DC", NULL, NULL, false, killit);
         dcat[1]   = 0x80000000U;    // enable board to process io instructions
         dcreg     = &dcat[2+port];  // point to register for this terminal
         getprchar = dc_getprchar;   // set up get/put functions
         putkbchar = dc_putkbchar;
-        z8p.locksubdev (dcreg, 1, killit);  // make sure another one of these isn't running
+        z8lpage.locksubdev (dcreg, 1, killit);  // make sure another one of these isn't running
     } else {
         if (port < 0) port = 3;
         if ((port < 1) || (port > 076)) {
             fprintf (stderr, "port number %o must be in range 1..76\n", port);
             return 1;
         }
-        ttyat = z8p.findev ("TT", findtt, &port, true, killit);
+        ttyat = z8lpage.findev ("TT", findtt, &port, true, killit);
         ttyat[Z_TTYKB] = KB_ENAB;   // enable board to process io instructions
         getprchar = tt_getprchar;   // set up get/put functions
         putkbchar = tt_putkbchar;

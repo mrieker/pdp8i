@@ -87,7 +87,6 @@ struct I2CZLib {
 private:
     Z8LU32 *pdpat;
     Z8LU32 *fpat;
-    Z8LPage *z8p;
 };
 
 #endif

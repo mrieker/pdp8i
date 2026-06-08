@@ -122,11 +122,6 @@ module pdp8icmem (
                     end
                 end
 
-                2: begin
-                    if (~ ctlbusy) begin
-                    end
-                end
-
                 // test-and-set cell for arm processor use
                 //  anything can be written when it is currently zero
                 //  otherwise writing the same number back clears it to zero

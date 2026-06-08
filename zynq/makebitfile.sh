@@ -15,4 +15,6 @@ sleep 2
 grep ^ERROR pdp8i.runs/*/runme.log
 ls -l pdp8i.runs/impl_1/myboard_wrapper.bit
 echo = = = = = = = = = = = =
-exec ./sortmyboard.sh
+./sortmyboard.sh
+sleep 0.125
+touch pdp8i.runs/impl_1/myboard_wrapper.bit

@@ -32,7 +32,7 @@
 #include "z8ldefs.h"
 #include "z8lutil.h"
 
-uint32_t Z8LPage::mypid = getpid ();
+Z8LPage z8lpage;
 
 Z8LPage::Z8LPage ()
 {
@@ -40,7 +40,11 @@ Z8LPage::Z8LPage ()
     zynqptr = NULL;
 
     cmemat = NULL;
-    xmemat = NULL;
+    pdpat  = NULL;
+
+    mypid  = getpid ();
+
+    if (pthread_mutex_init (&dmamtx, NULL) != 0) ABORT ();
 
 #ifdef VERIZYNQ
     zynqptr = Z8LU32::veriopen (&zynqfd);
@@ -66,10 +70,10 @@ Z8LPage::~Z8LPage ()
     if (zynqptr != NULL) munmap (zynqptr, 4096);
     close (zynqfd);
     zynqpage = NULL;
-    zynqptr = NULL;
-    zynqfd = -1;
-    cmemat = NULL;
-    xmemat = NULL;
+    zynqptr  = NULL;
+    zynqfd   = -1;
+    cmemat   = NULL;
+    pdpat    = NULL;
 }
 
 // find a device in the Z8L page
@@ -166,87 +170,65 @@ found:;
     }
 }
 
-
-#define CMWAIT(pred) do {                                               \
-    uint32_t started = 0;                                               \
-    while (true) {                                                      \
-        int i;                                                          \
-        for (i = 1000000; -- i >= 0;) if (pred) break;                  \
-        if (i >= 0) break;                                              \
-        uint32_t now = time (NULL);                                     \
-        if (started == 0) started = now;                                \
-        else if (now - started > 1) {                                   \
-            fprintf (stderr, "z8lpage: cmem controller is stuck\n");    \
-            ABORT ();                                                   \
-        }                                                               \
-    }                                                                   \
-} while (false)
-
 // do a dma cycle
 //  input:
 //     cm<CM_ADDR>  = 15-bit address
 //     cm<CM_WRITE> = do a write access (else it's a read)
 //     cm<CM_DATA>  = write data
 //     cm<CM_ENAB>  = enable access
-//   cm2<CM2_CAINC> = increment address of a 3-cycle
-//   cm2<CM2_3CYCL> = do a 3-cycle
+//     cm<CM_CAINC> = increment address of a 3-cycle
+//     cm<CM_3CYCL> = do a 3-cycle
 //  output:
 //     cm<CM_DATA>  = read data
 //     cm<CM_WCOVF> = wordcount overflow in 3-cycle
-uint32_t Z8LPage::dmacycle (uint32_t cm, uint32_t cm2)
+uint32_t Z8LPage::dmacycle (uint32_t cm)
 {
-    if (cmemat == NULL) cmemat = findev ("CM", NULL, NULL, false);
-
     cmlock ();
-    CMWAIT (! (cmemat[1] & CM_BUSY));
-    cmemat[2] = (cmemat[2] & CM2_NOBRK) | cm2;
-    cmemat[1] = cm;
-    CMWAIT ((cm = cmemat[1]) & CM_DONE);
+    cmemat[1] = CM_BUSY | cm;
+    uint32_t started = pdpat[Z_RH];
+    while ((cm = cmemat[1]) & CM_BUSY) {
+        uint32_t now = pdpat[Z_RH];
+        uint32_t diff = now - started;
+        if (diff > 100000) {    // 1mS
+            fprintf (stderr, "Z8LPage::dmacycle: cmem controller is stuck %08X - %08X = %08X\n", now, started, diff);
+            ABORT ();
+        }
+    }
     cmunlk ();
     return cm;
-}
-
-// make sure last write has completed
-void Z8LPage::dmaflush ()
-{
-    cmlock ();
-    CMWAIT (! (cmemat[1] & CM_BUSY));
-    cmunlk ();
 }
 
 // get exclusive access (co-operative) to pdp8lcmem.v device by the calling process
 void Z8LPage::cmlock ()
 {
-    if (cmemat == NULL) cmemat = findev ("CM", NULL, NULL, false);
+    if (pthread_mutex_lock (&dmamtx) != 0) ABORT ();
 
-    uint32_t started = 0;
+    if (cmemat == NULL) cmemat = findev ("CM", NULL, NULL, false);
+    if (pdpat  == NULL) pdpat  = findev ("8I", NULL, NULL, false);
+
+    ASSERT (CM3_LOCK == 0xFFFFFFFFU);
     while (true) {
-        uint32_t lkpid;
-        for (int i = 1000000; -- i >= 0;) {
-            cmemat[3] = mypid;
-            lkpid = cmemat[3];
-            if (lkpid == mypid) return;
-        }
-        uint32_t now = time (NULL);
-        if (started == 0) started = now;
-        else if (now - started > 1) {
-            fprintf (stderr, "z8lpage: cmem controller is stuckn");
-            ABORT ();
-        }
-        if ((lkpid != 0) && (kill (lkpid, 0) < 0) && (errno == ESRCH)) {
-            fprintf (stderr, "Z8LPage::cmlock: pid %u died, releasing lock\n", lkpid);
+        cmemat[3] = mypid;
+        int lkpid = cmemat[3];
+        if (lkpid == mypid) break;
+        if ((lkpid > 0) && (kill (lkpid, 0) < 0) && (errno == ESRCH)) {
+            fprintf (stderr, "Z8LPage::cmlock: pid %d died, releasing lock\n", lkpid);
             cmemat[3] = lkpid;
         }
     }
+    if (cmemat[1] & CM_BUSY) ABORT ();
 }
 
 // release exclusive access to pdp8lcmem.v device by the calling process
 void Z8LPage::cmunlk ()
 {
+    ASSERT (CM3_LOCK == 0xFFFFFFFFU);
     ASSERT (cmemat != NULL);
-    uint32_t lkpid = cmemat[3];
-    ASSERT (lkpid == mypid);
-    cmemat[3] = lkpid;
+    ASSERT (! (cmemat[1] & CM_BUSY));
+    ASSERT (cmemat[3] == (uint32_t) mypid);
+    cmemat[3] = mypid;
+    ASSERT (cmemat[3] != (uint32_t) mypid);
+    if (pthread_mutex_unlock (&dmamtx) != 0) ABORT ();
 }
 
 // format shadow string

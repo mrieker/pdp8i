@@ -69,8 +69,7 @@ int main (int argc, char **argv)
         return 1;
     }
 
-    Z8LPage z8p;
-    Z8LU32 *pdpat = z8p.findev ("8I", NULL, NULL, false);
+    Z8LU32 *pdpat = z8lpage.findev ("8I", NULL, NULL, false);
 
     uint32_t ctl;
     if (asisflag) {

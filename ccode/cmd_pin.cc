@@ -132,14 +132,12 @@ static PinDef const pindefs[] = {
     { "CM_ADDR",         DEV_CM, 1, CM_ADDR,               true  },
     { "CM_WRITE",        DEV_CM, 1, CM_WRITE,              true  },
     { "CM_DATA",         DEV_CM, 1, CM_DATA,               true  },
-    { "CM_BUSY",         DEV_CM, 1, CM_BUSY,               false },
-    { "CM_DONE",         DEV_CM, 1, CM_DONE,               false },
+    { "CM_CAINC",        DEV_CM, 1, CM_CAINC,              true  },
+    { "CM_3CYCL",        DEV_CM, 1, CM_3CYCL,              true  },
     { "CM_WCOVF",        DEV_CM, 1, CM_WCOVF,              false },
-    { "CM_ENAB",         DEV_CM, 1, CM_ENAB,               true  },
-    { "CM_NOBRK",        DEV_CM, 2, CM2_NOBRK,             true  },
-    { "CM_CAINC",        DEV_CM, 2, CM2_CAINC,             true  },
-    { "CM_3CYCL",        DEV_CM, 2, CM2_3CYCL,             true  },
-    { "CM3",             DEV_CM, 3, CM3,                   true  },
+    { "CM_BUSY",         DEV_CM, 1, CM_BUSY,               false },
+    { "CM_BGNT",         DEV_CM, 2, CM2_BGNT,              false },
+    { "CM_LOCK",         DEV_CM, 3, CM3_LOCK,              true  },
 
     { "KB_FLAG",         DEV_TT, Z_TTYKB, KB_FLAG,         true  },
     { "KB_ENAB",         DEV_TT, Z_TTYKB, KB_ENAB,         true  },
@@ -173,8 +171,6 @@ static PinDef const pindefs[] = {
     { "", 0, 0, 0, false }
 };
 
-static Z8LPage *z8p;
-
 int cmd_pin (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
     if ((objc == 2) && (strcasecmp (Tcl_GetString (objv[1]), "help") == 0)) {
@@ -206,14 +202,13 @@ int cmd_pin (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj *const
         return TCL_OK;
     }
 
-    if (z8p == NULL) {
+    if (devs[0] == NULL) {
 
         // access the zynq io page and find devices thereon
-        z8p = new Z8LPage ();
-        devs[DEV_8I] = z8p->findev ("8I", NULL, NULL, false);
-        devs[DEV_CM] = z8p->findev ("CM", NULL, NULL, false);
-        devs[DEV_TT] = z8p->findev ("TT", NULL, NULL, false);
-        devs[DEV_FP] = z8p->findev ("FP", NULL, NULL, false);
+        devs[DEV_8I] = z8lpage.findev ("8I", NULL, NULL, false);
+        devs[DEV_CM] = z8lpage.findev ("CM", NULL, NULL, false);
+        devs[DEV_TT] = z8lpage.findev ("TT", NULL, NULL, false);
+        devs[DEV_FP] = z8lpage.findev ("FP", NULL, NULL, false);
     }
 
     bool setmode = false;

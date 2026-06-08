@@ -22,14 +22,12 @@ proc os8dpackloadandboot {} {
     atexit "exec kill $rk8pid"
     after 1000
 
-    pin set xm_os8zap 1
     startat [os8dpack0toggleinboot]
 }
 
 # toggle in decpack long-form OS/8 boot
 proc os8dpacktoggleinboot {{driveno 0}} {
     if {($driveno < 0) || ($driveno > 3)} {error "bad driveno $driveno"}
-    setsw mprt 0
     wrmem 023 06002     ;#  iof
     wrmem 024 06744     ;#  dlca
     wrmem 025 01032     ;#  tad unit
@@ -44,7 +42,6 @@ proc os8dpacktoggleinboot {{driveno 0}} {
 
 # toggle in decpack short-form OS/8 boot drive 0
 proc os8dpack0toggleinboot {} {
-    setsw mprt 0
     wrmem 030 06743     ;#  dlag
     wrmem 031 05031     ;#  jmp .
     disas 030 031
@@ -74,13 +71,11 @@ proc os8dtapeloadandboot {} {
     atexit "exec kill $tc08pid"
     after 1000
 
-    pin set xm_os8zap 1
     startat [os8dtapetoggleinboot]
 }
 
 # toggle in dectape OS/8 boot
 proc os8dtapetoggleinboot {} {
-    setsw mprt 0
 
     ;# from OS8 Handbook p41
 
