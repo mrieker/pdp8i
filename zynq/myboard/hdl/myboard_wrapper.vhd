@@ -42,6 +42,7 @@ entity myboard_wrapper is
     hdw_iBRKRQST_0 : out STD_LOGIC;
     hdw_iBRKWRM_0 : out STD_LOGIC;
     hdw_iCAINC_0 : out STD_LOGIC;
+    hdw_iCLOCK_0 : out STD_LOGIC;
     hdw_iCONSCK_0 : out STD_LOGIC;
     hdw_iCYCLE3_0 : out STD_LOGIC;
     hdw_iDMAFLD_0 : out STD_LOGIC_VECTOR ( 2 downto 0 );
@@ -49,15 +50,18 @@ entity myboard_wrapper is
     hdw_iINTRQST_0 : out STD_LOGIC;
     hdw_iIOSKIP_0 : out STD_LOGIC;
     hdw_iPAUSE_0 : out STD_LOGIC;
+    hdw_iRESET_0 : out STD_LOGIC;
     hdw_oACUM_0 : in STD_LOGIC_VECTOR ( 11 downto 0 );
     hdw_oBRKCYC_0 : in STD_LOGIC;
     hdw_oBRKGNTI_0 : in STD_LOGIC;
     hdw_oBRKRQST_0 : in STD_LOGIC;
     hdw_oBUSINI_0 : in STD_LOGIC;
     hdw_oBWCOV_0 : in STD_LOGIC;
-    hdw_oCLOCK_0 : in STD_LOGIC;
     hdw_oIOP_0 : in STD_LOGIC;
+    hdw_oMADR_0 : in STD_LOGIC_VECTOR ( 11 downto 0 );
+    hdw_oMAJST_0 : in STD_LOGIC_VECTOR ( 3 downto 0 );
     hdw_oMBUF_0 : in STD_LOGIC_VECTOR ( 11 downto 0 );
+    hdw_oMEAD_0 : in STD_LOGIC_VECTOR ( 2 downto 0 );
     hdw_oRESET_0 : in STD_LOGIC;
     hdw_oTP1_0 : in STD_LOGIC;
     hdw_oTP2_0 : in STD_LOGIC;
@@ -103,6 +107,7 @@ architecture STRUCTURE of myboard_wrapper is
     hdw_iBRKRQST_0 : out STD_LOGIC;
     hdw_iBRKWRM_0 : out STD_LOGIC;
     hdw_iCAINC_0 : out STD_LOGIC;
+    hdw_iCLOCK_0 : out STD_LOGIC;
     hdw_iCONSCK_0 : out STD_LOGIC;
     hdw_iCYCLE3_0 : out STD_LOGIC;
     hdw_iDMAFLD_0 : out STD_LOGIC_VECTOR ( 2 downto 0 );
@@ -110,15 +115,18 @@ architecture STRUCTURE of myboard_wrapper is
     hdw_iINTRQST_0 : out STD_LOGIC;
     hdw_iIOSKIP_0 : out STD_LOGIC;
     hdw_iPAUSE_0 : out STD_LOGIC;
+    hdw_iRESET_0 : out STD_LOGIC;
     hdw_oACUM_0 : in STD_LOGIC_VECTOR ( 11 downto 0 );
     hdw_oBRKCYC_0 : in STD_LOGIC;
     hdw_oBRKGNTI_0 : in STD_LOGIC;
     hdw_oBRKRQST_0 : in STD_LOGIC;
     hdw_oBUSINI_0 : in STD_LOGIC;
     hdw_oBWCOV_0 : in STD_LOGIC;
-    hdw_oCLOCK_0 : in STD_LOGIC;
     hdw_oIOP_0 : in STD_LOGIC;
+    hdw_oMADR_0 : in STD_LOGIC_VECTOR ( 11 downto 0 );
+    hdw_oMAJST_0 : in STD_LOGIC_VECTOR ( 3 downto 0 );
     hdw_oMBUF_0 : in STD_LOGIC_VECTOR ( 11 downto 0 );
+    hdw_oMEAD_0 : in STD_LOGIC_VECTOR ( 2 downto 0 );
     hdw_oRESET_0 : in STD_LOGIC;
     hdw_oTP1_0 : in STD_LOGIC;
     hdw_oTP2_0 : in STD_LOGIC;
@@ -163,6 +171,7 @@ myboard_i: component myboard
     hdw_iBRKRQST_0 => hdw_iBRKRQST_0,
     hdw_iBRKWRM_0 => hdw_iBRKWRM_0,
     hdw_iCAINC_0 => hdw_iCAINC_0,
+    hdw_iCLOCK_0 => hdw_iCLOCK_0,
     hdw_iCONSCK_0 => hdw_iCONSCK_0,
     hdw_iCYCLE3_0 => hdw_iCYCLE3_0,
     hdw_iDMAFLD_0(2 downto 0) => hdw_iDMAFLD_0(2 downto 0),
@@ -170,15 +179,18 @@ myboard_i: component myboard
     hdw_iINTRQST_0 => hdw_iINTRQST_0,
     hdw_iIOSKIP_0 => hdw_iIOSKIP_0,
     hdw_iPAUSE_0 => hdw_iPAUSE_0,
+    hdw_iRESET_0 => hdw_iRESET_0,
     hdw_oACUM_0(11 downto 0) => hdw_oACUM_0(11 downto 0),
     hdw_oBRKCYC_0 => hdw_oBRKCYC_0,
     hdw_oBRKGNTI_0 => hdw_oBRKGNTI_0,
     hdw_oBRKRQST_0 => hdw_oBRKRQST_0,
     hdw_oBUSINI_0 => hdw_oBUSINI_0,
     hdw_oBWCOV_0 => hdw_oBWCOV_0,
-    hdw_oCLOCK_0 => hdw_oCLOCK_0,
     hdw_oIOP_0 => hdw_oIOP_0,
+    hdw_oMADR_0(11 downto 0) => hdw_oMADR_0(11 downto 0),
+    hdw_oMAJST_0(3 downto 0) => hdw_oMAJST_0(3 downto 0),
     hdw_oMBUF_0(11 downto 0) => hdw_oMBUF_0(11 downto 0),
+    hdw_oMEAD_0(2 downto 0) => hdw_oMEAD_0(2 downto 0),
     hdw_oRESET_0 => hdw_oRESET_0,
     hdw_oTP1_0 => hdw_oTP1_0,
     hdw_oTP2_0 => hdw_oTP2_0,

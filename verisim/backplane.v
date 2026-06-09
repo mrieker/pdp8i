@@ -66,7 +66,7 @@ module backplane (
         _busIOSKIP, _busLNKTOG, _busIOP, _busMEMDIS, _busINTINH, _busBWCOV, _busBRKCYC;
     wire _busSWCONT, _busSWDEPOS, _busSWEXAM, _busSWLDAD, _busSWSINST, _busSWSSTEP, _busSWSTART;
     wire _busTP1, _busTP2, _busTP3, _busTP4, _busTS1, _busTS2, _busTS3, _busTS4;
-    wire[2:0] _busDFLD, _busIFLD, _busDMAFLD, _busFIELD;
+    wire[2:0] _busDFLD, _busIFLD, _busDMAFLD, _busMEAD;
     wire[3:0] _busMAJST;
     wire[4:0] _busSCTR;
     wire[11:00] _busACUM, _busMADR, _busMBUF, _busMQUO, _busPCTR, _busINBUS;
@@ -94,7 +94,7 @@ module backplane (
     assign oTS3     = ~ _busTS3;
     assign oTS4     = ~ _busTS4;
     assign majst    = ~ _busMAJST;
-    assign memfield = ~ _busFIELD;
+    assign memfield = ~ _busMEAD;
     assign mquo     = ~ _busMQUO;
     assign pctr     = ~ _busPCTR;
     assign sctr     = ~ _busSCTR;
@@ -544,12 +544,12 @@ module backplane (
         ._IFLD_1_o  (_memIFLD[1]),
         ._IFLD_2_o  (_memIFLD[2]),
 
-        ._FIELD_0   (_busFIELD[0]),     // field currently in use
-        ._FIELD_1   (_busFIELD[1]),
-        ._FIELD_2   (_busFIELD[2]),
-        ._FIELD_0_o (_busFIELD[0]),
-        ._FIELD_1_o (_busFIELD[1]),
-        ._FIELD_2_o (_busFIELD[2]),
+        ._MEAD_0    (_busMEAD[0]),      // field currently in use
+        ._MEAD_1    (_busMEAD[1]),
+        ._MEAD_2    (_busMEAD[2]),
+        ._MEAD_0_o  (_busMEAD[0]),
+        ._MEAD_1_o  (_busMEAD[1]),
+        ._MEAD_2_o  (_busMEAD[2]),
 
         ._INBUS_0   (_busINBUS[0]),
         ._INBUS_1   (_busINBUS[1]),
@@ -818,7 +818,10 @@ module backplane (
         .hdw_oBUSINI  (~ _busBUSINI),
         .hdw_oBWCOV   (~ _busBWCOV),
         .hdw_oIOP     (~ _busIOP),
+        .hdw_oMADR    (~ _busMADR),
         .hdw_oMBUF    (~ _busMBUF),
+        .hdw_oMEAD    (~ _busMEAD),
+        .hdw_oMAJST   (~ _busMAJST),
         .hdw_oTP1     (~ _busTP1),
         .hdw_oTP2     (~ _busTP2),
         .hdw_oTP3     (~ _busTP3),

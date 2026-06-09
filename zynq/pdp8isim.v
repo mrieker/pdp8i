@@ -44,7 +44,10 @@ module pdp8isim (
     output oBUSINI,                 // initialize bus devices
     output oBWCOV,                  // 3-cycle DMA wordcount overflowed
     output oIOP,                    // io instruction pulse
+    output[11:00] oMADR,
     output[11:00] oMBUF,
+    output[2:0] oMEAD,
+    output[3:0] oMAJST,
     output oTP1, oTP2, oTP3, oTP4,
     output oTS1, oTS2, oTS3, oTS4,
 
@@ -71,7 +74,7 @@ module pdp8isim (
         _busIOSKIP, _busLNKTOG, _busIOP, _busINTINH, _busBWCOV, _busBRKCYC;
     wire _busSWCONT, _busSWDEPOS, _busSWEXAM, _busSWLDAD, _busSWSINST, _busSWSSTEP, _busSWSTART;
     wire _busTP1, _busTP2, _busTP3, _busTP4, _busTS1, _busTS2, _busTS3, _busTS4;
-    wire[2:0] _busDFLD, _busIFLD, _busDMAFLD, _busFIELD;
+    wire[2:0] _busDFLD, _busIFLD, _busDMAFLD, _busMEAD;
     wire[3:0] _busMAJST;
     wire[4:0] _busSCTR;
     wire[11:00] _busACUM, _busMADR, _busMBUF, _busMQUO, _busPCTR, _busINBUS;
@@ -306,16 +309,6 @@ module pdp8isim (
         .swreg_9  (),
         .swreg_10 (),
         .swreg_11 ()
-
-        ,._reset  ()
-        ,.swcont  ()
-        ,.swdepos ()
-        ,.swexam  ()
-        ,.swldad  ()
-        ,.swsinst ()
-        ,.swsstep ()
-        ,.swstart ()
-        ,.swstop  ()
     );
 
     ///////////////////////////
@@ -533,12 +526,12 @@ module pdp8isim (
         ._IFLD_1_o   (_memIFLD[1]),
         ._IFLD_2_o   (_memIFLD[2]),
 
-        ._FIELD_0    (_busFIELD[0]),     // field currently in use
-        ._FIELD_1    (_busFIELD[1]),
-        ._FIELD_2    (_busFIELD[2]),
-        ._FIELD_0_o  (_busFIELD[0]),
-        ._FIELD_1_o  (_busFIELD[1]),
-        ._FIELD_2_o  (_busFIELD[2]),
+        ._MEAD_0     (_busMEAD[0]),      // field currently in use
+        ._MEAD_1     (_busMEAD[1]),
+        ._MEAD_2     (_busMEAD[2]),
+        ._MEAD_0_o   (_busMEAD[0]),
+        ._MEAD_1_o   (_busMEAD[1]),
+        ._MEAD_2_o   (_busMEAD[2]),
 
         ._INBUS_0    (_busINBUS[0]),
         ._INBUS_1    (_busINBUS[1]),
@@ -816,7 +809,10 @@ module pdp8isim (
     assign oBUSINI  = ~ _busBUSINI;
     assign oBWCOV   = ~ _busBWCOV;
     assign oIOP     = ~ _busIOP;
+    assign oMADR    = ~ _busMADR;
     assign oMBUF    = ~ _busMBUF;
+    assign oMEAD    = ~ _busMEAD;
+    assign oMAJST   = ~ _busMAJST;
     assign oTP1     = ~ _busTP1;
     assign oTP2     = ~ _busTP2;
     assign oTP3     = ~ _busTP3;

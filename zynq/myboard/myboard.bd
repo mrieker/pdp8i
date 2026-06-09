@@ -348,9 +348,24 @@
           "hdw_oIOP": {
             "direction": "I"
           },
+          "hdw_oMADR": {
+            "direction": "I",
+            "left": "11",
+            "right": "0"
+          },
+          "hdw_oMAJST": {
+            "direction": "I",
+            "left": "3",
+            "right": "0"
+          },
           "hdw_oMBUF": {
             "direction": "I",
             "left": "11",
+            "right": "0"
+          },
+          "hdw_oMEAD": {
+            "direction": "I",
+            "left": "2",
             "right": "0"
           },
           "hdw_oTP1": {
@@ -1774,7 +1789,7 @@
       }
     },
     "design_info": {
-      "boundary_crc": "0x7FA9AABCD737034C",
+      "boundary_crc": "0xBB664610407BC3AD",
       "device": "xc7z020clg400-1",
       "name": "myboard",
       "synth_flow_mode": "None",
@@ -1941,6 +1956,12 @@
           "hdw_iCAINC_0"
         ]
       },
+      "Zynq_0_hdw_iCLOCK": {
+        "ports": [
+          "Zynq_0/hdw_iCLOCK",
+          "hdw_iCLOCK_0"
+        ]
+      },
       "Zynq_0_hdw_iCONSCK": {
         "ports": [
           "Zynq_0/hdw_iCONSCK",
@@ -1989,6 +2010,12 @@
           "hdw_iPAUSE_0"
         ]
       },
+      "Zynq_0_hdw_iRESET": {
+        "ports": [
+          "Zynq_0/hdw_iRESET",
+          "hdw_iRESET_0"
+        ]
+      },
       "hdw_oACUM_0_1": {
         "ports": [
           "hdw_oACUM_0",
@@ -2025,21 +2052,34 @@
           "Zynq_0/hdw_oBWCOV"
         ]
       },
-      "hdw_oCLOCK_0_1": {
-        "ports": [
-          "hdw_oCLOCK_0"
-        ]
-      },
       "hdw_oIOP_0_1": {
         "ports": [
           "hdw_oIOP_0",
           "Zynq_0/hdw_oIOP"
         ]
       },
+      "hdw_oMADR_0_1": {
+        "ports": [
+          "hdw_oMADR_0",
+          "Zynq_0/hdw_oMADR"
+        ]
+      },
+      "hdw_oMAJST_0_1": {
+        "ports": [
+          "hdw_oMAJST_0",
+          "Zynq_0/hdw_oMAJST"
+        ]
+      },
       "hdw_oMBUF_0_1": {
         "ports": [
           "hdw_oMBUF_0",
           "Zynq_0/hdw_oMBUF"
+        ]
+      },
+      "hdw_oMEAD_0_1": {
+        "ports": [
+          "hdw_oMEAD_0",
+          "Zynq_0/hdw_oMEAD"
         ]
       },
       "hdw_oRESET_0_1": {
@@ -2179,6 +2219,9 @@
       "hdw_iCAINC_0": {
         "direction": "O"
       },
+      "hdw_iCLOCK_0": {
+        "direction": "O"
+      },
       "hdw_iCONSCK_0": {
         "direction": "O"
       },
@@ -2204,6 +2247,9 @@
       "hdw_iPAUSE_0": {
         "direction": "O"
       },
+      "hdw_iRESET_0": {
+        "direction": "O"
+      },
       "hdw_oACUM_0": {
         "direction": "I",
         "left": "11",
@@ -2224,15 +2270,27 @@
       "hdw_oBWCOV_0": {
         "direction": "I"
       },
-      "hdw_oCLOCK_0": {
-        "direction": "I"
-      },
       "hdw_oIOP_0": {
         "direction": "I"
+      },
+      "hdw_oMADR_0": {
+        "direction": "I",
+        "left": "11",
+        "right": "0"
+      },
+      "hdw_oMAJST_0": {
+        "direction": "I",
+        "left": "3",
+        "right": "0"
       },
       "hdw_oMBUF_0": {
         "direction": "I",
         "left": "11",
+        "right": "0"
+      },
+      "hdw_oMEAD_0": {
+        "direction": "I",
+        "left": "2",
         "right": "0"
       },
       "hdw_oRESET_0": {

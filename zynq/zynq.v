@@ -56,7 +56,10 @@ module Zynq #(parameter BIDIRCONSDA=1, parameter CLOCKDIVIDE=5) (
     input         hdw_oBUSINI,  // hdw_iRESET + start switch
     input         hdw_oBWCOV,
     input         hdw_oIOP,
+    input[11:00]  hdw_oMADR,
     input[11:00]  hdw_oMBUF,
+    input[2:0]    hdw_oMEAD,
+    input[3:0]    hdw_oMAJST,
     input         hdw_oTP1,
     input         hdw_oTP2,
     input         hdw_oTP3,
@@ -136,7 +139,10 @@ module Zynq #(parameter BIDIRCONSDA=1, parameter CLOCKDIVIDE=5) (
     wire        sim_oBUSINI;
     wire        sim_oBWCOV;
     wire        sim_oIOP;
+    wire[11:00] sim_oMADR;
     wire[11:00] sim_oMBUF;
+    wire[2:0]   sim_oMEAD;
+    wire[3:0]   sim_oMAJST;
     wire        sim_oTP1;
     wire        sim_oTP2;
     wire        sim_oTP3;
@@ -171,7 +177,10 @@ module Zynq #(parameter BIDIRCONSDA=1, parameter CLOCKDIVIDE=5) (
     wire        dev_oBUSINI;
     wire        dev_oBWCOV;
     wire        dev_oIOP;
+    wire[11:00] dev_oMADR;
     wire[11:00] dev_oMBUF;
+    wire[2:0]   dev_oMEAD;
+    wire[3:0]   dev_oMAJST;
     wire        dev_oTP1;
     wire        dev_oTP2;
     wire        dev_oTP3;
@@ -564,7 +573,10 @@ module Zynq #(parameter BIDIRCONSDA=1, parameter CLOCKDIVIDE=5) (
     assign dev_oBUSINI  = simit ? sim_oBUSINI  : hsy_oBUSINI;
     assign dev_oBWCOV   = simit ? sim_oBWCOV   : hdw_oBWCOV;
     assign dev_oIOP     = simit ? sim_oIOP     : hsy_oIOP;
+    assign dev_oMADR    = simit ? sim_oMADR    : hdw_oMADR;
     assign dev_oMBUF    = simit ? sim_oMBUF    : hdw_oMBUF;
+    assign dev_oMEAD    = simit ? sim_oMEAD    : hdw_oMEAD;
+    assign dev_oMAJST   = simit ? sim_oMAJST   : hdw_oMAJST;
     assign dev_oTP1     = simit ? sim_oTP1     : hsy_oTP1;
     assign dev_oTP2     = simit ? sim_oTP2     : hsy_oTP2;
     assign dev_oTP3     = simit ? sim_oTP3     : hsy_oTP3;
@@ -619,7 +631,8 @@ module Zynq #(parameter BIDIRCONSDA=1, parameter CLOCKDIVIDE=5) (
     assign regctle[02]    = nanocontin;
     assign regctle[03]    = nanotrigger;
     assign regctle[04]    = nanocstep;
-    assign regctle[19:05] = 0;
+    assign regctle[16:05] = dev_oMADR;
+    assign regctle[19:17] = dev_oMEAD;
     assign regctle[31:20] = dev_oMBUF;
 
     assign regctlf[11:00] = dev_oACUM;
@@ -639,7 +652,7 @@ module Zynq #(parameter BIDIRCONSDA=1, parameter CLOCKDIVIDE=5) (
     assign regctlf[25]    = dev_oTS2;
     assign regctlf[26]    = dev_oTS3;
     assign regctlf[27]    = dev_oTS4;
-    assign regctlf[31:28] = 0;
+    assign regctlf[31:28] = dev_oMAJST;
 
     assign regctli = 0;
 
@@ -742,7 +755,10 @@ module Zynq #(parameter BIDIRCONSDA=1, parameter CLOCKDIVIDE=5) (
         .oBUSINI        (sim_oBUSINI),
         .oBWCOV         (sim_oBWCOV),
         .oIOP           (sim_oIOP),
+        .oMADR          (sim_oMADR),
         .oMBUF          (sim_oMBUF),
+        .oMEAD          (sim_oMEAD),
+        .oMAJST         (sim_oMAJST),
         .oTP1           (sim_oTP1),
         .oTP2           (sim_oTP2),
         .oTP3           (sim_oTP3),

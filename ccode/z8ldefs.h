@@ -88,7 +88,10 @@
 #define e_nanocontin    (1U <<  2)  //rw 0=single step mode (sim only); 1=normal continuous running
 #define e_nanotrigger   (1U <<  3)  //rw 0=ignored; 1=trigger single step (sim only)
 #define e_nanocstep     (1U <<  4)  //ro 0=stopped; 1=stepping
+#define e_oMADR     (07777U <<  5)  //ro dev_oMADR
+#define e_oMEAD         (7U << 17)  //ro dev_oMEAD
 #define e_oMBUF     (07777U << 20)  //ro dev_oMBUF
+#define e_oMADX  (e_oMEAD|e_oMADR)  //ro extended memory address
 
 #define f_oACUM     (07777U <<  0)  //ro dev_...
 #define f_oBRKCYC       (1U << 12)
@@ -107,6 +110,7 @@
 #define f_oTS2          (1U << 25)
 #define f_oTS3          (1U << 26)
 #define f_oTS4          (1U << 27)
+#define f_oMAJST      (017U << 28)
 
 #if 000
 #define g_lbAC      (07777U <<  0)  //ro sim_...

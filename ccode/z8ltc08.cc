@@ -135,7 +135,6 @@ static uint16_t status_a, status_b;
 static uint32_t cycles;
 static Z8LU32 *pdpat;
 static Z8LU32 *tcat;
-static Z8LU32 *xmemat;
 
 static int loadtape (bool readwrite, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
 static bool loadfile (Tcl_Interp *interp, bool readwrite, int driveno, char const *filenm);
@@ -223,9 +222,8 @@ int main (int argc, char **argv)
         break;
     }
 
-    pdpat  = z8lpage.findev ("8L", NULL, NULL, false);
-    tcat   = z8lpage.findev ("TC", NULL, NULL, true, killit);
-    xmemat = z8lpage.findev ("XM", NULL, NULL, false);
+    pdpat = z8lpage.findev ("8L", NULL, NULL, false);
+    tcat  = z8lpage.findev ("TC", NULL, NULL, true, killit);
 
     tcat[1] = TC_ENABLE;    // enable board to process io instructions
 
@@ -823,22 +821,21 @@ static void dumpbuf (Drive *drive, char const *label, uint16_t const *buff, int 
 static bool dmareadoverwritesinstructions (uint16_t field, uint16_t idca, uint16_t idwc)
 {
     // field must match exactly
-    uint16_t curif = (xmemat[2] & XM2_IFLD) / XM2_IFLD0;
+    uint16_t curif = EXT (pdpat[Z_RE], e_oMEAD);
     if (curif != field >> 12) return false;
 
-#if 000
     // current PC must be within transfer area
     // we use the MA cuz PDP-8/L doesn't make PC available
     // but if it's doing a JMP . in the boot code, PC should be the only thing in there
     uint16_t endaddr = (idca - idwc) & 07777;
     idca = (idca + 1) & 07777;
-    uint16_t curpc = (pdpat[Z_RI] & i_oMA) / i_oMA0;
+    uint16_t curpc = EXT (pdpat[Z_RE], e_oMADR);
     if (endaddr >= idca) {
         if ((curpc < idca) || (curpc > endaddr)) return false;
     } else {
         if ((curpc < idca) && (curpc > endaddr)) return false;
     }
-#endif
+
     return true;
 }
 

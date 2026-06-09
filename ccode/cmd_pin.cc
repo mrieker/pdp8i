@@ -87,7 +87,10 @@ static PinDef const pindefs[] = {
     { "nanocontin",      DEV_8I, Z_RE, e_nanocontin,   true  },
     { "nanotrigger",     DEV_8I, Z_RE, e_nanotrigger,  true  },
     { "nanocstep",       DEV_8I, Z_RE, e_nanocstep,    true  },
+    { "oMADR",           DEV_8I, Z_RE, e_oMADR,        false },
+    { "oMEAD",           DEV_8I, Z_RE, e_oMEAD,        false },
     { "oMBUF",           DEV_8I, Z_RE, e_oMBUF,        false },
+    { "oMADX",           DEV_8I, Z_RE, e_oMADX,        false },
 
     { "oACUM",           DEV_8I, Z_RF, f_oACUM,        false },
     { "oBRKCYC",         DEV_8I, Z_RF, f_oBRKCYC,      false },
@@ -106,6 +109,7 @@ static PinDef const pindefs[] = {
     { "oTS2",            DEV_8I, Z_RF, f_oTS2,         false },
     { "oTS3",            DEV_8I, Z_RF, f_oTS3,         false },
     { "oTS4",            DEV_8I, Z_RF, f_oTS4,         false },
+    { "oMAJST",          DEV_8I, Z_RF, f_oMAJST,       false },
 
 #if 000
     { "lbAC",            DEV_8I, Z_RG, g_lbAC,         false },
