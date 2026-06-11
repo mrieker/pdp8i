@@ -1044,8 +1044,9 @@ module Zynq #(parameter BIDIRCONSDA=1, parameter CLOCKDIVIDE=5) (
 
     // PDP-8/I front panel i2c interface
     pdp8ifpi2c fpi2cinst (
-        .CLOCK (CLOCK),
-        .RESET (dev_iRESET),
+        .CLOCK  (CLOCK),
+        .RESET  (~ RESET_N),
+        .iRESET (dev_iRESET),
 
         .armwrite (fpi2cwrite),
         .armraddr (readaddr[5:2]),
@@ -1056,12 +1057,7 @@ module Zynq #(parameter BIDIRCONSDA=1, parameter CLOCKDIVIDE=5) (
         .i2cclo (fpi2c_clock),
         .i2ccli (fpi2c_clock),
         .i2cdao (fpi2c_datao),
-        .i2cdai (fpi2c_datai),
-
-        .i2ccount (),
-        .i2cstate (),
-        .comand (),
-        .status ()
+        .i2cdai (fpi2c_datai)
     );
 
     // paper tape reader interface

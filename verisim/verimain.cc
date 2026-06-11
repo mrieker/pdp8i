@@ -225,10 +225,6 @@ static int cmd_arm (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj
             }
             char const *ident = Tcl_GetString (objv[i]);
             int x = findev (ident);
-            if (x < 0) {
-                Tcl_SetResultF (interp, "unknown 2-char device code %s", ident);
-                return TCL_ERROR;
-            }
             getobjs[ngetobjs++] = Tcl_NewIntObj (x);
             continue;
         }

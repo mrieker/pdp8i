@@ -33,24 +33,21 @@
 #include "i2czlib.h"
 #include "z8ldefs.h"
 
-I2CZLib::I2CZLib ()
+I2CZLib::I2CZLib (bool real, bool sim)
 {
-    pdpat = NULL;
-    fpat  = NULL;
     pdpat = z8lpage.findev ("8I", NULL, NULL, false);
     fpat  = z8lpage.findev ("FP", NULL, NULL, false);
+
+    if (real) pdpat[Z_RE] &= ~ e_simit;
+    if (sim)  pdpat[Z_RE] |=   e_simit;
+
+    fpat[5] &= ~ FP5_MANUAL;
 }
 
 I2CZLib::~I2CZLib ()
 {
     pdpat = NULL;
     fpat  = NULL;
-}
-
-void I2CZLib::openpads (bool real, bool sim)
-{
-    if (real) pdpat[Z_RE] &= ~ e_simit;
-    if (sim)  pdpat[Z_RE] |=   e_simit;
 }
 
 // deposit 05252: jmp 05252 in memory then start it

@@ -154,8 +154,7 @@ int main (int argc, char **argv)
         break;
     }
 
-    padlib = new I2CZLib ();
-    padlib->openpads (real, sim);
+    padlib = new I2CZLib (real, sim);
 
     // process tcl commands
     return tclmain (fundefs, argv[0], "z8lpanel", logname, getenv ("z8lpanelini"), argc - tclargs, argv + tclargs);
@@ -583,8 +582,7 @@ static int showstatus (int argc, char **argv)
     uint32_t nframes = 0;
     time_t lasttime = 0;
 
-    padlib = new I2CZLib ();
-    padlib->openpads (false, false);
+    padlib = new I2CZLib (false, false);
 
     setvbuf (stdout, outbuf, _IOFBF, sizeof outbuf);
 

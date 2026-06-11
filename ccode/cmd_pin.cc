@@ -155,7 +155,6 @@ static PinDef const pindefs[] = {
     { "FP_STSLO",        DEV_FP,  3, FP3_STSLO,            false },
     { "FP_STSHI",        DEV_FP,  4, FP4_STSHI,            false },
     { "FP_INMODE",       DEV_FP,  5, FP5_INMODE,           false },
-    { "FP_CLEAR",        DEV_FP,  5, FP5_CLEAR,            true  },
     { "FP_MANUAL",       DEV_FP,  5, FP5_MANUAL,           true  },
     { "FP_I2CCOUNT",     DEV_FP,  5, FP5_I2CCOUNT,         false },
     { "FP_I2CSTATE",     DEV_FP,  5, FP5_I2CSTATE,         false },

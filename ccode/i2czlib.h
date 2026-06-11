@@ -74,10 +74,8 @@ struct Z8LPanel {
 };
 
 struct I2CZLib {
-    I2CZLib ();
+    I2CZLib (bool real, bool sim);
     ~I2CZLib ();
-    bool probei2c ();
-    void openpads (bool real, bool sim);
     void relall ();
     void readpads (Z8LPanel *pads);
     void writepads (Z8LPanel const *pads);

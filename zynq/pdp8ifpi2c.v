@@ -19,12 +19,14 @@
 //    http://www.gnu.org/licenses/gpl-2.0.html
 
 // PDP-8/I front panel interface
-//  communicates with front-panel board (console) via i2c line
-//  presents light and switch settings to the arm
+//  communicates with front-panel board (console.kicad_sch) via i2c line
+//  sends light and switch settings to the arm
 //  allows arm to override switches
 
 module pdp8ifpi2c (
-    input CLOCK, RESET,
+    input CLOCK,    // 100MHz FPGA clock
+    input RESET,    // FPGA power-on reset
+    input iRESET,   // processor bus power-on reset
 
     input armwrite,
     input[3:0] armraddr, armwaddr,
@@ -34,14 +36,10 @@ module pdp8ifpi2c (
     output i2cclo,
     input  i2ccli,
     output i2cdao,
-    input  i2cdai,
-
-    output[2:0] i2cstate,
-    output[14:00] i2ccount,
-    output[63:00] comand, status
+    input  i2cdai
 );
 
-    reg clear, inmode, manual, startbit;
+    reg inmode, manual, startbit;
     reg[31:00] armlock;
     reg[31:00] commandlo;
     reg[63:00] command;
@@ -61,12 +59,16 @@ module pdp8ifpi2c (
     reg[15:00] ltspeed;
     reg[9:0] i2cspeed;
 
+    wire[2:0] i2cstate;
+    wire[14:00] i2ccount;
+    wire[63:00] comand, status;
+
     assign armrdata = (armraddr ==  0) ? 32'h46503001 : // [31:16] = 'FP'; [15:12] = (log2 nreg) - 1; [11:00] = version
                       (armraddr ==  1) ? { comand[31:00] } :
                       (armraddr ==  2) ? { comand[63:32] } :
                       (armraddr ==  3) ? { status[31:00] } :
                       (armraddr ==  4) ? { status[63:32] } :
-                      (armraddr ==  5) ? { i2cclo, i2cdao, i2cdai, i2ccli, 6'b0, i2cstate, i2ccount, manual, clear, inmode, 1'b0 } :
+                      (armraddr ==  5) ? { i2cclo, i2cdao, i2cdai, i2ccli, 6'b0, i2cstate, i2ccount, manual, 1'b0, inmode, 1'b0 } :
                       (armraddr ==  6) ? armlock :
                       (armraddr ==  7) ? { mcpassno, mcpltrow, mcpswrow, mcpstate } :
 
@@ -115,7 +117,7 @@ module pdp8ifpi2c (
 
     i2cmaster fpi2cintf (
         .CLOCK (CLOCK),
-        .RESET (RESET | clear),
+        .RESET (iRESET),        // reset i2c on processor reset (matches console.kicad_sh mcp23017 reset)
         .CSTEP (1'b1),
         .wrcmd (startbit),
         .command (command),
@@ -130,18 +132,22 @@ module pdp8ifpi2c (
         .count (i2ccount));
 
     always @(posedge CLOCK) begin
-        if (RESET) begin
+        if (iRESET) begin           // processor power-on reset
+            if (RESET) begin        // fpga power-on reset
+                manual   <= 1;      // let console.kicad_sch clock itself
+                ltspeed  <= 19999;  // each light row stays on for 200uS
+                i2cspeed <= 29;     // operate i2c at 1.667MHz
+                switchovrs[0] <= 0; // not overriding any switches
+                switchovrs[1] <= 0;
+                switchovrs[2] <= 0;
+            end
             armlock  <= 0;
-            clear    <= 0;
-            inmode   <= 0;      // data pins not known to be in input mode
-            manual   <= 0;
+            inmode   <= 0;          // data pins not known to be in input mode
             mcpassno <= 0;
             mcpltime <= 0;
             mcpltrow <= 7;
             mcpstate <= 15;
             startbit <= 0;
-            ltspeed  <= 19999;  // each light row stays on for 200uS
-            i2cspeed <= 29;     // operate i2c at 1.667MHz
         end else if (armwrite) begin
 
             // writing register from arm
@@ -151,8 +157,8 @@ module pdp8ifpi2c (
                     command  <= { armwdata, commandlo };
                 end
                 5: begin
-                    clear  <= armwdata[02];     // reset i2cmaster module
-                    manual <= armwdata[03];     // 0=scan console automatically; 1=arm must issue i2c commands to scan
+                    manual <= armwdata[03];     // 0=scan console automatically
+                                                // 1=arm must issue i2c commands to scan
                 end
 
                 // test-and-set cell for arm processor use

@@ -138,7 +138,7 @@ int main (int argc, char **argv)
         signal (SIGINT, siginthand);
     }
 
-    I2CZLib i2czlib;
+    I2CZLib i2czlib (false, false);
 
     int pagelen = 1024;
     while (! exitflag) {

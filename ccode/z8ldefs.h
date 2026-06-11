@@ -265,7 +265,6 @@
 #define FP3_STSLO 0xFFFFFFFFU
 #define FP4_STSHI 0xFFFFFFFFU
 #define FP5_INMODE       (1U << 1)
-#define FP5_CLEAR        (1U << 2)
 #define FP5_MANUAL       (1U << 3)
 #define FP5_I2CCOUNT (32767U << 4)
 #define FP5_I2CSTATE    (7U << 19)
@@ -300,8 +299,8 @@
 #define fp9_lbAC (07777U << 12)
 #define fp9_lbMB (07777U <<  0)
 
-#define fp10_lbDF     (1U << 24)
-#define fp10_lbIF     (1U << 21)
+#define fp10_lbDF     (7U << 24)
+#define fp10_lbIF     (7U << 21)
 #define fp10_lbLINK   (1U << 20)
 #define fp10_lbION    (1U << 19)
 #define fp10_lbPAU    (1U << 18)

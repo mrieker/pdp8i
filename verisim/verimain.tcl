@@ -57,13 +57,12 @@ proc hardreset {} {
     bus set reset 0
 
     ;# maybe use pdp8ifpi2c.v to scan panel
-    ;# switch and light access very slow
-    ;# otherwise console.kicad_sch internal counters scan panel quickly
+    ;# otherwise console.kicad_sch internal counters scan panel
     if {$usefpi2c} {
-        set fpat [arm find FP]
+        set fpat [arm find FP]              ;# find pdp8ifpi2c.v registers
         ;# turn pdp8ifpi2c.v scanning on
         arm set [expr {$fpat +  5}] 0       ;# fp_manual=0
-        ;# tell it to scan quickly (sim mcp23017 is fast and we don't use gpio lights)
+        ;# tell it to scan quickly (sim mcp23017 is fast)
         arm set [expr {$fpat + 13}] 0x3C0F  ;# fp_ltspeed=15; fp_i2cspeed=15
         ;# wait for state 2 meaning the mcp23017 has received a command,
         ;#  shutting off console.kicad_sch internal scanners
@@ -480,11 +479,13 @@ proc runstep {} {
 }
 
 # start processor at the given address
+# - clock with runloop/runstep afterward
 proc startat {addr} {
     if {($addr < 0) || ($addr > 07777)} {
         error "bad address $addr"
     }
-    puts "startat: setting swreg $addr"
+    puts "startat: DF=[swtch df] IF=[swtch if]"
+    puts "startat: setting swreg [octal $addr]"
     swtchwait reg $addr
     puts "startat: pressing ldad"
     swtchwait ldad 1
