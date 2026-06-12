@@ -27,6 +27,7 @@ VFILES := \
 	../zynq/pdp8ldc02.v \
 	../zynq/pdp8lrk8je.v \
 	../zynq/pdp8icmem.v \
+	../zynq/pdp8irtc.v \
 	../zynq/pdp8isim.v \
 	../zynq/pdp8ltc08.v \
 	../zynq/pdp8ifpi2c.v \
@@ -105,10 +106,10 @@ obj_dir/VZynq.cpp obj_dir/VZynq.h obj_dir/VZynq.mk: $(VFILES)
 	rm -rf obj_dir
 	verilator --cc --top-module Zynq $(VFILES)
 
-doubleroll-8l.bin: doubleroll-8l.asm
-	pdp8v/asm/assemble doubleroll-8l.asm doubleroll-8l.obj > doubleroll-8l.lis
-	pdp8v/asm/link -o doubleroll-8l.oct doubleroll-8l.obj > doubleroll-8l.map
-	pdp8v/asm/octtobin < doubleroll-8l.oct > doubleroll-8l.bin
+doubleroll.bin: doubleroll.asm
+	pdp8v/asm/assemble doubleroll.asm doubleroll.obj > doubleroll.lis
+	pdp8v/asm/link -o doubleroll.oct doubleroll.obj > doubleroll.map
+	pdp8v/asm/octtobin < doubleroll.oct > doubleroll.bin
 
 kaleid-e.bin: kaleid-e.pal kaleid.pal
 	pdp8v/asm/assemble -pal kaleid-e.pal kaleid-e.obj > kaleid-e.lis

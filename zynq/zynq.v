@@ -242,6 +242,11 @@ module Zynq #(parameter BIDIRCONSDA=1, parameter CLOCKDIVIDE=5) (
     // shadow interface wires
     wire[31:00] shardata;
 
+    // rtc interface wires
+    wire[31:00] rcardata;
+    wire[11:00] rcibus;
+    wire rcacclr, rcintrq, rcioskp;
+
     // tty interface wires
     wire[31:00] ttardata;
     wire[11:00] ttibus;
@@ -349,6 +354,7 @@ module Zynq #(parameter BIDIRCONSDA=1, parameter CLOCKDIVIDE=5) (
         (readaddr[11:03] ==  9'b000101100)  ? prardata   :
         (readaddr[11:03] ==  9'b000101101)  ? ppardata   :
         (readaddr[11:03] ==  9'b000101110)  ? tcardata   :
+        (readaddr[11:03] ==  9'b000101111)  ? rcardata   :
         32'hDEADBEEF;
 
     ////(readaddr[11:05] ==  7'b0001001)    ? shardata   :
@@ -364,6 +370,7 @@ module Zynq #(parameter BIDIRCONSDA=1, parameter CLOCKDIVIDE=5) (
     wire prawrite   = armwrite & writeaddr[11:03] == 9'b000101100;
     wire ppawrite   = armwrite & writeaddr[11:03] == 9'b000101101;
     wire tcawrite   = armwrite & writeaddr[11:03] == 9'b000101110;
+    wire rcawrite   = armwrite & writeaddr[11:03] == 9'b000101111;
 
     //// shawrite   = armwrite & writeaddr[11:05] == 7'b0001001;
 
@@ -686,15 +693,15 @@ module Zynq #(parameter BIDIRCONSDA=1, parameter CLOCKDIVIDE=5) (
     end
 
     // internal pio busses - wire-ored (active high) from device to processor
-    assign dev_iACCLEAR = arm_iACCLEAR | ttacclr | rkacclr | vcacclr | tcacclr | pracclr | pbacclr | dcacclr;
+    assign dev_iACCLEAR = arm_iACCLEAR | ttacclr | rkacclr | vcacclr | tcacclr | pracclr | pbacclr | dcacclr | rcacclr;
     assign dev_iBRKRQST = arm_iBRKRQST | cmbrkrqst;
     assign dev_iBRKWRM  = arm_iBRKWRM  | cmbrkwrite;
     assign dev_iCAINC   = arm_iCAINC   | cmbrkcainc;
     assign dev_iCYCLE3  = arm_iCYCLE3  | cmbrk3cycl;
     assign dev_iDMAFLD  = arm_iDMAFLD  | cmbrkema;
-    assign dev_iINBUS   = arm_iINBUS   | ttibus  | rkibus  | vcibus  | tcibus  | pribus  | pbibus  | dcibus  | cmbrkinbus;
-    assign dev_iINTRQST = arm_iINTRQST | ttintrq | rkintrq | vcintrq | tcintrq | printrq | ppintrq | dcintrq;
-    assign dev_iIOSKIP  = arm_iIOSKIP  | ttioskp | rkioskp | vcioskp | tcioskp | prioskp | ppioskp | dcioskp | pbioskp;
+    assign dev_iINBUS   = arm_iINBUS   | ttibus  | rkibus  | vcibus  | tcibus  | pribus  | pbibus  | dcibus  | rcibus  | cmbrkinbus;
+    assign dev_iINTRQST = arm_iINTRQST | ttintrq | rkintrq | vcintrq | tcintrq | printrq | ppintrq | dcintrq | rcintrq;
+    assign dev_iIOSKIP  = arm_iIOSKIP  | ttioskp | rkioskp | vcioskp | tcioskp | prioskp | ppioskp | dcioskp | rcioskp | pbioskp;
     assign dev_iPAUSE   = arm_iPAUSE;
 
     ///////////////////////////////////
@@ -1128,6 +1135,31 @@ module Zynq #(parameter BIDIRCONSDA=1, parameter CLOCKDIVIDE=5) (
 
         .IO_SKIP  (ppioskp),
         .INT_RQST (ppintrq)
+    );
+
+    // realtime clock interface
+
+    pdp8irtc rcinst (
+        .CLOCK (CLOCK),
+        .CSTEP (nanocstep),
+        .RESET (dev_iRESET),
+        .BINIT (dev_oBUSINI),
+
+        .armwrite (rcawrite),
+        .armraddr (readaddr[2]),
+        .armwaddr (writeaddr[2]),
+        .armwdata (saxi_WDATA),
+        .armrdata (rcardata),
+
+        .iopstart (iopstart),
+        .iopstop  (iopstop),
+        .ioopcode (dev_oMBUF),
+        .cputodev (dev_oACUM),
+
+        .devtocpu (rcibus),
+        .AC_CLEAR (rcacclr),
+        .IO_SKIP  (rcioskp),
+        .INT_RQST (rcintrq)
     );
 
     // integrated logic analyzer

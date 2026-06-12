@@ -441,34 +441,29 @@ proc loadbinptr {fname} {
     global Z8LHOME
 
     hardreset
-    setsw ifld 0 ; setsw dfld 0 ; setsw step 0
+    setsw ifld 0 ; setsw dfld 0
 
-    if {[getsw mprt]} {
-        puts "loadbinptr: mprt sw on - assuming loaders intact"
-    } else {
-        puts "loadbinptr: toggling in rim loader"
-        rimloader hi
+    puts "loadbinptr: toggling in rim loader"
+    rimloader hi
 
-        puts "loadbinptr: reading in bin loader"
-        exec -ignorestderr make -C $Z8LHOME binloader.rim
-        set ptrpid [exec -ignorestderr $Z8LHOME/z8lptr -killit $Z8LHOME/binloader.rim &]
-        after 1000
-        setsw sr 07756 ; flicksw ldad
-        setsw sr 00000 ; flicksw start
-        while true {
-            set exst [waitpid $ptrpid]
-            if {$exst != ""} break
-            if {[ctrlcflag]} {error "control-C"}
-            after 100
-        }
-        if {$exst != 0} {error "error $exst reading binloader.rim"}
-        flicksw stop
+    puts "loadbinptr: reading in bin loader"
+    exec -ignorestderr make -C $Z8LHOME binloader.rim
+    set ptrpid [exec -ignorestderr $Z8LHOME/z8lptr -killit $Z8LHOME/binloader.rim &]
+    after 1000
+    setsw sr 07756 ; flicksw ldad
+    setsw sr 00000 ; flicksw start
+    while true {
+        set exst [waitpid $ptrpid]
+        if {$exst != ""} break
+        if {[ctrlcflag]} {error "control-C"}
+        after 100
     }
+    if {$exst != 0} {error "error $exst reading binloader.rim"}
+    flicksw stop
 
     puts "loadbinptr: reading in $fname"
     set ptrpid [exec -ignorestderr $Z8LHOME/z8lptr -killit $fname &]
     after 1000
-    setsw mprt 0
     setsw sr 07777 ; flicksw ldad
     setsw sr 00000 ; flicksw start
     while {[getreg run]} {
@@ -479,7 +474,6 @@ proc loadbinptr {fname} {
     waitpid $ptrpid
     puts ""
     if {[getreg ac] != 0} {error "checksum error"}
-    setsw mprt 1
     return [rdmem 07616]
 }
 

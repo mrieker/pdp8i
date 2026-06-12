@@ -1,13 +1,10 @@
 
-# run doubleroll-8l on zynq with real or simulated PDP-8/L
-#  ./z8lpanel doubleroll-8l.tcl     real PDP-8/L
-#  ./z8lsim doubleroll-8l.tcl       simulator
+# run doubleroll on zynq with real or simulated PDP-8/I
 
-exec -ignorestderr make doubleroll-8l.bin
+exec -ignorestderr make doubleroll.bin
 hardreset
-set startaddr [loadbinptr doubleroll-8l.bin]
+set startaddr [loadbin doubleroll.bin]
 setsw sr 0140
 startat $startaddr
-relsw sr
 exec -ignorestderr ./z8lpanel -status < /dev/tty > /dev/tty
 exit
