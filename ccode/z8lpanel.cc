@@ -108,8 +108,8 @@ int main (int argc, char **argv)
 
     setlinebuf (stdout);
 
-    bool real    = false;
-    bool sim     = false;
+    bool real = false;
+    bool sim  = false;
     char const *logname = NULL;
     int tclargs = argc;
     for (int i = 0; ++ i < argc;) {
@@ -118,8 +118,8 @@ int main (int argc, char **argv)
             puts ("  ./z8lpanel [-log <logfile>] [-real | -sim] [<scriptfile.tcl>]");
             puts ("     access pdp-8/l front panel");
             puts ("         -log : record output to given log file");
-            puts ("        -real : use real pdp-8/l");
-            puts ("         -sim : simulate the pdp-8/l");
+            puts ("        -real : use real pdp-8/l (resets processor)");
+            puts ("         -sim : simulate the pdp-8/l (resets processor)");
             puts ("     <scriptfile.tcl> : execute script then exit");
             puts ("                 else : read and process commands from stdin");
             puts ("");
@@ -154,10 +154,14 @@ int main (int argc, char **argv)
         break;
     }
 
-    padlib = new I2CZLib (real, sim);
+    // access lights and switches via i2c
+    padlib = new I2CZLib ();
 
     // process tcl commands
-    return tclmain (fundefs, argv[0], "z8lpanel", logname, getenv ("z8lpanelini"), argc - tclargs, argv + tclargs);
+    char const *initargs[2] = { NULL, NULL };
+    if (real) initargs[0] = "-real";
+    if (sim)  initargs[0] = "-sim";
+    return tclmain (fundefs, argv[0], "z8lpanel", logname, getenv ("z8lpanelini"), argc - tclargs, argv + tclargs, false, initargs);
 }
 
 
@@ -573,7 +577,7 @@ static int showstatus (int argc, char **argv)
     time_t lasttime = 0;
 
     Z8LU32 *pdpat = z8lpage.findev ("8I", NULL, NULL, false);
-    padlib = new I2CZLib (false, false);
+    padlib = new I2CZLib ();
 
     setvbuf (stdout, outbuf, _IOFBF, sizeof outbuf);
 

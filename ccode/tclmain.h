@@ -39,7 +39,8 @@ int tclmain (
     char const *scriptini,
     int scriptargc,
     char const *const *scriptargv,
-    bool repeat = false);
+    bool repeat = false,
+    char const *const *initargs = NULL);
 
 void Tcl_SetResultF (Tcl_Interp *interp, char const *fmt, ...);
 

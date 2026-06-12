@@ -80,7 +80,8 @@ int tclmain (
     char const *scriptini,          // script init filename or NULL
     int scriptargc,                 // script filename or 0
     char const *const *scriptargv,  // script filename or NULL
-    bool repeat)                    // repeated prompts from tty
+    bool repeat,                    // repeated prompts from tty
+    char const *const *initargs)    // init script args or NULL
 {
     Tcl_FindExecutable (argv0);
 
@@ -155,6 +156,19 @@ int tclmain (
 
     // maybe there is a script init file
     if (scriptini != NULL) {
+
+        // create global var 'initargs' with any given initialization values
+        int ninitargs = 0;
+        if (initargs != NULL) {
+            for (; initargs[ninitargs] != NULL; ninitargs ++) { }
+        }
+        Tcl_Obj *initargobjs[ninitargs];
+        for (int i = 0; i < ninitargs; i ++) {
+            initargobjs[i] = Tcl_NewStringObj (initargs[i], -1);
+        }
+        Tcl_ObjSetVar2 (interp, Tcl_NewStringObj ("initargs", -1), NULL, Tcl_NewListObj (ninitargs, initargobjs), TCL_GLOBAL_ONLY);
+
+        // evaluate the script file
         rc = Tcl_EvalFile (interp, scriptini);
         if (rc != TCL_OK) {
             char const *err = Tcl_GetStringResult (interp);
@@ -163,6 +177,8 @@ int tclmain (
             Tcl_EvalEx (interp, "puts $::errorInfo", -1, TCL_EVAL_GLOBAL);
             return 1;
         }
+
+        // assume result is an help string
         char const *res = Tcl_GetStringResult (interp);
         if ((res != NULL) && (res[0] != 0)) inihelp = strdup (res);
     }

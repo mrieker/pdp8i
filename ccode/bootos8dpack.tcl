@@ -1,8 +1,8 @@
 #
 #  Boot OS/8 from RK05
 #
-#    real PDP:  ./z8lpanel bootos8dpack.tcl
-#    simulator: ./z8lsim bootos8dpack.tcl
+#    real PDP:  ./z8lpanel -real bootos8dpack.tcl
+#    simulator: ./z8lpanel -sim  bootos8dpack.tcl
 #
 global Z8LHOME
 source $Z8LHOME/os8lib.tcl

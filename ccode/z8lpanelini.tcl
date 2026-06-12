@@ -857,5 +857,10 @@ proc zeromem {start stop} {
 # make sure fpga clocking is turned on
 pin set nanocontin 1
 
+# maybe initialize real or sim mode
+# ...passed from z8lpanel command line
+if {$initargs == "-real"} simoff
+if {$initargs == "-sim"}  simon
+
 # message displayed as part of help command
 return "also, 'helpini' will print help for z8lpanelini.tcl commands"

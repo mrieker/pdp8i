@@ -33,15 +33,10 @@
 #include "i2czlib.h"
 #include "z8ldefs.h"
 
-I2CZLib::I2CZLib (bool real, bool sim)
+I2CZLib::I2CZLib ()
 {
-    pdpat = z8lpage.findev ("8I", NULL, NULL, false);
-    fpat  = z8lpage.findev ("FP", NULL, NULL, false);
-
-    if (real) pdpat[Z_RE] &= ~ e_simit;
-    if (sim)  pdpat[Z_RE] |=   e_simit;
-
-    fpat[5] &= ~ FP5_MANUAL;
+    pdpat = z8lpage.findev ("8I", NULL, NULL, false);   // zynq.v registers
+    fpat  = z8lpage.findev ("FP", NULL, NULL, false);   // pdp8ifpi2c.v registers
 }
 
 I2CZLib::~I2CZLib ()
