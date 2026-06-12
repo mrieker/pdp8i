@@ -148,6 +148,13 @@ void I2CZLib::readpads (Z8LPanel *pads)
     if (EXT (fp8, fp8_lbWCT)) pads->light.ms |= MS_WRDCT;
     if (EXT (fp8, fp8_lbCAD)) pads->light.ms |= MS_CURAD;
     if (EXT (fp8, fp8_lbBRK)) pads->light.ms |= MS_BREAK;
+    if (pads->light.ms == 0) {
+        ASSERT (MS_INTAK == 7);
+        ASSERT (MS_DEPOS == 8);
+        ASSERT (MS_EXAM  == 9);
+        pads->light.ms = (fp8 & fp8_lbMS3) ? (EXT (fp8, fp8_lbMS0) + 8) :
+                                             (EXT (fp8, fp8_lbMS0) * 7);
+    }
 
     pads->light.mb = EXT (fp9, fp9_lbMB);
     pads->light.ac = EXT (fp9, fp9_lbAC);

@@ -279,6 +279,8 @@
 #define fp7_mcpswrow (3U << 4)
 #define fp7_mcpstate (017U << 0)
 
+#define fp8_lbMS3    (1U << 31)
+#define fp8_lbMS0    (1U << 30)
 #define fp8_lbFET    (1U << 29)
 #define fp8_lbEXE    (1U << 28)
 #define fp8_lbDEF    (1U << 27)

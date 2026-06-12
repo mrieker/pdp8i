@@ -83,10 +83,10 @@ module pdp8ifpi2c (
                         //  9  GPA4    .   .   .   .   .  opr sc3       .      sinst
                         // 10  GPA3    .   .   .   .   .  fet sc4       .
                         // 11  GPA2    .   .   .   .   .  exe sc5       .
-                        // 12  GPA1    .   .   .   .   .  def           .
-                        // 13  GPA0    .   .   .   .   .  wct           .              [LSB]
+                        // 12  GPA1    .   .   .   .   .  def ms1       .
+                        // 13  GPA0    .   .   .   .   .  wct ms4       .              [LSB]
 
-                      (armraddr ==  8) ? { 2'b0,                    //30
+                      (armraddr ==  8) ? { lightrows[6][01:00],     //30 { MAJST[3], MAJST[0] }
                                            lightrows[5][03:00],     //26 { FET, EXE, DEF, WCT }
                                            lightrows[6][11:10],     //24 { CAD, BRK }
                                            lightrows[1],            //12 MADR[11:00]
