@@ -301,9 +301,10 @@
 #define fp9_lbAC (07777U << 12)
 #define fp9_lbMB (07777U <<  0)
 
-#define fp10_lbDF     (7U << 24)
-#define fp10_lbIF     (7U << 21)
-#define fp10_lbLINK   (1U << 20)
+#define fp10_lbDF     (7U << 29)
+#define fp10_lbIF     (7U << 26)
+#define fp10_lbLINK   (1U << 25)
+#define fp10_lbMS   (017U << 20)
 #define fp10_lbION    (1U << 19)
 #define fp10_lbPAU    (1U << 18)
 #define fp10_lbRUN    (1U << 17)

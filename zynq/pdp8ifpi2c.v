@@ -63,7 +63,7 @@ module pdp8ifpi2c (
     wire[14:00] i2ccount;
     wire[63:00] comand, status;
 
-    assign armrdata = (armraddr ==  0) ? 32'h46503001 : // [31:16] = 'FP'; [15:12] = (log2 nreg) - 1; [11:00] = version
+    assign armrdata = (armraddr ==  0) ? 32'h46503002 : // [31:16] = 'FP'; [15:12] = (log2 nreg) - 1; [11:00] = version
                       (armraddr ==  1) ? { comand[31:00] } :
                       (armraddr ==  2) ? { comand[63:32] } :
                       (armraddr ==  3) ? { status[31:00] } :
@@ -81,10 +81,10 @@ module pdp8ifpi2c (
                         //  7  GPB0    .   .   .   .   .  jmp sc1 if3   .  if3 stop
                         //  8  GPA5    .   .   .   .   .  iot sc2 lnk   .      sstep
                         //  9  GPA4    .   .   .   .   .  opr sc3       .      sinst
-                        // 10  GPA3    .   .   .   .   .  fet sc4       .
-                        // 11  GPA2    .   .   .   .   .  exe sc5       .
-                        // 12  GPA1    .   .   .   .   .  def ms1       .
-                        // 13  GPA0    .   .   .   .   .  wct ms4       .              [LSB]
+                        // 10  GPA3    .   .   .   .   .  fet sc4 ms1   .
+                        // 11  GPA2    .   .   .   .   .  exe sc5 ms2   .
+                        // 12  GPA1    .   .   .   .   .  def     ms3   .
+                        // 13  GPA0    .   .   .   .   .  wct     ms4   .              [LSB]
 
                       (armraddr ==  8) ? { lightrows[6][01:00],     //30 { MAJST[3], MAJST[0] }
                                            lightrows[5][03:00],     //26 { FET, EXE, DEF, WCT }
@@ -96,8 +96,7 @@ module pdp8ifpi2c (
                                            lightrows[3],            //12 ACUM[11:00]
                                            lightrows[2] } :         //00 MBUF[11:00]
 
-                      (armraddr == 10) ? { 5'b0,                    //27
-                                           lightrows[7][11:05],     //20 { DF[2:0], IF[2:0], LINK }
+                      (armraddr == 10) ? { lightrows[7][11:00],     //20 { DF[2:0], IF[2:0], LINK, 1'b0, MAJST[3:0] }
                                            lightrows[6][09:02],     //12 { ION, PAUSE, RUN, SCTR[4:0] }
                                            lightrows[4] } :         //00 MQUO[11:00]
 

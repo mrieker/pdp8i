@@ -137,20 +137,6 @@ void I2CZLib::readpads (Z8LPanel *pads)
     pads->light.pc = EXT (fp8, fp8_lbPC);
     pads->light.ma = EXT (fp8, fp8_lbMA);
 
-    if (EXT (fp8, fp8_lbFET)) pads->light.ms |= MS_FETCH;
-    if (EXT (fp8, fp8_lbDEF)) pads->light.ms |= MS_DEFER;
-    if (EXT (fp8, fp8_lbEXE)) pads->light.ms |= MS_EXEC;
-    if (EXT (fp8, fp8_lbWCT)) pads->light.ms |= MS_WRDCT;
-    if (EXT (fp8, fp8_lbCAD)) pads->light.ms |= MS_CURAD;
-    if (EXT (fp8, fp8_lbBRK)) pads->light.ms |= MS_BREAK;
-    if (pads->light.ms == 0) {
-        ASSERT (MS_INTAK == 7);
-        ASSERT (MS_DEPOS == 8);
-        ASSERT (MS_EXAM  == 9);
-        pads->light.ms = (fp8 & fp8_lbMS3) ? (EXT (fp8, fp8_lbMS0) + 8) :
-                                             (EXT (fp8, fp8_lbMS0) * 7);
-    }
-
     pads->light.mb = EXT (fp9, fp9_lbMB);
     pads->light.ac = EXT (fp9, fp9_lbAC);
 
@@ -168,6 +154,7 @@ void I2CZLib::readpads (Z8LPanel *pads)
     pads->light.run    = EXT (fp10, fp10_lbRUN);
     pads->light.pau    = EXT (fp10, fp10_lbPAU);
     pads->light.ion    = EXT (fp10, fp10_lbION);
+    pads->light.ms     = EXT (fp10, fp10_lbMS);
     pads->light.link   = EXT (fp10, fp10_lbLINK);
     pads->light.ifld   = EXT (fp10, fp10_lbIF);
     pads->light.dfld   = EXT (fp10, fp10_lbDF);
