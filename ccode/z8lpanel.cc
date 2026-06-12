@@ -535,10 +535,7 @@ static int cmd_setsw (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_O
 
 
 
-// continuously display what would be on the PDP-8/L front panel
-// reads panel lights and switches from z8lpanel via udp
-
-// requires './z8lpanel -status server' running in background on zturn
+// continuously display what would be on the PDP-8/I front panel
 
 #define ESC_NORMV "\033[m"             /* go back to normal video */
 #define ESC_REVER "\033[7m"            /* turn reverse video on */
@@ -557,6 +554,8 @@ static int cmd_setsw (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_O
 #define ESC_ON ESC_BOLDV ESC_GRNBG ESC_BLKFG
 
 #define RBITL(r,n) BOOL ((r >> (11 - n)) & 1)
+#define REG3L(r) RBITL (r, 9), RBITL (r, 10), RBITL (r, 11)
+#define REG5L(r) RBITL (r, 7), RBITL (r, 8), RBITL (r, 9), RBITL (r, 10), RBITL (r, 11)
 #define REG12L(r) RBITL (r, 0), RBITL (r, 1), RBITL (r, 2), RBITL (r, 3), RBITL (r, 4), RBITL (r, 5), RBITL (r, 6), RBITL (r, 7), RBITL (r, 8), RBITL (r, 9), RBITL (r, 10), RBITL (r, 11)
 #define STL(b,on,off) (b ? (ESC_ON on ESC_NORMV) : off)
 #define BOOL(b) STL (b, "*", "-")
@@ -565,16 +564,7 @@ static int cmd_setsw (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_O
 #define EOL ESC_EREOL "\n"
 #define EOP ESC_EREOP
 
-#define UDPPORT 23456
-
-struct UDPPkt {
-    uint64_t seq;
-    Z8LPanel pan;
-};
-
-static char const *const mnes[] = { "AND", "TAD", "ISZ", "DCA", "JMS", "JMP", "IOT", "OPR" };
-
-static char outbuf[4000];
+static char outbuf[6000];
 
 static int showstatus (int argc, char **argv)
 {
@@ -582,6 +572,7 @@ static int showstatus (int argc, char **argv)
     uint32_t nframes = 0;
     time_t lasttime = 0;
 
+    Z8LU32 *pdpat = z8lpage.findev ("8I", NULL, NULL, false);
     padlib = new I2CZLib (false, false);
 
     setvbuf (stdout, outbuf, _IOFBF, sizeof outbuf);
@@ -607,33 +598,69 @@ static int showstatus (int argc, char **argv)
         // read bulbs and switches
         padlib->readpads (&pads);
 
+        bool irand = pads.light.ir == 0;
+        bool irtad = pads.light.ir == 1;
+        bool irisz = pads.light.ir == 2;
+        bool irdca = pads.light.ir == 3;
+        bool irjms = pads.light.ir == 4;
+        bool irjmp = pads.light.ir == 5;
+        bool iriot = pads.light.ir == 6;
+        bool iropr = pads.light.ir == 7;
+
         bool msfet = pads.light.ms == MS_FETCH;
         bool msdef = pads.light.ms == MS_DEFER;
         bool msexe = pads.light.ms == MS_EXEC;
         bool mswct = pads.light.ms == MS_WRDCT;
         bool mscad = pads.light.ms == MS_CURAD;
         bool msbrk = pads.light.ms == MS_BREAK;
+        bool msiak = pads.light.ms == MS_INTAK;
+        bool msdep = pads.light.ms == MS_DEPOS;
+        bool msexm = pads.light.ms == MS_EXAM;
+
+        char const *simit = (pdpat[Z_RE] & e_simit) ? " sim" : "real";
 
         // display it
         printf (TOP EOL);
-        printf ("  PDP-8/I       %s   %s %s %s   %s %s %s   %s %s %s   %s %s %s  " ESC_BOLDV "%o.%04o" ESC_NORMV "  MA   IR [ %s %s %s  " ESC_ON "%s" ESC_NORMV " ]     %10u fps" EOL,
-            BOOL (pads.light.ema), REG12L (pads.light.ma), pads.light.ema, pads.light.ma,
-            RBITL (pads.light.ir,  9), RBITL (pads.light.ir, 10), RBITL (pads.light.ir, 11), mnes[pads.light.ir], fps);
-        printf (EOL);
-        printf ("                    %s %s %s   %s %s %s   %s %s %s   %s %s %s   " ESC_BOLDV " %04o" ESC_NORMV "  MB   ST [ %s %s %s %s %s %s ]" EOL,
-            REG12L (pads.light.mb), pads.light.mb, STL (msfet, "F", "f"), STL (msexe, "E", "e"), STL (msdef, "D", "d"),
-            STL (mswct, "WC", "wc"), STL (mscad, "CA", "ca"), STL (msbrk, "B", "b"));
-        printf (EOL);
-        printf ("                %s   %s %s %s   %s %s %s   %s %s %s   %s %s %s  " ESC_BOLDV "%o.%04o" ESC_NORMV "  AC   %s %s %s %s" EOL,
+
+        printf ("  PDP-8/I    %s %s %s  %s %s %s   %s %s %s  %s %s %s  %s %s %s  %s %s %s  PC  %o%o.%04o  %s  %s  %s%8u" EOL,
+            REG3L (pads.light.dfld), REG3L (pads.light.ifld), REG12L (pads.light.pc), pads.light.dfld, pads.light.ifld, pads.light.pc,
+            STL (irand, "AND", "and"), STL (msfet, "FET", "fet"), STL (pads.light.ion, "ION", "ion"), fps);
+
+        printf ("              DF     IF                                              %s  %s  %s     fps" EOL,
+            STL (irtad, "TAD", "tad"), STL (msexe, "EXE", "exe"), STL (pads.light.pau, "PAU", "pau"));
+
+        printf ("                            %s %s %s  %s %s %s  %s %s %s  %s %s %s  MA     %04o  %s  %s  %s" EOL,
+            REG12L (pads.light.ma), pads.light.ma, STL (irisz, "ISZ", "isz"), STL (msdef, "DEF", "def"), STL (pads.light.run, "RUN", "run"));
+
+        printf ("                                                                     %s  %s         %s" EOL,
+            STL (irdca, "DCA", "dca"), STL (mswct, "WCT", "wct"), simit);
+
+        printf ("                            %s %s %s  %s %s %s  %s %s %s  %s %s %s  MB     %04o  %s  %s" EOL,
+            REG12L (pads.light.mb), pads.light.mb, STL (irjms, "JMS", "jms"), STL (mscad, "CAD", "cad"));
+
+        printf ("                                                                     %s  %s" EOL,
+            STL (irjmp, "JMP", "jmp"), STL (msbrk, "BRK", "brk"));
+
+        printf ("                     L  %s   %s %s %s  %s %s %s  %s %s %s  %s %s %s  AC   %o.%04o  %s  %s" EOL,
             BOOL (pads.light.link), REG12L (pads.light.ac), pads.light.link, pads.light.ac,
-            STL (pads.light.ion, "ION", "ion"), "", "", STL (pads.light.run, "RUN", "run"));
+            STL (iriot, "IOT", "iot"), STL (msiak, "IAK", "iak"));
+
+        printf ("                                                                     %s  %s" EOL,
+            STL (iropr, "OPR", "opr"), STL (msdep, "DEP", "dep"));
+
+        printf ("           SC  %s %s  %s %s %s   %s %s %s  %s %s %s  %s %s %s  %s %s %s  MQ  %02o.%04o       %s" EOL,
+            REG5L (pads.light.sc), REG12L (pads.light.mq), pads.light.sc, pads.light.mq, STL (msexm, "EXM", "exm"));
+
         printf (EOL);
-        printf ("  %s  %s %s   %s %s %s   %s %s %s   %s %s %s   %s %s %s   " ESC_BOLDV " %04o" ESC_NORMV "  SR   %s  %s %s %s %s %s %s  %s" EOL,
-            "", STL (pads.togval.dfld, "DFLD", "dfld"), STL (pads.togval.ifld, "IFLD", "ifld"), REG12L (pads.togval.sr),
-            pads.togval.sr, STL (pads.button.ldad, "LDAD", "ldad"), STL (pads.button.start, "START", "start"), STL (pads.button.cont, "CONT", "cont"),
-            STL (pads.button.stop, "STOP", "stop"), STL (pads.togval.sinst, "SINST", "sinst"), STL (pads.togval.sstep, "SSTEP", "sstep"), STL (pads.button.exam, "EXAM", "exam"), STL (pads.button.dep, "DEP", "dep"));
-        printf (EOL EOP);
-        printf ("  %c\r", "\\|/-"[++twirly&3]);
+
+        printf ("             %s %s %s  %s %s %s   %s %s %s  %s %s %s  %s %s %s  %s %s %s  SR  %o%o.%04o  %s %s %s %s" EOL,
+            REG3L (pads.togval.dfld), REG3L (pads.togval.ifld), REG12L (pads.togval.sr), pads.togval.dfld, pads.togval.ifld, pads.togval.sr,
+            STL (pads.button.start, "START", "start"), STL (pads.button.ldad, "LDAD", "ldad"), STL (pads.button.dep, "DEPOS", "depos"), STL (pads.button.exam, "EXAM", "exam"));
+
+        printf ("                                                                     %s %s %s %s" EOL EOP,
+            STL (pads.button.cont, "CONT", "cont"), STL (pads.button.stop, "STOP", "stop"), STL (pads.togval.sstep, "SSTEP", "sstep"), STL (pads.togval.sinst, "SINST", "sinst"));
+
+        printf ("    %c\r", "\\|/-"[++twirly&3]);
         fflush (stdout);
     }
 }
