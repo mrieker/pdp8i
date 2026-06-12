@@ -664,7 +664,7 @@ module Zynq #(parameter BIDIRCONSDA=1, parameter CLOCKDIVIDE=5) (
     assign regctli = 0;
 
     // count memory cycles
-    // dectape uses it for timing in z8ltc08.cc
+    // dectape uses it for timing in z8itc08.cc
     always @(posedge CLOCK) begin
         regctlh <= RESET_N ? regctlh + 1 : 0;
         if (~ RESET_N) begin
@@ -874,7 +874,7 @@ module Zynq #(parameter BIDIRCONSDA=1, parameter CLOCKDIVIDE=5) (
 
     // teletype interface
 
-    pdp8ltty ttinst (
+    pdp8itty ttinst (
         .CLOCK (CLOCK),
         .CSTEP (nanocstep),
         .RESET (dev_iRESET),
@@ -899,7 +899,7 @@ module Zynq #(parameter BIDIRCONSDA=1, parameter CLOCKDIVIDE=5) (
 
     // terminal multiplexor
 
-    pdp8ldc02 dcinst (
+    pdp8idc02 dcinst (
         .CLOCK (CLOCK),
         .CSTEP (nanocstep),
         .RESET (dev_iRESET),
@@ -924,7 +924,7 @@ module Zynq #(parameter BIDIRCONSDA=1, parameter CLOCKDIVIDE=5) (
 
     // disk interface
 
-    pdp8lrk8je rkinst (
+    pdp8irk8je rkinst (
         .CLOCK (CLOCK),
         .CSTEP (nanocstep),
         .RESET (dev_iRESET),
@@ -984,7 +984,7 @@ module Zynq #(parameter BIDIRCONSDA=1, parameter CLOCKDIVIDE=5) (
 
     // tape interface
 
-    pdp8ltc08 tcinst (
+    pdp8itc08 tcinst (
         .CLOCK (CLOCK),
         .CSTEP (nanocstep),
         .RESET (dev_iRESET),
@@ -1009,7 +1009,7 @@ module Zynq #(parameter BIDIRCONSDA=1, parameter CLOCKDIVIDE=5) (
 
     // video interface
 
-    pdp8lvc8 vcinst (
+    pdp8ivc8 vcinst (
         .CLOCK (CLOCK),
         .CSTEP (nanocstep),
         .RESET (dev_iRESET),
@@ -1068,7 +1068,7 @@ module Zynq #(parameter BIDIRCONSDA=1, parameter CLOCKDIVIDE=5) (
     );
 
     // paper tape reader interface
-    pdp8lptr prinst (
+    pdp8iptr prinst (
         .CLOCK (CLOCK),
         .CSTEP (nanocstep),
         .RESET (dev_iRESET),
@@ -1092,7 +1092,7 @@ module Zynq #(parameter BIDIRCONSDA=1, parameter CLOCKDIVIDE=5) (
     );
 
     // pulse bit interface
-    pdp8lpbit pbinst (
+    pdp8ipbit pbinst (
         .CLOCK (CLOCK),
         .CSTEP (nanocstep),
         .RESET (dev_iRESET),
@@ -1116,7 +1116,7 @@ module Zynq #(parameter BIDIRCONSDA=1, parameter CLOCKDIVIDE=5) (
     );
 
     // paper tape punch interface
-    pdp8lptp ppinst (
+    pdp8iptp ppinst (
         .CLOCK (CLOCK),
         .CSTEP (nanocstep),
         .RESET (dev_iRESET),

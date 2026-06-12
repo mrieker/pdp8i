@@ -6,5 +6,5 @@ hardreset
 set startaddr [loadbin doubleroll.bin]
 setsw sr 0140
 startat $startaddr
-exec -ignorestderr ./z8lpanel -status < /dev/tty > /dev/tty
+exec -ignorestderr ./z8ipanel -status < /dev/tty > /dev/tty
 exit

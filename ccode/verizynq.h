@@ -23,7 +23,7 @@
 
 #include <stdint.h>
 
-#define VERIZYNQ_SHMNM "/z8lverizynq"
+#define VERIZYNQ_SHMNM "/z8iverizynq"
 
 #define VERIZYNQ_CPID  ((1<<29)-1)  // client pid mask
 #define VERIZYNQ_STATE (7<<29)      // state mask

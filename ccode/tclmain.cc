@@ -109,7 +109,7 @@ int tclmain (
 
     char exedir[1024];
     getexedir (exedir, sizeof exedir);
-    if (Tcl_SetVar (interp, "Z8LHOME", exedir, 0) == NULL) ABORT ();
+    if (Tcl_SetVar (interp, "Z8IHOME", exedir, 0) == NULL) ABORT ();
 
     // redirect stdout if -log given
     if (logname != NULL) {

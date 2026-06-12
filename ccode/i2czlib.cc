@@ -19,7 +19,7 @@
 //    http://www.gnu.org/licenses/gpl-2.0.html
 
 // Access the front panel lights and switches via I2C bus to PCB3 piggy-backed on backplane
-// z8lpanel.cc -> i2czlib.cc -> pdp8lfpi2c.v -> i2cmaster.v -> i2c -> pcb3 -> mcp23017s -> lights & switches
+// z8ipanel.cc -> i2czlib.cc -> pdp8ifpi2c.v -> i2cmaster.v -> i2c -> pcb3 -> mcp23017s -> lights & switches
 
 #include <errno.h>
 #include <fcntl.h>
@@ -31,12 +31,12 @@
 #include <unistd.h>
 
 #include "i2czlib.h"
-#include "z8ldefs.h"
+#include "z8idefs.h"
 
 I2CZLib::I2CZLib ()
 {
-    pdpat = z8lpage.findev ("8I", NULL, NULL, false);   // zynq.v registers
-    fpat  = z8lpage.findev ("FP", NULL, NULL, false);   // pdp8ifpi2c.v registers
+    pdpat = z8ipage.findev ("8I", NULL, NULL, false);   // zynq.v registers
+    fpat  = z8ipage.findev ("FP", NULL, NULL, false);   // pdp8ifpi2c.v registers
 }
 
 I2CZLib::~I2CZLib ()
@@ -49,7 +49,7 @@ I2CZLib::~I2CZLib ()
 void I2CZLib::loop52 ()
 {
     // make sure processor halted
-    Z8LPanel pads;
+    Z8IPanel pads;
     for (int i = 0; i < 10; i ++) {
         this->readpads (&pads);
         if (! pads.light.run) goto halted;
@@ -59,7 +59,7 @@ void I2CZLib::loop52 ()
         usleep (200000);
     }
     fprintf (stderr, "I2CZLib::loop52: processor would not halt\n");
-    fprintf (stderr, "I2CZLib::loop52: try ./z8lpanel hardreset\n");
+    fprintf (stderr, "I2CZLib::loop52: try ./z8ipanel hardreset\n");
     ABORT ();
 halted:;
 
@@ -116,7 +116,7 @@ halted:;
 // release our override of all switches
 void I2CZLib::relall ()
 {
-    Z8LPanel pads;
+    Z8IPanel pads;
     memset (&pads, 0, sizeof pads);
     writepads (&pads);
 }
@@ -124,7 +124,7 @@ void I2CZLib::relall ()
 // read light bulbs and switches
 // pdp8ifpi2c.v is continuously scanning the lights and switches
 //  and updating fpat[8,9,10,11,12] registers
-void I2CZLib::readpads (Z8LPanel *pads)
+void I2CZLib::readpads (Z8IPanel *pads)
 {
     memset (pads, 0, sizeof *pads);
 
@@ -181,7 +181,7 @@ void I2CZLib::readpads (Z8LPanel *pads)
 // write overidden switches
 // pdp8ifpi2c.v is continuously reading fpat[11,12] registers
 //  and passing them to the console board via i2c
-void I2CZLib::writepads (Z8LPanel const *pads)
+void I2CZLib::writepads (Z8IPanel const *pads)
 {
     // enable which bits are being sent out
     // - buttons need to be sent out only when pressed

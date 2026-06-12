@@ -18,10 +18,10 @@
 //
 //    http://www.gnu.org/licenses/gpl-2.0.html
 
-// Runs PIPan8L on a Zynq board programmed with 8/L emulation code
+// Runs PIPan8I on a Zynq board programmed with 8/I emulation code
 // It does not write to the zynq memory pages so does not alter zynq state
 
-//  ./z8ldump.armv7l [-once | -step] [-xmem <lo>..<hi>]...
+//  ./z8idump.armv7l [-once | -step] [-xmem <lo>..<hi>]...
 
 #include <alloca.h>
 #include <signal.h>
@@ -32,10 +32,10 @@
 #include <unistd.h>
 
 #include "i2czlib.h"
-#include "z8ldefs.h"
-#include "z8lutil.h"
+#include "z8idefs.h"
+#include "z8iutil.h"
 
-#define FLD(idx,msk) EXT(z8ls[idx],msk)
+#define FLD(idx,msk) EXT(z8is[idx],msk)
 
 #define ESC_NORMV "\033[m"          // go back to normal video
 #define ESC_REVER "\033[7m"         // turn reverse video on
@@ -76,7 +76,7 @@ int main (int argc, char **argv)
             puts ("     Dump ZTurn FPGA state");
             puts ("     Does not alter the state");
             puts ("");
-            puts ("  ./z8ldump.armv7l [-fps <num> | -once | -page | -step]");
+            puts ("  ./z8idump.armv7l [-fps <num> | -once | -page | -step]");
             puts ("      -fps : this many frames per second 1..1000 (default 20)");
             puts ("     -once : just print the state once, else update continually");
             puts ("     -page : just dump the raw page then exit");
@@ -114,7 +114,7 @@ int main (int argc, char **argv)
         return 1;
     }
 
-    Z8LU32 *pdpat = z8lpage.findev ("8I", NULL, NULL, false);
+    Z8IU32 *pdpat = z8ipage.findev ("8I", NULL, NULL, false);
 
     // maybe just dump the page and exit
     if (pagemode) {
@@ -144,12 +144,12 @@ int main (int argc, char **argv)
     while (! exitflag) {
         usleep (1000000 / fps);
 
-        uint32_t z8ls[1024];
+        uint32_t z8is[1024];
         for (int i = 0; i < pagelen; i ++) {
-            z8ls[i] = pdpat[i];
+            z8is[i] = pdpat[i];
         }
 
-        Z8LPanel pads;
+        Z8IPanel pads;
         i2czlib.readpads (&pads);
 
         if (! oncemode) printf (ESC_HOMEC);
@@ -159,7 +159,7 @@ int main (int argc, char **argv)
         uint32_t timestate = (FLD(Z_RF,f_oTS1) << 9) | (FLD(Z_RF,f_oTS2) << 6) | (FLD(Z_RF,f_oTS3) << 3) | FLD(Z_RF,f_oTS4);
 
         // zynq.v register dump
-        printf ("VERSION=%08X %c%c  %s%s", z8ls[0], (char)(z8ls[0] >> 24), (char)(z8ls[0] >> 16), mode, eol);
+        printf ("VERSION=%08X %c%c  %s%s", z8is[0], (char)(z8is[0] >> 24), (char)(z8is[0] >> 16), mode, eol);
 
         printf ("  oACUM=%04o    iACCLEAR=%o     lbAC=%04o    swCONT=%o  %s", FLD(Z_RF,f_oACUM),    FLD(Z_RC,c_dev_iACCLEAR), pads.light.ac,   pads.button.cont,  eol);
         printf ("  oBRKCYC=%o     iBRKGNTO=%o     lbMA=%04o    swDEPOS=%o %s", FLD(Z_RF,f_oBRKCYC),  FLD(Z_RC,c_dev_iBRKGNTO), pads.light.ma,   pads.button.dep,   eol);
@@ -174,12 +174,12 @@ int main (int argc, char **argv)
         printf ("  oTP=%04o      iPAUSE=%o       lbRUN=%o                %s", timepulse,            FLD(Z_RC,c_dev_iPAUSE),   pads.light.run,                     eol);
         printf ("  oTS=%04o                     lbPC=%04o               %s", timestate,                                      pads.light.pc,                      eol);
         printf ("                               lbDF=%o                 %s",                                                 pads.light.dfld,                    eol);
-        printf ("  memcycctr=%08X           lbEA=%o                 %s", z8ls[14],                                           pads.light.ema,                     eol);
-        printf ("  regctld=%08X             lbIF=%o                 %s", z8ls[4],                                            pads.light.ifld,                    eol);
-        printf ("  regctlg=%08X%s", z8ls[7], eol);
+        printf ("  memcycctr=%08X           lbEA=%o                 %s", z8is[14],                                           pads.light.ema,                     eol);
+        printf ("  regctld=%08X             lbIF=%o                 %s", z8is[4],                                            pads.light.ifld,                    eol);
+        printf ("  regctlg=%08X%s", z8is[7], eol);
 
         for (int i = 0; i < pagelen;) {
-            uint32_t idver = z8ls[i];
+            uint32_t idver = z8is[i];
             if (idver == 0xDEADBEEF) {
                 pagelen = i;
                 if (oncemode) printf ("\npagelen=%d\n", pagelen);
@@ -197,25 +197,25 @@ int main (int argc, char **argv)
                     FLD(i+4,XM4_ADDRLATCHWID), FLD(i+4,XM4_READSTROBEDEL), FLD(i+4,XM4_READSTROBEWID), FLD(i+4,XM4_WRITEENABDEL),
                     FLD(i+5,XM5_WRITEENABWID), FLD(i+5,XM5_WRITEDONEWID), eol);
             } else if (((idver >> 24) == 'S') && (((idver >> 16) & 255) == 'H')) {
-                char *shst = formatshadow (&z8ls[i]);
+                char *shst = formatshadow (&z8is[i]);
                 printf ("%sVERSION=%08X SH %s%s", eol, idver, shst, eol);
                 free (shst);
             } else {
                 if ((idver & 0xF000U) == 0x0000U) {
-                    printf ("%sVERSION=%08X %c%c %08X%s", eol, idver, idver >> 24, idver >> 16, z8ls[i+1], eol);
+                    printf ("%sVERSION=%08X %c%c %08X%s", eol, idver, idver >> 24, idver >> 16, z8is[i+1], eol);
                 }
                 if ((idver & 0xF000U) == 0x1000U) {
-                    printf ("%sVERSION=%08X %c%c %08X %08X %08X%s", eol, idver, idver >> 24, idver >> 16, z8ls[i+1], z8ls[i+2], z8ls[i+3], eol);
+                    printf ("%sVERSION=%08X %c%c %08X %08X %08X%s", eol, idver, idver >> 24, idver >> 16, z8is[i+1], z8is[i+2], z8is[i+3], eol);
                 }
                 if ((idver & 0xF000U) == 0x2000U) {
                     printf ("%sVERSION=%08X %c%c %08X %08X %08X %08X %08X %08X %08X%s", eol, idver, idver >> 24, idver >> 16,
-                        z8ls[i+1], z8ls[i+2], z8ls[i+3], z8ls[i+4], z8ls[i+5], z8ls[i+6], z8ls[i+7], eol);
+                        z8is[i+1], z8is[i+2], z8is[i+3], z8is[i+4], z8is[i+5], z8is[i+6], z8is[i+7], eol);
                 }
                 if ((idver & 0xF000U) == 0x3000U) {
                     printf ("%sVERSION=%08X %c%c %08X %08X %08X %08X %08X %08X %08X%s", eol, idver, idver >> 24, idver >> 16,
-                        z8ls[i+1], z8ls[i+2], z8ls[i+3], z8ls[i+4], z8ls[i+5], z8ls[i+6], z8ls[i+7], eol);
+                        z8is[i+1], z8is[i+2], z8is[i+3], z8is[i+4], z8is[i+5], z8is[i+6], z8is[i+7], eol);
                     printf ("           %08X %08X %08X %08X %08X %08X %08X %08X%s",
-                        z8ls[i+8], z8ls[i+9], z8ls[i+10], z8ls[i+11], z8ls[i+12], z8ls[i+13], z8ls[i+14], z8ls[i+15], eol);
+                        z8is[i+8], z8is[i+9], z8is[i+10], z8is[i+11], z8is[i+12], z8is[i+13], z8is[i+14], z8is[i+15], eol);
                 }
             }
             i += 2 << ((idver >> 12) & 15);

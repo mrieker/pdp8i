@@ -18,14 +18,13 @@
 //
 //    http://www.gnu.org/licenses/gpl-2.0.html
 
-// PDP-8/L paper tape punch interface
-// small computer handbook 1972 p 7-41..43 (261..263)
+// PDP-8/I paper tape reader interface
 
 // arm registers:
-//  [0] = ident='PP',sizecode=0,version
-//  [1] = <wrflag> <enable> <wrbusy> 00000000000000000 <wrchar>
+//  [0] = ident='PR',sizecode=0,version
+//  [1] = <rdflag> <enable> <rdstep> 00000000000000000 <rdchar>
 
-module pdp8lptp (
+module pdp8iptr (
     input CLOCK, CSTEP, RESET, BINIT,
 
     input armwrite,
@@ -38,48 +37,57 @@ module pdp8lptp (
     input[11:00] ioopcode,
     input[11:00] cputodev,
 
+    output reg[11:00] devtocpu,
+    output reg AC_CLEAR,
     output reg IO_SKIP,
     output INT_RQST
 );
 
-    reg enable, wrbusy, wrflag;
-    reg[11:00] wrchar;
+    reg enable, rdflag, rdstep;
+    reg[11:00] rdchar;
 
-    assign armrdata = ~ armraddr ? 32'h50500001 : // [31:16] = 'PP'; [15:12] = (log2 nreg) - 1; [11:00] = version
-                      { wrflag, enable, wrbusy, 17'b0, wrchar };
+    assign armrdata = ~ armraddr ? 32'h50520002 : // [31:16] = 'PR'; [15:12] = (log2 nreg) - 1; [11:00] = version
+                      { rdflag, enable, rdstep, 17'b0, rdchar };
 
-    assign INT_RQST = wrflag;
+    assign INT_RQST = rdflag;
 
     always @(posedge CLOCK) begin
         if (BINIT) begin
             if (RESET) begin
                 enable <= 0;
             end
-            wrflag <= 0;
+            rdflag <= 0;
+            rdstep <= 0;
         end
 
         // arm processor is writing one of the registers
         else if (armwrite) begin
             case (armwaddr)
+
+                // arm processor is sending a reader char for the PDP-8/I code to read
+                // - typically sets rdflag = 1 indicating rdchar has something in it
                 1: begin
-                    wrflag <= armwdata[31];
+                    rdflag <= armwdata[31];
                     enable <= armwdata[30];
-                    wrbusy <= armwdata[29];
+                    rdstep <= armwdata[29];
+                    rdchar <= armwdata[11:00];
                 end
             endcase
         end else if (CSTEP) begin
 
             // process the IOP only on the leading edge
-            // ...but leave output signals to PDP-8/L in place until given the all clear
-            if (iopstart & enable & (ioopcode[11:03] == 9'o602)) begin
-                if (ioopcode[00]) IO_SKIP <= wrflag;
-                if (ioopcode[01]) wrflag  <= 0;
-                if (ioopcode[02]) begin wrchar <= cputodev; wrbusy <= 1; end
+            // ...but leave output signals to PDP-8/I in place until given the all clear
+            if (iopstart & enable & (ioopcode[11:03] == 9'o601)) begin
+                if (ioopcode[00]) begin IO_SKIP <= rdflag; end                              // skip if reader char ready
+                if (ioopcode[01]) begin devtocpu <= rdchar; rdflag <= 0; end                // read char, clear flag
+                if (ioopcode[02]) begin rdflag <= 0; rdstep <= 1; end                       // clear flag, step reader
             end
 
             // processor no longer sending an IOP, stop sending data over the bus so it doesn't jam other devices
             else if (iopstop) begin
-                IO_SKIP <= 0;
+                AC_CLEAR <= 0;
+                devtocpu <= 0;
+                IO_SKIP  <= 0;
             end
         end
     end

@@ -18,7 +18,7 @@
 //
 //    http://www.gnu.org/licenses/gpl-2.0.html
 
-// Performs TC08 tape I/O for the PDP-8/L Zynq I/O board
+// Performs TC08 tape I/O for the PDP-8/I Zynq I/O board
 
 #include <arpa/inet.h>
 #include <errno.h>
@@ -39,8 +39,8 @@
 #include <unistd.h>
 
 #include "tclmain.h"
-#include "z8ldefs.h"
-#include "z8lutil.h"
+#include "z8idefs.h"
+#include "z8iutil.h"
 
 #define TC_ENABLE 0x80000000
 #define TC_STATB  0x0FFF0000
@@ -133,8 +133,8 @@ static pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 static uint16_t ocarray[4096];
 static uint16_t status_a, status_b;
 static uint32_t cycles;
-static Z8LU32 *pdpat;
-static Z8LU32 *tcat;
+static Z8IU32 *pdpat;
+static Z8IU32 *tcat;
 
 static int loadtape (bool readwrite, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
 static bool loadfile (Tcl_Interp *interp, bool readwrite, int driveno, char const *filenm);
@@ -174,7 +174,7 @@ int main (int argc, char **argv)
             puts ("");
             puts ("     Access TC08 controller and drives");
             puts ("");
-            puts ("  ./z8ltc08 [-killit] [-loadro/-loadrw <driveno> <file>]... | [<tclscriptfile> [<scriptargs>...]]");
+            puts ("  ./z8itc08 [-killit] [-loadro/-loadrw <driveno> <file>]... | [<tclscriptfile> [<scriptargs>...]]");
             puts ("     -killit : kill other process accessing TC08 controller");
             puts ("     -loadro/rw : load the given file in the given drive");
             puts ("     <tclscriptfile> : execute script then exit");
@@ -186,7 +186,7 @@ int main (int argc, char **argv)
             puts ("     If no -loadro/rw options given, will use TCL commands to dynamically load");
             puts ("     and unload drives.  If no <tclscriptfile> given, will read from stdin.");
             puts ("");
-            puts ("  ./z8ltc08 -status [<hostname-or-ip-address-of-zturn>]");
+            puts ("  ./z8itc08 -status [<hostname-or-ip-address-of-zturn>]");
             puts ("     display ascii-art dectape status");
             puts ("     runs on pc, raspi, zturn");
             puts ("     <hostname-or-ip-address-of-zturn> defaults to localhost");
@@ -222,12 +222,12 @@ int main (int argc, char **argv)
         break;
     }
 
-    pdpat = z8lpage.findev ("8L", NULL, NULL, false);
-    tcat  = z8lpage.findev ("TC", NULL, NULL, true, killit);
+    pdpat = z8ipage.findev ("8I", NULL, NULL, false);
+    tcat  = z8ipage.findev ("TC", NULL, NULL, true, killit);
 
     tcat[1] = TC_ENABLE;    // enable board to process io instructions
 
-    char const *dbenv = getenv ("z8ltc08_debug");
+    char const *dbenv = getenv ("z8itc08_debug");
     debug = (dbenv == NULL) ? 0 : atoi (dbenv);
 
     // initialize obverse complement lookup table
@@ -265,7 +265,7 @@ int main (int argc, char **argv)
     if (rc != 0) ABORT ();
 
     // process tcl commands
-    rc = tclmain (fundefs, argv[0], "z8ltc08", NULL, NULL, argc - tclargs, argv + tclargs, true);
+    rc = tclmain (fundefs, argv[0], "z8itc08", NULL, NULL, argc - tclargs, argv + tclargs, true);
 
     exiting = true;
     pthread_join (threadid, NULL);
@@ -497,11 +497,11 @@ static void *thread (void *dummy)
                         // increment word count and write new tape position to memory
                         uint32_t tp = drive->tapepos / 4;
                         if (debug >= 3) {
-                            uint16_t wc = EXT (z8lpage.dmacycle (INS (IDWC, CM_ADDR)), CM_DATA);
-                            uint16_t ca = EXT (z8lpage.dmacycle (INS (IDCA, CM_ADDR)), CM_DATA);
+                            uint16_t wc = EXT (z8ipage.dmacycle (INS (IDWC, CM_ADDR)), CM_DATA);
+                            uint16_t ca = EXT (z8ipage.dmacycle (INS (IDCA, CM_ADDR)), CM_DATA);
                             DBGPR (3, "thread: skip writing tp=%04o to wc=%04o ca=%04o\n", tp, wc, ca);
                         }
-                        cm = z8lpage.dmacycle (INS (tp, CM_DATA) | INS (field | IDWC, CM_ADDR) | CM_WRITE | CM_3CYCL);
+                        cm = z8ipage.dmacycle (INS (tp, CM_DATA) | INS (field | IDWC, CM_ADDR) | CM_WRITE | CM_3CYCL);
                         DBGPR (2, "thread: skip cm=%08X tp=%04o\n", cm, tp);
                     } while (CONTIN && ! (cm & CM_WCOVF));
                     goto success;
@@ -534,14 +534,14 @@ static void *thread (void *dummy)
                                 uint16_t ocdat = buff[i] & 07777;
                                 uint16_t data  = ocarray[ocdat];
                                 DBGPR (4, "thread:  rev memory[] = %04o = ocarray[%04o]\n", data, ocdat);
-                                cm = z8lpage.dmacycle (INS (data, CM_DATA) | CM_WRITE | INS (field | IDWC, CM_ADDR) | CM_3CYCL | CM_CAINC);
+                                cm = z8ipage.dmacycle (INS (data, CM_DATA) | CM_WRITE | INS (field | IDWC, CM_ADDR) | CM_3CYCL | CM_CAINC);
                                 if (cm & CM_WCOVF) break;
                             }
                         } else {
                             // madness: TC08 OS/8 boot block changes from data field 0 to data field 1 mid-read
                             // so pass data s-l-o-w-l-y when booting
-                            uint16_t idwc = EXT (z8lpage.dmacycle (INS (IDWC, CM_ADDR)), CM_DATA);
-                            uint16_t idca = EXT (z8lpage.dmacycle (INS (IDCA, CM_ADDR)), CM_DATA);
+                            uint16_t idwc = EXT (z8ipage.dmacycle (INS (IDWC, CM_ADDR)), CM_DATA);
+                            uint16_t idca = EXT (z8ipage.dmacycle (INS (IDCA, CM_ADDR)), CM_DATA);
                             bool slow = dmareadoverwritesinstructions (field, idca, idwc);
                             for (int i = 0; i < WORDSPERBLOCK; i ++) {
                                 if (slow) {
@@ -552,11 +552,11 @@ static void *thread (void *dummy)
                                     field    = (status_b & 070) << 9;
                                 }
                                 if (debug >= 4) {
-                                    idwc = EXT (z8lpage.dmacycle (INS (IDWC, CM_ADDR)), CM_DATA);
-                                    idca = EXT (z8lpage.dmacycle (INS (IDCA, CM_ADDR)), CM_DATA);
+                                    idwc = EXT (z8ipage.dmacycle (INS (IDWC, CM_ADDR)), CM_DATA);
+                                    idca = EXT (z8ipage.dmacycle (INS (IDCA, CM_ADDR)), CM_DATA);
                                 }
                                 uint16_t data = buff[i] & 07777;
-                                cm = z8lpage.dmacycle (INS (data, CM_DATA) | INS (field | IDWC, CM_ADDR) | CM_WRITE | CM_3CYCL | CM_CAINC);
+                                cm = z8ipage.dmacycle (INS (data, CM_DATA) | INS (field | IDWC, CM_ADDR) | CM_WRITE | CM_3CYCL | CM_CAINC);
                                 DBGPR (4, "thread:  %s idwc=%04o idca=%04o memory[%o.%04o] = %04o => wcovf=%o\n",
                                     (slow ? "slo" : "fwd"), idwc, idca, field >> 12, (idca + 1) & 07777, data, (cm / CM_WCOVF) & 1);
                                 if (cm & CM_WCOVF) break;
@@ -629,18 +629,18 @@ static void *thread (void *dummy)
                                 uint16_t ocdat = buff[i] & 07777;
                                 uint16_t data  = ocarray[ocdat];
                                 DBGPR (4, "thread:  rev memory[] = %04o = ocarray[%04o]\n", data, ocdat);
-                                cm = z8lpage.dmacycle (INS (data, CM_DATA) | INS (field | IDWC, CM_ADDR) | CM_WRITE | CM_3CYCL | CM_CAINC);
+                                cm = z8ipage.dmacycle (INS (data, CM_DATA) | INS (field | IDWC, CM_ADDR) | CM_WRITE | CM_3CYCL | CM_CAINC);
                                 if (cm & CM_WCOVF) break;
                             }
                         } else {
                             uint16_t idwc = 0, idca = 0;
                             for (int i = 0; i < 5 + WORDSPERBLOCK + 5; i ++) {
                                 if (debug >= 4) {
-                                    idwc = EXT (z8lpage.dmacycle (INS (IDWC, CM_ADDR)), CM_DATA);
-                                    idca = EXT (z8lpage.dmacycle (INS (IDCA, CM_ADDR)), CM_DATA);
+                                    idwc = EXT (z8ipage.dmacycle (INS (IDWC, CM_ADDR)), CM_DATA);
+                                    idca = EXT (z8ipage.dmacycle (INS (IDCA, CM_ADDR)), CM_DATA);
                                 }
                                 uint16_t data = buff[i] & 07777;
-                                cm = z8lpage.dmacycle (INS (data, CM_DATA) | INS (field | IDWC, CM_ADDR) | CM_WRITE | CM_3CYCL | CM_CAINC);
+                                cm = z8ipage.dmacycle (INS (data, CM_DATA) | INS (field | IDWC, CM_ADDR) | CM_WRITE | CM_3CYCL | CM_CAINC);
                                 DBGPR (4, "thread:  fwd idwc=%04o idca=%04o memory[%o.%04o] = %04o => wcovf=%o\n",
                                     idwc, idca, field >> 12, (idca + 1) & 07777, data, (cm / CM_WCOVF) & 1);
                                 if (cm & CM_WCOVF) break;
@@ -667,7 +667,7 @@ static void *thread (void *dummy)
                         DBGPR (2, "thread: write block=%04o\n", drive->tapepos / 4);
                         if (REVERS) {
                             for (int i = WORDSPERBLOCK; i > 0;) {
-                                cm = z8lpage.dmacycle (INS (field | IDWC, CM_ADDR) | CM_3CYCL | CM_CAINC);
+                                cm = z8ipage.dmacycle (INS (field | IDWC, CM_ADDR) | CM_3CYCL | CM_CAINC);
                                 uint16_t data = EXT (cm, CM_DATA);
                                 buff[--i] = ocarray[data];
                                 if (cm & CM_WCOVF) {
@@ -677,7 +677,7 @@ static void *thread (void *dummy)
                             }
                         } else {
                             for (int i = 0; i < WORDSPERBLOCK;) {
-                                cm = z8lpage.dmacycle (INS (field | IDWC, CM_ADDR) | CM_3CYCL | CM_CAINC);
+                                cm = z8ipage.dmacycle (INS (field | IDWC, CM_ADDR) | CM_3CYCL | CM_CAINC);
                                 uint16_t data = EXT (cm, CM_DATA);
                                 buff[i++] = data;
                                 if (cm & CM_WCOVF) {
@@ -825,7 +825,7 @@ static bool dmareadoverwritesinstructions (uint16_t field, uint16_t idca, uint16
     if (curif != field >> 12) return false;
 
     // current PC must be within transfer area
-    // we use the MA cuz PDP-8/L doesn't make PC available
+    // we use the MA cuz PDP-8/I doesn't make PC available
     // but if it's doing a JMP . in the boot code, PC should be the only thing in there
     uint16_t endaddr = (idca - idwc) & 07777;
     idca = (idca + 1) & 07777;

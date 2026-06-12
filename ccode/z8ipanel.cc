@@ -18,8 +18,8 @@
 //
 //    http://www.gnu.org/licenses/gpl-2.0.html
 
-// access pdp-8/l front panel via backplane piggy-back board connected to the Zynq
-// see ./z8lpanel -? for options
+// access pdp-8/i front panel via backplane piggy-back board connected to the Zynq
+// see ./z8ipanel -? for options
 
 #include <errno.h>
 #include <fcntl.h>
@@ -40,8 +40,8 @@
 #include "i2czlib.h"
 #include "readprompt.h"
 #include "tclmain.h"
-#include "z8ldefs.h"
-#include "z8lutil.h"
+#include "z8idefs.h"
+#include "z8iutil.h"
 
 // internal TCL commands
 static Tcl_ObjCmdProc cmd_assemop;
@@ -60,7 +60,7 @@ static TclFunDef const fundefs[] = {
     { cmd_getreg,     "getreg",     "get register value" },
     { cmd_getsw,      "getsw",      "get switch value" },
     { cmd_gettod,     "gettod",     "get current time in us precision" },
-    { cmd_libname,    "libname",    "get library name i2c,sim,z8l" },
+    { cmd_libname,    "libname",    "get library name i2c,sim,z8i" },
     { CMD_PIN },
     { cmd_readchar,   "readchar",   "read character with timeout" },
     { cmd_relsw,      "relsw",      "release control of switch" },
@@ -70,7 +70,7 @@ static TclFunDef const fundefs[] = {
 
 static char const *const msnames[] = { MS_NAMES };
 
-static Z8LPanel pads;
+static Z8IPanel pads;
 
 struct Switch {
     char const *name;
@@ -115,15 +115,15 @@ int main (int argc, char **argv)
     for (int i = 0; ++ i < argc;) {
         if (strcmp (argv[i], "-?") == 0) {
             puts ("");
-            puts ("  ./z8lpanel [-log <logfile>] [-real | -sim] [<scriptfile.tcl>]");
-            puts ("     access pdp-8/l front panel");
+            puts ("  ./z8ipanel [-log <logfile>] [-real | -sim] [<scriptfile.tcl>]");
+            puts ("     access pdp-8/i front panel");
             puts ("         -log : record output to given log file");
-            puts ("        -real : use real pdp-8/l (resets processor)");
-            puts ("         -sim : simulate the pdp-8/l (resets processor)");
+            puts ("        -real : use real pdp-8/i (resets processor)");
+            puts ("         -sim : simulate the pdp-8/i (resets processor)");
             puts ("     <scriptfile.tcl> : execute script then exit");
             puts ("                 else : read and process commands from stdin");
             puts ("");
-            puts ("  ./z8lpanel -status");
+            puts ("  ./z8ipanel -status");
             puts ("     display ascii-art front panel");
             puts ("");
             return 0;
@@ -161,7 +161,7 @@ int main (int argc, char **argv)
     char const *initargs[2] = { NULL, NULL };
     if (real) initargs[0] = "-real";
     if (sim)  initargs[0] = "-sim";
-    return tclmain (fundefs, argv[0], "z8lpanel", logname, getenv ("z8lpanelini"), argc - tclargs, argv + tclargs, false, initargs);
+    return tclmain (fundefs, argv[0], "z8ipanel", logname, getenv ("z8ipanelini"), argc - tclargs, argv + tclargs, false, initargs);
 }
 
 
@@ -576,7 +576,7 @@ static int showstatus (int argc, char **argv)
     uint32_t nframes = 0;
     time_t lasttime = 0;
 
-    Z8LU32 *pdpat = z8lpage.findev ("8I", NULL, NULL, false);
+    Z8IU32 *pdpat = z8ipage.findev ("8I", NULL, NULL, false);
     padlib = new I2CZLib ();
 
     setvbuf (stdout, outbuf, _IOFBF, sizeof outbuf);

@@ -1,24 +1,24 @@
 
 # boot ~/os8-rkab0.rk05 disk
 proc os8dpackloadandboot {} {
-    global Z8LHOME
+    global Z8IHOME
 
     hardreset
 
     set sourcedisk "os8-rkab0.rk05"
-    if {! [file exists $Z8LHOME/$sourcedisk]} {
-        exec -ignorestderr wget -nv -O $Z8LHOME/$sourcedisk.temp https://tangentsoft.com/pidp8i/uv/ock.rk05
-        exec mv $Z8LHOME/$sourcedisk.temp $Z8LHOME/$sourcedisk
-        exec chmod a-w $Z8LHOME/$sourcedisk
+    if {! [file exists $Z8IHOME/$sourcedisk]} {
+        exec -ignorestderr wget -nv -O $Z8IHOME/$sourcedisk.temp https://tangentsoft.com/pidp8i/uv/ock.rk05
+        exec mv $Z8IHOME/$sourcedisk.temp $Z8IHOME/$sourcedisk
+        exec chmod a-w $Z8IHOME/$sourcedisk
     }
 
     set home [getenv HOME /tmp]
     if {! [file exists $home/$sourcedisk]} {
-        exec cp $Z8LHOME/$sourcedisk $home/$sourcedisk
+        exec cp $Z8IHOME/$sourcedisk $home/$sourcedisk
         exec chmod u+w $home/$sourcedisk
     }
 
-    set rk8pid [exec $Z8LHOME/z8lrk8je -killit -loadrw 0 $home/$sourcedisk &]
+    set rk8pid [exec $Z8IHOME/z8irk8je -killit -loadrw 0 $home/$sourcedisk &]
     atexit "exec kill $rk8pid"
     after 1000
 
@@ -50,24 +50,24 @@ proc os8dpack0toggleinboot {} {
 
 # boot ~/os8-dta0.tu56 tape
 proc os8dtapeloadandboot {} {
-    global Z8LHOME
+    global Z8IHOME
 
     hardreset
 
     set sourcetape "os8-dta0.tu56"
-    if {! [file exists $Z8LHOME/$sourcetape]} {
-        exec -ignorestderr wget -nv -O $Z8LHOME/$sourcetape.temp https://www.pdp8online.com/ftp/images/misc_dectapes/AL-4711C-BA.tu56
-        exec mv $Z8LHOME/$sourcetape.temp $Z8LHOME/$sourcetape
-        exec chmod a-w $Z8LHOME/$sourcetape
+    if {! [file exists $Z8IHOME/$sourcetape]} {
+        exec -ignorestderr wget -nv -O $Z8IHOME/$sourcetape.temp https://www.pdp8online.com/ftp/images/misc_dectapes/AL-4711C-BA.tu56
+        exec mv $Z8IHOME/$sourcetape.temp $Z8IHOME/$sourcetape
+        exec chmod a-w $Z8IHOME/$sourcetape
     }
 
     set home [getenv HOME /tmp]
     if {! [file exists $home/$sourcetape]} {
-        exec cp $Z8LHOME/$sourcetape $home/$sourcetape
+        exec cp $Z8IHOME/$sourcetape $home/$sourcetape
         exec chmod u+w $home/$sourcetape
     }
 
-    set tc08pid [exec $Z8LHOME/z8ltc08 -killit -loadrw 0 $home/$sourcetape &]
+    set tc08pid [exec $Z8IHOME/z8itc08 -killit -loadrw 0 $home/$sourcetape &]
     atexit "exec kill $tc08pid"
     after 1000
 

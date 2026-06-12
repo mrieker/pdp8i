@@ -20,23 +20,23 @@
 
 // Set pulse bit generator parameters
 
-// The PDP-8/L will output a pulse for any I/O instruction that can be picked up on an AM radio.
+// The PDP-8/I will output a pulse for any I/O instruction that can be picked up on an AM radio.
 // The music.pal program uses this fact to play music.
 
-// The z8lpbit.v board outputs a pulse to D36-B2 pin for any I/O instruction
+// The z8ipbit.v board outputs a pulse to D36-B2 pin for any I/O instruction
 // that can be connected to an amplified speaker with a pullup to +5V.
 
 // The original music.pal program assumes the I/O instruction takes 1.5uS
-// but the PDP-8/L takes approx 4.2uS for an I/O instruction.
+// but the PDP-8/I takes approx 4.2uS for an I/O instruction.
 
 // So there is a modified music.pal program in ../music that uses a 6004 instruction
 // in a modified loop to keep the timing correct.  This program enables processing of
-// the 6004 opcode by pdp8lpbit.v to do an 'increment and skip if zero AC' as expected
+// the 6004 opcode by pdp8ipbit.v to do an 'increment and skip if zero AC' as expected
 // by the modified music.pal program.
 
 // This program can also forward the sound pulse bit from the PDP to a sound card on a PC:
-//   1) on the PC do:     ./z8lpbit -server &
-//   2) on the ZTurn do:  ./z8lpbit -sound <ipaddressofpc> &
+//   1) on the PC do:     ./z8ipbit -server &
+//   2) on the ZTurn do:  ./z8ipbit -sound <ipaddressofpc> &
 // Adjust volume on PC sound control panel.
 
 #include <arpa/inet.h>
@@ -54,13 +54,13 @@
 #include <time.h>
 #include <unistd.h>
 
-#include "z8ldefs.h"
-#include "z8lutil.h"
+#include "z8idefs.h"
+#include "z8iutil.h"
 
 #define SOUNDRATE 8000
 #define UDPPORT 13287
 
-static Z8LU32 *pbat;
+static Z8IU32 *pbat;
 
 static int soundclient (char const *hostname);
 static void soundserver ();
@@ -82,13 +82,13 @@ int main (int argc, char **argv)
             puts ("");
             puts ("  Set pulsebit generator parameters");
             puts ("");
-            puts ("    ./z8lpbit [-noiszac] [-sound <serverhostname>] [-width <width>]");
+            puts ("    ./z8ipbit [-noiszac] [-sound <serverhostname>] [-width <width>]");
             puts ("");
             puts ("      -noiszac = disable ISZAC I/O instruction 6004");
             puts ("      -sound   = forward sound on to server (see -server)");
             puts ("      -width   = set width of pulses in 10nS units, 1..8192");
             puts ("");
-            puts ("    ./z8lpbit -server");
+            puts ("    ./z8ipbit -server");
             puts ("");
             puts ("      act as server for -sound client");
             puts ("      typically runs on PC with sound card");
@@ -124,7 +124,7 @@ int main (int argc, char **argv)
         return 1;
     }
 
-    pbat = z8lpage.findev ("PB", NULL, NULL, false);
+    pbat = z8ipage.findev ("PB", NULL, NULL, false);
     pbat[1] = (doiszac ? (1U << 31) : 0) | (width << 13);
 
     if (sound != NULL) {
@@ -284,10 +284,10 @@ static void *serverthread (void *dummy)
     ss.rate = SOUNDRATE;
 
     s = pa_simple_new(NULL,               // Use the default server.
-                      "z8lpbit",          // Our application's name.
+                      "z8ipbit",          // Our application's name.
                       PA_STREAM_PLAYBACK,
                       NULL,               // Use the default device.
-                      "PDP-8/L Pulse",    // Description of our stream.
+                      "PDP-8/I Pulse",    // Description of our stream.
                       &ss,                // Our sample format.
                       NULL,               // Use default channel map
                       NULL,               // Use default buffering attributes.

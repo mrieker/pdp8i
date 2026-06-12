@@ -18,7 +18,7 @@
 //
 //    http://www.gnu.org/licenses/gpl-2.0.html
 
-// Performs paper tape reader I/O for the PDP-8/L Zynq I/O board
+// Performs paper tape reader I/O for the PDP-8/I Zynq I/O board
 
 #include <fcntl.h>
 #include <stdint.h>
@@ -28,11 +28,11 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#include "z8ldefs.h"
-#include "z8lutil.h"
+#include "z8idefs.h"
+#include "z8iutil.h"
 
 #define PTR_FLAG 0x80000000U // tells PDP char is ready to read
-#define PTR_ENAB 0x40000000U // enables pdp8lptr.v to process i/o instructions
+#define PTR_ENAB 0x40000000U // enables pdp8iptr.v to process i/o instructions
 #define PTR_STEP 0x20000000U // tells ARM to read another char from file
 
 int main (int argc, char **argv)
@@ -48,7 +48,7 @@ int main (int argc, char **argv)
             puts ("");
             puts ("     Access paper tape reader");
             puts ("");
-            puts ("  ./z8lptr [-7bit] [-clear] [-cps <charspersec>] [-inscr] [-killit] [-text] <filename>");
+            puts ("  ./z8iptr [-7bit] [-clear] [-cps <charspersec>] [-inscr] [-killit] [-text] <filename>");
             puts ("     -7bit   : force top bit of byte = 1");
             puts ("     -clear  : clear status bits at beginning");
             puts ("     -cps    : set chars per second, default 300");
@@ -117,11 +117,11 @@ int main (int argc, char **argv)
     if (fstat (filedes, &statbuf) < 0) ABORT ();
     uint32_t fsize = statbuf.st_size;
 
-    Z8LU32 *ptrat = z8lpage.findev ("PR", NULL, NULL, true, killit);
+    Z8IU32 *ptrat = z8ipage.findev ("PR", NULL, NULL, true, killit);
     if (clear) {
-        ptrat[1]  = PTR_ENAB;   // enable pdp8lptr.v to process io instructions
+        ptrat[1]  = PTR_ENAB;   // enable pdp8iptr.v to process io instructions
     } else {
-        ptrat[1] |= PTR_ENAB;   // enable pdp8lptr.v to process io instructions
+        ptrat[1] |= PTR_ENAB;   // enable pdp8iptr.v to process io instructions
     }
 
     bool lastcr = false;

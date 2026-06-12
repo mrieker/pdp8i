@@ -1,12 +1,12 @@
 #
 #  Boot OS/8 from RK05
 #
-#    real PDP:  ./z8lpanel -real bootos8dpack.tcl
-#    simulator: ./z8lpanel -sim  bootos8dpack.tcl
+#    real PDP:  ./z8ipanel -real bootos8dpack.tcl
+#    simulator: ./z8ipanel -sim  bootos8dpack.tcl
 #
-global Z8LHOME
-source $Z8LHOME/os8lib.tcl
+global Z8IHOME
+source $Z8IHOME/os8lib.tcl
 os8dpackloadandboot
-exec -ignorestderr $Z8LHOME/z8ltty -cps 960 -killit -upcase < /dev/tty > /dev/tty
+exec -ignorestderr $Z8IHOME/z8itty -cps 960 -killit -upcase < /dev/tty > /dev/tty
 flicksw stop
 exit

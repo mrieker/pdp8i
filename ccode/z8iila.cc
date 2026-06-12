@@ -20,7 +20,7 @@
 
 // Arm then dump zynq.v ilaarray when triggered
 
-//  ./z8lila.armv7l
+//  ./z8iila.armv7l
 
 #include <alloca.h>
 #include <signal.h>
@@ -30,8 +30,8 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "z8ldefs.h"
-#include "z8lutil.h"
+#include "z8idefs.h"
+#include "z8iutil.h"
 
 #define DEPTH 4096  // total number of elements in ilaarray
 #define AFTER   96  // number of samples to take after sample containing trigger
@@ -55,7 +55,7 @@ int main (int argc, char **argv)
             puts ("");
             puts ("  arm then dump zynq.v ilaarray when triggered");
             puts ("");
-            puts ("    ./z8lila [-asis]");
+            puts ("    ./z8iila [-asis]");
             puts ("");
             puts ("      -asis = don't arm and wait, just dump as is");
             puts ("");
@@ -69,7 +69,7 @@ int main (int argc, char **argv)
         return 1;
     }
 
-    Z8LU32 *pdpat = z8lpage.findev ("8I", NULL, NULL, false);
+    Z8IU32 *pdpat = z8ipage.findev ("8I", NULL, NULL, false);
 
     uint32_t ctl;
     if (asisflag) {

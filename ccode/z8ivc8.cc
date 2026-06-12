@@ -26,10 +26,10 @@
 #include <unistd.h>
 #include <X11/Xlib.h>
 
-#include "z8ldefs.h"
-#include "z8lutil.h"
+#include "z8idefs.h"
+#include "z8iutil.h"
 
-#define MAXBUFFPTS 32768    // size of pdp8lvc8.v videoram
+#define MAXBUFFPTS 32768    // size of pdp8ivc8.v videoram
 #define DEFPERSISTMS 500    // how long non-storage points last
 #define MINPERSISTMS 10     // ...smaller and the up/down buttons won't work
 #define MAXPERSISTMS 60000  // ...larger and it will overflow 16-bit counter
@@ -137,7 +137,7 @@ int main (int argc, char **argv)
             puts ("");
             puts ("     Access VC8/E or VC8/I display");
             puts ("");
-            puts ("  ./z8lvc8 [-pms <persistence-milliseconds>] [-size <windowsize-pixels>] e | i");
+            puts ("  ./z8ivc8 [-pms <persistence-milliseconds>] [-size <windowsize-pixels>] e | i");
             printf ("     persistence %d..%d, default %dmS\n", MINPERSISTMS, MAXPERSISTMS, DEFPERSISTMS);
             printf ("     windowsize %d..%d, default %d pixels\n", MINWINSIZE, MAXWINSIZE, DEFWINSIZE);
             puts ("     e : process VC8/E-style IO instructions");
@@ -197,8 +197,8 @@ int main (int argc, char **argv)
 
 static void thread ()
 {
-    // access pdp8lvc8.v registers
-    Z8LU32 *vcat = z8lpage.findev ("VC", NULL, NULL, true);
+    // access pdp8ivc8.v registers
+    Z8IU32 *vcat = z8ipage.findev ("VC", NULL, NULL, true);
     switch (vc8type) {
         case VC8TypeE: {
             vcat[2] = VC2_TYPEE;
@@ -321,7 +321,7 @@ static void thread ()
             uint32_t pt;
             for (int i = 0; (pt = vcat[4]) & VC4_READBUSY; i ++) {
                 if (i > 1000000) {
-                    fprintf (stderr, "thread: pdp8lvc8.v is stuck\n");
+                    fprintf (stderr, "thread: pdp8ivc8.v is stuck\n");
                     ABORT ();
                 }
             }

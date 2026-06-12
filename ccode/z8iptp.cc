@@ -18,7 +18,7 @@
 //
 //    http://www.gnu.org/licenses/gpl-2.0.html
 
-// Performs paper tape punch I/O for the PDP-8/L Zynq I/O board
+// Performs paper tape punch I/O for the PDP-8/I Zynq I/O board
 
 #include <errno.h>
 #include <fcntl.h>
@@ -29,11 +29,11 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "z8ldefs.h"
-#include "z8lutil.h"
+#include "z8idefs.h"
+#include "z8iutil.h"
 
 #define PTP_FLAG 0x80000000U // tells PDP char has been punched
-#define PTP_ENAB 0x40000000U // enables pdp8lptp.v to process i/o instructions
+#define PTP_ENAB 0x40000000U // enables pdp8iptp.v to process i/o instructions
 #define PTP_BUSY 0x20000000U // tells ARM there is a char to punch
 
 static bool volatile ctrlcflag;
@@ -58,7 +58,7 @@ int main (int argc, char **argv)
             puts ("");
             puts ("     Access paper tape punch");
             puts ("");
-            puts ("  ./z8lptp [-7bit] [-clear] [-cps <charspersec>] [-killit] [-leader] [-remcr] [-remdel] [-remnul] [-text] [-trailer] <filename>");
+            puts ("  ./z8iptp [-7bit] [-clear] [-cps <charspersec>] [-killit] [-leader] [-remcr] [-remdel] [-remnul] [-text] [-trailer] <filename>");
             puts ("     -7bit    : force top bit of byte = 0");
             puts ("     -clear   : clear status bits at beginning");
             puts ("     -cps     : set chars per second, default 50");
@@ -156,11 +156,11 @@ int main (int argc, char **argv)
         }
     }
 
-    Z8LU32 *ptpat = z8lpage.findev ("PP", NULL, NULL, true, killit);
+    Z8IU32 *ptpat = z8ipage.findev ("PP", NULL, NULL, true, killit);
     if (clear) {
-        ptpat[1]  = PTP_ENAB;   // enable pdp8lptp.v to process io instructions
+        ptpat[1]  = PTP_ENAB;   // enable pdp8iptp.v to process io instructions
     } else {
-        ptpat[1] |= PTP_ENAB;   // enable pdp8lptp.v to process io instructions
+        ptpat[1] |= PTP_ENAB;   // enable pdp8iptp.v to process io instructions
     }
 
     signal (SIGINT, siginthand);

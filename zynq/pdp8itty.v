@@ -18,7 +18,7 @@
 //
 //    http://www.gnu.org/licenses/gpl-2.0.html
 
-// PDP-8/L teletype interface
+// PDP-8/I teletype interface
 
 // arm registers:
 //  [0] = ident='TT',sizecode=1,version
@@ -26,7 +26,7 @@
 //  [2] = <prflag> <prfull> 000000000000000000 <prchar>
 //  [3] = 00000000000000000000000000 <KBDEV>
 
-module pdp8ltty
+module pdp8itty
     #(parameter[8:3] KBDEV=6'o03) (
     input CLOCK, CSTEP, RESET, BINIT,
 
@@ -74,11 +74,11 @@ module pdp8ltty
         else if (armwrite) begin
             case (armwaddr)
 
-                // arm processor is sending a keyboard char for the PDP-8/L code to read
+                // arm processor is sending a keyboard char for the PDP-8/I code to read
                 // - typically sets kbflag = 1 indicating kbchar has something in it
                 1: begin kbflag <= armwdata[31]; enable <= armwdata[30]; kbchar <= armwdata[11:00]; end
 
-                // arm processor is telling PDP-8/L that it has finished printing char
+                // arm processor is telling PDP-8/I that it has finished printing char
                 // - typically sets prflag = 1 meaning it has finished printing char
                 //         and sets prfull = 0 indicating prchar is empty
                 2: begin prflag <= armwdata[31]; prfull <= armwdata[30]; end
@@ -86,7 +86,7 @@ module pdp8ltty
         end else if (CSTEP) begin
 
             // process the IOP only on the leading edge
-            // ...but leave output signals to PDP-8/L in place until given the all clear
+            // ...but leave output signals to PDP-8/I in place until given the all clear
             if (iopstart & enable) begin
                 case (ioopcode)
                     kbio+1: begin IO_SKIP <= kbflag; end                                // skip if kb char ready

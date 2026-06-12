@@ -20,7 +20,7 @@
 
 // daemon for verilator zynq simulator
 // run on x86_64 as daemon - ./verizynq.x86_64
-// then run z8lctrl, z8ldump, z8lila on same x86_64
+// then run z8ictrl, z8idump, z8iila on same x86_64
 
 #include <errno.h>
 #include <fcntl.h>

@@ -18,13 +18,13 @@
 //
 //    http://www.gnu.org/licenses/gpl-2.0.html
 
-// PDP-8/L pulse bit generator
+// PDP-8/I pulse bit generator
 
 // arm registers:
 //  [0] = ident='PB',sizecode=0,version
 //  [1] = iszac 00000 width count
 
-module pdp8lpbit (
+module pdp8ipbit (
     input CLOCK, CSTEP, RESET,
 
     input armwrite,

@@ -18,7 +18,7 @@
 //
 //    http://www.gnu.org/licenses/gpl-2.0.html
 
-// Running z8l utilities on a PC - the Zynq register page is simulated using a 4K shared memory page.
+// Running z8i utilities on a PC - the Zynq register page is simulated using a 4K shared memory page.
 // Reads and Writes are wrapped with calls to veriread() and veriwrite().
 // The Zynq code is run in verilator daemon process verizynq.
 
@@ -33,18 +33,18 @@
 
 #include "futex.h"
 #include "verizynq.h"
-#include "z8lutil.h"
+#include "z8iutil.h"
 
 static int mypid, serverpid;
 static int shmfd = -1;
-static Z8LU32 *nullpage;
+static Z8IU32 *nullpage;
 static VeriPage *pageptr;
 
 static void waitforidle ();
 static uint32_t waitfordone (int func);
 static void futexwait (int *cell, int valu);
 
-void *Z8LU32::veriopen (int *fd_r)
+void *Z8IU32::veriopen (int *fd_r)
 {
     *fd_r = -1;
     if (nullpage == NULL) {
@@ -57,7 +57,7 @@ void *Z8LU32::veriopen (int *fd_r)
         // user will have to start verizynq daemon if not there
         shmfd = shm_open (VERIZYNQ_SHMNM, O_RDWR, 0);
         if (shmfd < 0) {
-            fprintf (stderr, "Z8LU32::veriopen: error opening %s: %m\n", VERIZYNQ_SHMNM);
+            fprintf (stderr, "Z8IU32::veriopen: error opening %s: %m\n", VERIZYNQ_SHMNM);
             ABORT ();
         }
 
@@ -69,7 +69,7 @@ void *Z8LU32::veriopen (int *fd_r)
         // user will have to restart it if not
         serverpid = pageptr->serverpid;
         if ((serverpid <= 0) || (kill (serverpid, 0) < 0)) {
-            fprintf (stderr, "Z8LU32::veriopen: verizynq server %d dead\n", serverpid);
+            fprintf (stderr, "Z8IU32::veriopen: verizynq server %d dead\n", serverpid);
             ABORT ();
         }
 
@@ -77,7 +77,7 @@ void *Z8LU32::veriopen (int *fd_r)
         // any reads and writes not wrapped with veriread() and veriwrite() will abort
         ptr = mmap (NULL, 4096, PROT_NONE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
         if (ptr == MAP_FAILED) ABORT ();
-        nullpage = (Z8LU32 *) ptr;
+        nullpage = (Z8IU32 *) ptr;
     }
 
     // return fd for locking
@@ -88,7 +88,7 @@ void *Z8LU32::veriopen (int *fd_r)
     return (void *) nullpage;
 }
 
-uint32_t Z8LU32::veriread ()
+uint32_t Z8IU32::veriread ()
 {
     waitforidle ();
     pageptr->index = this - nullpage;
@@ -96,7 +96,7 @@ uint32_t Z8LU32::veriread ()
     return waitfordone (VERIZYNQ_READ);
 }
 
-void Z8LU32::veriwrite (uint32_t val)
+void Z8IU32::veriwrite (uint32_t val)
 {
     waitforidle ();
     pageptr->index = this - nullpage;
@@ -158,7 +158,7 @@ static void futexwait (int *cell, int valu)
     when.tv_sec = 1;
     while (true) {
         if ((pageptr->serverpid != serverpid) || (kill (serverpid, 0) < 0)) {
-            fprintf (stderr, "Z8LU32::futexwait: server %d died\n", serverpid);
+            fprintf (stderr, "Z8IU32::futexwait: server %d died\n", serverpid);
             ABORT ();
         }
         if (futex (cell, FUTEX_WAIT, valu, &when, NULL, 0) >= 0) break;

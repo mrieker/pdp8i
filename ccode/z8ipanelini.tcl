@@ -1,5 +1,5 @@
 #
-# initialization file for z8lpanel
+# initialization file for z8ipanel
 #
 
 # help for commands defined herein
@@ -438,7 +438,7 @@ proc loadbin {fname} {
 # load bin format tape file, return start address
 # uses rim loader, bin loader, high-speed paper tape reader
 proc loadbinptr {fname} {
-    global Z8LHOME
+    global Z8IHOME
 
     hardreset
     setsw ifld 0 ; setsw dfld 0
@@ -447,8 +447,8 @@ proc loadbinptr {fname} {
     rimloader hi
 
     puts "loadbinptr: reading in bin loader"
-    exec -ignorestderr make -C $Z8LHOME binloader.rim
-    set ptrpid [exec -ignorestderr $Z8LHOME/z8lptr -killit $Z8LHOME/binloader.rim &]
+    exec -ignorestderr make -C $Z8IHOME binloader.rim
+    set ptrpid [exec -ignorestderr $Z8IHOME/z8iptr -killit $Z8IHOME/binloader.rim &]
     after 1000
     setsw sr 07756 ; flicksw ldad
     setsw sr 00000 ; flicksw start
@@ -462,7 +462,7 @@ proc loadbinptr {fname} {
     flicksw stop
 
     puts "loadbinptr: reading in $fname"
-    set ptrpid [exec -ignorestderr $Z8LHOME/z8lptr -killit $fname &]
+    set ptrpid [exec -ignorestderr $Z8IHOME/z8iptr -killit $fname &]
     after 1000
     setsw sr 07777 ; flicksw ldad
     setsw sr 00000 ; flicksw start
@@ -801,7 +801,7 @@ proc ttyprtest {} {
     wrmem 060 00040
     wrmem 061 00177
     disas 040 050
-    puts "do './z8ltty' on another screen"
+    puts "do './z8itty' on another screen"
     puts "do 'startat 040' to start test"
 }
 
@@ -858,9 +858,9 @@ proc zeromem {start stop} {
 pin set nanocontin 1
 
 # maybe initialize real or sim mode
-# ...passed from z8lpanel command line
+# ...passed from z8ipanel command line
 if {$initargs == "-real"} simoff
 if {$initargs == "-sim"}  simon
 
 # message displayed as part of help command
-return "also, 'helpini' will print help for z8lpanelini.tcl commands"
+return "also, 'helpini' will print help for z8ipanelini.tcl commands"

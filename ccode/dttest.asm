@@ -7,15 +7,15 @@
 ; pdp8v/asm/link -o dttest.oct dttest.obj > dttest.map
 ; pdp8v/asm/octtobin < dttest.oct > dttest.bin
 
-; on zynq with real pdp-8/l:
-;  ./z8lreal [-entty03] [-nobrk]
-;  ./z8lpanel dttest.tcl
+; on zynq with real pdp-8/i:
+;  ./z8ireal [-entty03] [-nobrk]
+;  ./z8ipanel dttest.tcl
 
 ; on zynq with simulator:
-;  ./z8lsim dttest.tcl
+;  ./z8isim dttest.tcl
 
 ; optional on another screen:
-;  ./z8ltc08 -status
+;  ./z8itc08 -status
 
 	ion   = 06001
 	iof   = 06002

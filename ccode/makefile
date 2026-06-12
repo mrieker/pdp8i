@@ -2,10 +2,10 @@ CFLAGS ?= -O2 -Werror
 MACH   := $(shell uname -m)
 LNKFLG := -lpthread -lreadline -lrt -l$(shell ./tcllib.sh)
 
-EXECUTEABLES := z8ldump.$(MACH) \
-	z8lila.$(MACH) z8lpanel.$(MACH) z8lpbit.$(MACH) \
-	z8lptp.$(MACH) z8lptr.$(MACH) z8lrk8je.$(MACH) \
-	z8ltc08.$(MACH) z8ltty.$(MACH) z8lvc8.$(MACH)
+EXECUTEABLES := z8idump.$(MACH) \
+	z8iila.$(MACH) z8ipanel.$(MACH) z8ipbit.$(MACH) \
+	z8iptp.$(MACH) z8iptr.$(MACH) z8irk8je.$(MACH) \
+	z8itc08.$(MACH) z8itty.$(MACH) z8ivc8.$(MACH)
 
 LIBOBJS := \
 	assemble.$(MACH).o \
@@ -14,7 +14,7 @@ LIBOBJS := \
 	i2czlib.$(MACH).o \
 	readprompt.$(MACH).o \
 	tclmain.$(MACH).o \
-	z8lutil.$(MACH).o
+	z8iutil.$(MACH).o
 
 VFILES := \
 	../verisim/chips-10ns.v \
@@ -24,18 +24,18 @@ VFILES := \
 	../kicads/extmemory/extmemory.v \
 	../kicads/processor/processor.v \
 	../zynq/zynq.v \
-	../zynq/pdp8ldc02.v \
-	../zynq/pdp8lrk8je.v \
+	../zynq/pdp8idc02.v \
+	../zynq/pdp8irk8je.v \
 	../zynq/pdp8icmem.v \
 	../zynq/pdp8irtc.v \
 	../zynq/pdp8isim.v \
-	../zynq/pdp8ltc08.v \
+	../zynq/pdp8itc08.v \
 	../zynq/pdp8ifpi2c.v \
-	../zynq/pdp8lptr.v \
-	../zynq/pdp8lpbit.v \
-	../zynq/pdp8lptp.v \
-	../zynq/pdp8ltty.v \
-	../zynq/pdp8lvc8.v \
+	../zynq/pdp8iptr.v \
+	../zynq/pdp8ipbit.v \
+	../zynq/pdp8iptp.v \
+	../zynq/pdp8itty.v \
+	../zynq/pdp8ivc8.v \
 	../zynq/dmareq.v \
 	../zynq/i2cmaster.v
 
@@ -46,7 +46,7 @@ endif
 ifeq ($(MACH),x86_64)
 	CFLAGS  := $(CFLAGS) -DVERIZYNQ
 	EXECUTEABLES := $(EXECUTEABLES) verizynq.$(MACH)
-	LIBOBJS := $(LIBOBJS) z8lu32.$(MACH).o
+	LIBOBJS := $(LIBOBJS) z8iu32.$(MACH).o
 endif
 
 ifneq (,$(wildcard /usr/include/pulse/simple.h))
@@ -87,10 +87,10 @@ verizynq.$(MACH).o: verizynq.cc *.h obj_dir/VZynq.h
 verilated.$(MACH).o: /usr/share/verilator/include/verilated.cpp
 	$(GPP) -Wno-sign-compare -c -o verilated.$(MACH).o -I/usr/share/verilator/include/ /usr/share/verilator/include/verilated.cpp
 
-z8lpbit.$(MACH): z8lpbit.$(MACH).o $(LIBS)
+z8ipbit.$(MACH): z8ipbit.$(MACH).o $(LIBS)
 	$(GPP) -o $@ $^ $(LNKFLG) $(PALIB)
 
-z8lvc8.$(MACH): z8lvc8.$(MACH).o $(LIBS)
+z8ivc8.$(MACH): z8ivc8.$(MACH).o $(LIBS)
 	$(GPP) -o $@ $^ $(LNKFLG) -lX11
 
 %.$(MACH): %.$(MACH).o $(LIBS)

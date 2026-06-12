@@ -18,8 +18,8 @@
 //
 //    http://www.gnu.org/licenses/gpl-2.0.html
 
-#ifndef _Z8LUTIL_H
-#define _Z8LUTIL_H
+#ifndef _Z8IUTIL_H
+#define _Z8IUTIL_H
 
 #include <pthread.h>
 #include <stdint.h>
@@ -31,7 +31,7 @@
 
 #ifdef VERIZYNQ
 // running on a PC - access the Verilated Zynq register page via function calls
-struct Z8LU32 {
+struct Z8IU32 {
 
     // access shared memory page
     static void *veriopen (int *fd_r);
@@ -43,41 +43,41 @@ struct Z8LU32 {
     }
 
     // writes get wrapped with veriwrite()
-    Z8LU32& operator= (uint32_t rhs)
+    Z8IU32& operator= (uint32_t rhs)
     {
         veriwrite (rhs);
         return *this;
     }
 
     // modifies
-    Z8LU32& operator&= (uint32_t rhs)
+    Z8IU32& operator&= (uint32_t rhs)
     {
         veriwrite (veriread () & rhs);
         return *this;
     }
 
-    Z8LU32& operator|= (uint32_t rhs)
+    Z8IU32& operator|= (uint32_t rhs)
     {
         veriwrite (veriread () | rhs);
         return *this;
     }
 
 private:
-    uint32_t dummy; // so sizeof (Z8LU32) == 4
+    uint32_t dummy; // so sizeof (Z8IU32) == 4
 
     void veriwrite (uint32_t val);
     uint32_t veriread ();
 };
 #else
 // running on a Zynq - access register page directly
-typedef uint32_t volatile Z8LU32;
+typedef uint32_t volatile Z8IU32;
 #endif
 
-struct Z8LPage {
-    Z8LPage ();
-    virtual ~Z8LPage ();
-    Z8LU32 *findev (char const *id, bool (*entry) (void *param, Z8LU32 *dev), void *param, bool lockit, bool killit = false);
-    void locksubdev (Z8LU32 *start, int nwords, bool killit);
+struct Z8IPage {
+    Z8IPage ();
+    virtual ~Z8IPage ();
+    Z8IU32 *findev (char const *id, bool (*entry) (void *param, Z8IU32 *dev), void *param, bool lockit, bool killit = false);
+    void locksubdev (Z8IU32 *start, int nwords, bool killit);
 
     uint32_t dmacycle (uint32_t cm);
     void cmlock ();
@@ -88,12 +88,12 @@ private:
     int zynqfd;
     pthread_mutex_t dmamtx;
     void *zynqptr;
-    Z8LU32 *cmemat;
-    Z8LU32 *pdpat;
-    Z8LU32 *zynqpage;
+    Z8IU32 *cmemat;
+    Z8IU32 *pdpat;
+    Z8IU32 *zynqpage;
 };
 
-extern Z8LPage z8lpage;
+extern Z8IPage z8ipage;
 
 char *formatshadow (uint32_t *shat);
 uint32_t randbits (int nbits);

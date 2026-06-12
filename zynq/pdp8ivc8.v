@@ -18,9 +18,9 @@
 //
 //    http://www.gnu.org/licenses/gpl-2.0.html
 
-// PDP-8/L VC-8 interface
+// PDP-8/I VC-8 interface
 
-module pdp8lvc8 (
+module pdp8ivc8 (
     input CLOCK, CSTEP, RESET, BINIT,
 
     input armwrite,

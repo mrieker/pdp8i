@@ -18,9 +18,9 @@
 //
 //    http://www.gnu.org/licenses/gpl-2.0.html
 
-// Performs RK8JE disk I/O for the PDP-8/L Zynq I/O board
+// Performs RK8JE disk I/O for the PDP-8/I Zynq I/O board
 
-//  ./z8lrk8je [-killit] [-loadro/-loadrw <driveno> <file>]... [<tclscriptfile>]
+//  ./z8irk8je [-killit] [-loadro/-loadrw <driveno> <file>]... [<tclscriptfile>]
 
 #include <errno.h>
 #include <fcntl.h>
@@ -36,8 +36,8 @@
 #include <unistd.h>
 
 #include "tclmain.h"
-#include "z8ldefs.h"
-#include "z8lutil.h"
+#include "z8idefs.h"
+#include "z8iutil.h"
 
 #define NCYLS 203
 #define SECPERCYL 32
@@ -93,7 +93,7 @@ static TclFunDef const fundefs[] = {
 static bool volatile exiting;
 static pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
 static pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
-static Z8LU32 *rkat;
+static Z8IU32 *rkat;
 
 static int loaddisk (bool readwrite, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
 static bool loadfile (Tcl_Interp *interp, bool readwrite, int diskno, char const *filenm);
@@ -114,7 +114,7 @@ int main (int argc, char **argv)
             puts ("");
             puts ("     Access RK8JE controller and drives");
             puts ("");
-            puts ("  ./z8lrk8je [-killit] [-loadro/-loadrw <driveno> <file>]... | [<tclscriptfile> [<scriptargs>...]]");
+            puts ("  ./z8irk8je [-killit] [-loadro/-loadrw <driveno> <file>]... | [<tclscriptfile> [<scriptargs>...]]");
             puts ("     -killit : kill other process accessing RK8JE controller");
             puts ("     -loadro/rw : load the given file in the given drive");
             puts ("     <tclscriptfile> : execute script then exit");
@@ -157,12 +157,12 @@ int main (int argc, char **argv)
         break;
     }
 
-    rkat = z8lpage.findev ("RK", NULL, NULL, true, killit);
+    rkat = z8ipage.findev ("RK", NULL, NULL, true, killit);
     rkat[RK_FLG] = F_ENABLE;    // enable board to process io instructions
 
     nsperus = 1000;
     debug = 0;
-    char const *dbgenv = getenv ("z8lrk8je_debug");
+    char const *dbgenv = getenv ("z8irk8je_debug");
     if (dbgenv != NULL) debug = atoi (dbgenv);
 
     // if -load option, load files then just run io calls
@@ -184,7 +184,7 @@ int main (int argc, char **argv)
     if (rc != 0) ABORT ();
 
     // run scripting
-    rc = tclmain (fundefs, argv[0], "z8lrk8je", NULL, NULL, argc - tclargs, argv + tclargs, true);
+    rc = tclmain (fundefs, argv[0], "z8irk8je", NULL, NULL, argc - tclargs, argv + tclargs, true);
 
     exiting = true;
     pthread_join (threadid, NULL);
@@ -426,7 +426,7 @@ void *thread (void *dummy)
                     }
                     for (icnt = 0; icnt < wcnt; icnt ++) {
                         uint16_t xaddr = (xma & 070000) | ((xma + icnt) & 007777);
-                        z8lpage.dmacycle (INS (temp[icnt], CM_DATA) | CM_WRITE | INS (xaddr, CM_ADDR));
+                        z8ipage.dmacycle (INS (temp[icnt], CM_DATA) | CM_WRITE | INS (xaddr, CM_ADDR));
                     }
                     memaddr = (memaddr + wcnt) & 07777;
                     SETST (ST_DONE);                                            // done
@@ -453,7 +453,7 @@ void *thread (void *dummy)
                     ASSERT (wcnt * 2 <= sizeof temp);
                     for (icnt = 0; icnt < wcnt; icnt ++) {
                         uint16_t xaddr = (xma & 070000) | ((xma + icnt) & 007777);
-                        uint32_t cm = z8lpage.dmacycle (INS (xaddr, CM_ADDR));
+                        uint32_t cm = z8ipage.dmacycle (INS (xaddr, CM_ADDR));
                         temp[icnt] = EXT (cm, CM_DATA);
                     }
                     if (wcnt < 256) memset (&temp[wcnt], 0, 512 - 2 * wcnt);

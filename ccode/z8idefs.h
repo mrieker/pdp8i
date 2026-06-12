@@ -18,12 +18,12 @@
 //
 //    http://www.gnu.org/licenses/gpl-2.0.html
 
-// bits provided by pdp8l.v in the zynq
+// bits provided by pdp8i.v in the zynq
 
-#ifndef _Z8LDEFS
-#define _Z8LDEFS
+#ifndef _Z8IDEFS
+#define _Z8IDEFS
 
-#define Z_VER 0     // pdp8l.v version number
+#define Z_VER 0     // pdp8i.v version number
 #define Z_RA 1      // contain the various bits
 #define Z_RB 2
 #define Z_RC 3
@@ -83,7 +83,7 @@
 #define c_dev_iIOSKIP       (1U << 22)
 #define c_dev_iPAUSE        (1U << 23)
 
-#define e_simit         (1U <<  0)  //rw 0=real PDP-8/L; 1=pdp8lsim.v
+#define e_simit         (1U <<  0)  //rw 0=real PDP-8/I; 1=pdp8isim.v
 #define e_fpgareset     (1U <<  1)  //rw 0=normal; 1=power-on-reset
 #define e_nanocontin    (1U <<  2)  //rw 0=single step mode (sim only); 1=normal continuous running
 #define e_nanotrigger   (1U <<  3)  //rw 0=ignored; 1=trigger single step (sim only)
@@ -158,7 +158,7 @@
 #define CM2_BGNT (1U << 0)
 #define CM3_LOCK (0xFFFFFFFFU)
 
-// pdp8ltty.v registers
+// pdp8itty.v registers
 #define Z_TTYVER 0
 #define Z_TTYKB 1
 #define Z_TTYPR 2
@@ -169,7 +169,7 @@
 #define PR_FLAG 0x80000000
 #define PR_FULL 0x40000000
 
-// pdp8lshad.v registers
+// pdp8ishad.v registers
 #define SH_ACKNOWN  (1U << 31)
 #define SH_EAKNOWN  (1U << 30)
 #define SH_IRKNOWN  (1U << 29)
@@ -194,7 +194,7 @@
 #define SH4_ACUM (07777U << 12)
 #define SH4_EADR (07777U <<  0)
 
-// pdp8lxmem.v registers
+// pdp8ixmem.v registers
 #define XM_OS8ZAP (1U <<  0)
 #define XM_MWSTEP (1U <<  1)
 #define XM_MWHOLD (1U <<  2)
@@ -235,7 +235,7 @@
 #define XM6_MEMCYCCTRLO 0xFFFFFFFFU
 #define XM7_MEMCYCCTRHI 0xFFFFFFFFU
 
-// pdp8lvc8.v registers
+// pdp8ivc8.v registers
 #define VC1_REMOVE   (077777U << 17)
 #define VC1_INSERT   (077777U <<  0)
 #define VC2_TYPEE         (1U << 31)
@@ -259,7 +259,7 @@
 #define VC4_YCOORD0       (1U << 10)
 #define VC4_XCOORD0       (1U <<  0)
 
-// pdp8lfpi2c.v
+// pdp8ifpi2c.v
 #define FP1_CMDLO 0xFFFFFFFFU
 #define FP2_CMDHI 0xFFFFFFFFU
 #define FP3_STSLO 0xFFFFFFFFU

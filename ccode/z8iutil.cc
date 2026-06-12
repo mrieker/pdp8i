@@ -29,12 +29,12 @@
 #include <time.h>
 #include <unistd.h>
 
-#include "z8ldefs.h"
-#include "z8lutil.h"
+#include "z8idefs.h"
+#include "z8iutil.h"
 
-Z8LPage z8lpage;
+Z8IPage z8ipage;
 
-Z8LPage::Z8LPage ()
+Z8IPage::Z8IPage ()
 {
     zynqpage = NULL;
     zynqptr = NULL;
@@ -47,25 +47,25 @@ Z8LPage::Z8LPage ()
     if (pthread_mutex_init (&dmamtx, NULL) != 0) ABORT ();
 
 #ifdef VERIZYNQ
-    zynqptr = Z8LU32::veriopen (&zynqfd);
+    zynqptr = Z8IU32::veriopen (&zynqfd);
 #else
-    zynqfd = open ("/proc/zynqpdp8l", O_RDWR);
+    zynqfd = open ("/proc/zynqpdp8i", O_RDWR);
     if (zynqfd < 0) {
-        fprintf (stderr, "Z8LPage::Z8LPage: error opening /proc/zynqpdp8l: %m\n");
+        fprintf (stderr, "Z8IPage::Z8IPage: error opening /proc/zynqpdp8i: %m\n");
         ABORT ();
     }
 
     zynqptr = mmap (NULL, 4096, PROT_READ | PROT_WRITE, MAP_SHARED, zynqfd, 0);
     if (zynqptr == MAP_FAILED) {
-        fprintf (stderr, "Z8LPage::Z8LPage: error mmapping /proc/zynqpdp8l: %m\n");
+        fprintf (stderr, "Z8IPage::Z8IPage: error mmapping /proc/zynqpdp8i: %m\n");
         ABORT ();
     }
 #endif
 
-    zynqpage = (Z8LU32 *) zynqptr;
+    zynqpage = (Z8IU32 *) zynqptr;
 }
 
-Z8LPage::~Z8LPage ()
+Z8IPage::~Z8IPage ()
 {
     if (zynqptr != NULL) munmap (zynqptr, 4096);
     close (zynqfd);
@@ -76,7 +76,7 @@ Z8LPage::~Z8LPage ()
     pdpat    = NULL;
 }
 
-// find a device in the Z8L page
+// find a device in the Z8I page
 //  input:
 //   id = NULL: all entries passed to entry() for checking
 //        else: two-char string ident to check for
@@ -87,10 +87,10 @@ Z8LPage::~Z8LPage ()
 //         false: don't bother locking
 //  output:
 //   returns pointer to dev
-Z8LU32 *Z8LPage::findev (char const *id, bool (*entry) (void *param, Z8LU32 *dev), void *param, bool lockit, bool killit)
+Z8IU32 *Z8IPage::findev (char const *id, bool (*entry) (void *param, Z8IU32 *dev), void *param, bool lockit, bool killit)
 {
     for (int idx = 0; idx < 1024;) {
-        Z8LU32 *dev = &zynqpage[idx];
+        Z8IU32 *dev = &zynqpage[idx];
         int len = 2 << ((*dev >> 12) & 15);
         if (idx + len > 1024) break;
         if ((id == NULL) || (((*dev >> 24) == (uint8_t) id[0]) && (((*dev >> 16) & 255) == (uint8_t) id[1]))) {
@@ -102,7 +102,7 @@ Z8LU32 *Z8LPage::findev (char const *id, bool (*entry) (void *param, Z8LU32 *dev
         idx += len;
     }
     if (entry == NULL) {
-        fprintf (stderr, "Z8LPage::findev: cannot find %s\n", id);
+        fprintf (stderr, "Z8IPage::findev: cannot find %s\n", id);
         ABORT ();
     }
     entry (param, NULL);
@@ -115,11 +115,11 @@ Z8LU32 *Z8LPage::findev (char const *id, bool (*entry) (void *param, Z8LU32 *dev
 //   nwords = number of registers starting at 'start'
 //   killit = true: try to kill other process if locked
 //           false: abort if already locked
-void Z8LPage::locksubdev (Z8LU32 *start, int nwords, bool killit)
+void Z8IPage::locksubdev (Z8IU32 *start, int nwords, bool killit)
 {
     // find device that contains the start word
     int len, ofs;
-    Z8LU32 *dev;
+    Z8IU32 *dev;
     for (int idx = 0; idx < 1024;) {
         dev = &zynqpage[idx];
         len = 2 << ((*dev >> 12) & 15);
@@ -154,17 +154,17 @@ found:;
             if (flockit.l_type == F_UNLCK) continue;
 
             // print out message saying pid that has it locked
-            fprintf (stderr, "Z8LPage::findev: %c%c+%d locked by pid %d\n", *dev >> 24, *dev >> 16, ofs, (int) flockit.l_pid);
+            fprintf (stderr, "Z8IPage::findev: %c%c+%d locked by pid %d\n", *dev >> 24, *dev >> 16, ofs, (int) flockit.l_pid);
             if (-- kills >= 0) {
 
                 // try to kill it then try locking again
-                fprintf (stderr, "Z8LPage::findev: killing pid %d\n", (int) flockit.l_pid);
+                fprintf (stderr, "Z8IPage::findev: killing pid %d\n", (int) flockit.l_pid);
                 kill ((int) flockit.l_pid, SIGTERM);
                 usleep (125000);
                 continue;
             }
         } else {
-            fprintf (stderr, "Z8LPage::findev: error locking %c%c: %m\n", *dev >> 24, *dev >> 16);
+            fprintf (stderr, "Z8IPage::findev: error locking %c%c: %m\n", *dev >> 24, *dev >> 16);
         }
         ABORT ();
     }
@@ -181,7 +181,7 @@ found:;
 //  output:
 //     cm<CM_DATA>  = read data
 //     cm<CM_WCOVF> = wordcount overflow in 3-cycle
-uint32_t Z8LPage::dmacycle (uint32_t cm)
+uint32_t Z8IPage::dmacycle (uint32_t cm)
 {
     cmlock ();
     cmemat[1] = CM_BUSY | cm;
@@ -190,7 +190,7 @@ uint32_t Z8LPage::dmacycle (uint32_t cm)
         uint32_t now = pdpat[Z_RH];
         uint32_t diff = now - started;
         if (diff > 100000) {    // 1mS
-            fprintf (stderr, "Z8LPage::dmacycle: cmem controller is stuck %08X - %08X = %08X\n", now, started, diff);
+            fprintf (stderr, "Z8IPage::dmacycle: cmem controller is stuck %08X - %08X = %08X\n", now, started, diff);
             ABORT ();
         }
     }
@@ -198,8 +198,8 @@ uint32_t Z8LPage::dmacycle (uint32_t cm)
     return cm;
 }
 
-// get exclusive access (co-operative) to pdp8lcmem.v device by the calling process
-void Z8LPage::cmlock ()
+// get exclusive access (co-operative) to pdp8icmem.v device by the calling process
+void Z8IPage::cmlock ()
 {
     if (pthread_mutex_lock (&dmamtx) != 0) ABORT ();
 
@@ -212,15 +212,15 @@ void Z8LPage::cmlock ()
         int lkpid = cmemat[3];
         if (lkpid == mypid) break;
         if ((lkpid > 0) && (kill (lkpid, 0) < 0) && (errno == ESRCH)) {
-            fprintf (stderr, "Z8LPage::cmlock: pid %d died, releasing lock\n", lkpid);
+            fprintf (stderr, "Z8IPage::cmlock: pid %d died, releasing lock\n", lkpid);
             cmemat[3] = lkpid;
         }
     }
     if (cmemat[1] & CM_BUSY) ABORT ();
 }
 
-// release exclusive access to pdp8lcmem.v device by the calling process
-void Z8LPage::cmunlk ()
+// release exclusive access to pdp8icmem.v device by the calling process
+void Z8IPage::cmunlk ()
 {
     ASSERT (CM3_LOCK == 0xFFFFFFFFU);
     ASSERT (cmemat != NULL);

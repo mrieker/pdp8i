@@ -130,7 +130,7 @@ proc simtest {} {
     ;# pdp8icmem.v ARM-side register indices in the 4K page
     set cmat1 [expr {$cmat0 + 1}]
     set cmat2 [expr {$cmat0 + 2}]
-    ;# pdp8ltty.v ARM-side register indices in the 4K page
+    ;# pdp8itty.v ARM-side register indices in the 4K page
     set ttat1 [expr {$ttat0 + 1}]
     set ttat2 [expr {$ttat0 + 2}]
 
@@ -901,7 +901,7 @@ proc doioinstr {opcode} {
         bus set iACCLEAR $acclear iIOSKIP $ioskip iINBUS $acbits
     } elseif {($opcode & 07770) == 06030} {
 
-        ;# - keyboard opcodes (see pdp8ltty.v)
+        ;# - keyboard opcodes (see pdp8itty.v)
         set r [expr {$opcode & 7}]
         switch $r {
             1 {
@@ -925,7 +925,7 @@ proc doioinstr {opcode} {
         }
     } elseif {($opcode & 07770) == 06040} {
 
-        ;# - printer opcodes (see pdp8ltty.v)
+        ;# - printer opcodes (see pdp8itty.v)
         set r [expr {$opcode & 7}]
         switch $r {
             1 {

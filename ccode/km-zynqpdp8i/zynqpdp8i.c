@@ -19,7 +19,7 @@
 //    http://www.gnu.org/licenses/gpl-2.0.html
 
 // kernel module for raspi to map the zynq.vhd fpga 4K page
-// sets it up as a mmap page accessed from /proc/zynqpdp8l
+// sets it up as a mmap page accessed from /proc/zynqpdp8i
 
 #include <linux/version.h>
 #include <linux/fs.h>
@@ -33,7 +33,7 @@
 
 MODULE_LICENSE("GPL");
 
-#define ZG_PROCNAME "zynqpdp8l"
+#define ZG_PROCNAME "zynqpdp8i"
 #define ZG_PHYSADDR 0x43C00000
 #define ZG_EXTMEMPA 0x43C20000
 

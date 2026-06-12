@@ -18,14 +18,14 @@
 //
 //    http://www.gnu.org/licenses/gpl-2.0.html
 
-// tcl command to give direct access to z8l fpga signals
+// tcl command to give direct access to z8i fpga signals
 
 #include <string.h>
 
 #include "cmd_pin.h"
 #include "tclmain.h"
-#include "z8ldefs.h"
-#include "z8lutil.h"
+#include "z8idefs.h"
+#include "z8iutil.h"
 
 // pin definitions
 struct PinDef {
@@ -41,7 +41,7 @@ struct PinDef {
 #define DEV_TT 2
 #define DEV_FP 3
 
-static Z8LU32 *devs[4];
+static Z8IU32 *devs[4];
 
 static PinDef const pindefs[] = {
 
@@ -185,10 +185,10 @@ int cmd_pin (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj *const
         puts ("    get returns integer value");
         puts ("    test returns -1: undefined; 0: read-only; 1: read/write");
         puts ("");
-        puts ("  'o' pins : simit=0 : read PDP-8/L output pins");
+        puts ("  'o' pins : simit=0 : read PDP-8/I output pins");
         puts ("             simit=1 : read simulator output pins");
         puts ("");
-        puts ("  'i' pins : simit=0 : drives PDP-8/L inputs from device & arm register");
+        puts ("  'i' pins : simit=0 : drives PDP-8/I inputs from device & arm register");
         puts ("             simit=1 : drives simulator inputs from device & arm register");
         puts ("            bareit=0 : logical OR of device and arm register");
         puts ("            bareit=1 : just value of arm register");
@@ -198,7 +198,7 @@ int cmd_pin (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj *const
 
     if ((objc == 2) && (strcasecmp (Tcl_GetString (objv[1]), "list") == 0)) {
         for (PinDef const *pte = pindefs; pte->name[0] != 0; pte ++) {
-            Z8LU32 *ptr = devs[pte->dev];
+            Z8IU32 *ptr = devs[pte->dev];
             printf ("  %-16s  %c%c[%2u]  %08X\n",
                 pte->name, (ptr[0] >> 24) & 0xFFU, (ptr[0] >> 16) & 0xFFU, pte->reg, pte->mask);
         }
@@ -208,10 +208,10 @@ int cmd_pin (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj *const
     if (devs[0] == NULL) {
 
         // access the zynq io page and find devices thereon
-        devs[DEV_8I] = z8lpage.findev ("8I", NULL, NULL, false);
-        devs[DEV_CM] = z8lpage.findev ("CM", NULL, NULL, false);
-        devs[DEV_TT] = z8lpage.findev ("TT", NULL, NULL, false);
-        devs[DEV_FP] = z8lpage.findev ("FP", NULL, NULL, false);
+        devs[DEV_8I] = z8ipage.findev ("8I", NULL, NULL, false);
+        devs[DEV_CM] = z8ipage.findev ("CM", NULL, NULL, false);
+        devs[DEV_TT] = z8ipage.findev ("TT", NULL, NULL, false);
+        devs[DEV_FP] = z8ipage.findev ("FP", NULL, NULL, false);
     }
 
     bool setmode = false;
@@ -241,7 +241,7 @@ int cmd_pin (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj *const
         bool writeable;
         int width;
         uint32_t mask;
-        Z8LU32 *ptr;
+        Z8IU32 *ptr;
 
         // signalname
         {

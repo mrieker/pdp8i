@@ -18,9 +18,9 @@
 //
 //    http://www.gnu.org/licenses/gpl-2.0.html
 
-// PDP-8/L TC08 interface
+// PDP-8/I TC08 interface
 
-module pdp8ltc08 (
+module pdp8itc08 (
     input CLOCK, CSTEP, RESET, BINIT,
 
     input armwrite,
@@ -72,7 +72,7 @@ module pdp8ltc08 (
         end
 
         // process the IOP only on the leading edge
-        // ...but leave output signals to PDP-8/L in place until given the all clear
+        // ...but leave output signals to PDP-8/I in place until given the all clear
         else if (CSTEP) begin
             if (iopstart & enable) begin
 

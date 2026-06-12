@@ -18,7 +18,7 @@
 //
 //    http://www.gnu.org/licenses/gpl-2.0.html
 
-// Performs TTY I/O for the PDP-8/L Zynq I/O board
+// Performs TTY I/O for the PDP-8/I Zynq I/O board
 
 #include <errno.h>
 #include <fcntl.h>
@@ -35,8 +35,8 @@
 #include <unistd.h>
 
 #include "tclmain.h"
-#include "z8ldefs.h"
-#include "z8lutil.h"
+#include "z8idefs.h"
+#include "z8iutil.h"
 
 struct TTYStopOn {
     TTYStopOn *next;
@@ -78,12 +78,12 @@ static uint32_t cps = 10;
 static uint32_t punchbytes;
 static uint32_t readerbytes;
 static uint32_t readersize;
-static Z8LU32 *dcreg;
-static Z8LU32 *ttyat;
+static Z8IU32 *dcreg;
+static Z8IU32 *ttyat;
 static uint8_t punchmask;
 static uint8_t readermask;
 
-static bool findtt (void *param, Z8LU32 *ttyat);
+static bool findtt (void *param, Z8IU32 *ttyat);
 static bool stoponcheck (TTYStopOn *const stopon, char prchar);
 static void sigrunhand (int signum);
 
@@ -107,7 +107,7 @@ int main (int argc, char **argv)
             puts ("");
             puts ("     Access TTY");
             puts ("");
-            puts ("  ./z8ltty [-cps <charspersec>] [-dc02] [-killit] [-nokb] [<octalportnumber>] [-upcase] [-tcl [<scriptfilename> [<scriptargs...>]]]");
+            puts ("  ./z8itty [-cps <charspersec>] [-dc02] [-killit] [-nokb] [<octalportnumber>] [-upcase] [-tcl [<scriptfilename> [<scriptargs...>]]]");
             puts ("     -cps    : set chars per second, default 10");
             puts ("     -dc02   : <octalportnumber> is DC02 port number, 0..5, default 0");
             puts ("     -killit : kill other process that is processing this tty port");
@@ -119,7 +119,7 @@ int main (int argc, char **argv)
             puts ("               needed for loading papertape files");
             puts ("     -upcase : convert all keyboard to upper case");
             puts ("");
-            puts ("     Can access TTY 03 only if -entty03 given to z8lreal or using z8lsim simulator");
+            puts ("     Can access TTY 03 only if -entty03 given to z8ireal or using z8isim simulator");
             puts ("");
             return 0;
         }
@@ -173,19 +173,19 @@ int main (int argc, char **argv)
             fprintf (stderr, "port number %o must be in range 0..5\n", port);
             return 1;
         }
-        Z8LU32 *dcat = z8lpage.findev ("DC", NULL, NULL, false, killit);
+        Z8IU32 *dcat = z8ipage.findev ("DC", NULL, NULL, false, killit);
         dcat[1]   = 0x80000000U;    // enable board to process io instructions
         dcreg     = &dcat[2+port];  // point to register for this terminal
         getprchar = dc_getprchar;   // set up get/put functions
         putkbchar = dc_putkbchar;
-        z8lpage.locksubdev (dcreg, 1, killit);  // make sure another one of these isn't running
+        z8ipage.locksubdev (dcreg, 1, killit);  // make sure another one of these isn't running
     } else {
         if (port < 0) port = 3;
         if ((port < 1) || (port > 076)) {
             fprintf (stderr, "port number %o must be in range 1..76\n", port);
             return 1;
         }
-        ttyat = z8lpage.findev ("TT", findtt, &port, true, killit);
+        ttyat = z8ipage.findev ("TT", findtt, &port, true, killit);
         ttyat[Z_TTYKB] = KB_ENAB;   // enable board to process io instructions
         getprchar = tt_getprchar;   // set up get/put functions
         putkbchar = tt_putkbchar;
@@ -193,7 +193,7 @@ int main (int argc, char **argv)
 
     int rc;
     if (dotcl) {
-        rc = tclmain (fundefs, argv[0], "z8ltty", NULL, getenv ("z8lttyini"), argc - tclargs, argv + tclargs, false);
+        rc = tclmain (fundefs, argv[0], "z8itty", NULL, getenv ("z8ittyini"), argc - tclargs, argv + tclargs, false);
     } else {
         cmd_run (NULL, NULL, 0, NULL);
         rc = 0;
@@ -203,7 +203,7 @@ int main (int argc, char **argv)
 
 
 
-static bool findtt (void *param, Z8LU32 *ttyat)
+static bool findtt (void *param, Z8IU32 *ttyat)
 {
     int port = *(int *) param;
     if (ttyat == NULL) {
@@ -569,7 +569,7 @@ static int cmd_run (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj
     stdintty = isatty (STDIN_FILENO) > 0;
     if (stdintty && ! nokb) {
         // stdin is a tty, set it to raw mode
-        fprintf (stderr, "z8ltty: use control-\\ for stop char\n");
+        fprintf (stderr, "z8itty: use control-\\ for stop char\n");
         if (tcgetattr (STDIN_FILENO, &term_original) < 0) ABORT ();
         if (signal (SIGHUP,  sigrunhand) != SIG_DFL) ABORT ();
         if (signal (SIGTERM, sigrunhand) != SIG_DFL) ABORT ();
@@ -621,11 +621,11 @@ static int cmd_run (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj
                     uint8_t prbyte = prreg & punchmask;
                     int rc = write (punchfile, &prbyte, 1);
                     if (rc < 0) {
-                        fprintf (stderr, "\r\nz8ltty: error writing punch file: %m\r\n");
+                        fprintf (stderr, "\r\nz8itty: error writing punch file: %m\r\n");
                         break;
                     }
                     if (rc != 1) {
-                        fprintf (stderr, "\r\nz8ltty: only wrote %d bytes of 1 to punch file\r\n", rc);
+                        fprintf (stderr, "\r\nz8itty: only wrote %d bytes of 1 to punch file\r\n", rc);
                         break;
                     }
                     if (punchstat) fprintf (stderr, "\r[%u]", ++ punchbytes);
@@ -671,11 +671,11 @@ static int cmd_run (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj
                 uint8_t kbbyte;
                 int rc = read (readerfile, &kbbyte, 1);
                 if (rc < 0) {
-                    fprintf (stderr, "\r\nz8ltty: error reading reader file: %m\r\n");
+                    fprintf (stderr, "\r\nz8itty: error reading reader file: %m\r\n");
                     break;
                 }
                 if (rc == 0) {
-                    fprintf (stderr, "\r\nz8ltty: reached end of reader file\r\n");
+                    fprintf (stderr, "\r\nz8itty: reached end of reader file\r\n");
                     close (readerfile);
                     readerfile  = -1;
                     readerquiet = false;
@@ -784,7 +784,7 @@ static void sigrunhand (int signum)
     } else {
         tcsetattr (STDIN_FILENO, TCSADRAIN, &term_original);
     }
-    dprintf (STDERR_FILENO, "\nz8ltty: terminated by signal %d\n", signum);
+    dprintf (STDERR_FILENO, "\nz8itty: terminated by signal %d\n", signum);
     exit (1);
 }
 

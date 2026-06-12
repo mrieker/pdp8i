@@ -1,10 +1,10 @@
 #!/bin/bash
 #
-#  Start z8lpanel on the zturn board programmed with the PDP-8/L simulator
+#  Start z8ipanel on the zturn board programmed with the PDP-8/I simulator
 #
 dd=`dirname $0`
 $dd/loadmod.sh
-export z8lpanelini=$dd/z8lpanelini.tcl
+export z8ipanelini=$dd/z8ipanelini.tcl
 dbg=
 if [ "$1" == "-gdb" ]
 then

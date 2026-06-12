@@ -13,18 +13,18 @@ VFILES := \
 	../kicads/extmemory/extmemory.v \
 	../kicads/processor/processor.v \
 	../zynq/zynq.v \
-	../zynq/pdp8ldc02.v \
-	../zynq/pdp8lrk8je.v \
+	../zynq/pdp8idc02.v \
+	../zynq/pdp8irk8je.v \
 	../zynq/pdp8icmem.v \
 	../zynq/pdp8irtc.v \
 	../zynq/pdp8isim.v \
-	../zynq/pdp8ltc08.v \
+	../zynq/pdp8itc08.v \
 	../zynq/pdp8ifpi2c.v \
-	../zynq/pdp8lptr.v \
-	../zynq/pdp8lpbit.v \
-	../zynq/pdp8lptp.v \
-	../zynq/pdp8ltty.v \
-	../zynq/pdp8lvc8.v \
+	../zynq/pdp8iptr.v \
+	../zynq/pdp8ipbit.v \
+	../zynq/pdp8iptp.v \
+	../zynq/pdp8itty.v \
+	../zynq/pdp8ivc8.v \
 	../zynq/dmareq.v \
 	../zynq/i2cmaster.v \
 

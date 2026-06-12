@@ -18,7 +18,7 @@
 //
 //    http://www.gnu.org/licenses/gpl-2.0.html
 
-// PDP-8/L DC02 terminal multiplexor board, supports up to 6 terminals
+// PDP-8/I DC02 terminal multiplexor board, supports up to 6 terminals
 //  * incomplete implementation
 //    enough to get EDUSYSTEM 20 C BASIC working
 
@@ -34,7 +34,7 @@
 //     ...
 //  [7] = terminal 5 bits (enabled by MTON[06])
 
-module pdp8ldc02
+module pdp8idc02
 (
     input CLOCK, CSTEP, RESET, BINIT,
 
@@ -108,7 +108,7 @@ module pdp8ldc02
         end else if (CSTEP) begin
 
             // process the IOP only on the leading edge
-            // ...but leave output signals to PDP-8/L in place until given the all clear
+            // ...but leave output signals to PDP-8/I in place until given the all clear
             if (iopstart & enable) begin
                 case (ioopcode)
 

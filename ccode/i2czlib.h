@@ -25,10 +25,10 @@
 
 #define DOTJMPDOT 05252U
 
-#include "z8lutil.h"
+#include "z8iutil.h"
 
 // toggle switches
-struct Z8LToggles {
+struct Z8IToggles {
     uint16_t sr;
     uint8_t dfld;
     uint8_t ifld;
@@ -37,7 +37,7 @@ struct Z8LToggles {
 };
 
 // button (momentary) switches
-struct Z8LButtons {
+struct Z8IButtons {
     bool stop;
     bool cont;
     bool start;
@@ -47,7 +47,7 @@ struct Z8LButtons {
 };
 
 // light bulbs
-struct Z8LLights {
+struct Z8ILights {
     uint16_t ac;
     uint16_t ma;
     uint16_t mb;
@@ -66,25 +66,25 @@ struct Z8LLights {
 };
 
 // all switches and lights
-struct Z8LPanel {
-    Z8LToggles togovr;  // which toggles are being overridden
-    Z8LToggles togval;  // toggle switch values
-    Z8LButtons button;  // button switch values
-    Z8LLights  light;   // light bulb values
+struct Z8IPanel {
+    Z8IToggles togovr;  // which toggles are being overridden
+    Z8IToggles togval;  // toggle switch values
+    Z8IButtons button;  // button switch values
+    Z8ILights  light;   // light bulb values
 };
 
 struct I2CZLib {
     I2CZLib ();
     ~I2CZLib ();
     void relall ();
-    void readpads (Z8LPanel *pads);
-    void writepads (Z8LPanel const *pads);
+    void readpads (Z8IPanel *pads);
+    void writepads (Z8IPanel const *pads);
 
     void loop52 ();
 
 private:
-    Z8LU32 *pdpat;
-    Z8LU32 *fpat;
+    Z8IU32 *pdpat;
+    Z8IU32 *fpat;
 };
 
 #endif

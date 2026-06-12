@@ -2,7 +2,7 @@ puts ""
 puts "d01b: instruction test 1"
 
 ;# load program
-loadbin ../../pdp8l/alltapes/maindec-8i-d01b-pb.bin
+loadbin ../../pdp8i/alltapes/maindec-8i-d01b-pb.bin
 
 ;# program starts at 0144, halts at 0146 with ac=0000
 puts "d01b: starting program"

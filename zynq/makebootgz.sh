@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#  create the BOOT.BIN file for pdp8l and gzip it
+#  create the BOOT.BIN file for pdp8i and gzip it
 #  assumes the .bit bitstream file is up-to-date (compiled with vivado)
 #  assumes hostname zturn points to zturn board all booted up with an existing BOOT.BIN file
 #    zturn root .ssh/authorized_keys should have this user's .ssh public key so don't need to enter its password
