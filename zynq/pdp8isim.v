@@ -92,6 +92,7 @@ module pdp8isim (
 
     wire[2:0] _conDFLD, _conIFLD;
     wire[11:00] _conINBUS;
+    wire lttime, swtime;
 
     wire[27:04] gpout;
     wire[15:04] gpin = (gpout[18:16] == 7) ? 12'o7777 : // light select hi-Z value from panel (or it jams mcp23017 from sensing lights)
@@ -103,6 +104,13 @@ module pdp8isim (
         .zreset (zreset),
         .GND    (1'b0),
         .VCC    (1'b1),
+
+        .lttime (lttime),   // light row display time
+        .swtime (swtime),   // switch row sense time
+        .div_11 (),         // 204.8uS
+        .div_5  (lttime),   // 3.2uS
+        .div_4  (),         // 1.6uS
+        .div_2  (swtime),   // 0.4uS
 
         .CONSCK   (iCONSCK),
         .CONSDA   (iCONSDA),

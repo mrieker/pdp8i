@@ -112,6 +112,7 @@ module backplane (
 
     wire[2:0] _conDFLD, _conIFLD;
     wire[11:00] _conINBUS;
+    wire lttime, swtime;
 
     console conboard (
         .yclock (yclock),
@@ -119,6 +120,13 @@ module backplane (
         .zreset (zreset),
         .GND    (1'b0),
         .VCC    (1'b1),
+
+        .lttime (lttime),   // light row display time
+        .swtime (swtime),   // switch row sense time
+        .div_11 (),         // 204.8uS
+        .div_5  (lttime),   // 3.2uS
+        .div_4  (),         // 1.6uS
+        .div_2  (swtime),   // 0.4uS
 
         .CONSCK   (zynCONSCK),
         .CONSDA   (zynCONSDA),
