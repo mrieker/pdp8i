@@ -119,8 +119,6 @@ int main (int argc, char **argv)
             puts ("               needed for loading papertape files");
             puts ("     -upcase : convert all keyboard to upper case");
             puts ("");
-            puts ("     Can access TTY 03 only if -entty03 given to z8ireal or using z8isim simulator");
-            puts ("");
             return 0;
         }
         if (strcasecmp (argv[i], "-cps") == 0) {

@@ -323,6 +323,9 @@
 #define fp11_swIFLD   (7U << 12)
 #define fp11_swSR (07777U <<  0)
 
+#define fp12_dbncount  (0x3FU << 26)
+
+#define fp13_dbnlimit  (0x3FU << 26)
 #define fp13_ltspeed (0xFFFFU << 10)
 #define fp13_i2cspeed (0x3FFU <<  0)
 

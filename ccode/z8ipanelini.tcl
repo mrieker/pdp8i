@@ -256,14 +256,17 @@ proc getrestofttyline {{tmsec 30000}} {
 
 # halt and reset the CPU
 proc hardreset {} {
-    set oldsstep [pin fp_setsstep]
-    pin set nanocontin 1 fp_manual 0
+    set oldsstepovr [pin fp_ovrsstep]       ;# save SSTEP toggle state
+    set oldsstepval [pin fp_setsstep]
+    pin set nanocontin 1 fp_manual 0        ;# make sure pdp8ifpi2c.v is scanning
     pin set fp_ovrsstep 1 fp_ovrstart 1     ;# set START + SSTEP
     pin set fp_setsstep 1 fp_setstart 1     ;# ...holds processor in reset state
     pin set fpgareset 1 fpgareset 0         ;# pulse fpga reset
     setsw start 0                           ;# release START
-    if {! $oldsstep} {
-        setsw sstep 0                       ;# release SSTEP
+    if {! $oldsstepovr} {                   ;# restore SSTEP
+        relsw sstep
+    } elseif {! $oldsstepval} {
+        setsw sstep 0
     }
 }
 

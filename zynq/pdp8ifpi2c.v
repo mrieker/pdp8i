@@ -63,6 +63,11 @@ module pdp8ifpi2c (
     wire[14:00] i2ccount;
     wire[63:00] comand, status;
 
+    // start,dep,exam,cont button debounce
+    localparam[11:00] BUTTMASK = 12'b101110000000;
+    reg[5:0] dbncount, dbnlimit;
+    wire debounced = (dbncount == dbnlimit);
+
     assign armrdata = (armraddr ==  0) ? 32'h46503002 : // [31:16] = 'FP'; [15:12] = (log2 nreg) - 1; [11:00] = version
                       (armraddr ==  1) ? { comand[31:00] } :
                       (armraddr ==  2) ? { comand[63:32] } :
@@ -105,12 +110,14 @@ module pdp8ifpi2c (
                                            switchrows[1][11:06],    //12 { DF[2:0], IF[2:0] }
                                            switchrows[0] } :        //00 SR[11:00]
 
-                      (armraddr == 12) ? { 6'b0,                    //26
+                      (armraddr == 12) ? { dbncount,                //26
                                            switchovrs[2][11:04],    //18 { START, LDAD, DEP, EXAM, CONT, STOP, SSTEP, SINST }
                                            switchovrs[1][11:06],    //12 { DF[2:0], IF[2:0] }
                                            switchovrs[0] } :        //00 SR[11:00]
 
-                      (armraddr == 13) ? { 6'b0, ltspeed, i2cspeed } :
+                      (armraddr == 13) ? { dbnlimit,                //26
+                                           ltspeed,                 //10
+                                           i2cspeed } :             //00
 
                        32'hDEADBEEF;
 
@@ -130,12 +137,16 @@ module pdp8ifpi2c (
         .state (i2cstate),
         .count (i2ccount));
 
+    // status bits read from MCP23017 give 12 bits of data
+    wire[11:00] sts12 = { status[05:00], status[13:08] };
+
     always @(posedge CLOCK) begin
         if (iRESET) begin           // processor power-on reset
             if (RESET) begin        // fpga power-on reset
                 manual   <= 1;      // let console.kicad_sch clock itself
                 ltspeed  <= 19999;  // each light row stays on for 200uS
                 i2cspeed <= 29;     // operate i2c at 1.667MHz
+                dbnlimit <= 44;     // debounce time 2.272mS * 44 = 100mS
                 switchovrs[0] <= 0; // not overriding any switches
                 switchovrs[1] <= 0;
                 switchovrs[2] <= 0;
@@ -190,6 +201,7 @@ module pdp8ifpi2c (
                 end
 
                 13: begin
+                    dbnlimit <= armwdata[31:26];
                     ltspeed  <= armwdata[25:10];
                     i2cspeed <= armwdata[09:00];
                 end
@@ -276,8 +288,8 @@ module pdp8ifpi2c (
                     mcpswrow <= mcpltrow[1:0];
                     mcpltime <= mcpltime + 1;
                     if (status[63:60] == 0) begin
-                        ////$display ("pdp8ifpi2c*: capture light row %o = %o", mcpltrow, ~ { status[05:00], status[13:08] });
-                        lightrows[mcpltrow][11:00] <= ~ { status[05:00], status[13:08] };
+                        ////$display ("pdp8ifpi2c*: capture light row %o = %o", mcpltrow, ~ sts12);
+                        lightrows[mcpltrow][11:00] <= ~ sts12;
                         mcpstate <= 4;
                     end
                 end
@@ -382,7 +394,7 @@ module pdp8ifpi2c (
                 end
 
                 // waiting for mcp to receive iicsel=4'b1010 command, which clocked data into swrow 0 flipflops,
-                // ...and is now cocked to clock into row 2
+                // ...and is now cocked to clock into row 2 flipflops
                 8: begin
                     if (status[63:60] == 0) begin
                         ////$display ("pdp8ifpi2c*: clock switch 2 data %o into flipflops", switchrows[2]);
@@ -411,9 +423,20 @@ module pdp8ifpi2c (
                 // then go on to display next light row
                 11: begin
                     if (status[63:60] == 0) begin
-                        ////$display ("pdp8ifpi2c*: read switch row %o got data %o", mcpswrow, { status[05:00], status[13:08] });
-                        switchrows[mcpswrow] <= switchovrs[mcpswrow] & switchrows[mcpswrow] |
-                                              ~ switchovrs[mcpswrow] & { status[05:00], status[13:08] };
+                        ////$display ("pdp8ifpi2c*: read switch row %o got data %o", mcpswrow, sts12);
+                        if (mcpswrow != 2) begin
+                            switchrows[mcpswrow] <= switchovrs[mcpswrow] & switchrows[mcpswrow] |   // overridden, ignore phys switch
+                                                  ~ switchovrs[mcpswrow] & sts12;                   // else save phys switch
+                        end else begin
+                            switchrows[2] <= switchovrs[2] & switchrows[2] |        // overridden, ignore phys switch
+                                           ~ switchovrs[2] & sts12 & (debounced ? 12'o7777 : ~ BUTTMASK);
+                                                                                    // else save debounced switch
+                            if ((sts12 & BUTTMASK) == 0) begin
+                                dbncount <= 0;                                      // no debounceable button pushed, reset counter
+                            end else if (~ debounced) begin
+                                dbncount <= dbncount + 1;                           // not reached limit, increment counter
+                            end
+                        end
                         mcpstate <= 0;
                     end
                 end
