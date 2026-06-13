@@ -624,40 +624,40 @@ static int showstatus (int argc, char **argv)
         char const *simit = (pdpat[Z_RE] & e_simit) ? " sim" : "real";
 
         // display it
-        printf (TOP EOL);
+        printf (TOP ESC_NORMV EOL);
 
-        printf ("  PDP-8/I    %s %s %s  %s %s %s   %s %s %s  %s %s %s  %s %s %s  %s %s %s  PC  %o%o.%04o  %s  %s  %s%8u" EOL,
+        printf ("  PDP-8/I    %s %s %s  %s %s %s   %s %s %s  %s %s %s  %s %s %s  %s %s %s  PC  " ESC_BOLDV "%o%o.%04o" ESC_NORMV "  %s  %s  %s%8u" EOL,
             REG3L (pads.light.dfld), REG3L (pads.light.ifld), REG12L (pads.light.pc), pads.light.dfld, pads.light.ifld, pads.light.pc,
             STL (irand, "AND", "and"), STL (msfet, "FET", "fet"), STL (pads.light.ion, "ION", "ion"), fps);
 
         printf ("              DF     IF                                              %s  %s  %s     fps" EOL,
             STL (irtad, "TAD", "tad"), STL (msexe, "EXE", "exe"), STL (pads.light.pau, "PAU", "pau"));
 
-        printf ("                            %s %s %s  %s %s %s  %s %s %s  %s %s %s  MA     %04o  %s  %s  %s" EOL,
+        printf ("                            %s %s %s  %s %s %s  %s %s %s  %s %s %s  MA  " ESC_BOLDV "   %04o" ESC_NORMV "  %s  %s  %s" EOL,
             REG12L (pads.light.ma), pads.light.ma, STL (irisz, "ISZ", "isz"), STL (msdef, "DEF", "def"), STL (pads.light.run, "RUN", "run"));
 
         printf ("                                                                     %s  %s         %s" EOL,
             STL (irdca, "DCA", "dca"), STL (mswct, "WCT", "wct"), simit);
 
-        printf ("                            %s %s %s  %s %s %s  %s %s %s  %s %s %s  MB     %04o  %s  %s" EOL,
+        printf ("                            %s %s %s  %s %s %s  %s %s %s  %s %s %s  MB  " ESC_BOLDV "   %04o" ESC_NORMV "  %s  %s" EOL,
             REG12L (pads.light.mb), pads.light.mb, STL (irjms, "JMS", "jms"), STL (mscad, "CAD", "cad"));
 
         printf ("                                                                     %s  %s" EOL,
             STL (irjmp, "JMP", "jmp"), STL (msbrk, "BRK", "brk"));
 
-        printf ("                     L  %s   %s %s %s  %s %s %s  %s %s %s  %s %s %s  AC   %o.%04o  %s  %s" EOL,
+        printf ("                     L  %s   %s %s %s  %s %s %s  %s %s %s  %s %s %s  AC  " ESC_BOLDV " %o.%04o" ESC_NORMV "  %s  %s" EOL,
             BOOL (pads.light.link), REG12L (pads.light.ac), pads.light.link, pads.light.ac,
             STL (iriot, "IOT", "iot"), STL (msiak, "IAK", "iak"));
 
         printf ("                                                                     %s  %s" EOL,
             STL (iropr, "OPR", "opr"), STL (msdep, "DEP", "dep"));
 
-        printf ("           SC  %s %s  %s %s %s   %s %s %s  %s %s %s  %s %s %s  %s %s %s  MQ  %02o.%04o       %s" EOL,
+        printf ("           SC  %s %s  %s %s %s   %s %s %s  %s %s %s  %s %s %s  %s %s %s  MQ  " ESC_BOLDV "%02o.%04o" ESC_NORMV "       %s" EOL,
             REG5L (pads.light.sc), REG12L (pads.light.mq), pads.light.sc, pads.light.mq, STL (msexm, "EXM", "exm"));
 
         printf (EOL);
 
-        printf ("             %s %s %s  %s %s %s   %s %s %s  %s %s %s  %s %s %s  %s %s %s  SR  %o%o.%04o  %s %s %s %s" EOL,
+        printf ("             %s %s %s  %s %s %s   %s %s %s  %s %s %s  %s %s %s  %s %s %s  SR  " ESC_BOLDV "%o%o.%04o" ESC_NORMV "  %s %s %s %s" EOL,
             REG3L (pads.togval.dfld), REG3L (pads.togval.ifld), REG12L (pads.togval.sr), pads.togval.dfld, pads.togval.ifld, pads.togval.sr,
             STL (pads.button.start, "START", "start"), STL (pads.button.ldad, "LDAD", "ldad"), STL (pads.button.dep, "DEPOS", "depos"), STL (pads.button.exam, "EXAM", "exam"));
 
