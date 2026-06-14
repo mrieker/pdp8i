@@ -367,7 +367,14 @@ proc loadbin {fname} {
             flush stdout
 
             # deposit data
-            wrmem $addr $data
+            if {$addr != $nextaddr} {
+                setsw ifld [expr {$addr >> 12}]
+                setsw dfld [expr {$addr >> 12}]
+                setsw sr [expr {$addr & 07777}]
+                flicksw ldad
+            }
+            setsw sr $data
+            flicksw dep
 
             # set up for next byte
             set addr [expr {($addr & 070000) | (($addr + 1) & 007777)}]

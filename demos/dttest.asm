@@ -120,11 +120,7 @@ __boot:
 	tad	_initloopm1
 	jmsi	_printstrz
 initloop:
-	tad	blockno
-	jmsi	_printoct
 	jmsi	_writefwdrand	; write block with random data
-	tad	_0040
-	jmsi	_printac
 	isz	blockno
 	tad	blockno
 	tad	_5076		; -2702
@@ -483,19 +479,18 @@ waitforeot: .word .-.
 ;   AC = status B
 ;
 waitfordone: .word .-.
+	cla
 wfd_loop:
-	cla			; read status register B
-	dtrb
+	dtrb			; read status register B
 	sza
 	jmpi	waitfordone
 	tadi	_idwc
 	ion			; busy, enable interrupts
 	nop
-wfd_halt:
-	iof
-	jmp	wfd_loop
+wfd_hang:
+	jmp	wfd_hang	; hang here for interrupt
 
-__wfd_halt: .word -wfd_halt
+__wfd_hang: .word -wfd_hang
 
 ;
 ; interrupt service -
@@ -505,8 +500,8 @@ intserv:
 	dtsf			; check for tape op complete
 	jmp	intret
 	dca	intacsave
-	tad	0		; see if interrupted waitfordone's HLT instruction
-	tad	__wfd_halt
+	tad	0		; see if interrupted waitfordone's hang loop
+	tad	__wfd_hang
 	sna cla
 	jmp	wfd_loop	; if so, just jump back to it without enabling interrupts
 	dtra			; if not, read status A
@@ -818,7 +813,7 @@ _fatalm2: .word	fatalm2
 
 ; ------------------------------------------------------------------------------
 
-initloopm1: .asciz "\r\ninit fwd blockno="
+initloopm1: .asciz "\r\ninit fwd..."
 readloopm1: .asciz "\r\n\nverify fwd blockno="
 readloopm2: .asciz "\r\n\nverify rev blockno="
 rewmsg1:    .asciz "\r\nrewind: rewinding"
