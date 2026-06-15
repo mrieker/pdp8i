@@ -22,7 +22,8 @@ VFILES := \
 	../kicads/console/console.v \
 	../kicads/extarith/extarith.v \
 	../kicads/extmemory/extmemory.v \
-	../kicads/processor/processor.v \
+	../kicads/procseq/procseq.v \
+	../kicads/proc23/proc23.v \
 	../zynq/zynq.v \
 	../zynq/pdp8idc02.v \
 	../zynq/pdp8irk8je.v \

@@ -11,7 +11,8 @@ VFILES := \
 	../kicads/dmatester/dmatester.v \
 	../kicads/extarith/extarith.v \
 	../kicads/extmemory/extmemory.v \
-	../kicads/processor/processor.v \
+	../kicads/procseq/procseq.v \
+	../kicads/proc23/proc23.v \
 	../zynq/zynq.v \
 	../zynq/pdp8idc02.v \
 	../zynq/pdp8irk8je.v \
@@ -79,8 +80,11 @@ obj_dir/Vbackplane.cpp obj_dir/Vbackplane.h obj_dir/Vbackplane.mk: $(VFILES)
 ../kicads/extmemory/extmemory.v: ../kicads/extmemory/extmemory.kicad_pcb
 	cd ../kicads/extmemory ; ../parsepcb.sh extmemory
 
-../kicads/processor/processor.v: ../kicads/processor/processor.kicad_pcb
-	cd ../kicads/processor ; ../parsepcb.sh processor
+../kicads/procseq/procseq.v: ../kicads/procseq/procseq.kicad_pcb
+	cd ../kicads/procseq ; ../parsepcb.sh procseq
+
+../kicads/proc23/proc23.v: ../kicads/proc23/proc23.kicad_pcb
+	cd ../kicads/proc23 ; ../parsepcb.sh proc23
 
 ../kicads/console/console.kicad_pcb: ../kicads/console/console.kicad_sch
 	error update console.kicad_pcb

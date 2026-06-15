@@ -159,6 +159,7 @@ void I2CZLib::readpads (Z8IPanel *pads)
     pads->light.ifld   = EXT (fp10, fp10_lbIF);
     pads->light.dfld   = EXT (fp10, fp10_lbDF);
 
+    pads->button.stop  = EXT (fp11, fp11_swSTOP);
     pads->button.cont  = EXT (fp11, fp11_swCONT);
     pads->button.start = EXT (fp11, fp11_swSTART);
     pads->button.ldad  = EXT (fp11, fp11_swLDAD);
@@ -188,6 +189,7 @@ void I2CZLib::writepads (Z8IPanel const *pads)
     //   if released, resorts to what physical button is
     // - toggles are sent when explicitly enabled
     fpat[12] =
+        (pads->button.stop  ? fp11_swSTOP  : 0) |
         (pads->button.cont  ? fp11_swCONT  : 0) |
         (pads->button.start ? fp11_swSTART : 0) |
         (pads->button.ldad  ? fp11_swLDAD  : 0) |
@@ -204,6 +206,7 @@ void I2CZLib::writepads (Z8IPanel const *pads)
 
     // set up values to be sent out
     fpat[11] =
+        (pads->button.stop  ? fp11_swSTOP  : 0) |
         (pads->button.cont  ? fp11_swCONT  : 0) |
         (pads->button.start ? fp11_swSTART : 0) |
         (pads->button.ldad  ? fp11_swLDAD  : 0) |
@@ -219,15 +222,16 @@ void I2CZLib::writepads (Z8IPanel const *pads)
     // waits for an whole pass through all the rows
     ASSERT (fp7_mcpassno == 0xFFFFFE00U);
     ASSERT (fp7_mcpltrow == 0x000001C0U);
-    uint32_t begnum = fpat[7] & 0xFFFFFFC0U;
-    uint32_t nownum;
-    uint32_t zrh = pdpat[Z_RH];
-    do {
-        if (pdpat[Z_RH] - zrh > 1000000) {  // give it 10mS
+    uint32_t begnum = fpat[7] & 0xFFFFFFC0U;    // pass,ltrow
+    uint32_t begzrh = pdpat[Z_RH];              // 100MHz
+    while (true) {
+        uint32_t nowzrh = pdpat[Z_RH];
+        uint32_t nownum = fpat[7] & 0xFFFFFFC0U;
+        if (nownum - begnum > 0x200U) break;
+        if (nowzrh - begzrh > 1000000) {        // give it 10mS
             fprintf (stderr, "I2CZLib::writepads: timed out\n");
-            ABORT ();   // should take 1.68mS
+            ABORT ();   // should take ~2.27mS
         }
         usleep (345);
-        nownum = fpat[7] & 0xFFFFFFC0U;
-    } while (nownum - begnum <= 0x200U);
+    }
 }

@@ -594,19 +594,109 @@ module backplane (
     /////////////////
 
     wire _cpuBRKGNTO;
+    wire nxtms_0, nxtms_1, nxtms_2, nxtms_3, memacsw;
 
-    processor procboard (
+    procseq seqboard (
         .yclock (yclock),
         .zclock (zclock),
         .zreset (zreset),
         .GND    (1'b0),
         .VCC    (1'b1),
 
+        .nxtms_0 (nxtms_0),
+        .nxtms_1 (nxtms_1),
+        .nxtms_2 (nxtms_2),
+        .nxtms_3 (nxtms_3),
+        .memacsw (memacsw),
+
         ._BRKGNTO   (_cpuBRKGNTO),
         ._BRKGNTO_o (_cpuBRKGNTO),
 
-        ._ACCLEAR   (_busACCLEAR),
         ._BRKRQST   (_busBRKRQST),
+        ._CYCLE3    (_busCYCLE3),
+
+        ._INTINH    (_busINTINH),
+        ._INTRQST   (_busINTRQST),
+        ._PAUSE     (_busPAUSE),
+        ._RESET     (_busRESET),
+        ._SWCONT    (_busSWCONT),
+        ._SWDEPOS   (_busSWDEPOS),
+        ._SWEXAM    (_busSWEXAM),
+        ._SWLDAD    (_busSWLDAD),
+        ._SWSINST   (_busSWSINST),
+        ._SWSSTEP   (_busSWSSTEP),
+        ._SWSTART   (_busSWSTART),
+
+        ._BUSINI    (_busBUSINI),
+        ._CLOCK     (_busCLOCK),
+        ._ION       (_busION),
+        ._IOP       (_busIOP),
+
+        ._IREG_9    (_busIREG[9]),
+        ._IREG_10   (_busIREG[10]),
+        ._IREG_11   (_busIREG[11]),
+
+        ._MAJST_0   (_busMAJST[0]),
+        ._MAJST_1   (_busMAJST[1]),
+        ._MAJST_2   (_busMAJST[2]),
+        ._MAJST_3   (_busMAJST[3]),
+
+        ._MBUF_0    (_busMBUF[0]),
+        ._MBUF_1    (_busMBUF[1]),
+        ._MBUF_2    (_busMBUF[2]),
+        ._MBUF_3    (_busMBUF[3]),
+        ._MBUF_4    (_busMBUF[4]),
+        ._MBUF_5    (_busMBUF[5]),
+        ._MBUF_6    (_busMBUF[6]),
+        ._MBUF_7    (_busMBUF[7]),
+        ._MBUF_8    (_busMBUF[8]),
+
+        ._RUN       (_busRUN),
+
+        ._TP1       (_busTP1),
+        ._TP2       (_busTP2),
+        ._TP3       (_busTP3),
+        ._TP4       (_busTP4),
+        ._TS1       (_busTS1),
+        ._TS2       (_busTS2),
+        ._TS3       (_busTS3),
+        ._TS4       (_busTS4),
+
+        ._BUSINI_o  (_busBUSINI),
+        ._ION_o     (_busION),
+        ._IOP_o     (_busIOP),
+
+        ._MAJST_0_o (_busMAJST[0]),
+        ._MAJST_1_o (_busMAJST[1]),
+        ._MAJST_2_o (_busMAJST[2]),
+        ._MAJST_3_o (_busMAJST[3]),
+
+        ._RUN_o     (_busRUN),
+
+        ._TP1_o     (_busTP1),
+        ._TP2_o     (_busTP2),
+        ._TP3_o     (_busTP3),
+        ._TP4_o     (_busTP4),
+        ._TS1_o     (_busTS1),
+        ._TS2_o     (_busTS2),
+        ._TS3_o     (_busTS3),
+        ._TS4_o     (_busTS4)
+    );
+
+    proc23 proc23board (
+        .yclock (yclock),
+        .zclock (zclock),
+        .zreset (zreset),
+        .GND    (1'b0),
+        .VCC    (1'b1),
+
+        .nxtms_0 (nxtms_0),
+        .nxtms_1 (nxtms_1),
+        .nxtms_2 (nxtms_2),
+        .nxtms_3 (nxtms_3),
+        .memacsw (memacsw),
+
+        ._ACCLEAR   (_busACCLEAR),
         ._BRKWRM    (_busBRKWRM),
         ._CAINC     (_busCAINC),
         ._CYCLE3    (_busCYCLE3),
@@ -624,18 +714,13 @@ module backplane (
         ._INBUS_10  (_busINBUS[10]),
         ._INBUS_11  (_busINBUS[11]),
 
-        ._INTINH    (_busINTINH),
-        ._INTRQST   (_busINTRQST),
         ._IOSKIP    (_busIOSKIP),
         ._LNKTOG    (_busLNKTOG),
-        ._PAUSE     (_busPAUSE),
         ._RESET     (_busRESET),
         ._SWCONT    (_busSWCONT),
         ._SWDEPOS   (_busSWDEPOS),
         ._SWEXAM    (_busSWEXAM),
         ._SWLDAD    (_busSWLDAD),
-        ._SWSINST   (_busSWSINST),
-        ._SWSSTEP   (_busSWSSTEP),
         ._SWSTART   (_busSWSTART),
 
         ._ACUM_0    (_busACUM[0]),
@@ -734,10 +819,7 @@ module backplane (
         ._ACUM_11_o (_busACUM[11]),
 
         ._BRKCYC_o  (_busBRKCYC),
-        ._BUSINI_o  (_busBUSINI),
         ._BWCOV_o   (_busBWCOV),
-        ._ION_o     (_busION),
-        ._IOP_o     (_busIOP),
 
         ._IREG_9_o  (_busIREG[9]),
         ._IREG_10_o (_busIREG[10]),
@@ -757,11 +839,6 @@ module backplane (
         ._MADR_9_o  (_busMADR[9]),
         ._MADR_10_o (_busMADR[10]),
         ._MADR_11_o (_busMADR[11]),
-
-        ._MAJST_0_o (_busMAJST[0]),
-        ._MAJST_1_o (_busMAJST[1]),
-        ._MAJST_2_o (_busMAJST[2]),
-        ._MAJST_3_o (_busMAJST[3]),
 
         ._MBUF_0_o  (_busMBUF[0]),
         ._MBUF_1_o  (_busMBUF[1]),
@@ -789,17 +866,7 @@ module backplane (
         ._PCTR_10_o (_busPCTR[10]),
         ._PCTR_11_o (_busPCTR[11]),
 
-        ._READSR_o  (_busREADSR),
-        ._RUN_o     (_busRUN),
-
-        ._TP1_o     (_busTP1),
-        ._TP2_o     (_busTP2),
-        ._TP3_o     (_busTP3),
-        ._TP4_o     (_busTP4),
-        ._TS1_o     (_busTS1),
-        ._TS2_o     (_busTS2),
-        ._TS3_o     (_busTS3),
-        ._TS4_o     (_busTS4)
+        ._READSR_o  (_busREADSR)
     );
 
     //////////////////////////////////
