@@ -36,12 +36,7 @@ module pdp8ivc8 (
     output reg[11:00] devtocpu,
     output reg AC_CLEAR,
     output reg IO_SKIP,
-    output INT_RQST,
-
-    output reg[14:00] vidaddra, vidaddrb,
-    output reg[21:00] viddataa,
-    output reg videnaba, vidwrena, videnabb,
-    input[21:00] viddatab
+    output INT_RQST
 );
 
     localparam EF_M_DN = 12'o4000;      // done executing last command
@@ -62,8 +57,13 @@ module pdp8ivc8 (
     reg[9:0] xcobuf, ycobuf;
     reg[1:0] intens;
     reg typee;
+    
+    reg[14:00] vidaddra, vidaddrb;
+    reg[21:00] viddataa;
+    reg videnaba, vidwrena, videnabb;
+    wire[21:00] viddatab;
 
-    assign armrdata = (armraddr == 0) ? 32'h56432005 : // [31:16] = 'VC'; [15:12] = (log2 nreg) - 1; [11:00] = version
+    assign armrdata = (armraddr == 0) ? 32'h56432006 : // [31:16] = 'VC'; [15:12] = (log2 nreg) - 1; [11:00] = version
                       (armraddr == 1) ? { 1'b0, remove, 1'b0, insert } :
                       (armraddr == 2) ? { typee, 1'b0, intens, eflags, 16'b0 } :
                       (armraddr == 3) ? { 17'b0, vidaddrb } :   // address being read from
@@ -234,4 +234,18 @@ module pdp8ivc8 (
             3: begin videnabb <= 0; vidramreadbusy <= 0; vidramreaddata <= viddatab; end
         endcase
     end
+
+    //----------- Begin Cut here for INSTANTIATION Template ---// INST_TAG
+    blk_mem_gen_0 videomem (
+      .clka(CLOCK),      // input wire clka
+      .ena(videnaba),    // input wire ena
+      .wea(vidwrena),    // input wire [0 : 0] wea
+      .addra(vidaddra),  // input wire [14 : 0] addra
+      .dina(viddataa),   // input wire [21 : 0] dina
+      .clkb(CLOCK),      // input wire clkb
+      .enb(videnabb),    // input wire enb
+      .addrb(vidaddrb),  // input wire [14 : 0] addrb
+      .doutb(viddatab)   // output wire [21 : 0] doutb
+    );
+    // INST_TAG_END ------ End INSTANTIATION Template ---------
 endmodule

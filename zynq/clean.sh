@@ -3,7 +3,6 @@ rm -rf pdp8i.cache
 rm -rf pdp8i.hw
 rm -rf pdp8i.runs
 rm -rf pdp8i.sim
-rm -rf pdp8i.srcs
 rm -rf myboard/hw_handoff/
 rm -rf myboard/ip/
 rm -rf myboard/ipshared/

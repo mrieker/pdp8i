@@ -1030,15 +1030,7 @@ module Zynq #(parameter BIDIRCONSDA=1, parameter CLOCKDIVIDE=5) (
         .devtocpu (vcibus),
         .AC_CLEAR (vcacclr),
         .IO_SKIP  (vcioskp),
-        .INT_RQST (vcintrq),
-
-        .vidaddra (),
-        .vidaddrb (),
-        .viddataa (),
-        .videnaba (),
-        .vidwrena (),
-        .videnabb (),
-        .viddatab ()
+        .INT_RQST (vcintrq)
     );
 
     wire fpi2c_clock, fpi2c_datao, fpi2c_datai;
