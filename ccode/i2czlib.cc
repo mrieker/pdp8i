@@ -126,6 +126,8 @@ void I2CZLib::relall ()
 //  and updating fpat[8,9,10,11,12] registers
 void I2CZLib::readpads (Z8IPanel *pads)
 {
+    waitpass ();
+
     memset (pads, 0, sizeof *pads);
 
     uint32_t fp8  = fpat[8];
@@ -219,7 +221,12 @@ void I2CZLib::writepads (Z8IPanel const *pads)
         INS (pads->togval.sr,   fp11_swSR);
 
     // wait for them to get all clocked in
-    // waits for an whole pass through all the rows
+    waitpass ();
+}
+
+// waits for an whole pass through all the rows
+void I2CZLib::waitpass ()
+{
     ASSERT (fp7_mcpassno == 0xFFFFFE00U);
     ASSERT (fp7_mcpltrow == 0x000001C0U);
     uint32_t begnum = fpat[7] & 0xFFFFFFC0U;    // pass,ltrow

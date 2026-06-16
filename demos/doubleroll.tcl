@@ -3,7 +3,8 @@
 
 exec -ignorestderr make doubleroll.bin
 hardreset
-set startaddr [loadbin doubleroll.bin]
+set startaddr [loadbinptr doubleroll.bin]
+setsw sr $startaddr
+domemcyc ldad
 setsw sr 0140
-startat $startaddr
-exit
+flicksw start

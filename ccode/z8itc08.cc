@@ -132,7 +132,6 @@ static pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
 static pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 static uint16_t ocarray[4096];
 static uint16_t status_a, status_b;
-static uint32_t cycles;
 static Z8IU32 *pdpat;
 static Z8IU32 *tcat;
 
@@ -143,9 +142,8 @@ static void *thread (void *dummy);
 static bool stepskip (Drive *drive);
 static bool stepxfer (Drive *drive);
 static void dumpbuf (Drive *drive, char const *label, uint16_t const *buff, int nwords);
-static bool dmareadoverwritesinstructions (uint16_t field, uint16_t idca, uint16_t idwc);
 static bool delayblk ();
-static bool delayloop (int usec);
+static bool delayloop (uint32_t usec);
 static void dbgpr (int level, char const *fmt, ...);
 static bool writeformat (Tcl_Interp *interp, int fd);
 static int showstatus (int argc, char **argv);
@@ -539,14 +537,13 @@ static void *thread (void *dummy)
                             }
                         } else {
                             // madness: TC08 OS/8 boot block changes from data field 0 to data field 1 mid-read
-                            // so pass data s-l-o-w-l-y when booting
+                            // so pass data s-l-o-w-l-y when reading block 0
                             uint16_t idwc = EXT (z8ipage.dmacycle (INS (IDWC, CM_ADDR)), CM_DATA);
                             uint16_t idca = EXT (z8ipage.dmacycle (INS (IDCA, CM_ADDR)), CM_DATA);
-                            bool slow = dmareadoverwritesinstructions (field, idca, idwc);
+                            bool slow = (drive->tapepos / 4 == 0);
                             for (int i = 0; i < WORDSPERBLOCK; i ++) {
                                 if (slow) {
-                                    cycles = pdpat[Z_RN];                   // wait for processor to run 100 cycles
-                                    delayloop (1000);                       // ... at least 33 instructions
+                                    delayloop (133);    // 133 uS/wd = 7500 wd/sec
                                     status   = tcat[1];
                                     status_b = (status & TC_STATB) / TC_STATB0;
                                     field    = (status_b & 070) << 9;
@@ -813,40 +810,12 @@ static void dumpbuf (Drive *drive, char const *label, uint16_t const *buff, int 
     }
 }
 
-// see if a dma read will overwrite instructions currently executing
-//  input:
-//   field = dma transfer field in <14:12>, rest is zeroes
-//   idca  = start of transfer - 1
-//   idwc  = 2's comp transfer word count
-static bool dmareadoverwritesinstructions (uint16_t field, uint16_t idca, uint16_t idwc)
-{
-    // field must match exactly
-    uint16_t curif = EXT (pdpat[Z_RE], e_oMEAD);
-    if (curif != field >> 12) return false;
-
-    // current PC must be within transfer area
-    // we use the MA cuz PDP-8/I doesn't make PC available
-    // but if it's doing a JMP . in the boot code, PC should be the only thing in there
-    uint16_t endaddr = (idca - idwc) & 07777;
-    idca = (idca + 1) & 07777;
-    uint16_t curpc = EXT (pdpat[Z_RE], e_oMADR);
-    if (endaddr >= idca) {
-        if ((curpc < idca) || (curpc > endaddr)) return false;
-    } else {
-        if ((curpc < idca) && (curpc > endaddr)) return false;
-    }
-
-    return true;
-}
-
 // delay processing for a block
-//  returns:
-//   false = it's ok to keep going as is
-//    true = something changed, re-decode
+// TC08 diagnostics start the I/O THEN write IDWC,IDCA so need some delay for that
 static bool delayblk ()
 {
     // 25ms standard per-block delay
-    int usec = 25000;
+    uint32_t usec = 25000;
 
     // 375ms additional for startup delay
     if (startdelay) {
@@ -857,27 +826,20 @@ static bool delayblk ()
     return delayloop (usec);
 }
 
-// delay the given number of microseconds, unlocking during the wait
-// check for changed command during the wait
-// also make sure processor has executed at least 100 cycles since i/o instruction
-// ...so processor has time to set up dma descriptor words after starting the i/o
-//  output:
-//   returns true: command changed during wait
-//          false: command remained the same
-static bool delayloop (int usec)
+// delay the given number of microseconds relative to processor clocking
+// the TC08 diagnostics do the I/O instruction to start the I/O THEN write IDCA and IDWC
+static bool delayloop (uint32_t usec)
 {
+    uint32_t tenns  = usec * 100;
+    uint32_t begzrh = pdpat[Z_RH];  // 100MHz (much slower for verilator)
     while (! exiting) {
 
         // wait
         usleep (usec);
 
-        // the TC08 diagnostics do the I/O instruction to start the I/O THEN write IDCA and IDWC,
-        // so make sure CPU has executed at least 100 cycles (20..30 instructions)
-        uint32_t ncycles = pdpat[Z_RN] - cycles;                // see how many cycles since I/O started
-        if (ncycles >= 100) return false;                       // if 100 cycles, assume IDCA,IDWC set up
-
-        // not yet, wait another millisecond
-        usec = 1000;
+        // see if waited long enough
+        uint32_t delta = pdpat[Z_RH] - begzrh;
+        if (delta >= tenns) return false;
     }
 
     // tell caller to abort if exiting
@@ -1198,7 +1160,7 @@ static int showstatus (int argc, char **argv)
     while (true) {
         struct timeval tvnow;
         if (gettimeofday (&tvnow, NULL) < 0) ABORT ();
-        usleep (1000 - tvnow.tv_usec % 1000);
+        usleep (50000 - tvnow.tv_usec % 50000);
 
         // ping the server so it sends something out
     ping:;

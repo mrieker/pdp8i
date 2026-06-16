@@ -85,6 +85,8 @@ struct I2CZLib {
 private:
     Z8IU32 *pdpat;
     Z8IU32 *fpat;
+
+    void waitpass ();
 };
 
 #endif

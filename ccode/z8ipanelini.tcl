@@ -11,6 +11,7 @@ proc helpini {} {
     puts "  checkttymatch           - check for matching tty printer characters"
     puts "  checkttyprompt          - check tty for prompt and send reply string"
     puts "  disas <start> <stop>    - disassemble given range"
+    puts "  domemcyc <switch>       - do switch-initiated memory cycle"
     puts "  dumpit                  - dump registers and switches"
     puts "  dumpmem <start> <stop>  - dump memory in octal"
     puts "  escapechr               - convert character to escape"
@@ -172,6 +173,18 @@ proc disas {start {stop ""}} {
     }
 }
 
+# do memory cycle initiated by a switch (depos, exam, ldad)
+proc domemcyc {sw} {
+    set oldmc [pin memcycctr]
+    flicksw $sw
+    ;# memcycctr increments on posedge TS3
+    ;# loop until subsequent TS3 and TS4 are complete
+    for {set i 0} {([pin memcycctr] == $oldmc) || [pin ots3] || [pin ots4]} {incr i} {
+        after 1
+        if {$i > 1000} {error "$sw cycle timed out"}
+    }
+}
+
 # dump block of memory
 # - dumpmem start stop
 proc dumpmem {start stop} {
@@ -185,20 +198,20 @@ proc dumpmem {start stop} {
     }
 }
 
-# dump registers and switches
+# dump light bulbs and switches
 proc dumpit {} {
-    set ac   [getreg ac]
-    set ea   [getreg ea]
-    set ion  [getreg ion]
-    set ir   [getreg ir]
-    set link [getreg link]
-    set ma   [getreg ma]
-    set mb   [getreg mb]
-    set mq   [getreg mq]
-    set ms   [getreg ms]
-    set pc   [getreg pc]
-    set run  [getreg run]
-    set sc   [getreg sc]
+    set ac   [getlb ac]
+    set ea   [getlb ea]
+    set ion  [getlb ion]
+    set ir   [getlb ir]
+    set link [getlb link]
+    set ma   [getlb ma]
+    set mb   [getlb mb]
+    set mq   [getlb mq]
+    set ms   [getlb ms]
+    set pc   [getlb pc]
+    set run  [getlb run]
+    set sc   [getlb sc]
 
     set sw "SR=[octal [getsw sr]] DF=[getsw dfld] IF=[getsw ifld]"
     set sw [expr {[getsw cont]  ? "$sw CONT"  : "$sw"}]
@@ -369,10 +382,10 @@ proc loadbin {fname} {
                 setsw ifld [expr {$addr >> 12}]
                 setsw dfld [expr {$addr >> 12}]
                 setsw sr [expr {$addr & 07777}]
-                flicksw ldad
+                domemcyc ldad
             }
             setsw sr $data
-            flicksw dep
+            domemcyc dep
 
             # set up for next byte
             set addr [expr {($addr & 070000) | (($addr + 1) & 007777)}]
@@ -458,8 +471,8 @@ proc loadbinptr {fname} {
     exec -ignorestderr make -C $Z8IHOME binloader.rim
     set ptrpid [exec -ignorestderr $Z8IHOME/z8iptr -killit $Z8IHOME/binloader.rim &]
     after 1000
-    setsw sr 07756 ; flicksw ldad
-    setsw sr 00000 ; flicksw start
+    setsw sr 07756 ; domemcyc ldad
+    setsw sr 00000 ; domemcyc start
     while true {
         set exst [waitpid $ptrpid]
         if {$exst != ""} break
@@ -472,16 +485,16 @@ proc loadbinptr {fname} {
     puts "loadbinptr: reading in $fname"
     set ptrpid [exec -ignorestderr $Z8IHOME/z8iptr -killit $fname &]
     after 1000
-    setsw sr 07777 ; flicksw ldad
-    setsw sr 00000 ; flicksw start
-    while {[getreg run]} {
+    setsw sr 07777 ; domemcyc ldad
+    setsw sr 00000 ; domemcyc start
+    while {[getlb run]} {
         if {[ctrlcflag]} {error "control-C"}
         after 100
     }
     exec kill $ptrpid
     waitpid $ptrpid
     puts ""
-    if {[getreg ac] != 0} {error "checksum error"}
+    if {[getlb ac] != 0} {error "checksum error"}
     return [rdmem 07616]
 }
 
@@ -556,16 +569,16 @@ proc loadrim {fname} {
         # do 'load address' if not sequential
         if {$nextaddr != $addr} {
             setsw sr $addr
-            flicksw ldad
+            domemcyc ldad
         }
 
         # deposit the data
         setsw sr $data
-        flicksw dep
+        domemcyc dep
 
         # verify resultant lights
-        set actma [getreg ma]
-        set actmb [getreg mb]
+        set actma [getlb ma]
+        set actmb [getlb mb]
         if {($actma != $addr) || ($actmb != $data)} {
             close $fp
             error [format %04o %04o showed %04o %04o" $addr $data $actma $actmb]
@@ -606,9 +619,9 @@ proc loadverify {verify} {
 proc loop52 {} {
     hardreset
     setsw sr 05252
-    flicksw ldad
-    flicksw dep
-    flicksw ldad
+    domemcyc ldad
+    domemcyc dep
+    domemcyc ldad
     flicksw start
 }
 
@@ -650,42 +663,44 @@ proc rimloader {speed} {
     hardreset
     switch $speed {
         "lo" {
-            wrmem 07756 06032
-            wrmem 07757 06031
-            wrmem 07760 05357
-            wrmem 07761 06036
-            wrmem 07762 07106
-            wrmem 07763 07006
-            wrmem 07764 07510
-            wrmem 07765 05357
-            wrmem 07766 07006
-            wrmem 07767 06031
-            wrmem 07770 05367
-            wrmem 07771 06034
-            wrmem 07772 07420
-            wrmem 07773 03776
-            wrmem 07774 03376
-            wrmem 07775 05356
-            wrmem 07776 00000
+            setsw sr 07756 ; domemcyc ldad
+            setsw sr 06032 ; domemcyc dep
+            setsw sr 06031 ; domemcyc dep
+            setsw sr 05357 ; domemcyc dep
+            setsw sr 06036 ; domemcyc dep
+            setsw sr 07106 ; domemcyc dep
+            setsw sr 07006 ; domemcyc dep
+            setsw sr 07510 ; domemcyc dep
+            setsw sr 05357 ; domemcyc dep
+            setsw sr 07006 ; domemcyc dep
+            setsw sr 06031 ; domemcyc dep
+            setsw sr 05367 ; domemcyc dep
+            setsw sr 06034 ; domemcyc dep
+            setsw sr 07420 ; domemcyc dep
+            setsw sr 03776 ; domemcyc dep
+            setsw sr 03376 ; domemcyc dep
+            setsw sr 05356 ; domemcyc dep
+            setsw sr 00000 ; domemcyc dep
         }
         "hi" {
-            wrmem 07756 06014
-            wrmem 07757 06011
-            wrmem 07760 05357
-            wrmem 07761 06016
-            wrmem 07762 07106
-            wrmem 07763 07006
-            wrmem 07764 07510
-            wrmem 07765 05374
-            wrmem 07766 07006
-            wrmem 07767 06011
-            wrmem 07770 05367
-            wrmem 07771 06016
-            wrmem 07772 07420
-            wrmem 07773 03776
-            wrmem 07774 03376
-            wrmem 07775 05357
-            wrmem 07776 00000
+            setsw sr 07756 ; domemcyc ldad
+            setsw sr 06014 ; domemcyc dep
+            setsw sr 06011 ; domemcyc dep
+            setsw sr 05357 ; domemcyc dep
+            setsw sr 06016 ; domemcyc dep
+            setsw sr 07106 ; domemcyc dep
+            setsw sr 07006 ; domemcyc dep
+            setsw sr 07510 ; domemcyc dep
+            setsw sr 05374 ; domemcyc dep
+            setsw sr 07006 ; domemcyc dep
+            setsw sr 06011 ; domemcyc dep
+            setsw sr 05367 ; domemcyc dep
+            setsw sr 06016 ; domemcyc dep
+            setsw sr 07420 ; domemcyc dep
+            setsw sr 03776 ; domemcyc dep
+            setsw sr 03376 ; domemcyc dep
+            setsw sr 05357 ; domemcyc dep
+            setsw sr 00000 ; domemcyc dep
         }
         default {
             error "bad speed $speed"
@@ -701,16 +716,7 @@ proc rdmem {addr} {
     setsw ifld [expr {$addr >> 12}]
     setsw dfld [expr {$addr >> 12}]
     setsw sr [expr {$addr & 07777}]
-    set oldmc [pin memcycctr]
-    flicksw ldad
-    for {set i 0} {[pin memcycctr] == $oldmc} {incr i} {
-        after 1
-        if {$i > 1000} {error "timed out reading memory"}
-    }
-    for {set i 0} {[pin ots1]} {incr i} {
-        after 1
-        if {$i > 1000} {error "timed out reading memory"}
-    }
+    domemcyc ldad
     return [pin ombuf]
 }
 
@@ -770,7 +776,7 @@ proc startat {addr} {
     setsw ifld [expr {$addr >> 12}]
     setsw dfld [expr {$addr >> 12}]
     setsw sr [expr {$addr & 07777}]
-    flicksw ldad
+    domemcyc ldad
     setsw sr $savesr
     flicksw start
 }
@@ -816,7 +822,7 @@ proc ttyprtest {} {
 # wait for control-C or processor stopped
 # returns "CTRLC" or "STOP"
 proc wait {} {
-    while {[getreg run]} {
+    while {[getlb run]} {
         after 100
         if [ctrlcflag] {return "CTRLC"}
     }
@@ -845,20 +851,20 @@ proc wrmem {addr data} {
     setsw ifld [expr {$addr >> 12}]
     setsw dfld [expr {$addr >> 12}]
     setsw sr [expr {$addr & 07777}]
-    flicksw ldad
+    domemcyc ldad
     setsw sr $data
-    flicksw dep
+    domemcyc dep
 }
 
 # zero block of memory
 # - zeromem start stop
 proc zeromem {start stop} {
     setsw sr $start
-    flicksw ldad
+    domemcyc ldad
     setsw sr 0
     for {set addr $start} {$addr <= $stop} {incr addr} {
         if {$addr % 8 == 0} {puts [format "%04o" $addr]}
-        flicksw dep
+        domemcyc dep
     }
 }
 

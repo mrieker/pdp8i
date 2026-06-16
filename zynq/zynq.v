@@ -664,6 +664,7 @@ module Zynq #(parameter BIDIRCONSDA=1, parameter CLOCKDIVIDE=5) (
     assign regctli = 0;
 
     // count memory cycles
+    // z8ipanelini.tcl uses it to see when exam/depos cycle completes
     // dectape uses it for timing in z8itc08.cc
     always @(posedge CLOCK) begin
         regctlh <= RESET_N ? regctlh + 1 : 0;

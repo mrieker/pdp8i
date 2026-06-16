@@ -46,10 +46,8 @@
 // internal TCL commands
 static Tcl_ObjCmdProc cmd_assemop;
 static Tcl_ObjCmdProc cmd_disasop;
-static Tcl_ObjCmdProc cmd_getreg;
+static Tcl_ObjCmdProc cmd_getlb;
 static Tcl_ObjCmdProc cmd_getsw;
-static Tcl_ObjCmdProc cmd_gettod;
-static Tcl_ObjCmdProc cmd_libname;
 static Tcl_ObjCmdProc cmd_readchar;
 static Tcl_ObjCmdProc cmd_relsw;
 static Tcl_ObjCmdProc cmd_setsw;
@@ -57,10 +55,8 @@ static Tcl_ObjCmdProc cmd_setsw;
 static TclFunDef const fundefs[] = {
     { cmd_assemop,    "assemop",    "assemble instruction" },
     { cmd_disasop,    "disasop",    "disassemble instruction" },
-    { cmd_getreg,     "getreg",     "get register value" },
+    { cmd_getlb,      "getlb",      "get light bulb value" },
     { cmd_getsw,      "getsw",      "get switch value" },
-    { cmd_gettod,     "gettod",     "get current time in us precision" },
-    { cmd_libname,    "libname",    "get library name i2c,sim,z8i" },
     { CMD_PIN },
     { cmd_readchar,   "readchar",   "read character with timeout" },
     { cmd_relsw,      "relsw",      "release control of switch" },
@@ -248,77 +244,82 @@ static int cmd_disasop (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl
     return TCL_OK;
 }
 
-// get register (lights)
-static int cmd_getreg (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
+// get light bulb
+static int cmd_getlb (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
-    switch (objc) {
-        case 2: {
-            char const *regname = Tcl_GetString (objv[1]);
-            if (strcasecmp (regname, "help") == 0) {
-                puts ("");
-                puts (" getreg <registername>");
-                puts ("   multi-bit registers:");
-                puts ("      ac - accumulator");
-                puts ("      df - data field 0..7");
-                puts ("      ea - extended address 0..7");
-                puts ("      if - instruction field 0..7");
-                puts ("      ir - instruction register 0..7");
-                puts ("      ma - memory address");
-                puts ("      mb - memory buffer");
-                puts ("      mq - multiplier quotient");
-                puts ("      ms - major state");
-                puts ("      pc - program counter");
-                puts ("      sc - shift count");
-                puts ("   single-bit registers:");
-                puts ("     ion - interrupts enabled");
-                puts ("    link - link bit");
-                puts ("     run - executing instructions");
-                puts ("");
-                return TCL_OK;
+    if ((objc == 2) && (strcasecmp (Tcl_GetString (objv[1]), "help") == 0)) {
+        puts ("");
+        puts (" getlb <name>...");
+        puts ("   multi-bit lights:");
+        puts ("      ac - accumulator");
+        puts ("      df - data field 0..7");
+        puts ("      ea - extended address 0..7");
+        puts ("      if - instruction field 0..7");
+        puts ("      ir - instruction register 0..7");
+        puts ("      ma - memory address");
+        puts ("      mb - memory buffer");
+        puts ("      mq - multiplier quotient");
+        puts ("      ms - major state");
+        puts ("      pc - program counter");
+        puts ("      sc - shift count");
+        puts ("   single-bit lights:");
+        puts ("     ion - interrupts enabled");
+        puts ("    link - link bit");
+        puts ("     run - executing instructions");
+        puts ("");
+        return TCL_OK;
+    }
+
+    if (pthread_mutex_lock (&padmutex) != 0) ABORT ();
+    padlib->readpads (&pads);
+
+    int ngotvals = 0;
+    Tcl_Obj *gotvals[objc];
+    for (int i = 0; ++ i < objc;) {
+        char const *regname = Tcl_GetString (objv[i]);
+        uint16_t regval = 0xFFFFU;
+        if (strcasecmp (regname, "ac")   == 0) regval = pads.light.ac;
+        if (strcasecmp (regname, "df")   == 0) regval = pads.light.dfld;
+        if (strcasecmp (regname, "ea")   == 0) regval = pads.light.ema;
+        if (strcasecmp (regname, "ir")   == 0) regval = pads.light.ir;
+        if (strcasecmp (regname, "ma")   == 0) regval = pads.light.ma;
+        if (strcasecmp (regname, "mb")   == 0) regval = pads.light.mb;
+        if (strcasecmp (regname, "mq")   == 0) regval = pads.light.mq;
+        if (strcasecmp (regname, "if")   == 0) regval = pads.light.ifld;
+        if (strcasecmp (regname, "ion")  == 0) regval = pads.light.ion;
+        if (strcasecmp (regname, "link") == 0) regval = pads.light.link;
+        if (strcasecmp (regname, "pc")   == 0) regval = pads.light.pc;
+        if (strcasecmp (regname, "run")  == 0) regval = pads.light.run;
+        if (strcasecmp (regname, "sc")   == 0) regval = pads.light.sc;
+        if (regval != 0xFFFFU) {
+            gotvals[ngotvals++] = Tcl_NewIntObj (regval);
+            continue;
+        }
+        if (strcasecmp (regname, "ms") == 0) {
+            regval = pads.light.ms;
+            if (regval >= sizeof msnames / sizeof msnames[0]) {
+                gotvals[ngotvals++] = Tcl_NewIntObj (regval);
+            } else {
+                char const *msname = msnames[regval];
+                gotvals[ngotvals++] = Tcl_NewStringObj ((char *)msname, -1);
             }
+            continue;
+        }
+        if (pthread_mutex_unlock (&padmutex) != 0) ABORT ();
+        Tcl_SetResultF (interp, "bad light bulb name %s", regname);
+        return TCL_ERROR;
+    }
 
-            if (pthread_mutex_lock (&padmutex) != 0) ABORT ();
-            padlib->readpads (&pads);
+    if (pthread_mutex_unlock (&padmutex) != 0) ABORT ();
 
-            uint16_t regval = 0xFFFFU;
-            if (strcasecmp (regname, "ac")   == 0) regval = pads.light.ac;
-            if (strcasecmp (regname, "df")   == 0) regval = pads.light.dfld;
-            if (strcasecmp (regname, "ea")   == 0) regval = pads.light.ema;
-            if (strcasecmp (regname, "ir")   == 0) regval = pads.light.ir;
-            if (strcasecmp (regname, "ma")   == 0) regval = pads.light.ma;
-            if (strcasecmp (regname, "mb")   == 0) regval = pads.light.mb;
-            if (strcasecmp (regname, "mq")   == 0) regval = pads.light.mq;
-            if (strcasecmp (regname, "if")   == 0) regval = pads.light.ifld;
-            if (strcasecmp (regname, "ion")  == 0) regval = pads.light.ion;
-            if (strcasecmp (regname, "link") == 0) regval = pads.light.link;
-            if (strcasecmp (regname, "pc")   == 0) regval = pads.light.pc;
-            if (strcasecmp (regname, "run")  == 0) regval = pads.light.run;
-            if (strcasecmp (regname, "sc")   == 0) regval = pads.light.sc;
-            if (regval != 0xFFFFU) {
-                if (pthread_mutex_unlock (&padmutex) != 0) ABORT ();
-                Tcl_SetObjResult (interp, Tcl_NewIntObj (regval));
-                return TCL_OK;
-            }
-
-            if (strcasecmp (regname, "ms") == 0) {
-                regval = pads.light.ms;
-                if (pthread_mutex_unlock (&padmutex) != 0) ABORT ();
-                if (regval >= sizeof msnames / sizeof msnames[0]) {
-                    Tcl_SetObjResult (interp, Tcl_NewIntObj (regval));
-                } else {
-                    char const *msname = msnames[regval];
-                    Tcl_SetResult (interp, (char *)msname, TCL_STATIC);
-                }
-                return TCL_OK;
-            }
-
-            if (pthread_mutex_unlock (&padmutex) != 0) ABORT ();
-            Tcl_SetResultF (interp, "bad register name %s", regname);
-            return TCL_ERROR;
+    if (ngotvals > 0) {
+        if (ngotvals < 2) {
+            Tcl_SetObjResult (interp, gotvals[0]);
+        } else {
+            Tcl_SetObjResult (interp, Tcl_NewListObj (ngotvals, gotvals));
         }
     }
-    Tcl_SetResult (interp, (char *) "bad number of arguments", TCL_STATIC);
-    return TCL_ERROR;
+    return TCL_OK;
 }
 
 // get switch
@@ -367,23 +368,6 @@ static int cmd_getsw (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_O
     }
     Tcl_SetResult (interp, (char *) "bad number of arguments", TCL_STATIC);
     return TCL_ERROR;
-}
-
-// get time of day
-static int cmd_gettod (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
-{
-    struct timeval nowtv;
-    if (gettimeofday (&nowtv, NULL) < 0) ABORT ();
-    Tcl_SetResultF (interp, "%u.%06u", (uint32_t) nowtv.tv_sec, (uint32_t) nowtv.tv_usec);
-    return TCL_OK;
-}
-
-// get library name
-static int cmd_libname (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
-{
-    static char libname[] = "i2cz";
-    Tcl_SetResult (interp, libname, TCL_STATIC);
-    return TCL_OK;
 }
 
 // read character with timeout as an integer
