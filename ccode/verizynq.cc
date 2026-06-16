@@ -61,8 +61,32 @@ int main (int argc, char **argv)
         ABORT ();
     }
 
-    if (flock (shmfd, LOCK_EX | LOCK_NB) < 0) {
-        fprintf (stderr, "verizynq: error locking %s: %m\n", VERIZYNQ_SHMNM);
+    int kills = 3;
+    while (true) {
+        struct flock flockit;
+        memset (&flockit, 0, sizeof flockit);
+        flockit.l_type   = F_WRLCK;
+        flockit.l_whence = SEEK_SET;
+        flockit.l_len    = sizeof *pageptr;
+        if (fcntl (shmfd, F_SETLK, &flockit) >= 0) break;
+
+        // failed, try to find out what pid has it locked
+        if (((errno == EACCES) || (errno == EAGAIN)) && (fcntl (shmfd, F_GETLK, &flockit) >= 0)) {
+            if (flockit.l_type == F_UNLCK) continue;
+
+            // print out message saying pid that has it locked
+            fprintf (stderr, "verizynq: %s locked by pid %d\n", VERIZYNQ_SHMNM, (int) flockit.l_pid);
+            if (-- kills >= 0) {
+
+                // try to kill it then try locking again
+                fprintf (stderr, "verizynq: killing pid %d\n", (int) flockit.l_pid);
+                kill ((int) flockit.l_pid, SIGTERM);
+                usleep (125000);
+                continue;
+            }
+        } else {
+            fprintf (stderr, "verizynq: error locking %s: %m\n", VERIZYNQ_SHMNM);
+        }
         ABORT ();
     }
 
