@@ -17,13 +17,15 @@ LIBOBJS := \
 	z8iutil.$(MACH).o
 
 VFILES := \
+	../verisim/blk_mem_gen_0.v \
 	../verisim/chips-10ns.v \
 	../verisim/mcp23017.v \
 	../kicads/console/console.v \
 	../kicads/extarith/extarith.v \
 	../kicads/extmemory/extmemory.v \
+	../kicads/procalu/procalu.v \
+	../kicads/procreg/procreg.v \
 	../kicads/procseq/procseq.v \
-	../kicads/proc23/proc23.v \
 	../zynq/zynq.v \
 	../zynq/pdp8idc02.v \
 	../zynq/pdp8irk8je.v \

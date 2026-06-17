@@ -4,6 +4,7 @@ GPP    := g++ $(CFLAGS) -std=c++11 -g -Wall
 
 VFILES := \
 	backplane.v \
+	blk_mem_gen_0.v \
 	chips.v \
 	dmatest.v \
 	mcp23017.v \
@@ -11,8 +12,9 @@ VFILES := \
 	../kicads/dmatester/dmatester.v \
 	../kicads/extarith/extarith.v \
 	../kicads/extmemory/extmemory.v \
+	../kicads/procalu/procalu.v \
+	../kicads/procreg/procreg.v \
 	../kicads/procseq/procseq.v \
-	../kicads/proc23/proc23.v \
 	../zynq/zynq.v \
 	../zynq/pdp8idc02.v \
 	../zynq/pdp8irk8je.v \
@@ -80,11 +82,14 @@ obj_dir/Vbackplane.cpp obj_dir/Vbackplane.h obj_dir/Vbackplane.mk: $(VFILES)
 ../kicads/extmemory/extmemory.v: ../kicads/extmemory/extmemory.kicad_pcb
 	cd ../kicads/extmemory ; ../parsepcb.sh extmemory
 
+../kicads/procalu/procalu.v: ../kicads/procalu/procalu.kicad_pcb
+	cd ../kicads/procalu ; ../parsepcb.sh procalu
+
+../kicads/procreg/procreg.v: ../kicads/procreg/procreg.kicad_pcb
+	cd ../kicads/procreg ; ../parsepcb.sh procreg
+
 ../kicads/procseq/procseq.v: ../kicads/procseq/procseq.kicad_pcb
 	cd ../kicads/procseq ; ../parsepcb.sh procseq
-
-../kicads/proc23/proc23.v: ../kicads/proc23/proc23.kicad_pcb
-	cd ../kicads/proc23 ; ../parsepcb.sh proc23
 
 ../kicads/console/console.kicad_pcb: ../kicads/console/console.kicad_sch
 	error update console.kicad_pcb
