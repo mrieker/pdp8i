@@ -86,6 +86,74 @@ module pdp8isim (
     // power-on reset (zynq power-on reset + arm-commanded hard reset)
     wire _busRESET = ~ iRESET;
 
+    // OS/8 does a 'ISZ x ; JMP .-1' loop as a delay during printing
+    // zap it out by pretending 'x' contains 7777 on entry to the loop
+    reg lasttp1, lastts1;
+    reg[1:0] os8zapstate;
+    reg[14:00] os8zapiszdata, os8zapjmpaddr;
+    wire[14:00] os8zapaddress = ~ { _busMEAD, _busMADR };
+    wire[14:00] os8zapiszaddr = os8zapjmpaddr - 1;
+    wire os8zap = (os8zapstate == 3);
+    wire aa = (_busMAJST == 14);
+    wire bb = (~ _busINBUS[11:07] == 5'b10101);
+    wire cc = ({ 1'b0, ~ _busINBUS[06:00] } == { 1'b0, ~ _busMADR[06:00] } - 8'b1);
+    wire dd = (_busMAJST == 12);
+    wire ee = (os8zapaddress == os8zapiszdata);
+    wire ff = (os8zapaddress == os8zapiszaddr);
+    wire gg = (~ _busINBUS[11:07] == 5'b01001);
+
+    always @(posedge zclock) begin
+        if (iRESET) begin
+            os8zapstate <= 0;
+        end else begin
+            case (os8zapstate)
+
+                // looking for 'JMP .-1' at posedge TP1 of FETCH cycle
+                0: begin
+                    if (~ lasttp1 & ~ _busTP1) begin        // inbus from memory is now valid
+                        if (aa & bb & cc) begin
+                            os8zapjmpaddr <= os8zapaddress;
+                            os8zapstate   <= 1;
+                        end
+                    end
+                end
+
+                // the following cycle (at posedge TP1) must be an 'ISZ x' on same page
+                1: begin
+                    if (~ lasttp1 & ~ _busTP1) begin        // inbus from memory is now valid
+                        if (aa & ff & gg) begin
+                            os8zapiszdata <= ~ { _busMEAD, _busMADR[11:07], _busINBUS[06:00] };
+                            os8zapstate   <= 2;
+                        end else begin
+                            os8zapstate   <= 0;
+                        end
+                    end
+                end
+
+                // the following cycle (at posedge TS1) must be an EXEC cycle that accesses location 'x'
+                // setting os8zapstate <= 3 will jam the value to 7777 which will increment to 0000
+                2: begin
+                    if (~ lastts1 & ~ _busTS1) begin        // majst, mead, madr from processor are valid
+                        if (dd & ee) begin
+                            os8zapstate <= 3;               // jam the read to 7777
+                        end else begin
+                            os8zapstate <= 0;
+                        end
+                    end
+                end
+
+                // wait for end of the TS1 that reads the 'x' from memory that we are jamming to 7777
+                3: begin
+                    if (_busTS1) begin                      // wait for memory read to complete
+                        os8zapstate <= 0;                   // stop jamming it to 7777
+                    end
+                end
+            endcase
+        end
+        lastts1 <= ~ _busTS1;
+        lasttp1 <= ~ _busTP1;
+    end
+
     ///////////////
     //  CONSOLE  //
     ///////////////
@@ -580,6 +648,8 @@ module pdp8isim (
     wire[11:00] aluq;
     wire cout, memacsw, nxtms_0, nxtms_1, nxtms_2, nxtms_3;
 
+    wire[11:00] _os8zappedinbus = os8zap ? 12'o0000 : _busINBUS;
+
     procalu aluboard (
         .yclock (yclock),
         .zclock (zclock),
@@ -598,18 +668,18 @@ module pdp8isim (
         ._CAINC     (_busCAINC),
         ._CYCLE3    (_busCYCLE3),
 
-        ._INBUS_0   (_busINBUS[0]),
-        ._INBUS_1   (_busINBUS[1]),
-        ._INBUS_2   (_busINBUS[2]),
-        ._INBUS_3   (_busINBUS[3]),
-        ._INBUS_4   (_busINBUS[4]),
-        ._INBUS_5   (_busINBUS[5]),
-        ._INBUS_6   (_busINBUS[6]),
-        ._INBUS_7   (_busINBUS[7]),
-        ._INBUS_8   (_busINBUS[8]),
-        ._INBUS_9   (_busINBUS[9]),
-        ._INBUS_10  (_busINBUS[10]),
-        ._INBUS_11  (_busINBUS[11]),
+        ._INBUS_0   (_os8zappedinbus[0]),
+        ._INBUS_1   (_os8zappedinbus[1]),
+        ._INBUS_2   (_os8zappedinbus[2]),
+        ._INBUS_3   (_os8zappedinbus[3]),
+        ._INBUS_4   (_os8zappedinbus[4]),
+        ._INBUS_5   (_os8zappedinbus[5]),
+        ._INBUS_6   (_os8zappedinbus[6]),
+        ._INBUS_7   (_os8zappedinbus[7]),
+        ._INBUS_8   (_os8zappedinbus[8]),
+        ._INBUS_9   (_os8zappedinbus[9]),
+        ._INBUS_10  (_os8zappedinbus[10]),
+        ._INBUS_11  (_os8zappedinbus[11]),
 
 //      ._IOSKIP    (_busIOSKIP),
 //      ._LNKTOG    (_busLNKTOG),

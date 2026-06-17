@@ -295,8 +295,20 @@ proc isziactest {} {
     assem 021 jmp 020
     assem 022 iac
     assem 023 jmp 020
+    wrmem 030 01234
     disas 020 023
     puts "do 'startat 020' to start it"
+}
+
+proc isziactest2 {} {
+    hardreset
+    assem 0320 isz 0330
+    assem 0321 jmp 0320
+    assem 0322 iac
+    assem 0323 jmp 0320
+    wrmem 0330 01234
+    disas 0320 0323
+    puts "do 'startat 0320' to start it"
 }
 
 # load bin format tape file, return start address
