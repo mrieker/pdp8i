@@ -103,6 +103,7 @@ private:
     int pmslen;
 };
 
+static bool killit;
 static bool mintimes;
 static int winsize;
 static unsigned long xwin;
@@ -137,13 +138,19 @@ int main (int argc, char **argv)
             puts ("");
             puts ("     Access VC8/E or VC8/I display");
             puts ("");
-            puts ("  ./z8ivc8 [-pms <persistence-milliseconds>] [-size <windowsize-pixels>] e | i");
+            puts ("  ./z8ivc8 [-killit] [-pms <persistence-milliseconds>] [-size <windowsize-pixels>] e | i");
+            puts ("     -killit : kill other process that is processing this tty port");
             printf ("     persistence %d..%d, default %dmS\n", MINPERSISTMS, MAXPERSISTMS, DEFPERSISTMS);
             printf ("     windowsize %d..%d, default %d pixels\n", MINWINSIZE, MAXWINSIZE, DEFWINSIZE);
             puts ("     e : process VC8/E-style IO instructions");
             puts ("     i : process VC8/I-style IO instructions");
             puts ("");
             return 0;
+        }
+
+        if (strcasecmp (argv[i], "-killit") == 0) {
+            killit = true;
+            continue;
         }
 
         // maybe override default ephemeral persistence
@@ -198,7 +205,7 @@ int main (int argc, char **argv)
 static void thread ()
 {
     // access pdp8ivc8.v registers
-    Z8IU32 *vcat = z8ipage.findev ("VC", NULL, NULL, true);
+    Z8IU32 *vcat = z8ipage.findev ("VC", NULL, NULL, true, killit);
     switch (vc8type) {
         case VC8TypeE: {
             vcat[2] = VC2_TYPEE;
