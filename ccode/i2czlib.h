@@ -21,6 +21,7 @@
 #ifndef _I2CZLIB_H
 #define _I2CZLIB_H
 
+#include <pthread.h>
 #include <stdint.h>
 
 #define DOTJMPDOT 05252U
@@ -76,15 +77,17 @@ struct Z8IPanel {
 struct I2CZLib {
     I2CZLib ();
     ~I2CZLib ();
-    void relall ();
+
+    void lockpads ();
+    void unlkpads ();
     void readpads (Z8IPanel *pads);
     void writepads (Z8IPanel const *pads);
-
-    void loop52 ();
 
 private:
     Z8IU32 *pdpat;
     Z8IU32 *fpat;
+    uint32_t mypid;
+    pthread_mutex_t mutex;
 
     void waitpass ();
 };

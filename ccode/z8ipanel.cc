@@ -43,6 +43,28 @@
 #include "z8idefs.h"
 #include "z8iutil.h"
 
+struct Switch {
+    struct Switches *sws;
+    char const *name;
+    int nbits;
+    void *ovrptr, *valptr;
+
+    uint32_t get () const;
+    void rel () const;
+    bool set (uint32_t val) const;
+};
+
+struct Switches {
+    Switches ();
+    ~Switches ();
+
+    Switch const *list;
+    bool mademods;
+
+private:
+    Z8IPanel pads;
+};
+
 // internal TCL commands
 static Tcl_ObjCmdProc cmd_assemop;
 static Tcl_ObjCmdProc cmd_disasop;
@@ -66,31 +88,7 @@ static TclFunDef const fundefs[] = {
 
 static char const *const msnames[] = { MS_NAMES };
 
-static Z8IPanel pads;
-
-struct Switch {
-    char const *name;
-    int nbits;
-    void *ovrptr, *valptr;
-};
-
-static Switch const switches[] = {
-    { "cont",  1, NULL,               &pads.button.cont  },
-    { "dep",   1, NULL,               &pads.button.dep   },
-    { "dfld",  3, &pads.togovr.dfld,  &pads.togval.dfld  },
-    { "exam",  1, NULL,               &pads.button.exam  },
-    { "ifld",  3, &pads.togovr.ifld,  &pads.togval.ifld  },
-    { "ldad",  1, NULL,               &pads.button.ldad  },
-    { "sr",   12, &pads.togovr.sr,    &pads.togval.sr    },
-    { "start", 1, NULL,               &pads.button.start },
-    { "sinst", 1, &pads.togovr.sinst, &pads.togval.sinst },
-    { "sstep", 1, &pads.togovr.sstep, &pads.togval.sstep },
-    { "stop",  1, NULL,               &pads.button.stop  },
-    {  NULL  }
-};
-
 static I2CZLib *padlib;
-static pthread_mutex_t padmutex = PTHREAD_MUTEX_INITIALIZER;
 
 static int showstatus (int argc, char **argv);
 
@@ -249,7 +247,7 @@ static int cmd_getlb (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_O
 {
     if ((objc == 2) && (strcasecmp (Tcl_GetString (objv[1]), "help") == 0)) {
         puts ("");
-        puts (" getlb <name>...");
+        puts (" getlb <lightbulbname>...");
         puts ("   multi-bit lights:");
         puts ("      ac - accumulator");
         puts ("      df - data field 0..7");
@@ -265,12 +263,13 @@ static int cmd_getlb (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_O
         puts ("   single-bit lights:");
         puts ("     ion - interrupts enabled");
         puts ("    link - link bit");
+        puts ("     pau - paused");
         puts ("     run - executing instructions");
         puts ("");
         return TCL_OK;
     }
 
-    if (pthread_mutex_lock (&padmutex) != 0) ABORT ();
+    Z8IPanel pads;
     padlib->readpads (&pads);
 
     int ngotvals = 0;
@@ -305,12 +304,9 @@ static int cmd_getlb (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_O
             }
             continue;
         }
-        if (pthread_mutex_unlock (&padmutex) != 0) ABORT ();
         Tcl_SetResultF (interp, "bad light bulb name %s", regname);
         return TCL_ERROR;
     }
-
-    if (pthread_mutex_unlock (&padmutex) != 0) ABORT ();
 
     if (ngotvals > 0) {
         if (ngotvals < 2) {
@@ -325,49 +321,42 @@ static int cmd_getlb (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_O
 // get switch
 static int cmd_getsw (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
-    switch (objc) {
-        case 2: {
-            char const *swname = Tcl_GetString (objv[1]);
-            if (strcasecmp (swname, "help") == 0) {
-                puts ("");
-                puts (" getsw <switchname>");
-                for (Switch const *sw = switches; sw->name != NULL; sw ++) {
-                    printf ("      %s\n", sw->name);
-                }
-                puts ("");
-                return TCL_OK;
+    Switches sws;
+
+    if ((objc == 2) && (strcasecmp (Tcl_GetString (objv[1]), "help") == 0)) {
+        puts ("");
+        puts (" getsw <switchname>...");
+        for (Switch const *sw = sws.list; sw->name != NULL; sw ++) {
+            printf ("      %s\n", sw->name);
+        }
+        puts ("");
+        return TCL_OK;
+    }
+
+    int ngotvals = 0;
+    Tcl_Obj *gotvals[objc];
+    for (int i = 0; ++ i < objc;) {
+        char const *swname = Tcl_GetString (objv[i]);
+        for (Switch const *sw = sws.list; sw->name != NULL; sw ++) {
+            if (strcasecmp (swname, sw->name) == 0) {
+                uint16_t swval = sw->get ();
+                gotvals[ngotvals++] = Tcl_NewIntObj (swval);
+                goto gotit;
             }
-            for (Switch const *sw = switches; sw->name != NULL; sw ++) {
-                if (strcasecmp (swname, sw->name) == 0) {
-                    uint16_t swval = 0;
-                    if (pthread_mutex_lock (&padmutex) != 0) ABORT ();
-                    padlib->readpads (&pads);
-                    switch (sw->nbits) {
-                        case 1: {
-                            swval = *(bool *)(sw->valptr);
-                            break;
-                        }
-                        case 3: {
-                            swval = *(uint8_t *)(sw->valptr);
-                            break;
-                        }
-                        case 12: {
-                            swval = *(uint16_t *)(sw->valptr);
-                            break;
-                        }
-                        default: ABORT ();
-                    }
-                    if (pthread_mutex_unlock (&padmutex) != 0) ABORT ();
-                    Tcl_SetObjResult (interp, Tcl_NewIntObj (swval));
-                    return TCL_OK;
-                }
-            }
-            Tcl_SetResultF (interp, "bad switch name %s", swname);
-            return TCL_ERROR;
+        }
+        Tcl_SetResultF (interp, "bad switch name %s", swname);
+        return TCL_ERROR;
+gotit:;
+    }
+
+    if (ngotvals > 0) {
+        if (ngotvals < 2) {
+            Tcl_SetObjResult (interp, gotvals[0]);
+        } else {
+            Tcl_SetObjResult (interp, Tcl_NewListObj (ngotvals, gotvals));
         }
     }
-    Tcl_SetResult (interp, (char *) "bad number of arguments", TCL_STATIC);
-    return TCL_ERROR;
+    return TCL_OK;
 }
 
 // read character with timeout as an integer
@@ -405,125 +394,185 @@ static int cmd_readchar (ClientData clientdata, Tcl_Interp *interp, int objc, Tc
     return TCL_ERROR;
 }
 
-// release switch
+// release switch override
 static int cmd_relsw (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
-    switch (objc) {
-        case 2: {
-            char const *swname = Tcl_GetString (objv[1]);
-            if (strcasecmp (swname, "help") == 0) {
-                puts ("");
-                puts (" relsw <switchname> | all");
-                for (Switch const *sw = switches; sw->name != NULL; sw ++) {
-                    printf ("      %s\n", sw->name);
-                }
-                puts ("");
-                return TCL_OK;
-            }
-            if (strcasecmp (swname, "all") == 0) {
-                if (pthread_mutex_lock (&padmutex) != 0) ABORT ();
-                memset (&pads.togovr, 0, sizeof pads.togovr);
-                padlib->relall ();
-                if (pthread_mutex_unlock (&padmutex) != 0) ABORT ();
-                return TCL_OK;
-            }
-            for (Switch const *sw = switches; sw->name != NULL; sw ++) {
-                if (strcasecmp (swname, sw->name) == 0) {
-                    if (pthread_mutex_lock (&padmutex) != 0) ABORT ();
-                    padlib->readpads (&pads);
-                    switch (sw->nbits) {
-                        case 1: {
-                            if (sw->ovrptr != NULL) *(bool *)(sw->ovrptr) = false;
-                            break;
-                        }
-                        case 3: {
-                            if (sw->ovrptr != NULL) *(uint8_t *)(sw->ovrptr) = 0;
-                            break;
-                        }
-                        case 12: {
-                            if (sw->ovrptr != NULL) *(uint16_t *)(sw->ovrptr) = 0;
-                            break;
-                        }
-                        default: ABORT ();
-                    }
-                    padlib->writepads (&pads);
-                    if (pthread_mutex_unlock (&padmutex) != 0) ABORT ();
-                    return TCL_OK;
-                }
-            }
-            Tcl_SetResultF (interp, "bad switch name %s", swname);
-            return TCL_ERROR;
+    Switches sws;
+
+    if ((objc == 2) && (strcasecmp (Tcl_GetString (objv[1]), "help") == 0)) {
+        puts ("");
+        puts (" relsw all | <switchname>...");
+        for (Switch const *sw = sws.list; sw->name != NULL; sw ++) {
+            printf ("      %s\n", sw->name);
         }
+        puts ("");
+        return TCL_OK;
     }
-    Tcl_SetResult (interp, (char *) "bad number of arguments", TCL_STATIC);
-    return TCL_ERROR;
+
+    for (int i = 0; ++ i < objc;) {
+        char const *swname = Tcl_GetString (objv[i]);
+        if (strcasecmp (swname, "all") == 0) {
+            for (Switch const *sw = sws.list; sw->name != NULL; sw ++) {
+                sw->rel ();
+            }
+            return TCL_OK;
+        }
+        for (Switch const *sw = sws.list; sw->name != NULL; sw ++) {
+            if (strcasecmp (swname, sw->name) == 0) {
+                sw->rel ();
+                goto gotit;
+            }
+        }
+        Tcl_SetResultF (interp, "bad switch name %s", swname);
+        return TCL_ERROR;
+    gotit:;
+    }
+    return TCL_OK;
 }
 
 // set switch
 static int cmd_setsw (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
-    switch (objc) {
-        case 2: {
-            char const *swname = Tcl_GetString (objv[1]);
-            if (strcasecmp (swname, "help") == 0) {
-                puts ("");
-                puts (" setsw <switchname> <integervalue>");
-                for (Switch const *sw = switches; sw->name != NULL; sw ++) {
-                    printf ("      %s\n", sw->name);
-                }
-                puts ("");
-                return TCL_OK;
-            }
-            break;
+    Switches sws;
+
+    if ((objc == 2) && (strcasecmp (Tcl_GetString (objv[1]), "help") == 0)) {
+        puts ("");
+        puts (" setsw <switchname> <switchvalue>...");
+        for (Switch const *sw = sws.list; sw->name != NULL; sw ++) {
+            printf ("      %s\n", sw->name);
         }
-        case 3: {
-            char const *swname = Tcl_GetString (objv[1]);
-            int swval = 0;
-            int rc = Tcl_GetIntFromObj (interp, objv[2], &swval);
-            if (rc != TCL_OK) return rc;
-            for (Switch const *sw = switches; sw->name != NULL; sw ++) {
-                if (strcasecmp (swname, sw->name) == 0) {
-                    uint16_t mask = (1 << sw->nbits) - 1;
-                    if ((swval < 0) || (swval > mask)) {
-                        Tcl_SetResultF (interp, "value %d out of range for switch %s", swval, swname);
-                        return TCL_ERROR;
-                    }
-                    if (pthread_mutex_lock (&padmutex) != 0) ABORT ();
-                    padlib->readpads (&pads);
-                    switch (sw->nbits) {
-                        case 1: {
-                            *(bool *)(sw->valptr) = swval;
-                            if (sw->ovrptr != NULL) *(bool *)(sw->ovrptr) = true;
-                            break;
-                        }
-                        case 3: {
-                            *(uint8_t *)(sw->valptr) = swval;
-                            if (sw->ovrptr != NULL) *(uint8_t *)(sw->ovrptr) = 7;
-                            break;
-                        }
-                        case 12: {
-                            *(uint16_t *)(sw->valptr) = swval;
-                            if (sw->ovrptr != NULL) *(uint16_t *)(sw->ovrptr) = 07777;
-                            break;
-                        }
-                        default: ABORT ();
-                    }
-                    padlib->writepads (&pads);
-                    if (pthread_mutex_unlock (&padmutex) != 0) ABORT ();
-                    return TCL_OK;
-                }
-            }
-            Tcl_SetResultF (interp, "bad switch name %s", swname);
-            return TCL_ERROR;
-        }
+        puts ("");
+        return TCL_OK;
     }
-    Tcl_SetResult (interp, (char *) "bad number of arguments", TCL_STATIC);
-    return TCL_ERROR;
+
+    for (int i = 0; i + 2 < objc;) {
+        char const *swname = Tcl_GetString (objv[++i]);
+        int swval = 0;
+        int rc = Tcl_GetIntFromObj (interp, objv[++i], &swval);
+        if (rc != TCL_OK) return rc;
+        for (Switch const *sw = sws.list; sw->name != NULL; sw ++) {
+            if (strcasecmp (swname, sw->name) == 0) {
+                if (! sw->set (swval)) {
+                    Tcl_SetResultF (interp, "value %d (0%o) out of range for switch %s", swval, swval, swname);
+                    return TCL_ERROR;
+                }
+                goto gotit;
+            }
+        }
+        Tcl_SetResultF (interp, "bad switch name %s", swname);
+        return TCL_ERROR;
+    gotit:;
+    }
+    return TCL_OK;
 }
 
 
 
-// continuously display what would be on the PDP-8/I front panel
+// get list of switches
+Switches::Switches ()
+{
+    Switch swlist[] = {
+        { this, "cont",  1, NULL,               &pads.button.cont  },
+        { this, "dep",   1, NULL,               &pads.button.dep   },
+        { this, "df",    3, &pads.togovr.dfld,  &pads.togval.dfld  },
+        { this, "exam",  1, NULL,               &pads.button.exam  },
+        { this, "if",    3, &pads.togovr.ifld,  &pads.togval.ifld  },
+        { this, "ldad",  1, NULL,               &pads.button.ldad  },
+        { this, "sr",   12, &pads.togovr.sr,    &pads.togval.sr    },
+        { this, "start", 1, NULL,               &pads.button.start },
+        { this, "sinst", 1, &pads.togovr.sinst, &pads.togval.sinst },
+        { this, "sstep", 1, &pads.togovr.sstep, &pads.togval.sstep },
+        { this, "stop",  1, NULL,               &pads.button.stop  },
+        { this, NULL }
+    };
+
+    void *ptr = malloc (sizeof swlist);
+    if (ptr == NULL) ABORT ();
+    memcpy (ptr, swlist, sizeof swlist);
+    list = (Switch const *) ptr;
+
+    mademods = false;
+    padlib->lockpads ();
+    padlib->readpads (&pads);
+}
+
+Switches::~Switches ()
+{
+    if (mademods) {
+        padlib->writepads (&pads);
+    }
+    padlib->unlkpads ();
+}
+
+uint32_t Switch::get () const
+{
+    switch (nbits) {
+        case  1: {
+            return *(bool *)valptr;
+        }
+        case  3: {
+            return *(uint8_t *)valptr;
+        }
+        case 12: {
+            return *(uint16_t *)valptr;
+        }
+        default: ABORT ();
+    }
+}
+
+void Switch::rel () const
+{
+    switch (nbits) {
+        case 1: {
+            if (ovrptr != NULL) *(bool *)ovrptr = false;  // toggle - explicit release
+                           else *(bool *)valptr = false;  // button - release by clearing
+            break;
+        }
+        case 3: {
+            if (ovrptr != NULL) *(uint8_t *)ovrptr = 0;
+                           else *(uint8_t *)valptr = 0;
+            break;
+        }
+        case 12: {
+            if (ovrptr != NULL) *(uint16_t *)ovrptr = 0;
+                           else *(uint16_t *)valptr = 0;
+            break;
+        }
+        default: ABORT ();
+    }
+    sws->mademods = true;
+}
+
+bool Switch::set (uint32_t val) const
+{
+    uint16_t mask = (1 << nbits) - 1;
+    if (val > mask) return false;
+
+    switch (nbits) {
+        case 1: {
+            *(bool *)valptr = val;
+            if (ovrptr != NULL) *(bool *)ovrptr = true;
+            break;
+        }
+        case 3: {
+            *(uint8_t *)valptr = val;
+            if (ovrptr != NULL) *(uint8_t *)ovrptr = 7;
+            break;
+        }
+        case 12: {
+            *(uint16_t *)valptr = val;
+            if (ovrptr != NULL) *(uint16_t *)ovrptr = 07777;
+            break;
+        }
+        default: ABORT ();
+    }
+    sws->mademods = true;
+    return true;
+}
+
+
+
+// continuously display what should be on the PDP-8/I front panel
 
 #define ESC_NORMV "\033[m"             /* go back to normal video */
 #define ESC_REVER "\033[7m"            /* turn reverse video on */
@@ -568,10 +617,10 @@ static char const blubitoff[] =           ESC_CYNFG           "-" ESC_NORMV;
 static char const grnbiton [] = ESC_BOLDV ESC_GRNBG ESC_BLKFG "*" ESC_NORMV;
 static char const grnbitoff[] =           ESC_GRNFG           "-" ESC_NORMV;
 
-#define REG12L(v) REG3L (red, (v) >> 0), REG3L (yel, (v) >> 3), REG3L (red, (v) >> 6), REG3L (yel, (v) >> 9)
-#define REG3L(c,v) RBITL (c, (v), 9), RBITL (c, (v), 10), RBITL (c, (v), 11)
-#define REG5L(v) RBITL (blu, (v), 7), RBITL (blu, (v), 8), RBITL (grn, (v), 9), RBITL (grn, (v), 10), RBITL (grn, (v), 11)
-#define RBITL(c,v,n) BOOL (c, ((v) >> (11 - n)) & 1)
+#define REG12L(v) REG3L (red, (v) >> 9), REG3L (yel, (v) >> 6), REG3L (red, (v) >> 3), REG3L (yel, (v) >> 0)
+#define REG3L(c,v) RBITL (c, (v), 2), RBITL (c, (v), 1), RBITL (c, (v), 0)
+#define REG5L(v) RBITL (blu, (v), 4), RBITL (blu, (v), 3), RBITL (grn, (v), 2), RBITL (grn, (v), 1), RBITL (grn, (v), 0)
+#define RBITL(c,v,n) BOOL (c, ((v) >> (n)) & 1)
 #define BOOL(c,b) (b ? c##biton : c##bitoff)
 #define STL(c,b,on,off) (b ? (ESC_BOLDV ESC_##c##BG ESC_BLKFG on ESC_NORMV) : (ESC_##c##FG off ESC_NORMV))
 
@@ -611,6 +660,7 @@ static int showstatus (int argc, char **argv)
         ++ nframes;
 
         // read bulbs and switches
+        Z8IPanel pads;
         padlib->readpads (&pads);
 
         bool irand = pads.light.ir == 0;
@@ -632,28 +682,28 @@ static int showstatus (int argc, char **argv)
         bool msdep = pads.light.ms == MS_DEPOS;
         bool msexm = pads.light.ms == MS_EXAM;
 
-        char const *simit = (pdpat[Z_RE] & e_simit) ? " sim" : "real";
+        char const *simit = (pdpat[Z_RE] & e_simit) ? " SIM" : "REAL";
 
         // display it
         printf (TOP ESC_NORMV EOL);
 
-        printf ("  PDP-8/I    %s %s %s  %s %s %s   %s %s %s  %s %s %s  %s %s %s  %s %s %s  PC  " ESC_BOLDV "%o%o.%04o" ESC_NORMV "  %s  %s  %s%8u" EOL,
+        printf (" " ESC_BOLDV " PDP-8/I " ESC_NORMV "   %s %s %s  %s %s %s   %s %s %s  %s %s %s  %s %s %s  %s %s %s  PC  " ESC_BOLDV "%o%o.%04o" ESC_NORMV "  %s  %s  %s    %s" EOL,
             REG3L (blu, pads.light.dfld), REG3L (grn, pads.light.ifld), REG12L (pads.light.pc), pads.light.dfld, pads.light.ifld, pads.light.pc,
-            STL (CYN, irand, "AND", "and"), STL (GRN, msfet, "FET", "fet"), STL (CYN, pads.light.ion, "ION", "ion"), fps);
+            STL (CYN, irand, "AND", "and"), STL (GRN, msfet, "FET", "fet"), STL (CYN, pads.light.ion, "ION", "ion"), simit);
 
-        printf ("             " ESC_CYNFG " DF " ESC_NORMV "   " ESC_GRNFG " IF " ESC_NORMV "                                             %s  %s  %s     fps" EOL,
+        printf ("             " ESC_CYNFG " DF " ESC_NORMV "   " ESC_GRNFG " IF " ESC_NORMV "                                             %s  %s  %s" EOL,
             STL (CYN, irtad, "TAD", "tad"), STL (GRN, msexe, "EXE", "exe"), STL (CYN, pads.light.pau, "PAU", "pau"));
 
         printf ("                            %s %s %s  %s %s %s  %s %s %s  %s %s %s  MA  " ESC_BOLDV "   %04o" ESC_NORMV "  %s  %s  %s" EOL,
             REG12L (pads.light.ma), pads.light.ma,
             STL (CYN, irisz, "ISZ", "isz"), STL (GRN, msdef, "DEF", "def"), STL (CYN, pads.light.run, "RUN", "run"));
 
-        printf ("                                                                     %s  %s         %s" EOL,
-            STL (CYN, irdca, "DCA", "dca"), STL (GRN, mswct, "WCT", "wct"), simit);
+        printf ("                                                                     %s  %s" EOL,
+            STL (CYN, irdca, "DCA", "dca"), STL (GRN, mswct, "WCT", "wct"));
 
-        printf ("                            %s %s %s  %s %s %s  %s %s %s  %s %s %s  MB  " ESC_BOLDV "   %04o" ESC_NORMV "  %s  %s" EOL,
+        printf ("                            %s %s %s  %s %s %s  %s %s %s  %s %s %s  MB  " ESC_BOLDV "   %04o" ESC_NORMV "  %s  %s   %6u fps" EOL,
             REG12L (pads.light.mb), pads.light.mb,
-            STL (CYN, irjms, "JMS", "jms"), STL (GRN, mscad, "CAD", "cad"));
+            STL (CYN, irjms, "JMS", "jms"), STL (GRN, mscad, "CAD", "cad"), fps);
 
         printf ("                                                                     %s  %s" EOL,
             STL (CYN, irjmp, "JMP", "jmp"), STL (GRN, msbrk, "BRK", "brk"));
@@ -673,7 +723,7 @@ static int showstatus (int argc, char **argv)
         printf ("             %s %s %s  %s %s %s   %s %s %s  %s %s %s  %s %s %s  %s %s %s  SR  " ESC_BOLDV "%o%o.%04o" ESC_NORMV "  %s %s %s %s" EOL,
             REG3L (blu, pads.togval.dfld), REG3L (grn, pads.togval.ifld), REG12L (pads.togval.sr), pads.togval.dfld, pads.togval.ifld, pads.togval.sr,
             STL (CYN, pads.button.start, "START", "start"), STL (GRN, pads.button.ldad, "LDAD", "ldad"),
-            STL (CYN, pads.button.dep, "DEPOS", "depos"), STL (GRN, pads.button.exam, "EXAM", "exam"));
+            STL (CYN, pads.button.dep, " DEP ", " dep "), STL (GRN, pads.button.exam, "EXAM", "exam"));
 
         printf ("                                                                     %s %s %s %s" EOL EOP,
             STL (CYN, pads.button.cont, "CONT", "cont"), STL (GRN, pads.button.stop, "STOP", "stop"),

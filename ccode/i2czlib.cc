@@ -37,6 +37,8 @@ I2CZLib::I2CZLib ()
 {
     pdpat = z8ipage.findev ("8I", NULL, NULL, false);   // zynq.v registers
     fpat  = z8ipage.findev ("FP", NULL, NULL, false);   // pdp8ifpi2c.v registers
+    mypid = getpid ();
+    pthread_mutex_init (&mutex, NULL);
 }
 
 I2CZLib::~I2CZLib ()
@@ -45,80 +47,32 @@ I2CZLib::~I2CZLib ()
     fpat  = NULL;
 }
 
-// deposit 05252: jmp 05252 in memory then start it
-void I2CZLib::loop52 ()
+// get exclusive access
+void I2CZLib::lockpads ()
 {
-    // make sure processor halted
-    Z8IPanel pads;
-    for (int i = 0; i < 10; i ++) {
-        this->readpads (&pads);
-        if (! pads.light.run) goto halted;
-        pads.togovr.sinst = true;
-        pads.togval.sinst = true;
-        this->writepads (&pads);
-        usleep (200000);
+    pthread_mutex_lock (&mutex);
+    ASSERT (FP6_LOCK == 0xFFFFFFFFU);
+    while (true) {
+        fpat[6] = mypid;
+        uint32_t lkpid = fpat[6];
+        if (lkpid == mypid) break;
+        if ((kill (lkpid, 0) < 0) && (errno == ESRCH)) {
+            fprintf (stderr, "I2CZLib::lockpads: unlocking from dead pid %u\n", lkpid);
+            fpat[6] = lkpid;
+            usleep (123456);
+        } else {
+            usleep (456);
+        }
     }
-    fprintf (stderr, "I2CZLib::loop52: processor would not halt\n");
-    fprintf (stderr, "I2CZLib::loop52: try ./z8ipanel hardreset\n");
-    ABORT ();
-halted:;
-
-    // set switch register to 5252, all others to 0
-    memset (&pads.togovr, -1, sizeof pads.togovr);
-    pads.togval.sr = DOTJMPDOT;
-    pads.togval.sinst = false;
-    this->writepads (&pads);
-
-    // load address
-    pads.button.ldad = true;
-    this->writepads (&pads);
-    usleep (200000);
-    pads.button.ldad = false;
-    this->writepads (&pads);
-    usleep (200000);
-
-    // deposit
-    pads.button.dep = true;
-    this->writepads (&pads);
-    usleep (200000);
-    pads.button.dep = false;
-    this->writepads (&pads);
-    usleep (200000);
-
-    // load address
-    pads.button.ldad = true;
-    this->writepads (&pads);
-    usleep (200000);
-    pads.button.ldad = false;
-    this->writepads (&pads);
-    usleep (200000);
-
-    // start
-    pads.button.start = true;
-    this->writepads (&pads);
-    usleep (200000);
-    pads.button.start = false;
-    this->writepads (&pads);
-    usleep (200000);
-
-    // see if that worked
-    this->readpads (&pads);
-    if (! pads.light.run || (pads.light.ma != DOTJMPDOT) || (pads.light.mb != DOTJMPDOT)) {
-        fprintf (stderr, "I2CZLib::loop52: processor did not start (run=%o ma=%04o mb=%04o)\n",
-            pads.light.run, pads.light.ma, pads.light.mb);
-        ABORT ();
-    }
-
-    // release all switches
-    this->relall ();
 }
 
-// release our override of all switches
-void I2CZLib::relall ()
+// release exclusive access
+void I2CZLib::unlkpads ()
 {
-    Z8IPanel pads;
-    memset (&pads, 0, sizeof pads);
-    writepads (&pads);
+    ASSERT (FP6_LOCK == 0xFFFFFFFFU);
+    if (fpat[6] != mypid) ABORT ();
+    fpat[6] = mypid;
+    pthread_mutex_unlock (&mutex);
 }
 
 // read light bulbs and switches

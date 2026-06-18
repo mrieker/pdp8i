@@ -47,8 +47,8 @@ proc helpini {} {
 
 # turn all switches off
 proc alloff {} {
-    setsw dfld 0
-    setsw ifld 0
+    setsw df 0
+    setsw if 0
     setsw ldad 0
     setsw start 0
     setsw cont 0
@@ -173,7 +173,7 @@ proc disas {start {stop ""}} {
     }
 }
 
-# do memory cycle initiated by a switch (depos, exam, ldad)
+# do memory cycle initiated by a switch (dep, exam, ldad)
 proc domemcyc {sw} {
     set oldmc [pin memcycctr]
     flicksw $sw
@@ -200,33 +200,36 @@ proc dumpmem {start stop} {
 
 # dump light bulbs and switches
 proc dumpit {} {
-    set ac   [getlb ac]
-    set ea   [getlb ea]
-    set ion  [getlb ion]
-    set ir   [getlb ir]
-    set link [getlb link]
-    set ma   [getlb ma]
-    set mb   [getlb mb]
-    set mq   [getlb mq]
-    set ms   [getlb ms]
-    set pc   [getlb pc]
-    set run  [getlb run]
-    set sc   [getlb sc]
+    set lbs [getlb ac ea ion ir link ma mb mq ms pc run sc]
+    set ac   [lindex $lbs  0]
+    set ea   [lindex $lbs  1]
+    set ion  [lindex $lbs  2]
+    set ir   [lindex $lbs  3]
+    set link [lindex $lbs  4]
+    set ma   [lindex $lbs  5]
+    set mb   [lindex $lbs  6]
+    set mq   [lindex $lbs  7]
+    set ms   [lindex $lbs  8]
+    set pc   [lindex $lbs  9]
+    set run  [lindex $lbs 10]
+    set sc   [lindex $lbs 11]
 
-    set sw "SR=[octal [getsw sr]] DF=[getsw dfld] IF=[getsw ifld]"
-    set sw [expr {[getsw cont]  ? "$sw CONT"  : "$sw"}]
-    set sw [expr {[getsw dep]   ? "$sw DEP"   : "$sw"}]
-    set sw [expr {[getsw exam]  ? "$sw EXAM"  : "$sw"}]
-    set sw [expr {[getsw ldad]  ? "$sw LDAD"  : "$sw"}]
-    set sw [expr {[getsw sinst] ? "$sw SINST" : "$sw"}]
-    set sw [expr {[getsw sstep] ? "$sw SSTEP" : "$sw"}]
-    set sw [expr {[getsw start] ? "$sw START" : "$sw"}]
-    set sw [expr {[getsw stop]  ? "$sw STOP"  : "$sw"}]
+    set sws [getsw sr df if cont dep exam ldad sinst sstep start stop]
+
+    set sw "SR=[octal [lindex $sws 0]] DF=[lindex $sws 1] IF=[lindex $sws 2]"
+    if {[lindex $sws  3]} {append sw " CONT"}
+    if {[lindex $sws  4]} {append sw " DEP"}
+    if {[lindex $sws  5]} {append sw " EXAM"}
+    if {[lindex $sws  6]} {append sw " LDAD"}
+    if {[lindex $sws  7]} {append sw " SINST"}
+    if {[lindex $sws  8]} {append sw " SSTEP"}
+    if {[lindex $sws  9]} {append sw " START"}
+    if {[lindex $sws 10]} {append sw " STOP"}
 
     set mne [string range "ANDTADISZDCAJMSJMPIOTOPR" [expr {$ir * 3}] [expr {$ir * 3 + 2}]]
 
-    return [format "  %s %s MS=%-5s AC=%o.%04o MA=%o.%04o MB=%04o IR=%o  %s  %s" \
-        [expr {$run ? "RUN " : "    "}] [expr {$ion ? "ION" : "   "}] $ms $link $ac $ea $ma $mb $ir $mne $sw]
+    return [format "%s %s MS=%-5s AC=%o.%04o MA=%o.%04o MB=%04o MQ=%04o PC=%04o SC=%02o IR=%s  %s" \
+        [expr {$run ? "RUN" : "   "}] [expr {$ion ? "ION" : "   "}] $ms $link $ac $ea $ma $mb $mq $pc $sc $mne $sw]
 }
 
 ;# convert given character to escaped form if necessary
@@ -391,9 +394,9 @@ proc loadbin {fname} {
 
             # deposit data
             if {$addr != $nextaddr} {
-                setsw ifld [expr {$addr >> 12}]
-                setsw dfld [expr {$addr >> 12}]
-                setsw sr [expr {$addr & 07777}]
+                setsw if [expr {$addr >> 12}] \
+                      df [expr {$addr >> 12}] \
+                    sr [expr {$addr & 07777}]
                 domemcyc ldad
             }
             setsw sr $data
@@ -474,7 +477,7 @@ proc loadbinptr {fname} {
     global Z8IHOME
 
     hardreset
-    setsw ifld 0 ; setsw dfld 0
+    setsw if 0 df 0
 
     puts "loadbinptr: toggling in rim loader"
     rimloader hi
@@ -522,8 +525,7 @@ proc loadrim {fname} {
     set nextaddr -1
     set verify [dict create]
 
-    setsw ifld 0
-    setsw dfld 0
+    setsw if 0 df 0
 
     puts "loadrim: loading $fname..."
 
@@ -725,9 +727,9 @@ proc rimloader {speed} {
 # read memory location
 # - does loadaddress which reads the location
 proc rdmem {addr} {
-    setsw ifld [expr {$addr >> 12}]
-    setsw dfld [expr {$addr >> 12}]
-    setsw sr [expr {$addr & 07777}]
+    setsw if [expr {$addr >> 12}] \
+          df [expr {$addr >> 12}] \
+        sr [expr {$addr & 07777}]
     domemcyc ldad
     return [pin ombuf]
 }
@@ -785,9 +787,9 @@ proc simon {} {
 # preserves switchregister contents
 proc startat {addr} {
     set savesr [getsw sr]
-    setsw ifld [expr {$addr >> 12}]
-    setsw dfld [expr {$addr >> 12}]
-    setsw sr [expr {$addr & 07777}]
+    setsw if [expr {$addr >> 12}] \
+          df [expr {$addr >> 12}] \
+        sr [expr {$addr & 07777}]
     domemcyc ldad
     setsw sr $savesr
     flicksw start
@@ -860,9 +862,9 @@ proc waitforttypr {msec str} {
 # write memory location
 # - does loadaddress, then deposit to write
 proc wrmem {addr data} {
-    setsw ifld [expr {$addr >> 12}]
-    setsw dfld [expr {$addr >> 12}]
-    setsw sr [expr {$addr & 07777}]
+    setsw if [expr {$addr >> 12}] \
+          df [expr {$addr >> 12}] \
+        sr [expr {$addr & 07777}]
     domemcyc ldad
     setsw sr $data
     domemcyc dep
