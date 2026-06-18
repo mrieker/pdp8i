@@ -530,23 +530,50 @@ static int cmd_setsw (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_O
 #define ESC_UNDER "\033[4m"            /* turn underlining on */
 #define ESC_BLINK "\033[5m"            /* turn blink on */
 #define ESC_BOLDV "\033[1m"            /* turn bold on */
-#define ESC_REDBG "\033[41m"           /* red background */
-#define ESC_GRNBG "\033[42m"           /* green background */
-#define ESC_YELBG "\033[44m"           /* yellow background */
-#define ESC_BLKFG "\033[30m"           /* black foreground */
-#define ESC_REDFG "\033[91m"           /* red foreground */
+
+#define ESC_BLKFG "\033[30m"           /* foreground */
+#define ESC_REDFG "\033[31m"
+#define ESC_GRNFG "\033[32m"
+#define ESC_YELFG "\033[33m"
+#define ESC_BLUFG "\033[34m"
+#define ESC_MAGFG "\033[35m"
+#define ESC_CYNFG "\033[36m"
+#define ESC_WHTFG "\033[37m"
+
+#define ESC_BLKBG "\033[40m"           /* background */
+#define ESC_REDBG "\033[41m"
+#define ESC_GRNBG "\033[42m"
+#define ESC_YELBG "\033[43m"
+#define ESC_BLUBG "\033[44m"
+#define ESC_MAGBG "\033[45m"
+#define ESC_CYNBG "\033[46m"
+#define ESC_WHTBG "\033[47m"
+
 #define ESC_EREOL "\033[K"             /* erase to end of line */
 #define ESC_EREOP "\033[J"             /* erase to end of page */
 #define ESC_HOME  "\033[H"             /* home cursor */
 
 #define ESC_ON ESC_BOLDV ESC_GRNBG ESC_BLKFG
+#define ESC_OFF ESC_NORMV
 
-#define RBITL(r,n) BOOL ((r >> (11 - n)) & 1)
-#define REG3L(r) RBITL (r, 9), RBITL (r, 10), RBITL (r, 11)
-#define REG5L(r) RBITL (r, 7), RBITL (r, 8), RBITL (r, 9), RBITL (r, 10), RBITL (r, 11)
-#define REG12L(r) RBITL (r, 0), RBITL (r, 1), RBITL (r, 2), RBITL (r, 3), RBITL (r, 4), RBITL (r, 5), RBITL (r, 6), RBITL (r, 7), RBITL (r, 8), RBITL (r, 9), RBITL (r, 10), RBITL (r, 11)
-#define STL(b,on,off) (b ? (ESC_ON on ESC_NORMV) : off)
-#define BOOL(b) STL (b, "*", "-")
+static char const redbiton [] = ESC_BOLDV ESC_REDBG ESC_BLKFG "*" ESC_NORMV;
+static char const redbitoff[] =           ESC_REDFG           "-" ESC_NORMV;
+
+static char const yelbiton [] = ESC_BOLDV ESC_YELBG ESC_BLKFG "*" ESC_NORMV;
+static char const yelbitoff[] =           ESC_YELFG           "-" ESC_NORMV;
+
+static char const blubiton [] = ESC_BOLDV ESC_CYNBG ESC_BLKFG "*" ESC_NORMV;
+static char const blubitoff[] =           ESC_CYNFG           "-" ESC_NORMV;
+
+static char const grnbiton [] = ESC_BOLDV ESC_GRNBG ESC_BLKFG "*" ESC_NORMV;
+static char const grnbitoff[] =           ESC_GRNFG           "-" ESC_NORMV;
+
+#define REG12L(v) REG3L (red, (v) >> 0), REG3L (yel, (v) >> 3), REG3L (red, (v) >> 6), REG3L (yel, (v) >> 9)
+#define REG3L(c,v) RBITL (c, (v), 9), RBITL (c, (v), 10), RBITL (c, (v), 11)
+#define REG5L(v) RBITL (blu, (v), 7), RBITL (blu, (v), 8), RBITL (grn, (v), 9), RBITL (grn, (v), 10), RBITL (grn, (v), 11)
+#define RBITL(c,v,n) BOOL (c, ((v) >> (11 - n)) & 1)
+#define BOOL(c,b) (b ? c##biton : c##bitoff)
+#define STL(c,b,on,off) (b ? (ESC_BOLDV ESC_##c##BG ESC_BLKFG on ESC_NORMV) : (ESC_##c##FG off ESC_NORMV))
 
 #define TOP ESC_HOME
 #define EOL ESC_EREOL "\n"
@@ -611,42 +638,46 @@ static int showstatus (int argc, char **argv)
         printf (TOP ESC_NORMV EOL);
 
         printf ("  PDP-8/I    %s %s %s  %s %s %s   %s %s %s  %s %s %s  %s %s %s  %s %s %s  PC  " ESC_BOLDV "%o%o.%04o" ESC_NORMV "  %s  %s  %s%8u" EOL,
-            REG3L (pads.light.dfld), REG3L (pads.light.ifld), REG12L (pads.light.pc), pads.light.dfld, pads.light.ifld, pads.light.pc,
-            STL (irand, "AND", "and"), STL (msfet, "FET", "fet"), STL (pads.light.ion, "ION", "ion"), fps);
+            REG3L (blu, pads.light.dfld), REG3L (grn, pads.light.ifld), REG12L (pads.light.pc), pads.light.dfld, pads.light.ifld, pads.light.pc,
+            STL (CYN, irand, "AND", "and"), STL (GRN, msfet, "FET", "fet"), STL (CYN, pads.light.ion, "ION", "ion"), fps);
 
-        printf ("              DF     IF                                              %s  %s  %s     fps" EOL,
-            STL (irtad, "TAD", "tad"), STL (msexe, "EXE", "exe"), STL (pads.light.pau, "PAU", "pau"));
+        printf ("             " ESC_CYNFG " DF " ESC_NORMV "   " ESC_GRNFG " IF " ESC_NORMV "                                             %s  %s  %s     fps" EOL,
+            STL (CYN, irtad, "TAD", "tad"), STL (GRN, msexe, "EXE", "exe"), STL (CYN, pads.light.pau, "PAU", "pau"));
 
         printf ("                            %s %s %s  %s %s %s  %s %s %s  %s %s %s  MA  " ESC_BOLDV "   %04o" ESC_NORMV "  %s  %s  %s" EOL,
-            REG12L (pads.light.ma), pads.light.ma, STL (irisz, "ISZ", "isz"), STL (msdef, "DEF", "def"), STL (pads.light.run, "RUN", "run"));
+            REG12L (pads.light.ma), pads.light.ma,
+            STL (CYN, irisz, "ISZ", "isz"), STL (GRN, msdef, "DEF", "def"), STL (CYN, pads.light.run, "RUN", "run"));
 
         printf ("                                                                     %s  %s         %s" EOL,
-            STL (irdca, "DCA", "dca"), STL (mswct, "WCT", "wct"), simit);
+            STL (CYN, irdca, "DCA", "dca"), STL (GRN, mswct, "WCT", "wct"), simit);
 
         printf ("                            %s %s %s  %s %s %s  %s %s %s  %s %s %s  MB  " ESC_BOLDV "   %04o" ESC_NORMV "  %s  %s" EOL,
-            REG12L (pads.light.mb), pads.light.mb, STL (irjms, "JMS", "jms"), STL (mscad, "CAD", "cad"));
+            REG12L (pads.light.mb), pads.light.mb,
+            STL (CYN, irjms, "JMS", "jms"), STL (GRN, mscad, "CAD", "cad"));
 
         printf ("                                                                     %s  %s" EOL,
-            STL (irjmp, "JMP", "jmp"), STL (msbrk, "BRK", "brk"));
+            STL (CYN, irjmp, "JMP", "jmp"), STL (GRN, msbrk, "BRK", "brk"));
 
-        printf ("                     L  %s   %s %s %s  %s %s %s  %s %s %s  %s %s %s  AC  " ESC_BOLDV " %o.%04o" ESC_NORMV "  %s  %s" EOL,
-            BOOL (pads.light.link), REG12L (pads.light.ac), pads.light.link, pads.light.ac,
-            STL (iriot, "IOT", "iot"), STL (msiak, "IAK", "iak"));
+        printf ("                    " ESC_GRNFG " L " ESC_NORMV " %s   %s %s %s  %s %s %s  %s %s %s  %s %s %s  AC  " ESC_BOLDV " %o.%04o" ESC_NORMV "  %s  %s" EOL,
+            BOOL (grn, pads.light.link), REG12L (pads.light.ac), pads.light.link, pads.light.ac,
+            STL (CYN, iriot, "IOT", "iot"), STL (GRN, msiak, "IAK", "iak"));
 
         printf ("                                                                     %s  %s" EOL,
-            STL (iropr, "OPR", "opr"), STL (msdep, "DEP", "dep"));
+            STL (CYN, iropr, "OPR", "opr"), STL (GRN, msdep, "DEP", "dep"));
 
-        printf ("           SC  %s %s  %s %s %s   %s %s %s  %s %s %s  %s %s %s  %s %s %s  MQ  " ESC_BOLDV "%02o.%04o" ESC_NORMV "       %s" EOL,
-            REG5L (pads.light.sc), REG12L (pads.light.mq), pads.light.sc, pads.light.mq, STL (msexm, "EXM", "exm"));
+        printf ("          " ESC_CYNFG " SC " ESC_NORMV " %s %s  %s %s %s   %s %s %s  %s %s %s  %s %s %s  %s %s %s  MQ  " ESC_BOLDV "%02o.%04o" ESC_NORMV "       %s" EOL,
+            REG5L (pads.light.sc), REG12L (pads.light.mq), pads.light.sc, pads.light.mq, STL (GRN, msexm, "EXM", "exm"));
 
         printf (EOL);
 
         printf ("             %s %s %s  %s %s %s   %s %s %s  %s %s %s  %s %s %s  %s %s %s  SR  " ESC_BOLDV "%o%o.%04o" ESC_NORMV "  %s %s %s %s" EOL,
-            REG3L (pads.togval.dfld), REG3L (pads.togval.ifld), REG12L (pads.togval.sr), pads.togval.dfld, pads.togval.ifld, pads.togval.sr,
-            STL (pads.button.start, "START", "start"), STL (pads.button.ldad, "LDAD", "ldad"), STL (pads.button.dep, "DEPOS", "depos"), STL (pads.button.exam, "EXAM", "exam"));
+            REG3L (blu, pads.togval.dfld), REG3L (grn, pads.togval.ifld), REG12L (pads.togval.sr), pads.togval.dfld, pads.togval.ifld, pads.togval.sr,
+            STL (CYN, pads.button.start, "START", "start"), STL (GRN, pads.button.ldad, "LDAD", "ldad"),
+            STL (CYN, pads.button.dep, "DEPOS", "depos"), STL (GRN, pads.button.exam, "EXAM", "exam"));
 
         printf ("                                                                     %s %s %s %s" EOL EOP,
-            STL (pads.button.cont, "CONT", "cont"), STL (pads.button.stop, "STOP", "stop"), STL (pads.togval.sstep, "SSTEP", "sstep"), STL (pads.togval.sinst, "SINST", "sinst"));
+            STL (CYN, pads.button.cont, "CONT", "cont"), STL (GRN, pads.button.stop, "STOP", "stop"),
+            STL (CYN, pads.togval.sstep, "SSTEP", "sstep"), STL (GRN, pads.togval.sinst, "SINST", "sinst"));
 
         printf ("    %c\r", "\\|/-"[++twirly&3]);
         fflush (stdout);
