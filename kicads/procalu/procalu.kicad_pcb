@@ -549,7 +549,7 @@
 
   (footprint "Package_DIP:DIP-14_W7.62mm" (layer "F.Cu")
     (tstamp 01efdc97-9bc1-4fbf-8172-0aac383ce7bd)
-    (at 67.88 116.73 90)
+    (at 337.815 168.9 90)
     (descr "14-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -637,7 +637,7 @@
 
   (footprint "Package_DIP:DIP-14_W7.62mm" (layer "F.Cu")
     (tstamp 038ac588-adb3-43b1-8719-6d4854ebf0e8)
-    (at 145.48 127.58 90)
+    (at 266.695 67.3 90)
     (descr "14-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -722,7 +722,7 @@
 
   (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" (layer "F.Cu")
     (tstamp 03ea1e9d-423c-4278-8123-6c2a307d6953)
-    (at 315.57 172.6 90)
+    (at 354.47 45.67 90)
     (descr "Resistor, Axial_DIN0207 series, Axial, Horizontal, pin pitch=7.62mm, 0.25W = 1/4W, length*diameter=6.3*2.5mm^2, http://cdn-reichelt.de/documents/datenblatt/B400/1_4W%23YAG.pdf")
     (tags "Resistor Axial_DIN0207 series Axial Horizontal pin pitch 7.62mm 0.25W = 1/4W length 6.3mm diameter 2.5mm")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -788,7 +788,7 @@
 
   (footprint "Package_DIP:DIP-14_W7.62mm" (layer "F.Cu")
     (tstamp 075d649f-6414-4bc1-bfff-f9309bab55df)
-    (at 48.48 160.13 90)
+    (at 17.78 92.7 90)
     (descr "14-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -876,7 +876,7 @@
 
   (footprint "Package_DIP:DIP-14_W7.62mm" (layer "F.Cu")
     (tstamp 07d62ab6-e14a-46f0-82dd-28c28f6dc142)
-    (at 29.08 73.33 90)
+    (at 88.895 41.9 90)
     (descr "14-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -964,7 +964,7 @@
 
   (footprint "Package_DIP:DIP-14_W7.62mm" (layer "F.Cu")
     (tstamp 092a4694-85a2-4047-928e-16946494b55a)
-    (at 87.28 73.33 90)
+    (at 124.455 41.9 90)
     (descr "14-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -1052,7 +1052,7 @@
 
   (footprint "Package_DIP:DIP-14_W7.62mm" (layer "F.Cu")
     (tstamp 09f5c88f-0500-4c49-87db-ba71ed7de1ee)
-    (at 87.28 116.73 90)
+    (at 266.695 92.7 90)
     (descr "14-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -1140,7 +1140,7 @@
 
   (footprint "Package_DIP:DIP-14_W7.62mm" (layer "F.Cu")
     (tstamp 0c4f0175-2130-40d7-8a31-98e28beaf933)
-    (at 126.08 181.83 90)
+    (at 302.255 194.3 90)
     (descr "14-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -1228,7 +1228,7 @@
 
   (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" (layer "F.Cu")
     (tstamp 0dbd721f-9d67-4da0-af29-7c19c0420678)
-    (at 356.07 161.83 90)
+    (at 394.97 34.9 90)
     (descr "Resistor, Axial_DIN0207 series, Axial, Horizontal, pin pitch=7.62mm, 0.25W = 1/4W, length*diameter=6.3*2.5mm^2, http://cdn-reichelt.de/documents/datenblatt/B400/1_4W%23YAG.pdf")
     (tags "Resistor Axial_DIN0207 series Axial Horizontal pin pitch 7.62mm 0.25W = 1/4W length 6.3mm diameter 2.5mm")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -1294,7 +1294,7 @@
 
   (footprint "Package_DIP:DIP-14_W7.62mm" (layer "F.Cu")
     (tstamp 0f97f939-a8eb-45ad-b87c-8b8bc77f0d25)
-    (at 29.08 181.83 90)
+    (at 17.775 194.3 90)
     (descr "14-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -1382,7 +1382,7 @@
 
   (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" (layer "F.Cu")
     (tstamp 10fd7a50-22b4-479f-915e-e6469e0f55c9)
-    (at 319.62 140.29 90)
+    (at 358.52 13.36 90)
     (descr "Resistor, Axial_DIN0207 series, Axial, Horizontal, pin pitch=7.62mm, 0.25W = 1/4W, length*diameter=6.3*2.5mm^2, http://cdn-reichelt.de/documents/datenblatt/B400/1_4W%23YAG.pdf")
     (tags "Resistor Axial_DIN0207 series Axial Horizontal pin pitch 7.62mm 0.25W = 1/4W length 6.3mm diameter 2.5mm")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -1448,7 +1448,7 @@
 
   (footprint "Package_DIP:DIP-16_W7.62mm" (layer "F.Cu")
     (tstamp 119d4594-d86f-4880-8541-86828deb7ae5)
-    (at 106.68 105.08 90)
+    (at 265.445 143.5 90)
     (descr "16-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -1540,7 +1540,7 @@
 
   (footprint "Package_DIP:DIP-14_W7.62mm" (layer "F.Cu")
     (tstamp 14420a7b-b3f7-4aec-87d0-bdaab38c9f5e)
-    (at 29.08 170.98 90)
+    (at 53.335 41.9 90)
     (descr "14-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -1628,7 +1628,7 @@
 
   (footprint "Package_DIP:DIP-14_W7.62mm" (layer "F.Cu")
     (tstamp 146aed2c-da19-46c6-9db7-7235279b4bba)
-    (at 126.08 149.28 90)
+    (at 302.255 168.9 90)
     (descr "14-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -1716,7 +1716,7 @@
 
   (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" (layer "F.Cu")
     (tstamp 15baec49-ae84-4d44-8416-fa537ac40230)
-    (at 343.92 172.6 90)
+    (at 382.82 45.67 90)
     (descr "Resistor, Axial_DIN0207 series, Axial, Horizontal, pin pitch=7.62mm, 0.25W = 1/4W, length*diameter=6.3*2.5mm^2, http://cdn-reichelt.de/documents/datenblatt/B400/1_4W%23YAG.pdf")
     (tags "Resistor Axial_DIN0207 series Axial Horizontal pin pitch 7.62mm 0.25W = 1/4W length 6.3mm diameter 2.5mm")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -1782,7 +1782,7 @@
 
   (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" (layer "F.Cu")
     (tstamp 184d21b6-4366-4634-8c9f-7fa4262a7400)
-    (at 311.52 183.37 90)
+    (at 350.42 56.44 90)
     (descr "Resistor, Axial_DIN0207 series, Axial, Horizontal, pin pitch=7.62mm, 0.25W = 1/4W, length*diameter=6.3*2.5mm^2, http://cdn-reichelt.de/documents/datenblatt/B400/1_4W%23YAG.pdf")
     (tags "Resistor Axial_DIN0207 series Axial Horizontal pin pitch 7.62mm 0.25W = 1/4W length 6.3mm diameter 2.5mm")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -1848,7 +1848,7 @@
 
   (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" (layer "F.Cu")
     (tstamp 1ad7b8ce-717a-4fdb-b76e-1076f2281afe)
-    (at 323.67 161.83 90)
+    (at 362.57 34.9 90)
     (descr "Resistor, Axial_DIN0207 series, Axial, Horizontal, pin pitch=7.62mm, 0.25W = 1/4W, length*diameter=6.3*2.5mm^2, http://cdn-reichelt.de/documents/datenblatt/B400/1_4W%23YAG.pdf")
     (tags "Resistor Axial_DIN0207 series Axial Horizontal pin pitch 7.62mm 0.25W = 1/4W length 6.3mm diameter 2.5mm")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -1914,7 +1914,7 @@
 
   (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" (layer "F.Cu")
     (tstamp 1c44845c-cfb5-437b-9876-3e29d635905b)
-    (at 335.82 140.29 90)
+    (at 374.72 13.36 90)
     (descr "Resistor, Axial_DIN0207 series, Axial, Horizontal, pin pitch=7.62mm, 0.25W = 1/4W, length*diameter=6.3*2.5mm^2, http://cdn-reichelt.de/documents/datenblatt/B400/1_4W%23YAG.pdf")
     (tags "Resistor Axial_DIN0207 series Axial Horizontal pin pitch 7.62mm 0.25W = 1/4W length 6.3mm diameter 2.5mm")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -1980,7 +1980,7 @@
 
   (footprint "Package_DIP:DIP-16_W7.62mm" (layer "F.Cu")
     (tstamp 1dede0e4-8eb0-4812-93c3-79e93979b57c)
-    (at 145.48 203.53 90)
+    (at 265.445 194.3 90)
     (descr "16-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -2072,7 +2072,7 @@
 
   (footprint "Package_DIP:DIP-16_W7.62mm" (layer "F.Cu")
     (tstamp 221c30fe-b3da-410a-be7e-dac5e4cc1be2)
-    (at 145.48 138.43 90)
+    (at 52.085 194.3 90)
     (descr "16-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -2164,7 +2164,7 @@
 
   (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" (layer "F.Cu")
     (tstamp 2241ae1a-9699-411b-a938-db8eaf46f351)
-    (at 331.77 172.6 90)
+    (at 370.67 45.67 90)
     (descr "Resistor, Axial_DIN0207 series, Axial, Horizontal, pin pitch=7.62mm, 0.25W = 1/4W, length*diameter=6.3*2.5mm^2, http://cdn-reichelt.de/documents/datenblatt/B400/1_4W%23YAG.pdf")
     (tags "Resistor Axial_DIN0207 series Axial Horizontal pin pitch 7.62mm 0.25W = 1/4W length 6.3mm diameter 2.5mm")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -2230,7 +2230,7 @@
 
   (footprint "Package_DIP:DIP-14_W7.62mm" (layer "F.Cu")
     (tstamp 2311e0e9-4f67-4110-a59c-b4738362351a)
-    (at 29.08 105.88 90)
+    (at 124.455 143.5 90)
     (descr "14-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -2318,7 +2318,7 @@
 
   (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" (layer "F.Cu")
     (tstamp 233c653e-071c-4c55-98ff-83f683f4fa25)
-    (at 352.02 172.6 90)
+    (at 390.92 45.67 90)
     (descr "Resistor, Axial_DIN0207 series, Axial, Horizontal, pin pitch=7.62mm, 0.25W = 1/4W, length*diameter=6.3*2.5mm^2, http://cdn-reichelt.de/documents/datenblatt/B400/1_4W%23YAG.pdf")
     (tags "Resistor Axial_DIN0207 series Axial Horizontal pin pitch 7.62mm 0.25W = 1/4W length 6.3mm diameter 2.5mm")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -2384,7 +2384,7 @@
 
   (footprint "Package_DIP:DIP-20_W7.62mm" (layer "F.Cu")
     (tstamp 251c888f-dfcf-4b3e-9ee8-aedd3e1b24d8)
-    (at 80.015 232.4 90)
+    (at 85.095 219.7 90)
     (descr "20-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -2484,7 +2484,7 @@
 
   (footprint "Package_DIP:DIP-20_W7.62mm" (layer "F.Cu")
     (tstamp 2729b9d9-1217-432d-9879-595746d6efc9)
-    (at 360.68 228.6 90)
+    (at 369.575 219.7 90)
     (descr "20-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -2584,7 +2584,7 @@
 
   (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" (layer "F.Cu")
     (tstamp 2c0c86c7-c627-4c58-9d91-51de7c7e2f2b)
-    (at 315.57 151.06 90)
+    (at 354.47 24.13 90)
     (descr "Resistor, Axial_DIN0207 series, Axial, Horizontal, pin pitch=7.62mm, 0.25W = 1/4W, length*diameter=6.3*2.5mm^2, http://cdn-reichelt.de/documents/datenblatt/B400/1_4W%23YAG.pdf")
     (tags "Resistor Axial_DIN0207 series Axial Horizontal pin pitch 7.62mm 0.25W = 1/4W length 6.3mm diameter 2.5mm")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -2650,7 +2650,7 @@
 
   (footprint "Package_DIP:DIP-14_W7.62mm" (layer "F.Cu")
     (tstamp 2d697539-76cd-4938-9d85-fe4785a100f8)
-    (at 67.88 138.43 90)
+    (at 17.775 41.9 90)
     (descr "14-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -2736,7 +2736,7 @@
 
   (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" (layer "F.Cu")
     (tstamp 2dc3e362-a8d7-44b9-961b-d541412f8fe1)
-    (at 307.47 161.83 90)
+    (at 346.37 34.9 90)
     (descr "Resistor, Axial_DIN0207 series, Axial, Horizontal, pin pitch=7.62mm, 0.25W = 1/4W, length*diameter=6.3*2.5mm^2, http://cdn-reichelt.de/documents/datenblatt/B400/1_4W%23YAG.pdf")
     (tags "Resistor Axial_DIN0207 series Axial Horizontal pin pitch 7.62mm 0.25W = 1/4W length 6.3mm diameter 2.5mm")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -2802,7 +2802,7 @@
 
   (footprint "Package_DIP:DIP-14_W7.62mm" (layer "F.Cu")
     (tstamp 302cf552-b44e-48dd-830e-32de29b28f27)
-    (at 67.88 181.83 90)
+    (at 17.775 168.9 90)
     (descr "14-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -3020,7 +3020,7 @@
 
   (footprint "Package_DIP:DIP-16_W7.62mm" (layer "F.Cu")
     (tstamp 3231e1af-a825-4044-a0cd-90609a490c84)
-    (at 145.48 170.98 90)
+    (at 158.765 194.3 90)
     (descr "16-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -3112,7 +3112,7 @@
 
   (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" (layer "F.Cu")
     (tstamp 332cc212-93be-492b-bb58-ebe3b5cfe804)
-    (at 347.97 183.37 90)
+    (at 386.87 56.44 90)
     (descr "Resistor, Axial_DIN0207 series, Axial, Horizontal, pin pitch=7.62mm, 0.25W = 1/4W, length*diameter=6.3*2.5mm^2, http://cdn-reichelt.de/documents/datenblatt/B400/1_4W%23YAG.pdf")
     (tags "Resistor Axial_DIN0207 series Axial Horizontal pin pitch 7.62mm 0.25W = 1/4W length 6.3mm diameter 2.5mm")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -3178,7 +3178,7 @@
 
   (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" (layer "F.Cu")
     (tstamp 346b4f0b-06c4-4c43-8599-649ea7e4ac47)
-    (at 319.62 161.83 90)
+    (at 358.52 34.9 90)
     (descr "Resistor, Axial_DIN0207 series, Axial, Horizontal, pin pitch=7.62mm, 0.25W = 1/4W, length*diameter=6.3*2.5mm^2, http://cdn-reichelt.de/documents/datenblatt/B400/1_4W%23YAG.pdf")
     (tags "Resistor Axial_DIN0207 series Axial Horizontal pin pitch 7.62mm 0.25W = 1/4W length 6.3mm diameter 2.5mm")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -3244,7 +3244,7 @@
 
   (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" (layer "F.Cu")
     (tstamp 3538fb74-accc-4f55-bf00-3086ff0f5a30)
-    (at 315.57 161.83 90)
+    (at 354.47 34.9 90)
     (descr "Resistor, Axial_DIN0207 series, Axial, Horizontal, pin pitch=7.62mm, 0.25W = 1/4W, length*diameter=6.3*2.5mm^2, http://cdn-reichelt.de/documents/datenblatt/B400/1_4W%23YAG.pdf")
     (tags "Resistor Axial_DIN0207 series Axial Horizontal pin pitch 7.62mm 0.25W = 1/4W length 6.3mm diameter 2.5mm")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -3310,7 +3310,7 @@
 
   (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" (layer "F.Cu")
     (tstamp 356e8c5d-bc4c-4231-8bc7-426e094fb3bc)
-    (at 327.72 151.06 90)
+    (at 366.62 24.13 90)
     (descr "Resistor, Axial_DIN0207 series, Axial, Horizontal, pin pitch=7.62mm, 0.25W = 1/4W, length*diameter=6.3*2.5mm^2, http://cdn-reichelt.de/documents/datenblatt/B400/1_4W%23YAG.pdf")
     (tags "Resistor Axial_DIN0207 series Axial Horizontal pin pitch 7.62mm 0.25W = 1/4W length 6.3mm diameter 2.5mm")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -3376,7 +3376,7 @@
 
   (footprint "Package_DIP:DIP-14_W7.62mm" (layer "F.Cu")
     (tstamp 374ead02-32ed-4d87-86e4-7713e6f47dde)
-    (at 106.68 181.83 90)
+    (at 124.455 67.3 90)
     (descr "14-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -3462,7 +3462,7 @@
 
   (footprint "Package_DIP:DIP-14_W7.62mm" (layer "F.Cu")
     (tstamp 39084d7e-72d4-4a7a-bb63-456bd43a33bb)
-    (at 198.12 45.72 90)
+    (at 160.015 41.9 90)
     (descr "14-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -3547,7 +3547,7 @@
 
   (footprint "Package_DIP:DIP-14_W7.62mm" (layer "F.Cu")
     (tstamp 3c3bbefd-5b58-4244-81f5-1987367044b1)
-    (at 106.68 138.43 90)
+    (at 160.015 16.5 90)
     (descr "14-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -3635,7 +3635,7 @@
 
   (footprint "Package_DIP:DIP-14_W7.62mm" (layer "F.Cu")
     (tstamp 3ccc613b-7b95-484d-abab-d001d0aad10b)
-    (at 67.88 127.58 90)
+    (at 302.255 143.5 90)
     (descr "14-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -3723,7 +3723,7 @@
 
   (footprint "Package_DIP:DIP-20_W7.62mm" (layer "F.Cu")
     (tstamp 3daea3bc-1a6c-45bc-9688-c626e1a2d9c2)
-    (at 325.12 228.6 90)
+    (at 334.015 219.7 90)
     (descr "20-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -3823,7 +3823,7 @@
 
   (footprint "Package_DIP:DIP-14_W7.62mm" (layer "F.Cu")
     (tstamp 3e2e3a72-9b5d-42a5-ab90-0d13e1bc6573)
-    (at 67.88 105.88 90)
+    (at 266.695 118.1 90)
     (descr "14-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -3911,7 +3911,7 @@
 
   (footprint "Package_DIP:DIP-16_W7.62mm" (layer "F.Cu")
     (tstamp 3e5766d9-be2f-41de-b956-36c52eb6c1a4)
-    (at 145.48 181.83 90)
+    (at 229.885 194.3 90)
     (descr "16-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -4003,7 +4003,7 @@
 
   (footprint "Package_DIP:DIP-16_W7.62mm" (layer "F.Cu")
     (tstamp 3ebe9bf0-49af-4dae-9d6e-468b4390fecc)
-    (at 145.48 105.88 90)
+    (at 52.085 143.5 90)
     (descr "16-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -4095,7 +4095,7 @@
 
   (footprint "Package_DIP:DIP-14_W7.62mm" (layer "F.Cu")
     (tstamp 3f08acde-5e61-41de-bc04-f97203f4a0f3)
-    (at 48.48 105.88 90)
+    (at 266.695 168.9 90)
     (descr "14-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -4183,7 +4183,7 @@
 
   (footprint "Package_DIP:DIP-14_W7.62mm" (layer "F.Cu")
     (tstamp 3f43fa18-4215-4daa-b419-06a3ba86d6d6)
-    (at 29.08 149.28 90)
+    (at 160.015 118.1 90)
     (descr "14-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -4271,7 +4271,7 @@
 
   (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" (layer "F.Cu")
     (tstamp 3fabca9b-e232-496a-b638-56b1d265279f)
-    (at 335.82 172.6 90)
+    (at 374.72 45.67 90)
     (descr "Resistor, Axial_DIN0207 series, Axial, Horizontal, pin pitch=7.62mm, 0.25W = 1/4W, length*diameter=6.3*2.5mm^2, http://cdn-reichelt.de/documents/datenblatt/B400/1_4W%23YAG.pdf")
     (tags "Resistor Axial_DIN0207 series Axial Horizontal pin pitch 7.62mm 0.25W = 1/4W length 6.3mm diameter 2.5mm")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -4337,7 +4337,7 @@
 
   (footprint "Package_DIP:DIP-14_W7.62mm" (layer "F.Cu")
     (tstamp 415d0720-45e3-4fd3-9cfb-eb9e9375f472)
-    (at 87.28 95.03 90)
+    (at 17.775 16.5 90)
     (descr "14-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -4425,7 +4425,7 @@
 
   (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" (layer "F.Cu")
     (tstamp 4198d22d-e5c2-441d-8639-679f0094298e)
-    (at 323.67 172.6 90)
+    (at 362.57 45.67 90)
     (descr "Resistor, Axial_DIN0207 series, Axial, Horizontal, pin pitch=7.62mm, 0.25W = 1/4W, length*diameter=6.3*2.5mm^2, http://cdn-reichelt.de/documents/datenblatt/B400/1_4W%23YAG.pdf")
     (tags "Resistor Axial_DIN0207 series Axial Horizontal pin pitch 7.62mm 0.25W = 1/4W length 6.3mm diameter 2.5mm")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -4491,7 +4491,7 @@
 
   (footprint "Package_DIP:DIP-14_W7.62mm" (layer "F.Cu")
     (tstamp 434278e5-be5f-4536-b844-f0db829798fa)
-    (at 29.08 160.13 90)
+    (at 195.575 168.9 90)
     (descr "14-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -4579,7 +4579,7 @@
 
   (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" (layer "F.Cu")
     (tstamp 43fcfe73-40b4-406d-a733-8e9472973007)
-    (at 331.77 140.29 90)
+    (at 370.67 13.36 90)
     (descr "Resistor, Axial_DIN0207 series, Axial, Horizontal, pin pitch=7.62mm, 0.25W = 1/4W, length*diameter=6.3*2.5mm^2, http://cdn-reichelt.de/documents/datenblatt/B400/1_4W%23YAG.pdf")
     (tags "Resistor Axial_DIN0207 series Axial Horizontal pin pitch 7.62mm 0.25W = 1/4W length 6.3mm diameter 2.5mm")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -4645,7 +4645,7 @@
 
   (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" (layer "F.Cu")
     (tstamp 44e68d35-7db7-4d9a-b51d-a43193b7771c)
-    (at 303.42 161.83 90)
+    (at 342.32 34.9 90)
     (descr "Resistor, Axial_DIN0207 series, Axial, Horizontal, pin pitch=7.62mm, 0.25W = 1/4W, length*diameter=6.3*2.5mm^2, http://cdn-reichelt.de/documents/datenblatt/B400/1_4W%23YAG.pdf")
     (tags "Resistor Axial_DIN0207 series Axial Horizontal pin pitch 7.62mm 0.25W = 1/4W length 6.3mm diameter 2.5mm")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -4711,7 +4711,7 @@
 
   (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" (layer "F.Cu")
     (tstamp 4834a9ee-5d86-45ca-a508-6df4dcecfca9)
-    (at 352.02 183.37 90)
+    (at 390.92 56.44 90)
     (descr "Resistor, Axial_DIN0207 series, Axial, Horizontal, pin pitch=7.62mm, 0.25W = 1/4W, length*diameter=6.3*2.5mm^2, http://cdn-reichelt.de/documents/datenblatt/B400/1_4W%23YAG.pdf")
     (tags "Resistor Axial_DIN0207 series Axial Horizontal pin pitch 7.62mm 0.25W = 1/4W length 6.3mm diameter 2.5mm")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -4777,7 +4777,7 @@
 
   (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" (layer "F.Cu")
     (tstamp 4855d72b-d9ac-4294-ab07-23e73858e1a0)
-    (at 319.62 151.06 90)
+    (at 358.52 24.13 90)
     (descr "Resistor, Axial_DIN0207 series, Axial, Horizontal, pin pitch=7.62mm, 0.25W = 1/4W, length*diameter=6.3*2.5mm^2, http://cdn-reichelt.de/documents/datenblatt/B400/1_4W%23YAG.pdf")
     (tags "Resistor Axial_DIN0207 series Axial Horizontal pin pitch 7.62mm 0.25W = 1/4W length 6.3mm diameter 2.5mm")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -4843,7 +4843,7 @@
 
   (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" (layer "F.Cu")
     (tstamp 48973038-1f9f-49a1-866a-6109ff6311b1)
-    (at 347.97 151.06 90)
+    (at 386.87 24.13 90)
     (descr "Resistor, Axial_DIN0207 series, Axial, Horizontal, pin pitch=7.62mm, 0.25W = 1/4W, length*diameter=6.3*2.5mm^2, http://cdn-reichelt.de/documents/datenblatt/B400/1_4W%23YAG.pdf")
     (tags "Resistor Axial_DIN0207 series Axial Horizontal pin pitch 7.62mm 0.25W = 1/4W length 6.3mm diameter 2.5mm")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -4909,7 +4909,7 @@
 
   (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" (layer "F.Cu")
     (tstamp 48bbeb0a-6c69-49e5-b85f-99e65387d58a)
-    (at 299.37 172.6 90)
+    (at 338.27 45.67 90)
     (descr "Resistor, Axial_DIN0207 series, Axial, Horizontal, pin pitch=7.62mm, 0.25W = 1/4W, length*diameter=6.3*2.5mm^2, http://cdn-reichelt.de/documents/datenblatt/B400/1_4W%23YAG.pdf")
     (tags "Resistor Axial_DIN0207 series Axial Horizontal pin pitch 7.62mm 0.25W = 1/4W length 6.3mm diameter 2.5mm")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -4975,7 +4975,7 @@
 
   (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" (layer "F.Cu")
     (tstamp 49ca2c3b-0dfb-4553-87f9-8f31e58770fa)
-    (at 307.47 183.37 90)
+    (at 346.37 56.44 90)
     (descr "Resistor, Axial_DIN0207 series, Axial, Horizontal, pin pitch=7.62mm, 0.25W = 1/4W, length*diameter=6.3*2.5mm^2, http://cdn-reichelt.de/documents/datenblatt/B400/1_4W%23YAG.pdf")
     (tags "Resistor Axial_DIN0207 series Axial Horizontal pin pitch 7.62mm 0.25W = 1/4W length 6.3mm diameter 2.5mm")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -5041,7 +5041,7 @@
 
   (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" (layer "F.Cu")
     (tstamp 4c1110fa-3e50-4f5a-be74-3fc534f73252)
-    (at 295.32 172.6 90)
+    (at 334.22 45.67 90)
     (descr "Resistor, Axial_DIN0207 series, Axial, Horizontal, pin pitch=7.62mm, 0.25W = 1/4W, length*diameter=6.3*2.5mm^2, http://cdn-reichelt.de/documents/datenblatt/B400/1_4W%23YAG.pdf")
     (tags "Resistor Axial_DIN0207 series Axial Horizontal pin pitch 7.62mm 0.25W = 1/4W length 6.3mm diameter 2.5mm")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -5107,7 +5107,7 @@
 
   (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" (layer "F.Cu")
     (tstamp 4d7e99d6-6bff-41f8-b2ba-07ffe4b14c2b)
-    (at 339.87 172.6 90)
+    (at 378.77 45.67 90)
     (descr "Resistor, Axial_DIN0207 series, Axial, Horizontal, pin pitch=7.62mm, 0.25W = 1/4W, length*diameter=6.3*2.5mm^2, http://cdn-reichelt.de/documents/datenblatt/B400/1_4W%23YAG.pdf")
     (tags "Resistor Axial_DIN0207 series Axial Horizontal pin pitch 7.62mm 0.25W = 1/4W length 6.3mm diameter 2.5mm")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -5173,7 +5173,7 @@
 
   (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" (layer "F.Cu")
     (tstamp 4faf9cc1-75cd-4919-aa8a-abcad41f5ef6)
-    (at 327.72 172.6 90)
+    (at 366.62 45.67 90)
     (descr "Resistor, Axial_DIN0207 series, Axial, Horizontal, pin pitch=7.62mm, 0.25W = 1/4W, length*diameter=6.3*2.5mm^2, http://cdn-reichelt.de/documents/datenblatt/B400/1_4W%23YAG.pdf")
     (tags "Resistor Axial_DIN0207 series Axial Horizontal pin pitch 7.62mm 0.25W = 1/4W length 6.3mm diameter 2.5mm")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -5239,7 +5239,7 @@
 
   (footprint "Package_DIP:DIP-14_W7.62mm" (layer "F.Cu")
     (tstamp 518412a6-eeb5-4b68-b2d2-851336c21f46)
-    (at 106.68 73.33 90)
+    (at 17.775 118.1 90)
     (descr "14-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -5324,7 +5324,7 @@
 
   (footprint "Package_DIP:DIP-20_W7.62mm" (layer "F.Cu")
     (tstamp 5542ef16-241a-4615-9d8f-ac840ca6781f)
-    (at 147.32 231.14 90)
+    (at 156.215 219.7 90)
     (descr "20-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -5424,7 +5424,7 @@
 
   (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" (layer "F.Cu")
     (tstamp 55959bdc-e30c-47a7-bf51-bd299749a358)
-    (at 295.32 140.29 90)
+    (at 334.22 13.36 90)
     (descr "Resistor, Axial_DIN0207 series, Axial, Horizontal, pin pitch=7.62mm, 0.25W = 1/4W, length*diameter=6.3*2.5mm^2, http://cdn-reichelt.de/documents/datenblatt/B400/1_4W%23YAG.pdf")
     (tags "Resistor Axial_DIN0207 series Axial Horizontal pin pitch 7.62mm 0.25W = 1/4W length 6.3mm diameter 2.5mm")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -5490,7 +5490,7 @@
 
   (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" (layer "F.Cu")
     (tstamp 55c0afc0-e0c2-4c20-9dcd-71bfaae8e8a4)
-    (at 303.42 140.29 90)
+    (at 342.32 13.36 90)
     (descr "Resistor, Axial_DIN0207 series, Axial, Horizontal, pin pitch=7.62mm, 0.25W = 1/4W, length*diameter=6.3*2.5mm^2, http://cdn-reichelt.de/documents/datenblatt/B400/1_4W%23YAG.pdf")
     (tags "Resistor Axial_DIN0207 series Axial Horizontal pin pitch 7.62mm 0.25W = 1/4W length 6.3mm diameter 2.5mm")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -5556,7 +5556,7 @@
 
   (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" (layer "F.Cu")
     (tstamp 56ba1b84-e5e5-471e-af92-7ba0a979f935)
-    (at 319.62 172.6 90)
+    (at 358.52 45.67 90)
     (descr "Resistor, Axial_DIN0207 series, Axial, Horizontal, pin pitch=7.62mm, 0.25W = 1/4W, length*diameter=6.3*2.5mm^2, http://cdn-reichelt.de/documents/datenblatt/B400/1_4W%23YAG.pdf")
     (tags "Resistor Axial_DIN0207 series Axial Horizontal pin pitch 7.62mm 0.25W = 1/4W length 6.3mm diameter 2.5mm")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -5622,7 +5622,7 @@
 
   (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" (layer "F.Cu")
     (tstamp 581c5670-2c80-4ecd-88f0-6995a00ea2b0)
-    (at 331.77 183.37 90)
+    (at 370.67 56.44 90)
     (descr "Resistor, Axial_DIN0207 series, Axial, Horizontal, pin pitch=7.62mm, 0.25W = 1/4W, length*diameter=6.3*2.5mm^2, http://cdn-reichelt.de/documents/datenblatt/B400/1_4W%23YAG.pdf")
     (tags "Resistor Axial_DIN0207 series Axial Horizontal pin pitch 7.62mm 0.25W = 1/4W length 6.3mm diameter 2.5mm")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -5688,7 +5688,7 @@
 
   (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" (layer "F.Cu")
     (tstamp 5b32a25f-80ee-40a6-9f57-a4f51cfd6646)
-    (at 299.37 161.83 90)
+    (at 338.27 34.9 90)
     (descr "Resistor, Axial_DIN0207 series, Axial, Horizontal, pin pitch=7.62mm, 0.25W = 1/4W, length*diameter=6.3*2.5mm^2, http://cdn-reichelt.de/documents/datenblatt/B400/1_4W%23YAG.pdf")
     (tags "Resistor Axial_DIN0207 series Axial Horizontal pin pitch 7.62mm 0.25W = 1/4W length 6.3mm diameter 2.5mm")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -5754,7 +5754,7 @@
 
   (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" (layer "F.Cu")
     (tstamp 5c8e3c91-3be1-4ba1-bdf7-16caa948b82a)
-    (at 311.52 161.83 90)
+    (at 350.42 34.9 90)
     (descr "Resistor, Axial_DIN0207 series, Axial, Horizontal, pin pitch=7.62mm, 0.25W = 1/4W, length*diameter=6.3*2.5mm^2, http://cdn-reichelt.de/documents/datenblatt/B400/1_4W%23YAG.pdf")
     (tags "Resistor Axial_DIN0207 series Axial Horizontal pin pitch 7.62mm 0.25W = 1/4W length 6.3mm diameter 2.5mm")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -5820,7 +5820,7 @@
 
   (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" (layer "F.Cu")
     (tstamp 6052597a-fffd-4e20-a01e-5b86699ca23e)
-    (at 335.82 161.83 90)
+    (at 374.72 34.9 90)
     (descr "Resistor, Axial_DIN0207 series, Axial, Horizontal, pin pitch=7.62mm, 0.25W = 1/4W, length*diameter=6.3*2.5mm^2, http://cdn-reichelt.de/documents/datenblatt/B400/1_4W%23YAG.pdf")
     (tags "Resistor Axial_DIN0207 series Axial Horizontal pin pitch 7.62mm 0.25W = 1/4W length 6.3mm diameter 2.5mm")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -5886,7 +5886,7 @@
 
   (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" (layer "F.Cu")
     (tstamp 65c9414a-4bb1-450c-aa80-e543f462643c)
-    (at 356.07 151.06 90)
+    (at 394.97 24.13 90)
     (descr "Resistor, Axial_DIN0207 series, Axial, Horizontal, pin pitch=7.62mm, 0.25W = 1/4W, length*diameter=6.3*2.5mm^2, http://cdn-reichelt.de/documents/datenblatt/B400/1_4W%23YAG.pdf")
     (tags "Resistor Axial_DIN0207 series Axial Horizontal pin pitch 7.62mm 0.25W = 1/4W length 6.3mm diameter 2.5mm")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -5952,7 +5952,7 @@
 
   (footprint "Package_DIP:DIP-16_W7.62mm" (layer "F.Cu")
     (tstamp 66edf796-4202-4896-9d66-f9a197b0c324)
-    (at 233.08 138.43 90)
+    (at 87.645 194.3 90)
     (descr "16-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -6044,7 +6044,7 @@
 
   (footprint "Package_DIP:DIP-16_W7.62mm" (layer "F.Cu")
     (tstamp 67686489-eb9d-43a6-ab76-47d670030c2d)
-    (at 211.18 160.13 90)
+    (at 336.565 194.3 90)
     (descr "16-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -6268,7 +6268,7 @@
 
   (footprint "Package_DIP:DIP-20_W7.62mm" (layer "F.Cu")
     (tstamp 6dd2475a-db4f-48b3-86e2-2d03d58cfe2e)
-    (at 285.755 229.86 90)
+    (at 298.455 219.7 90)
     (descr "20-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -6368,7 +6368,7 @@
 
   (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" (layer "F.Cu")
     (tstamp 6f363d6c-eba8-4e7e-8113-f62b86e8a650)
-    (at 307.47 140.29 90)
+    (at 346.37 13.36 90)
     (descr "Resistor, Axial_DIN0207 series, Axial, Horizontal, pin pitch=7.62mm, 0.25W = 1/4W, length*diameter=6.3*2.5mm^2, http://cdn-reichelt.de/documents/datenblatt/B400/1_4W%23YAG.pdf")
     (tags "Resistor Axial_DIN0207 series Axial Horizontal pin pitch 7.62mm 0.25W = 1/4W length 6.3mm diameter 2.5mm")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -6434,7 +6434,7 @@
 
   (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" (layer "F.Cu")
     (tstamp 70740149-9f42-43fc-9ed8-9ce3c6a4c38d)
-    (at 323.67 140.29 90)
+    (at 362.57 13.36 90)
     (descr "Resistor, Axial_DIN0207 series, Axial, Horizontal, pin pitch=7.62mm, 0.25W = 1/4W, length*diameter=6.3*2.5mm^2, http://cdn-reichelt.de/documents/datenblatt/B400/1_4W%23YAG.pdf")
     (tags "Resistor Axial_DIN0207 series Axial Horizontal pin pitch 7.62mm 0.25W = 1/4W length 6.3mm diameter 2.5mm")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -6500,7 +6500,7 @@
 
   (footprint "Package_DIP:DIP-14_W7.62mm" (layer "F.Cu")
     (tstamp 72cac097-bc96-459c-ae32-abb7ded9cde6)
-    (at 29.08 192.68 90)
+    (at 53.335 168.9 90)
     (descr "14-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -6588,7 +6588,7 @@
 
   (footprint "Package_DIP:DIP-16_W7.62mm" (layer "F.Cu")
     (tstamp 736608fb-0fc0-48cd-bb6e-96ab19bc0c1a)
-    (at 167.38 170.98 90)
+    (at 158.765 168.9 90)
     (descr "16-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -6680,7 +6680,7 @@
 
   (footprint "Package_DIP:DIP-14_W7.62mm" (layer "F.Cu")
     (tstamp 75d85634-0b36-41d2-b7d9-36f96d5ab324)
-    (at 67.88 73.33 90)
+    (at 88.895 16.5 90)
     (descr "14-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -6768,7 +6768,7 @@
 
   (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" (layer "F.Cu")
     (tstamp 7874edd5-79f7-4476-8081-411760c9ee35)
-    (at 356.07 172.6 90)
+    (at 394.97 45.67 90)
     (descr "Resistor, Axial_DIN0207 series, Axial, Horizontal, pin pitch=7.62mm, 0.25W = 1/4W, length*diameter=6.3*2.5mm^2, http://cdn-reichelt.de/documents/datenblatt/B400/1_4W%23YAG.pdf")
     (tags "Resistor Axial_DIN0207 series Axial Horizontal pin pitch 7.62mm 0.25W = 1/4W length 6.3mm diameter 2.5mm")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -6834,7 +6834,7 @@
 
   (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" (layer "F.Cu")
     (tstamp 79d7bf6b-b161-48fe-a937-99088d91fdf9)
-    (at 307.47 151.06 90)
+    (at 346.37 24.13 90)
     (descr "Resistor, Axial_DIN0207 series, Axial, Horizontal, pin pitch=7.62mm, 0.25W = 1/4W, length*diameter=6.3*2.5mm^2, http://cdn-reichelt.de/documents/datenblatt/B400/1_4W%23YAG.pdf")
     (tags "Resistor Axial_DIN0207 series Axial Horizontal pin pitch 7.62mm 0.25W = 1/4W length 6.3mm diameter 2.5mm")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -6900,7 +6900,7 @@
 
   (footprint "Package_DIP:DIP-16_W7.62mm" (layer "F.Cu")
     (tstamp 7a69d355-346d-4c04-8b2b-d6eba7716db4)
-    (at 189.28 203.53 90)
+    (at 229.885 168.9 90)
     (descr "16-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -6992,7 +6992,7 @@
 
   (footprint "Package_DIP:DIP-20_W7.62mm" (layer "F.Cu")
     (tstamp 7e5afcc1-6c18-4b36-be95-ea26ee457bb8)
-    (at 45.72 231.14 90)
+    (at 49.535 219.7 90)
     (descr "20-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -7092,7 +7092,7 @@
 
   (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" (layer "F.Cu")
     (tstamp 80d31712-af81-4700-9a2e-d285bde2f9ad)
-    (at 295.32 161.83 90)
+    (at 334.22 34.9 90)
     (descr "Resistor, Axial_DIN0207 series, Axial, Horizontal, pin pitch=7.62mm, 0.25W = 1/4W, length*diameter=6.3*2.5mm^2, http://cdn-reichelt.de/documents/datenblatt/B400/1_4W%23YAG.pdf")
     (tags "Resistor Axial_DIN0207 series Axial Horizontal pin pitch 7.62mm 0.25W = 1/4W length 6.3mm diameter 2.5mm")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -7158,7 +7158,7 @@
 
   (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" (layer "F.Cu")
     (tstamp 8369d83b-3178-49b8-bb69-422ef0702d55)
-    (at 343.92 183.37 90)
+    (at 382.82 56.44 90)
     (descr "Resistor, Axial_DIN0207 series, Axial, Horizontal, pin pitch=7.62mm, 0.25W = 1/4W, length*diameter=6.3*2.5mm^2, http://cdn-reichelt.de/documents/datenblatt/B400/1_4W%23YAG.pdf")
     (tags "Resistor Axial_DIN0207 series Axial Horizontal pin pitch 7.62mm 0.25W = 1/4W length 6.3mm diameter 2.5mm")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -7356,7 +7356,7 @@
 
   (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" (layer "F.Cu")
     (tstamp 876bceaf-14aa-4ca4-b08a-d6b72baa422c)
-    (at 331.77 151.06 90)
+    (at 370.67 24.13 90)
     (descr "Resistor, Axial_DIN0207 series, Axial, Horizontal, pin pitch=7.62mm, 0.25W = 1/4W, length*diameter=6.3*2.5mm^2, http://cdn-reichelt.de/documents/datenblatt/B400/1_4W%23YAG.pdf")
     (tags "Resistor Axial_DIN0207 series Axial Horizontal pin pitch 7.62mm 0.25W = 1/4W length 6.3mm diameter 2.5mm")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -7422,7 +7422,7 @@
 
   (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" (layer "F.Cu")
     (tstamp 886c6cc5-7c4c-4137-a433-6e42f6143fcb)
-    (at 311.52 151.06 90)
+    (at 350.42 24.13 90)
     (descr "Resistor, Axial_DIN0207 series, Axial, Horizontal, pin pitch=7.62mm, 0.25W = 1/4W, length*diameter=6.3*2.5mm^2, http://cdn-reichelt.de/documents/datenblatt/B400/1_4W%23YAG.pdf")
     (tags "Resistor Axial_DIN0207 series Axial Horizontal pin pitch 7.62mm 0.25W = 1/4W length 6.3mm diameter 2.5mm")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -7488,7 +7488,7 @@
 
   (footprint "Package_DIP:DIP-16_W7.62mm" (layer "F.Cu")
     (tstamp 8fd6a439-b579-40d8-aab6-16222cd99367)
-    (at 145.48 116.73 90)
+    (at 87.645 67.3 90)
     (descr "16-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -7580,7 +7580,7 @@
 
   (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" (layer "F.Cu")
     (tstamp 921cdb7a-7b3c-44d0-977d-462bad6102f2)
-    (at 295.32 183.37 90)
+    (at 334.22 56.44 90)
     (descr "Resistor, Axial_DIN0207 series, Axial, Horizontal, pin pitch=7.62mm, 0.25W = 1/4W, length*diameter=6.3*2.5mm^2, http://cdn-reichelt.de/documents/datenblatt/B400/1_4W%23YAG.pdf")
     (tags "Resistor Axial_DIN0207 series Axial Horizontal pin pitch 7.62mm 0.25W = 1/4W length 6.3mm diameter 2.5mm")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -7646,7 +7646,7 @@
 
   (footprint "Package_DIP:DIP-14_W7.62mm" (layer "F.Cu")
     (tstamp 95a6a9b0-332b-4042-8e2d-94728ac6a4be)
-    (at 106.68 116.73 90)
+    (at 231.135 41.9 90)
     (descr "14-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -7734,7 +7734,7 @@
 
   (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" (layer "F.Cu")
     (tstamp 9723911c-e2e6-44c6-85c9-b780278df29e)
-    (at 307.47 172.6 90)
+    (at 346.37 45.67 90)
     (descr "Resistor, Axial_DIN0207 series, Axial, Horizontal, pin pitch=7.62mm, 0.25W = 1/4W, length*diameter=6.3*2.5mm^2, http://cdn-reichelt.de/documents/datenblatt/B400/1_4W%23YAG.pdf")
     (tags "Resistor Axial_DIN0207 series Axial Horizontal pin pitch 7.62mm 0.25W = 1/4W length 6.3mm diameter 2.5mm")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -7800,7 +7800,7 @@
 
   (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" (layer "F.Cu")
     (tstamp 97cdb16e-2fd6-41d1-a4cb-4794a299d43e)
-    (at 335.82 183.37 90)
+    (at 374.72 56.44 90)
     (descr "Resistor, Axial_DIN0207 series, Axial, Horizontal, pin pitch=7.62mm, 0.25W = 1/4W, length*diameter=6.3*2.5mm^2, http://cdn-reichelt.de/documents/datenblatt/B400/1_4W%23YAG.pdf")
     (tags "Resistor Axial_DIN0207 series Axial Horizontal pin pitch 7.62mm 0.25W = 1/4W length 6.3mm diameter 2.5mm")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -7866,7 +7866,7 @@
 
   (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" (layer "F.Cu")
     (tstamp 9c269c67-bfee-435c-aba6-a1f9d07a3020)
-    (at 335.82 151.06 90)
+    (at 374.72 24.13 90)
     (descr "Resistor, Axial_DIN0207 series, Axial, Horizontal, pin pitch=7.62mm, 0.25W = 1/4W, length*diameter=6.3*2.5mm^2, http://cdn-reichelt.de/documents/datenblatt/B400/1_4W%23YAG.pdf")
     (tags "Resistor Axial_DIN0207 series Axial Horizontal pin pitch 7.62mm 0.25W = 1/4W length 6.3mm diameter 2.5mm")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -7932,7 +7932,7 @@
 
   (footprint "Package_DIP:DIP-14_W7.62mm" (layer "F.Cu")
     (tstamp 9c6d04c8-f227-4970-a0e5-70fb8b948acd)
-    (at 87.28 138.43 90)
+    (at 302.255 118.1 90)
     (descr "14-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -8020,7 +8020,7 @@
 
   (footprint "Package_DIP:DIP-14_W7.62mm" (layer "F.Cu")
     (tstamp 9d34f00d-77b3-4a8b-99e9-8d8af26fa1a4)
-    (at 29.08 95.03 90)
+    (at 124.455 118.1 90)
     (descr "14-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -8033,11 +8033,11 @@
         (effects (font (size 1 1) (thickness 0.15)))
       (tstamp 7db02b43-3d76-44ed-b2ae-15e009feb79c)
     )
-    (fp_text value "74AHC08" (at 3.81 17.57 90) (layer "F.Fab")
+    (fp_text value "74AHC08" (at 3.8 17.785 90) (layer "F.Fab")
         (effects (font (size 1 1) (thickness 0.15)))
       (tstamp 29da1385-4a37-44d4-88aa-236cebe9cd54)
     )
-    (fp_text user "${REFERENCE}" (at 3.81 7.62 90) (layer "F.Fab")
+    (fp_text user "${REFERENCE}" (at 3.8 7.625 90) (layer "F.Fab")
         (effects (font (size 1 1) (thickness 0.15)))
       (tstamp 6d703b4f-7023-468d-89b7-e280b3ac216e)
     )
@@ -8108,7 +8108,7 @@
 
   (footprint "Package_DIP:DIP-16_W7.62mm" (layer "F.Cu")
     (tstamp 9d569e31-80de-41ea-a82e-6f982aee7dbe)
-    (at 145.48 160.13 90)
+    (at 158.765 143.5 90)
     (descr "16-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -8200,7 +8200,7 @@
 
   (footprint "Package_DIP:DIP-20_W7.62mm" (layer "F.Cu")
     (tstamp a16ad2f6-e977-4d7c-879d-6ce2b7536334)
-    (at 251.46 231.14 90)
+    (at 262.895 219.7 90)
     (descr "20-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -8300,7 +8300,7 @@
 
   (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" (layer "F.Cu")
     (tstamp a1d38e21-01e7-4e15-a5c6-5f4335d49ab6)
-    (at 343.92 161.83 90)
+    (at 382.82 34.9 90)
     (descr "Resistor, Axial_DIN0207 series, Axial, Horizontal, pin pitch=7.62mm, 0.25W = 1/4W, length*diameter=6.3*2.5mm^2, http://cdn-reichelt.de/documents/datenblatt/B400/1_4W%23YAG.pdf")
     (tags "Resistor Axial_DIN0207 series Axial Horizontal pin pitch 7.62mm 0.25W = 1/4W length 6.3mm diameter 2.5mm")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -8366,7 +8366,7 @@
 
   (footprint "Package_DIP:DIP-16_W7.62mm" (layer "F.Cu")
     (tstamp a4ff8126-c1f1-4d1c-9c3b-98a991a2ba14)
-    (at 167.38 105.88 90)
+    (at 87.645 118.1 90)
     (descr "16-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -8458,7 +8458,7 @@
 
   (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" (layer "F.Cu")
     (tstamp a7431b6f-2f27-4fa0-b544-3442530415a9)
-    (at 339.87 161.83 90)
+    (at 378.77 34.9 90)
     (descr "Resistor, Axial_DIN0207 series, Axial, Horizontal, pin pitch=7.62mm, 0.25W = 1/4W, length*diameter=6.3*2.5mm^2, http://cdn-reichelt.de/documents/datenblatt/B400/1_4W%23YAG.pdf")
     (tags "Resistor Axial_DIN0207 series Axial Horizontal pin pitch 7.62mm 0.25W = 1/4W length 6.3mm diameter 2.5mm")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -8524,7 +8524,7 @@
 
   (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" (layer "F.Cu")
     (tstamp a7a4847e-d93d-4630-bf56-9a6f8e02ddda)
-    (at 303.42 172.6 90)
+    (at 342.32 45.67 90)
     (descr "Resistor, Axial_DIN0207 series, Axial, Horizontal, pin pitch=7.62mm, 0.25W = 1/4W, length*diameter=6.3*2.5mm^2, http://cdn-reichelt.de/documents/datenblatt/B400/1_4W%23YAG.pdf")
     (tags "Resistor Axial_DIN0207 series Axial Horizontal pin pitch 7.62mm 0.25W = 1/4W length 6.3mm diameter 2.5mm")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -8590,7 +8590,7 @@
 
   (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" (layer "F.Cu")
     (tstamp a96ab36c-19ed-4f86-801b-c44f04b1de64)
-    (at 299.37 151.06 90)
+    (at 338.27 24.13 90)
     (descr "Resistor, Axial_DIN0207 series, Axial, Horizontal, pin pitch=7.62mm, 0.25W = 1/4W, length*diameter=6.3*2.5mm^2, http://cdn-reichelt.de/documents/datenblatt/B400/1_4W%23YAG.pdf")
     (tags "Resistor Axial_DIN0207 series Axial Horizontal pin pitch 7.62mm 0.25W = 1/4W length 6.3mm diameter 2.5mm")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -8656,7 +8656,7 @@
 
   (footprint "Package_DIP:DIP-16_W7.62mm" (layer "F.Cu")
     (tstamp aaa507c5-3896-458c-96aa-75c4ab8db2d2)
-    (at 167.38 116.73 90)
+    (at 123.205 92.7 90)
     (descr "16-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -8748,7 +8748,7 @@
 
   (footprint "Package_DIP:DIP-14_W7.62mm" (layer "F.Cu")
     (tstamp ac83efee-f9b9-4b50-ad14-2aa6676625d0)
-    (at 106.68 127.58 90)
+    (at 231.135 67.3 90)
     (descr "14-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -8836,7 +8836,7 @@
 
   (footprint "Package_DIP:DIP-14_W7.62mm" (layer "F.Cu")
     (tstamp adff76ef-4562-4e80-99a5-a249d5c9d32a)
-    (at 129.54 22.86 90)
+    (at 231.135 92.7 90)
     (descr "14-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -8924,7 +8924,7 @@
 
   (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" (layer "F.Cu")
     (tstamp b09ee1d8-b705-45f1-9395-19a7f38f103c)
-    (at 299.37 140.29 90)
+    (at 338.27 13.36 90)
     (descr "Resistor, Axial_DIN0207 series, Axial, Horizontal, pin pitch=7.62mm, 0.25W = 1/4W, length*diameter=6.3*2.5mm^2, http://cdn-reichelt.de/documents/datenblatt/B400/1_4W%23YAG.pdf")
     (tags "Resistor Axial_DIN0207 series Axial Horizontal pin pitch 7.62mm 0.25W = 1/4W length 6.3mm diameter 2.5mm")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -8990,7 +8990,7 @@
 
   (footprint "Package_DIP:DIP-16_W7.62mm" (layer "F.Cu")
     (tstamp b1491471-0601-40da-b662-43eaeb7c2caa)
-    (at 167.38 149.28 90)
+    (at 194.325 118.1 90)
     (descr "16-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -9082,7 +9082,7 @@
 
   (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" (layer "F.Cu")
     (tstamp b169f362-2081-43da-8c4a-c2cab4b81003)
-    (at 343.92 151.06 90)
+    (at 382.82 24.13 90)
     (descr "Resistor, Axial_DIN0207 series, Axial, Horizontal, pin pitch=7.62mm, 0.25W = 1/4W, length*diameter=6.3*2.5mm^2, http://cdn-reichelt.de/documents/datenblatt/B400/1_4W%23YAG.pdf")
     (tags "Resistor Axial_DIN0207 series Axial Horizontal pin pitch 7.62mm 0.25W = 1/4W length 6.3mm diameter 2.5mm")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -9148,7 +9148,7 @@
 
   (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" (layer "F.Cu")
     (tstamp b2f6a7eb-167e-4d86-ae0d-5932a6115b9d)
-    (at 315.57 183.37 90)
+    (at 354.47 56.44 90)
     (descr "Resistor, Axial_DIN0207 series, Axial, Horizontal, pin pitch=7.62mm, 0.25W = 1/4W, length*diameter=6.3*2.5mm^2, http://cdn-reichelt.de/documents/datenblatt/B400/1_4W%23YAG.pdf")
     (tags "Resistor Axial_DIN0207 series Axial Horizontal pin pitch 7.62mm 0.25W = 1/4W length 6.3mm diameter 2.5mm")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -9214,7 +9214,7 @@
 
   (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" (layer "F.Cu")
     (tstamp b5e92a27-b1d3-4993-b196-82494dd9c1ce)
-    (at 331.77 161.83 90)
+    (at 370.67 34.9 90)
     (descr "Resistor, Axial_DIN0207 series, Axial, Horizontal, pin pitch=7.62mm, 0.25W = 1/4W, length*diameter=6.3*2.5mm^2, http://cdn-reichelt.de/documents/datenblatt/B400/1_4W%23YAG.pdf")
     (tags "Resistor Axial_DIN0207 series Axial Horizontal pin pitch 7.62mm 0.25W = 1/4W length 6.3mm diameter 2.5mm")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -9280,7 +9280,7 @@
 
   (footprint "Package_DIP:DIP-14_W7.62mm" (layer "F.Cu")
     (tstamp b868ab8f-d5bd-4df1-81b8-6acd7cc16419)
-    (at 126.08 160.13 90)
+    (at 160.015 67.3 90)
     (descr "14-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -9368,7 +9368,7 @@
 
   (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" (layer "F.Cu")
     (tstamp b99906ad-1005-4194-ac2b-9fef651d0105)
-    (at 299.37 183.37 90)
+    (at 338.27 56.44 90)
     (descr "Resistor, Axial_DIN0207 series, Axial, Horizontal, pin pitch=7.62mm, 0.25W = 1/4W, length*diameter=6.3*2.5mm^2, http://cdn-reichelt.de/documents/datenblatt/B400/1_4W%23YAG.pdf")
     (tags "Resistor Axial_DIN0207 series Axial Horizontal pin pitch 7.62mm 0.25W = 1/4W length 6.3mm diameter 2.5mm")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -9566,7 +9566,7 @@
 
   (footprint "Package_DIP:DIP-14_W7.62mm" (layer "F.Cu")
     (tstamp ba76294a-9df0-42bb-9eb7-f93fcbe53bd6)
-    (at 67.88 170.98 90)
+    (at 231.135 143.5 90)
     (descr "14-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -9654,7 +9654,7 @@
 
   (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" (layer "F.Cu")
     (tstamp bbbcad4e-e9c9-48bb-b527-6ed8843ed441)
-    (at 319.62 183.37 90)
+    (at 358.52 56.44 90)
     (descr "Resistor, Axial_DIN0207 series, Axial, Horizontal, pin pitch=7.62mm, 0.25W = 1/4W, length*diameter=6.3*2.5mm^2, http://cdn-reichelt.de/documents/datenblatt/B400/1_4W%23YAG.pdf")
     (tags "Resistor Axial_DIN0207 series Axial Horizontal pin pitch 7.62mm 0.25W = 1/4W length 6.3mm diameter 2.5mm")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -9720,7 +9720,7 @@
 
   (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" (layer "F.Cu")
     (tstamp bf343bfb-f12c-411a-88d5-7daa0705f9ed)
-    (at 303.42 151.06 90)
+    (at 342.32 24.13 90)
     (descr "Resistor, Axial_DIN0207 series, Axial, Horizontal, pin pitch=7.62mm, 0.25W = 1/4W, length*diameter=6.3*2.5mm^2, http://cdn-reichelt.de/documents/datenblatt/B400/1_4W%23YAG.pdf")
     (tags "Resistor Axial_DIN0207 series Axial Horizontal pin pitch 7.62mm 0.25W = 1/4W length 6.3mm diameter 2.5mm")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -9786,7 +9786,7 @@
 
   (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" (layer "F.Cu")
     (tstamp c001cc8c-2ed9-4253-be9f-07cdcf7798dc)
-    (at 352.02 161.83 90)
+    (at 390.92 34.9 90)
     (descr "Resistor, Axial_DIN0207 series, Axial, Horizontal, pin pitch=7.62mm, 0.25W = 1/4W, length*diameter=6.3*2.5mm^2, http://cdn-reichelt.de/documents/datenblatt/B400/1_4W%23YAG.pdf")
     (tags "Resistor Axial_DIN0207 series Axial Horizontal pin pitch 7.62mm 0.25W = 1/4W length 6.3mm diameter 2.5mm")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -9852,7 +9852,7 @@
 
   (footprint "Package_DIP:DIP-14_W7.62mm" (layer "F.Cu")
     (tstamp c22dd68a-5160-4bd6-9976-ddf36b480309)
-    (at 29.08 116.73 90)
+    (at 195.575 92.7 90)
     (descr "14-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -9940,7 +9940,7 @@
 
   (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" (layer "F.Cu")
     (tstamp c53d1649-f9f2-4829-9e66-314312cb8189)
-    (at 295.32 151.06 90)
+    (at 334.22 24.13 90)
     (descr "Resistor, Axial_DIN0207 series, Axial, Horizontal, pin pitch=7.62mm, 0.25W = 1/4W, length*diameter=6.3*2.5mm^2, http://cdn-reichelt.de/documents/datenblatt/B400/1_4W%23YAG.pdf")
     (tags "Resistor Axial_DIN0207 series Axial Horizontal pin pitch 7.62mm 0.25W = 1/4W length 6.3mm diameter 2.5mm")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -10006,7 +10006,7 @@
 
   (footprint "Package_DIP:DIP-16_W7.62mm" (layer "F.Cu")
     (tstamp c7531591-97e5-4614-95fb-ba12f0af6f1d)
-    (at 167.38 138.43 90)
+    (at 158.765 92.7 90)
     (descr "16-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -10098,7 +10098,7 @@
 
   (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" (layer "F.Cu")
     (tstamp cb32683a-a03c-429f-8354-5754ffd3df71)
-    (at 356.07 183.37 90)
+    (at 394.97 56.44 90)
     (descr "Resistor, Axial_DIN0207 series, Axial, Horizontal, pin pitch=7.62mm, 0.25W = 1/4W, length*diameter=6.3*2.5mm^2, http://cdn-reichelt.de/documents/datenblatt/B400/1_4W%23YAG.pdf")
     (tags "Resistor Axial_DIN0207 series Axial Horizontal pin pitch 7.62mm 0.25W = 1/4W length 6.3mm diameter 2.5mm")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -10164,7 +10164,7 @@
 
   (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" (layer "F.Cu")
     (tstamp cc52737e-dae5-4560-8739-0efbb4b7eef7)
-    (at 347.97 172.6 90)
+    (at 386.87 45.67 90)
     (descr "Resistor, Axial_DIN0207 series, Axial, Horizontal, pin pitch=7.62mm, 0.25W = 1/4W, length*diameter=6.3*2.5mm^2, http://cdn-reichelt.de/documents/datenblatt/B400/1_4W%23YAG.pdf")
     (tags "Resistor Axial_DIN0207 series Axial Horizontal pin pitch 7.62mm 0.25W = 1/4W length 6.3mm diameter 2.5mm")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -10230,7 +10230,7 @@
 
   (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" (layer "F.Cu")
     (tstamp cce8c11e-393f-4a87-b0b4-69dc0def9999)
-    (at 339.87 151.06 90)
+    (at 378.77 24.13 90)
     (descr "Resistor, Axial_DIN0207 series, Axial, Horizontal, pin pitch=7.62mm, 0.25W = 1/4W, length*diameter=6.3*2.5mm^2, http://cdn-reichelt.de/documents/datenblatt/B400/1_4W%23YAG.pdf")
     (tags "Resistor Axial_DIN0207 series Axial Horizontal pin pitch 7.62mm 0.25W = 1/4W length 6.3mm diameter 2.5mm")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -10296,7 +10296,7 @@
 
   (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" (layer "F.Cu")
     (tstamp d1d574b5-1452-44f9-b030-0d2e1684b4eb)
-    (at 327.72 183.37 90)
+    (at 366.62 56.44 90)
     (descr "Resistor, Axial_DIN0207 series, Axial, Horizontal, pin pitch=7.62mm, 0.25W = 1/4W, length*diameter=6.3*2.5mm^2, http://cdn-reichelt.de/documents/datenblatt/B400/1_4W%23YAG.pdf")
     (tags "Resistor Axial_DIN0207 series Axial Horizontal pin pitch 7.62mm 0.25W = 1/4W length 6.3mm diameter 2.5mm")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -10362,7 +10362,7 @@
 
   (footprint "Package_DIP:DIP-20_W7.62mm" (layer "F.Cu")
     (tstamp d2116d79-0cb1-4333-a3e1-1427d99a916d)
-    (at 12.7 231.14 90)
+    (at 13.975 219.7 90)
     (descr "20-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -10462,7 +10462,7 @@
 
   (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" (layer "F.Cu")
     (tstamp d33102ee-73b7-4bb0-aed4-6b4550389ee0)
-    (at 327.72 161.83 90)
+    (at 366.62 34.9 90)
     (descr "Resistor, Axial_DIN0207 series, Axial, Horizontal, pin pitch=7.62mm, 0.25W = 1/4W, length*diameter=6.3*2.5mm^2, http://cdn-reichelt.de/documents/datenblatt/B400/1_4W%23YAG.pdf")
     (tags "Resistor Axial_DIN0207 series Axial Horizontal pin pitch 7.62mm 0.25W = 1/4W length 6.3mm diameter 2.5mm")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -10528,7 +10528,7 @@
 
   (footprint "Package_DIP:DIP-14_W7.62mm" (layer "F.Cu")
     (tstamp d35251df-7512-4965-a5fc-2e04abc3866e)
-    (at 29.08 127.58 90)
+    (at 195.575 67.3 90)
     (descr "14-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -10616,7 +10616,7 @@
 
   (footprint "Package_DIP:DIP-14_W7.62mm" (layer "F.Cu")
     (tstamp d3e2f36a-f59e-405d-a4c1-2698c18ccd97)
-    (at 106.68 149.28 90)
+    (at 17.775 143.5 90)
     (descr "14-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -10704,7 +10704,7 @@
 
   (footprint "Package_DIP:DIP-14_W7.62mm" (layer "F.Cu")
     (tstamp d4767626-cc27-4ed6-b50b-d8ecf82dd6d6)
-    (at 87.28 181.83 90)
+    (at 53.335 118.1 90)
     (descr "14-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -10792,7 +10792,7 @@
 
   (footprint "Package_DIP:DIP-16_W7.62mm" (layer "F.Cu")
     (tstamp d774977d-49a9-4f58-9ec3-518e46b4869a)
-    (at 167.38 127.58 90)
+    (at 123.205 168.9 90)
     (descr "16-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -10884,7 +10884,7 @@
 
   (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" (layer "F.Cu")
     (tstamp daba709b-12e1-4207-b6ec-f1218593f446)
-    (at 352.02 151.06 90)
+    (at 390.92 24.13 90)
     (descr "Resistor, Axial_DIN0207 series, Axial, Horizontal, pin pitch=7.62mm, 0.25W = 1/4W, length*diameter=6.3*2.5mm^2, http://cdn-reichelt.de/documents/datenblatt/B400/1_4W%23YAG.pdf")
     (tags "Resistor Axial_DIN0207 series Axial Horizontal pin pitch 7.62mm 0.25W = 1/4W length 6.3mm diameter 2.5mm")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -10950,7 +10950,7 @@
 
   (footprint "Package_DIP:DIP-14_W7.62mm" (layer "F.Cu")
     (tstamp dc81ea13-dcee-4f2f-b742-e9d84ee3c2e7)
-    (at 87.28 127.58 90)
+    (at 337.815 143.5 90)
     (descr "14-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -11038,7 +11038,7 @@
 
   (footprint "Package_DIP:DIP-14_W7.62mm" (layer "F.Cu")
     (tstamp ddb82b3a-2fa1-4213-a747-4803a32e39a9)
-    (at 87.28 105.88 90)
+    (at 53.335 67.3 90)
     (descr "14-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -11126,7 +11126,7 @@
 
   (footprint "Package_DIP:DIP-16_W7.62mm" (layer "F.Cu")
     (tstamp defb22a5-94a2-46e7-9b83-095ecaab3e99)
-    (at 167.38 160.13 90)
+    (at 87.645 143.5 90)
     (descr "16-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -11218,7 +11218,7 @@
 
   (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" (layer "F.Cu")
     (tstamp df942c00-e929-4bbb-aa77-1c091ccc0e95)
-    (at 315.57 140.29 90)
+    (at 354.47 13.36 90)
     (descr "Resistor, Axial_DIN0207 series, Axial, Horizontal, pin pitch=7.62mm, 0.25W = 1/4W, length*diameter=6.3*2.5mm^2, http://cdn-reichelt.de/documents/datenblatt/B400/1_4W%23YAG.pdf")
     (tags "Resistor Axial_DIN0207 series Axial Horizontal pin pitch 7.62mm 0.25W = 1/4W length 6.3mm diameter 2.5mm")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -11284,7 +11284,7 @@
 
   (footprint "Package_DIP:DIP-16_W7.62mm" (layer "F.Cu")
     (tstamp e0d80fff-b6a3-4193-916c-0acbbfe995e7)
-    (at 167.38 181.83 90)
+    (at 194.325 143.5 90)
     (descr "16-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -11376,7 +11376,7 @@
 
   (footprint "Package_DIP:DIP-14_W7.62mm" (layer "F.Cu")
     (tstamp e159e29f-6ea1-4c1c-adea-825708c81f42)
-    (at 106.68 170.98 90)
+    (at 231.135 118.1 90)
     (descr "14-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -11464,7 +11464,7 @@
 
   (footprint "Package_DIP:DIP-14_W7.62mm" (layer "F.Cu")
     (tstamp e642565c-fa57-4ffa-9e53-551618051a1d)
-    (at 87.28 192.68 90)
+    (at 88.895 168.9 90)
     (descr "14-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -11552,7 +11552,7 @@
 
   (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" (layer "F.Cu")
     (tstamp e8b93ced-4d33-4d63-8d9c-72802879ed3d)
-    (at 339.87 183.37 90)
+    (at 378.77 56.44 90)
     (descr "Resistor, Axial_DIN0207 series, Axial, Horizontal, pin pitch=7.62mm, 0.25W = 1/4W, length*diameter=6.3*2.5mm^2, http://cdn-reichelt.de/documents/datenblatt/B400/1_4W%23YAG.pdf")
     (tags "Resistor Axial_DIN0207 series Axial Horizontal pin pitch 7.62mm 0.25W = 1/4W length 6.3mm diameter 2.5mm")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -11618,7 +11618,7 @@
 
   (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" (layer "F.Cu")
     (tstamp e99c739a-9d40-4d54-ab40-25d4cea434f5)
-    (at 347.97 161.83 90)
+    (at 386.87 34.9 90)
     (descr "Resistor, Axial_DIN0207 series, Axial, Horizontal, pin pitch=7.62mm, 0.25W = 1/4W, length*diameter=6.3*2.5mm^2, http://cdn-reichelt.de/documents/datenblatt/B400/1_4W%23YAG.pdf")
     (tags "Resistor Axial_DIN0207 series Axial Horizontal pin pitch 7.62mm 0.25W = 1/4W length 6.3mm diameter 2.5mm")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -11684,7 +11684,7 @@
 
   (footprint "Package_DIP:DIP-14_W7.62mm" (layer "F.Cu")
     (tstamp e9a097d4-01c8-4900-9a3b-804493ffb9b9)
-    (at 29.08 138.43 90)
+    (at 17.775 67.3 90)
     (descr "14-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -11772,7 +11772,7 @@
 
   (footprint "Package_DIP:DIP-20_W7.62mm" (layer "F.Cu")
     (tstamp e9c016f0-1565-417f-920d-5b5945f3a93e)
-    (at 218.44 231.14 90)
+    (at 227.335 219.7 90)
     (descr "20-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -11872,7 +11872,7 @@
 
   (footprint "Package_DIP:DIP-14_W7.62mm" (layer "F.Cu")
     (tstamp ea918876-885f-45cf-b383-1ce5da5f00d7)
-    (at 87.28 160.13 90)
+    (at 53.335 92.7 90)
     (descr "14-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -11960,7 +11960,7 @@
 
   (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" (layer "F.Cu")
     (tstamp ead4aefe-8b79-40ed-bb31-8afe91a732fa)
-    (at 311.52 172.6 90)
+    (at 350.42 45.67 90)
     (descr "Resistor, Axial_DIN0207 series, Axial, Horizontal, pin pitch=7.62mm, 0.25W = 1/4W, length*diameter=6.3*2.5mm^2, http://cdn-reichelt.de/documents/datenblatt/B400/1_4W%23YAG.pdf")
     (tags "Resistor Axial_DIN0207 series Axial Horizontal pin pitch 7.62mm 0.25W = 1/4W length 6.3mm diameter 2.5mm")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -12026,7 +12026,7 @@
 
   (footprint "Package_DIP:DIP-16_W7.62mm" (layer "F.Cu")
     (tstamp ec9511f5-e7fb-4b0e-b08e-0cef727dc1ee)
-    (at 145.48 149.28 90)
+    (at 123.205 194.3 90)
     (descr "16-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -12118,7 +12118,7 @@
 
   (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" (layer "F.Cu")
     (tstamp ecbfb125-e9e8-4bba-9a5b-3aaeaffd0198)
-    (at 311.52 140.29 90)
+    (at 350.42 13.36 90)
     (descr "Resistor, Axial_DIN0207 series, Axial, Horizontal, pin pitch=7.62mm, 0.25W = 1/4W, length*diameter=6.3*2.5mm^2, http://cdn-reichelt.de/documents/datenblatt/B400/1_4W%23YAG.pdf")
     (tags "Resistor Axial_DIN0207 series Axial Horizontal pin pitch 7.62mm 0.25W = 1/4W length 6.3mm diameter 2.5mm")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -12184,7 +12184,7 @@
 
   (footprint "Package_DIP:DIP-14_W7.62mm" (layer "F.Cu")
     (tstamp ece1c676-65d0-45c6-a531-b121a7d10dbd)
-    (at 29.08 84.18 90)
+    (at 88.895 92.7 90)
     (descr "14-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -12272,7 +12272,7 @@
 
   (footprint "Package_DIP:DIP-20_W7.62mm" (layer "F.Cu")
     (tstamp ee09bcfa-7bc7-4907-aa56-f3875af4fd2a)
-    (at 114.3 231.14 90)
+    (at 120.655 219.7 90)
     (descr "20-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -12372,7 +12372,7 @@
 
   (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" (layer "F.Cu")
     (tstamp f01a2ebb-a4a1-4378-81ff-9cb31168368b)
-    (at 339.87 140.29 90)
+    (at 378.77 13.36 90)
     (descr "Resistor, Axial_DIN0207 series, Axial, Horizontal, pin pitch=7.62mm, 0.25W = 1/4W, length*diameter=6.3*2.5mm^2, http://cdn-reichelt.de/documents/datenblatt/B400/1_4W%23YAG.pdf")
     (tags "Resistor Axial_DIN0207 series Axial Horizontal pin pitch 7.62mm 0.25W = 1/4W length 6.3mm diameter 2.5mm")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -12438,7 +12438,7 @@
 
   (footprint "Package_DIP:DIP-16_W7.62mm" (layer "F.Cu")
     (tstamp f228af29-5a65-4087-ae03-97ba6509d758)
-    (at 145.48 192.68 90)
+    (at 194.325 194.3 90)
     (descr "16-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -12530,7 +12530,7 @@
 
   (footprint "Package_DIP:DIP-20_W7.62mm" (layer "F.Cu")
     (tstamp f3a542ed-11f5-47fe-9330-2f97cf5b57d5)
-    (at 182.88 231.14 90)
+    (at 191.775 219.7 90)
     (descr "20-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -12630,7 +12630,7 @@
 
   (footprint "Package_DIP:DIP-14_W7.62mm" (layer "F.Cu")
     (tstamp f472b2be-8db0-4656-b18e-25bf6718c88c)
-    (at 87.28 84.18 90)
+    (at 53.335 16.5 90)
     (descr "14-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -12718,7 +12718,7 @@
 
   (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" (layer "F.Cu")
     (tstamp f675b5d0-069b-408c-84e5-3f306ff1284e)
-    (at 323.67 151.06 90)
+    (at 362.57 24.13 90)
     (descr "Resistor, Axial_DIN0207 series, Axial, Horizontal, pin pitch=7.62mm, 0.25W = 1/4W, length*diameter=6.3*2.5mm^2, http://cdn-reichelt.de/documents/datenblatt/B400/1_4W%23YAG.pdf")
     (tags "Resistor Axial_DIN0207 series Axial Horizontal pin pitch 7.62mm 0.25W = 1/4W length 6.3mm diameter 2.5mm")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -12784,7 +12784,7 @@
 
   (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" (layer "F.Cu")
     (tstamp f79c12ee-c68e-411c-b45c-371e514d4377)
-    (at 323.67 183.37 90)
+    (at 362.57 56.44 90)
     (descr "Resistor, Axial_DIN0207 series, Axial, Horizontal, pin pitch=7.62mm, 0.25W = 1/4W, length*diameter=6.3*2.5mm^2, http://cdn-reichelt.de/documents/datenblatt/B400/1_4W%23YAG.pdf")
     (tags "Resistor Axial_DIN0207 series Axial Horizontal pin pitch 7.62mm 0.25W = 1/4W length 6.3mm diameter 2.5mm")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -12850,7 +12850,7 @@
 
   (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" (layer "F.Cu")
     (tstamp f8dcebe1-b29d-4cf7-b401-67a103787d89)
-    (at 303.42 183.37 90)
+    (at 342.32 56.44 90)
     (descr "Resistor, Axial_DIN0207 series, Axial, Horizontal, pin pitch=7.62mm, 0.25W = 1/4W, length*diameter=6.3*2.5mm^2, http://cdn-reichelt.de/documents/datenblatt/B400/1_4W%23YAG.pdf")
     (tags "Resistor Axial_DIN0207 series Axial Horizontal pin pitch 7.62mm 0.25W = 1/4W length 6.3mm diameter 2.5mm")
     (property "Sheetfile" "procalu.kicad_sch")
@@ -12916,7 +12916,7 @@
 
   (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" (layer "F.Cu")
     (tstamp faad2c35-9f58-48af-8b73-4d68d7534eec)
-    (at 327.72 140.29 90)
+    (at 366.62 13.36 90)
     (descr "Resistor, Axial_DIN0207 series, Axial, Horizontal, pin pitch=7.62mm, 0.25W = 1/4W, length*diameter=6.3*2.5mm^2, http://cdn-reichelt.de/documents/datenblatt/B400/1_4W%23YAG.pdf")
     (tags "Resistor Axial_DIN0207 series Axial Horizontal pin pitch 7.62mm 0.25W = 1/4W length 6.3mm diameter 2.5mm")
     (property "Sheetfile" "procalu.kicad_sch")
