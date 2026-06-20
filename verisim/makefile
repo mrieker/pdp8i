@@ -71,25 +71,25 @@ obj_dir/Vbackplane.cpp obj_dir/Vbackplane.h obj_dir/Vbackplane.mk: $(VFILES)
 	verilator --cc --top-module backplane $(VFILES)
 
 ../kicads/console/console.v: ../kicads/console/console.kicad_pcb
-	cd ../kicads/console ; ../parsepcb.sh console
+	cd ../kicads/console ; ../veripcb.sh console
 
 ../kicads/dmatester/dmatester.v: ../kicads/dmatester/dmatester.kicad_pcb
-	cd ../kicads/dmatester ; ../parsepcb.sh dmatester
+	cd ../kicads/dmatester ; ../veripcb.sh dmatester
 
 ../kicads/extarith/extarith.v: ../kicads/extarith/extarith.kicad_pcb
-	cd ../kicads/extarith ; ../parsepcb.sh extarith
+	cd ../kicads/extarith ; ../veripcb.sh extarith
 
 ../kicads/extmemory/extmemory.v: ../kicads/extmemory/extmemory.kicad_pcb
-	cd ../kicads/extmemory ; ../parsepcb.sh extmemory
+	cd ../kicads/extmemory ; ../veripcb.sh extmemory
 
 ../kicads/procalu/procalu.v: ../kicads/procalu/procalu.kicad_pcb
-	cd ../kicads/procalu ; ../parsepcb.sh procalu
+	cd ../kicads/procalu ; ../veripcb.sh procalu
 
 ../kicads/procreg/procreg.v: ../kicads/procreg/procreg.kicad_pcb
-	cd ../kicads/procreg ; ../parsepcb.sh procreg
+	cd ../kicads/procreg ; ../veripcb.sh procreg
 
 ../kicads/procseq/procseq.v: ../kicads/procseq/procseq.kicad_pcb
-	cd ../kicads/procseq ; ../parsepcb.sh procseq
+	cd ../kicads/procseq ; ../veripcb.sh procseq
 
 ../kicads/console/console.kicad_pcb: ../kicads/console/console.kicad_sch
 	error update console.kicad_pcb

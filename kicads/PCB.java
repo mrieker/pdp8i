@@ -19,7 +19,6 @@
 //    http://www.gnu.org/licenses/gpl-2.0.html
 
 // Parse a KiCad PCB file
-// Print out Verilog equivalent
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -28,18 +27,21 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.TreeMap;
 
-public class ParsePCB {
-    public static boolean error;
-    public static BufferedReader inrdr;
-    public static int linum;
+public class PCB {
+    private boolean error;
+    private BufferedReader inrdr;
+    private int linum;
 
-    public static void main (String[] args)
+    public ArrValue kicadpcb;
+    public TreeMap<String,Network>  netsbyname;
+    public TreeMap<Integer,Network> netsbynum;
+    public TreeMap<String,Compon>   compons;
+
+    public PCB (BufferedReader pcbrdr)
             throws Exception
     {
-        String modname = args[0];
-
         // parse the scheme syntax
-        inrdr = new BufferedReader (new InputStreamReader (System.in));
+        inrdr = pcbrdr;
         linum = 1;
         Value value = parseValue ();
         for (int ch; (ch = inrdr.read ()) >= 0;) {
@@ -49,19 +51,16 @@ public class ParsePCB {
             }
         }
 
-        // print it all out for debugging
-        // value.print ("");
-
         // should be in form (kicad_pcb ...)
         if (! "kicad_pcb".equals (value.getarrname ())) {
             throw new Exception ("top-level not a 'kicad_pcb'");
         }
-        ArrValue kicadpcb = (ArrValue) value;
+        kicadpcb = (ArrValue) value;
 
         // scan for networks and components
-        TreeMap<String,Network>  netsbyname = new TreeMap<> ();
-        TreeMap<Integer,Network> netsbynum  = new TreeMap<> ();
-        TreeMap<String,Compon>   compons    = new TreeMap<> ();
+        netsbyname = new TreeMap<> ();
+        netsbynum  = new TreeMap<> ();
+        compons    = new TreeMap<> ();
 
         for (Value elem : kicadpcb.elems) {
 
@@ -78,6 +77,9 @@ public class ParsePCB {
                 netsbynum.put (network.netnum, network);
                 netsbyname.put (network.netname, network);
             }
+        }
+
+        for (Value elem : kicadpcb.elems) {
 
             // (footprint ...)
             if ("footprint".equals (elem.getarrname ())) {
@@ -89,30 +91,38 @@ public class ParsePCB {
             }
         }
 
+        // fill in what pads each network is connected to
+        for (Network network : netsbynum.values ()) {
+            LinkedList<Pad> pads = new LinkedList<> ();
+            for (Compon compon : compons.values ()) {
+                for (Pad pad : compon.pads) {
+                    Network padnet = (pad == null) ? null : pad.padnet;
+                    if (padnet == network) pads.addLast (pad);
+                }
+            }
+            network.refdpads = pads.toArray (new Pad[pads.size()]);
+        }
+
         // fill in networks referenced by the component
         for (String refer : compons.keySet ()) {
             Compon compon = compons.get (refer);
 
             // if it is a connector, mark all referenced networks as being ports to be listed in module statement
             if (compon.isconnector ()) {
-                int npins = compon.padnets.length;
-                for (int i = 0; i < npins; i ++) {
-                    Network network = netsbynum.get (compon.padnets[i]);
+                for (Pad pad : compon.pads) {
+                    Network network = (pad == null) ? null : pad.padnet;
                     if (network != null) {
                         network.netport = true;
-                        network.numrefs ++;
                     }
                 }
             }
 
             // if not a connector, mark nets connected to output pins as being driven
             else {
-                int npins = compon.padnets.length;
-                for (int i = 0; i < npins; i ++) {
-                    Network network = netsbynum.get (compon.padnets[i]);
+                for (Pad pad : compon.pads) {
+                    Network network = (pad == null) ? null : pad.padnet;
                     if (network != null) {
-                        network.numrefs ++;
-                        switch (compon.pintypes[i]) {
+                        switch (pad.pintype) {
                             case OUTPUT: {
                                 if (network.netrefs > 0) {
                                     System.err.println ("network " + network.netname + " has mixed hard and tristate drivers");
@@ -138,101 +148,11 @@ public class ParsePCB {
                 }
             }
         }
-
-        // print networks
-        // - if referenced by a connector, it is an input/output pin for the module
-        // - if not refd by a connector, it is a wire
-        System.out.println ("module " + modname + " (input yclock, zclock, zreset");
-        char sep = ',';
-        sep = printconpins (sep, netsbyname, "input");
-        sep = printconpins (sep, netsbyname, "inout");
-        sep = printconpins (sep, netsbyname, "output");
-        System.out.println (");");
-
-        System.out.println ("");
-        for (Network network : netsbyname.values ()) {
-            if (! network.netport && ! network.netname.equals ("")) {
-                System.out.println (String.format ("    wire %s;", network.netname));
-                if ((network.netrefs == 0) && ! network.netname.startsWith ("unconnected__")) {
-                    System.err.println ("nothing drives " + network.netname);
-                    error = true;
-                }
-            }
-        }
-
-        // print non-connector components as module instantiations
-        for (String refer : compons.keySet ()) {
-            Compon compon = compons.get (refer);
-            if (! compon.isconnector ()) {
-                compon.print (netsbynum);
-            }
-        }
-
-        // output assign statements for wired-and tri-state networks
-        boolean first = true;
-        for (Network network : netsbyname.values ()) {
-            if (! network.trinetnames.isEmpty ()) {
-                if (first) System.out.println ("");
-                // trinetnames contains all internally generated signals
-                // netname = signal that contains all signals (internal and external) anded together
-                // if it is on a connector, we assume external circuitry will and everything together,
-                //   passing that big anded signal to our input pin named simply netname,
-                //   and the target of the and is netname_o (going to output pin)
-                // if not a connector, the target of the and is simply netname
-                System.out.print ("    assign " + network.netname);
-                if (network.netport) System.out.print ("_o");
-                System.out.print (" = ");
-                first = true;
-                for (String tnn : network.trinetnames) {
-                    if (! first) System.out.print (" & ");
-                    System.out.print (tnn);
-                    first = false;
-                }
-                System.out.println (";");
-                first = false;
-            }
-        }
-        if (! first) System.out.println ("");
-
-        System.out.println ("endmodule");
-
-        if (error) System.exit (1);
-    }
-
-    // print connector pin network names for a module statement
-    // skip pins not connected to anything even if it has a network name
-    //  input:
-    //   sep = separator character
-    //   netnames = all networks indexed by name
-    //   keywrd = "input", "inout" or "output" : print network names for that type
-    //  output:
-    //   prints matching network names
-    //   returns new separator char
-    public static char printconpins (char sep, TreeMap<String,Network> netsbyname, String keywrd)
-    {
-        for (Network network : netsbyname.values ()) {
-            if (network.netport && ! network.netname.startsWith ("unconnected") && (network.numrefs > 1)) {
-                String porttype = "input";
-                if (network.netrefs > 0) porttype = "inout";
-                if (network.netrefs < 0) porttype = "output";
-                if (porttype.equals (keywrd)) {
-                    if (porttype.equals ("inout")) {
-                        System.out.println ("    " + sep + " input " + network.netname);  // everything anded together
-                        sep = ',';
-                        System.out.println ("    " + sep + " output " + network.netname + "_o");  // all internals anded
-                        sep = ',';
-                    } else {
-                        System.out.println ("    " + sep + " " + porttype + " " + network.netname);
-                        sep = ',';
-                    }
-                }
-            }
-        }
-        return sep;
+        if (error) throw new Exception ("error parsing pcb file");
     }
 
     // parse one value from inrdr
-    public static Value parseValue ()
+    private Value parseValue ()
             throws Exception
     {
         int ch;
@@ -304,7 +224,7 @@ public class ParsePCB {
 
     // base value class
 
-    public static abstract class Value {
+    public abstract class Value {
         public String getarrname () { return null; }    // if array with symbol for first element, first element name
         public String oneline () { return null; }       // if value is not an array, the string representation of the value
         public int asint () { return 0; }               // as an integer if possible
@@ -314,7 +234,7 @@ public class ParsePCB {
 
     // parsed array (array of values between (...))
 
-    public static class ArrValue extends Value {
+    public class ArrValue extends Value {
         public Value[] elems;
 
         @Override
@@ -366,7 +286,7 @@ public class ParsePCB {
 
     // parsed numeric value
 
-    public static class NumValue extends Value {
+    public class NumValue extends Value {
         public double num;
         public String str;
 
@@ -388,7 +308,7 @@ public class ParsePCB {
 
     // parsed quoted string
 
-    public static class StrValue extends Value {
+    public class StrValue extends Value {
         public String str;  // includes quotes and escapes
 
         @Override
@@ -437,7 +357,7 @@ public class ParsePCB {
 
     // parsed symbol (unquoted string)
 
-    public static class SymValue extends Value {
+    public class SymValue extends Value {
         public String sym;
 
         @Override
@@ -454,38 +374,37 @@ public class ParsePCB {
 
     // network
 
-    public static class Network {
+    public class Network {
         public int netnum;
         public String netname;
         public int netrefs;         // <0: has an OUTPUT pin
                                     // >0: multiple TRISTATE pins
         public boolean netport;     // is referenced by a connector
-        public int numrefs;         // number of pins that reference the net
+        public Pad[] refdpads;      // list of pads the network connects to
 
         public LinkedList<String> trinetnames = new LinkedList<> ();
     }
 
     // component
 
-    public static class Compon {
+    public class Compon {
         public String refer;    // (fp_text reference <ref> ...)
         public String value;    // (fp_text value <ref> ...)
-        public int atx100;      // (at x y)
-        public int aty100;
-        public int[] padnets;   // (pad <idx> ... (net <num> ...) ...)
-        public PinType[] pintypes;
+        public double atxin;    // (at x y)
+        public double atyin;
+        public Pad[] pads;      // (pad <idx> ... (net <num> ...) ...)
 
         public Compon (ArrValue module)
+                throws Exception
         {
             value = "\"\"";
             int padsize = 0;
-            HashMap<Integer,Integer> padnethash = new HashMap<> ();
-            HashMap<Integer,PinType> pintypehash = new HashMap<> ();
+            HashMap<Integer,Pad> padhash = new HashMap<> ();
             for (Value moduleelem : module.elems) {
                 if ("at".equals (moduleelem.getarrname ())) {
                     ArrValue moduleat = (ArrValue) moduleelem;
-                    atx100 = (int) Math.round (((NumValue) moduleat.elems[1]).num * 100);
-                    aty100 = (int) Math.round (((NumValue) moduleat.elems[2]).num * 100);
+                    atxin = ((NumValue) moduleat.elems[1]).num / 25.4;
+                    atyin = ((NumValue) moduleat.elems[2]).num / 25.4;
                 }
                 if ("fp_text".equals (moduleelem.getarrname ())) {
                     ArrValue modulefptext = (ArrValue) moduleelem;
@@ -497,48 +416,15 @@ public class ParsePCB {
                     }
                 }
                 if ("pad".equals (moduleelem.getarrname ())) {
-                    ArrValue modulepad = (ArrValue) moduleelem;
-                    int padidx = modulepad.elems[1].asint ();
-
-                    PinType pintype = PinType.OTHER;
-                    for (Value modulepadelem : modulepad.elems) {
-                        if ("pintype".equals (modulepadelem.getarrname ())) {
-                            ArrValue modulepadnet = (ArrValue) modulepadelem;
-                            String ptstr = modulepadnet.elems[1].assym ();
-                            switch (ptstr) {
-                                case "bidirectional": pintype = PinType.TRISTATE; break;
-                                case "input": pintype = PinType.INPUT; break;
-                                case "output": pintype = PinType.OUTPUT; break;
-                                case "power_in": pintype = PinType.POWERIN; break;
-                                case "tri_state": pintype = PinType.TRISTATE; break;
-                            }
-                            break;
-                        }
-                    }
-
-                    int padnet = -1;
-                    for (Value modulepadelem : modulepad.elems) {
-                        if ("net".equals (modulepadelem.getarrname ())) {
-                            ArrValue modulepadnet = (ArrValue) modulepadelem;
-                            padnet = modulepadnet.elems[1].asint ();
-                            break;
-                        }
-                    }
-
-                    padnethash.put (padidx, padnet);
-                    pintypehash.put (padidx, pintype);
-                    if (padsize < padidx + 1) padsize = padidx + 1;
+                    Pad pad = new Pad ((ArrValue) moduleelem);
+                    pad.compon = this;
+                    padhash.put (pad.padidx, pad);
+                    if (padsize <= pad.padidx) padsize = pad.padidx + 1;
                 }
             }
-            padnets = new int[padsize];
-            pintypes = new PinType[padsize];
-            for (int i = 0; i < padsize; i ++) {
-                padnets[i] = -1;
-                pintypes[i] = PinType.OTHER;
-            }
-            for (Integer idx : padnethash.keySet ()) {
-                padnets[idx] = padnethash.get (idx);
-                pintypes[idx] = pintypehash.get (idx);
+            pads = new Pad[padsize];
+            for (Integer idx : padhash.keySet ()) {
+                pads[idx] = padhash.get (idx);
             }
         }
 
@@ -546,47 +432,65 @@ public class ParsePCB {
         {
             return value.startsWith ("Conn");
         }
+    }
 
-        public void print (TreeMap<Integer,Network> netsbynum)
+    public class Pad {
+        public Compon compon;
+        public int padidx;
+        public Network padnet;
+        public PinType pintype;
+        public double atxin;    // (at x y)
+        public double atyin;
+
+        public Pad (ArrValue modulepad)
+                throws Exception
         {
-            System.out.println ("");
+            padidx = modulepad.elems[1].asint ();
 
-            // print wire statements for each tri-state pin
-            //  wire <netname>_<uname>p<pinnum>;
-            for (int idx = 0; idx < padnets.length; idx ++) {
-                int netnum = padnets[idx];
-                if ((netnum >= 0) && (pintypes[idx] == PinType.TRISTATE)) {
-                    Network network = netsbynum.get (netnum);
-                    String tnn = network.netname + "_" + refer + "p" + idx;
-                    network.trinetnames.add (tnn);
-                    System.out.println ("    wire " + tnn + ";");
+            pintype = PinType.OTHER;
+            atxin = Double.NaN;
+            atyin = Double.NaN;
+
+            for (Value modulepadelem : modulepad.elems) {
+                if ("pintype".equals (modulepadelem.getarrname ())) {
+                    ArrValue modulepadnet = (ArrValue) modulepadelem;
+                    String ptstr = modulepadnet.elems[1].assym ();
+                    switch (ptstr) {
+                        case "bidirectional": pintype = PinType.TRISTATE; break;
+                        case "input": pintype = PinType.INPUT; break;
+                        case "output": pintype = PinType.OUTPUT; break;
+                        case "power_in": pintype = PinType.POWERIN; break;
+                        case "tri_state": pintype = PinType.TRISTATE; break;
+                    }
                 }
-            }
-
-            // output module instantiation
-            System.out.println ("    X" + value + " " + refer + " (");
-            System.out.println ("        .yclock(yclock),");
-            System.out.println ("        .zclock(zclock),");
-            System.out.println ("        .zreset(zreset)");
-            char sep = ',';
-            for (int idx = 0; idx < padnets.length; idx ++) {
-                int netnum = padnets[idx];
-                if (netnum >= 0) {
-                    Network network = netsbynum.get (netnum);
-                    String netname = (network == null) ? Integer.toString (netnum) : network.netname;
-                    if (pintypes[idx] == PinType.TRISTATE) {
-                        String tnn = netname + "_" + refer + "p" + idx;
-                        System.out.println (String.format ("        %c .p%di(%s) // TRISTATE", sep, idx, netname));
-                        sep = ',';
-                        System.out.println (String.format ("        %c .p%do(%s) // TRISTATE", sep, idx, tnn));
-                        sep = ',';
-                    } else {
-                        System.out.println (String.format ("        %c .p%d(%s) // %s", sep, idx, netname, pintypes[idx].toString ()));
-                        sep = ',';
+                if ("net".equals (modulepadelem.getarrname ())) {
+                    ArrValue modulepadnet = (ArrValue) modulepadelem;
+                    int padnetnum = modulepadnet.elems[1].asint ();
+                    padnet = netsbynum.get (padnetnum);
+                }
+                if ("at".equals (modulepadelem.getarrname ())) {
+                    ArrValue padat = (ArrValue) modulepadelem;
+                    double v1 = ((NumValue) padat.elems[1]).num / 25.4;
+                    double v2 = ((NumValue) padat.elems[2]).num / 25.4;
+                    int ang = 0;
+                    if (padat.elems.length > 3) {
+                        ang = (int) Math.round (((NumValue) padat.elems[3]).num);
+                    }
+                    switch (ang) {
+                        case 0: {
+                            atxin =   v1;
+                            atyin =   v2;
+                            break;
+                        }
+                        case 90: {
+                            atxin =   v2;
+                            atyin = - v1;
+                            break;
+                        }
+                        default: throw new Exception ("unsupported angle " + ang);
                     }
                 }
             }
-            System.out.println ("    );");
         }
     }
 }
