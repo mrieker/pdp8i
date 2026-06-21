@@ -22,6 +22,7 @@
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -151,6 +152,63 @@ public class PCB {
         if (error) throw new Exception ("error parsing pcb file");
     }
 
+    public void save (PrintStream ps)
+            throws Exception
+    {
+        Printer ptr = new Printer ();
+        ptr.ps = ps;
+        kicadpcb.print (ptr);
+        ps.println ("");
+    }
+
+    private static class Printer {
+        public PrintStream ps;
+
+        private boolean spacesep = false;
+        private int level = 0;
+        private int linum = 1;
+
+        // print array element separator, '(', ' ', ')'
+        // update indent level accordingly
+        public void printsep (int toklinum, char c)
+        {
+            if (c == ' ') {
+                spacesep = true;
+            } else {
+                if (c == ')') level --;
+                if (linum < toklinum) {
+                    linum = toklinum;
+                    ps.println ("");
+                    for (int i = 0; i < level; i ++) ps.print ("  ");
+                    spacesep = false;
+                }
+                if (spacesep) {
+                    ps.print (' ');
+                    spacesep = false;
+                }
+                ps.print (c);
+                if (c == '(') level ++;
+            }
+        }
+
+        // print value string
+        // maybe start a new line inserting corresponding indent
+        public void printstr (int toklinum, String s)
+        {
+            if (linum < toklinum) {
+                linum = toklinum;
+                ps.println ("");
+                for (int i = 0; i < level; i ++) ps.print ("  ");
+                spacesep = false;
+            }
+            if (spacesep) {
+                ps.print (' ');
+                spacesep = false;
+            }
+            ps.print (s);
+        }
+    }
+
     // parse one value from inrdr
     private Value parseValue ()
             throws Exception
@@ -164,6 +222,8 @@ public class PCB {
 
         if (ch == ')') return null;
 
+        int toklinum = linum;
+
         if (ch == '(') {
             LinkedList<Value> elems = new LinkedList<> ();
             while (true) {
@@ -172,6 +232,8 @@ public class PCB {
                 elems.addLast (elem);
             }
             ArrValue arrval = new ArrValue ();
+            arrval.linum = toklinum;
+            arrval.endln = linum;
             arrval.elems = elems.toArray (new Value[elems.size()]);
             return arrval;
         }
@@ -195,6 +257,7 @@ public class PCB {
             }
             sb.append ('"');
             StrValue strval = new StrValue ();
+            strval.linum = toklinum;
             strval.str = sb.toString ();
             return strval;
         }
@@ -212,12 +275,13 @@ public class PCB {
         try {
             double num = Double.parseDouble (st);
             NumValue numval = new NumValue ();
+            numval.linum = toklinum;
             numval.num = num;
-            numval.str = st;
             return numval;
         } catch (NumberFormatException nfe) {
         }
         SymValue symval = new SymValue ();
+        symval.linum = toklinum;
         symval.sym = st;
         return symval;
     }
@@ -225,11 +289,11 @@ public class PCB {
     // base value class
 
     public abstract class Value {
+        public int linum;                               // line number of first character of token
         public String getarrname () { return null; }    // if array with symbol for first element, first element name
-        public String oneline () { return null; }       // if value is not an array, the string representation of the value
         public int asint () { return 0; }               // as an integer if possible
         public String assym () { return null; }         // as a symbol if possible
-        public abstract void print (String indent);     // print the value on stdout
+        public abstract void print (Printer ptr);       // print the value
     }
 
     // parsed array (array of values between (...))
@@ -237,50 +301,25 @@ public class PCB {
     public class ArrValue extends Value {
         public Value[] elems;
 
+        public int endln;
+
         @Override
         public String getarrname ()
         {
-            if (elems.length < 1) return null;
-            if (! (elems[0] instanceof SymValue)) return null;
-            SymValue sv0 = (SymValue) elems[0];
-            return sv0.sym;
+            return (elems.length < 1) ? null : elems[0].assym ();
         }
 
         @Override
-        public void print (String indent)
+        public void print (Printer ptr)
         {
-            boolean ononeline = true;
+            ptr.printsep (linum, '(');
+            boolean first = true;
             for (Value elem : elems) {
-                if (elem.oneline () == null) {
-                    ononeline = false;
-                    break;
-                }
+                if (! first) ptr.printsep (linum, ' ');
+                elem.print (ptr);
+                first = false;
             }
-            if (ononeline) {
-                System.out.print (indent + "(");
-                boolean first = true;
-                for (Value elem : elems) {
-                    if (! first) System.out.print (" ");
-                    System.out.print (elem.oneline ());
-                    first = false;
-                }
-                System.out.println (")");
-            } else {
-                boolean skipfirst = false;
-                String firststring = elems[0].oneline ();
-                if (firststring != null) {
-                    System.out.println (indent + "(" + firststring);
-                    skipfirst = true;
-                } else {
-                    System.out.println (indent + "(");
-                }
-                String ind = indent + "  ";
-                for (Value elem : elems) {
-                    if (! skipfirst) elem.print (ind);
-                    skipfirst = false;
-                }
-                System.out.println (indent + ")");
-            }
+            ptr.printsep (endln, ')');
         }
     }
 
@@ -288,7 +327,6 @@ public class PCB {
 
     public class NumValue extends Value {
         public double num;
-        public String str;
 
         @Override
         public int asint ()
@@ -297,12 +335,17 @@ public class PCB {
         }
 
         @Override
-        public String oneline () { return str; }
-
-        @Override
-        public void print (String indent)
+        public void print (Printer ptr)
         {
-            System.out.println (indent + str);
+            String str;
+            int ival = asint ();
+            if ((double) ival == num) {
+                str = Integer.toString (ival);
+            } else {
+                str = Double.toString (num);
+                if (str.endsWith (".0")) str = str.substring (0, str.length () - 2);
+            }
+            ptr.printstr (linum, str);
         }
     }
 
@@ -346,12 +389,9 @@ public class PCB {
         }
 
         @Override
-        public String oneline () { return str; }
-
-        @Override
-        public void print (String indent)
+        public void print (Printer ptr)
         {
-            System.out.println (indent + str);
+            ptr.printstr (linum, str);
         }
     }
 
@@ -361,12 +401,15 @@ public class PCB {
         public String sym;
 
         @Override
-        public String oneline () { return sym; }
+        public String assym ()
+        {
+            return sym;
+        }
 
         @Override
-        public void print (String indent)
+        public void print (Printer ptr)
         {
-            System.out.println (indent + sym);
+            ptr.printstr (linum, sym);
         }
     }
 
@@ -388,11 +431,12 @@ public class PCB {
     // component
 
     public class Compon {
-        public String refer;    // (fp_text reference <ref> ...)
-        public String value;    // (fp_text value <ref> ...)
-        public double atxin;    // (at x y)
-        public double atyin;
-        public Pad[] pads;      // (pad <idx> ... (net <num> ...) ...)
+        public String refer;        // (fp_text reference <ref> ...)
+        public String value;        // (fp_text value <ref> ...)
+        public Pad[] pads;          // (pad <idx> ... (net <num> ...) ...)
+
+        private NumValue atnodex;   // (at x y)
+        private NumValue atnodey;
 
         public Compon (ArrValue module)
                 throws Exception
@@ -402,16 +446,16 @@ public class PCB {
             HashMap<Integer,Pad> padhash = new HashMap<> ();
             for (Value moduleelem : module.elems) {
                 if ("at".equals (moduleelem.getarrname ())) {
-                    ArrValue moduleat = (ArrValue) moduleelem;
-                    atxin = ((NumValue) moduleat.elems[1]).num / 25.4;
-                    atyin = ((NumValue) moduleat.elems[2]).num / 25.4;
+                    ArrValue atnode = (ArrValue) moduleelem;
+                    atnodex = (NumValue) atnode.elems[1];
+                    atnodey = (NumValue) atnode.elems[2];
                 }
                 if ("fp_text".equals (moduleelem.getarrname ())) {
                     ArrValue modulefptext = (ArrValue) moduleelem;
-                    if (modulefptext.elems[1].oneline ().equals ("reference")) {
+                    if (modulefptext.elems[1].assym ().equals ("reference")) {
                         refer = modulefptext.elems[2].assym ();
                     }
-                    if (modulefptext.elems[1].oneline ().equals ("value")) {
+                    if (modulefptext.elems[1].assym ().equals ("value")) {
                         value = modulefptext.elems[2].assym ();
                     }
                 }
@@ -431,6 +475,26 @@ public class PCB {
         public boolean isconnector ()
         {
             return value.startsWith ("Conn");
+        }
+
+        public double atxin ()
+        {
+            return atnodex.num / 25.4;
+        }
+
+        public double atyin ()
+        {
+            return atnodey.num / 25.4;
+        }
+
+        public void atxin (double v)
+        {
+            atnodex.num = v * 25.4;
+        }
+
+        public void atyin (double v)
+        {
+            atnodey.num = v * 25.4;
         }
     }
 
@@ -472,10 +536,7 @@ public class PCB {
                     ArrValue padat = (ArrValue) modulepadelem;
                     double v1 = ((NumValue) padat.elems[1]).num / 25.4;
                     double v2 = ((NumValue) padat.elems[2]).num / 25.4;
-                    int ang = 0;
-                    if (padat.elems.length > 3) {
-                        ang = (int) Math.round (((NumValue) padat.elems[3]).num);
-                    }
+                    int ang = (padat.elems.length > 3) ? padat.elems[3].asint () : 0;
                     switch (ang) {
                         case 0: {
                             atxin =   v1;

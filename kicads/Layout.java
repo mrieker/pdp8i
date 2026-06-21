@@ -89,10 +89,10 @@ public class Layout {
 
     /***
         for (PCB.Compon compon : iccompons.values ()) {
-            System.out.println ("comp " + compon.refer + " (" + compon.atxin + "," + compon.atyin + ")");
+            System.err.println ("comp " + compon.refer + " (" + compon.atxin + "," + compon.atyin + ")");
             for (PCB.Pad pad : compon.pads) {
                 if (pad == null) continue;
-                System.out.println ("   p" + pad.padidx + " (" + pad.atxin + "," + pad.atyin + ") " + (pad.padnet == null ? "" : pad.padnet.netname));
+                System.err.println ("   p" + pad.padidx + " (" + pad.atxin + "," + pad.atyin + ") " + (pad.padnet == null ? "" : pad.padnet.netname));
             }
         }
     ***/
@@ -103,7 +103,7 @@ public class Layout {
             if (goodnet (network) && (numnets <= network.netnum)) numnets = network.netnum + 1;
         }
         nettotlencache = new NetTotLen[numnets];
-        System.out.println ("totallen=" + inchstr (nettotallen ()));
+        System.err.println ("totallen=" + inchstr (nettotallen ()));
 
         // get cell row and column sizes and quantities
         HashSet<Integer> col20thins = new HashSet<> ();
@@ -113,8 +113,8 @@ public class Layout {
         int minaty20thin = 1000000000;
         int maxaty20thin = -999999999;
         for (PCB.Compon compon : iccompons.values ()) {
-            int atx20thin = (int) Math.round (compon.atxin * 20);
-            int aty20thin = (int) Math.round (compon.atyin * 20);
+            int atx20thin = (int) Math.round (compon.atxin () * 20);
+            int aty20thin = (int) Math.round (compon.atyin () * 20);
             col20thins.add (atx20thin);
             row20thins.add (aty20thin);
             if (minatx20thin > atx20thin) minatx20thin = atx20thin;
@@ -126,7 +126,7 @@ public class Layout {
         numrows = row20thins.size ();
         int colwid20thin = (maxatx20thin - minatx20thin) / (numcols - 1);
         int rowhit20thin = (maxaty20thin - minaty20thin) / (numrows - 1);
-        System.out.println ("numcols=" + numcols + " numrows=" + numrows + " colwid=" + inchstr (colwid20thin / 20.0) + " rowhit=" + inchstr (rowhit20thin / 20.0));
+        System.err.println ("numcols=" + numcols + " numrows=" + numrows + " colwid=" + inchstr (colwid20thin / 20.0) + " rowhit=" + inchstr (rowhit20thin / 20.0));
         lowxin = minatx20thin / 20.0;
         lowyin = minaty20thin / 20.0;
 
@@ -184,6 +184,9 @@ public class Layout {
                 editinprog.wait ();
             }
         }
+
+        // write out modified pcb
+        pcb.save (System.out);
     }
 
     public static String inchstr (double inch)
@@ -236,14 +239,14 @@ public class Layout {
 
             // find component being moved if any
             for (PCB.Compon compon : iccompons.values ()) {
-                int xpixleft = (int) Math.round ((compon.atxin - lowxin) * PIXPERINCH);
-                int ypixtop  = (int) Math.round ((compon.atyin - lowyin) * PIXPERINCH);
+                int xpixleft = (int) Math.round ((compon.atxin () - lowxin) * PIXPERINCH);
+                int ypixtop  = (int) Math.round ((compon.atyin () - lowyin) * PIXPERINCH);
                 int xpixrite = xpixleft + colwidpix;
                 int ypixbot  = ypixtop  + rowhitpix;
                 if ((mousedownxpix > xpixleft) && (mousedownxpix < xpixrite) && (mousedownypix > ypixtop) && (mousedownypix < ypixbot)) {
                     mousecompon  = compon;
-                    mousedownxin = compon.atxin - lowxin;
-                    mousedownyin = compon.atyin - lowyin;
+                    mousedownxin = compon.atxin () - lowxin;
+                    mousedownyin = compon.atyin () - lowyin;
                 }
             }
 
@@ -270,11 +273,11 @@ public class Layout {
                 double newxinch = mousedownxin + Math.round ((mouselastxpix - mousedownxpix) / (double) PIXPER20THIN) / 20.0;
                 double newyinch = mousedownyin + Math.round ((mouselastypix - mousedownypix) / (double) PIXPER20THIN) / 20.0;
 
-                if ((newxinch != mousecompon.atxin - lowxin) || (newyinch != mousecompon.atyin - lowyin)) {
+                if ((newxinch != mousecompon.atxin () - lowxin) || (newyinch != mousecompon.atyin () - lowyin)) {
 
                     // set new position
-                    mousecompon.atxin = newxinch + lowxin;
-                    mousecompon.atyin = newyinch + lowyin;
+                    mousecompon.atxin (newxinch + lowxin);
+                    mousecompon.atyin (newyinch + lowyin);
 
                     // invalidate all connected network lengths
                     for (PCB.Pad pad : mousecompon.pads) {
@@ -310,8 +313,8 @@ public class Layout {
                     ypixtop  = (int) Math.round (mousedownyin * PIXPERINCH);
                     g.setColor (Color.YELLOW);
                 } else {
-                    xpixleft = (int) Math.round ((compon.atxin - lowxin) * PIXPERINCH);
-                    ypixtop  = (int) Math.round ((compon.atyin - lowyin) * PIXPERINCH);
+                    xpixleft = (int) Math.round ((compon.atxin () - lowxin) * PIXPERINCH);
+                    ypixtop  = (int) Math.round ((compon.atyin () - lowyin) * PIXPERINCH);
                     g.setColor (Color.WHITE);
                 }
                 g.fillRoundRect (xpixleft, ypixtop, colwidpix, rowhitpix, 10, 10);
@@ -322,8 +325,8 @@ public class Layout {
 
             // if one is being dragged, show its new position in red
             if (mousecompon != null) {
-                int xpix = (int) Math.round ((mousecompon.atxin - lowxin) * PIXPERINCH);
-                int ypix = (int) Math.round ((mousecompon.atyin - lowyin) * PIXPERINCH);
+                int xpix = (int) Math.round ((mousecompon.atxin () - lowxin) * PIXPERINCH);
+                int ypix = (int) Math.round ((mousecompon.atyin () - lowyin) * PIXPERINCH);
                 g.setColor (Color.RED);
                 g.fillRoundRect (xpix, ypix, colwidpix, rowhitpix, 10, 10);
             }
@@ -352,10 +355,10 @@ public class Layout {
                         }
                         if (drawit) {
                             g.setColor ((compa == mousecompon) || (compb == mousecompon) ? Color.BLUE : Color.MAGENTA);
-                            int ax = (int) Math.round ((compa.atxin + pada.atxin) * PIXPERINCH);
-                            int ay = (int) Math.round ((compa.atyin + pada.atyin) * PIXPERINCH);
-                            int bx = (int) Math.round ((compb.atxin + padb.atxin) * PIXPERINCH);
-                            int by = (int) Math.round ((compb.atyin + padb.atyin) * PIXPERINCH);
+                            int ax = (int) Math.round ((compa.atxin () + pada.atxin) * PIXPERINCH);
+                            int ay = (int) Math.round ((compa.atyin () + pada.atyin) * PIXPERINCH);
+                            int bx = (int) Math.round ((compb.atxin () + padb.atxin) * PIXPERINCH);
+                            int by = (int) Math.round ((compb.atyin () + padb.atyin) * PIXPERINCH);
                             g.drawLine (ax, ay, bx, by);
                         }
                     }
@@ -397,10 +400,10 @@ public class Layout {
         public PCB.Pad padb;
         public double dist ()
         {
-            double ax = pada.compon.atxin + pada.atxin;
-            double ay = pada.compon.atyin + pada.atyin;
-            double bx = padb.compon.atxin + padb.atxin;
-            double by = padb.compon.atyin + padb.atyin;
+            double ax = pada.compon.atxin () + pada.atxin;
+            double ay = pada.compon.atyin () + pada.atyin;
+            double bx = padb.compon.atxin () + padb.atxin;
+            double by = padb.compon.atyin () + padb.atyin;
             return Math.hypot (ax - bx, ay - by);
         }
     }
@@ -425,14 +428,14 @@ public class Layout {
             ntl = new NetTotLen ();
             for (int j = 0; j < network.refdpads.length; j ++) {
                 PCB.Pad firstpad = network.refdpads[j];
-                double firstpadatxin = firstpad.atxin + firstpad.compon.atxin;
-                double firstpadatyin = firstpad.atyin + firstpad.compon.atyin;
+                double firstpadatxin = firstpad.atxin + firstpad.compon.atxin ();
+                double firstpadatyin = firstpad.atyin + firstpad.compon.atyin ();
                 PCB.Pad closestpad = null;
                 double closestdist = Double.NaN;
                 for (int i = j; ++ i < network.refdpads.length;) {
                     PCB.Pad pad = network.refdpads[i];
-                    double padatxin = pad.atxin + pad.compon.atxin;
-                    double padatyin = pad.atyin + pad.compon.atyin;
+                    double padatxin = pad.atxin + pad.compon.atxin ();
+                    double padatyin = pad.atyin + pad.compon.atyin ();
                     double dist = Math.hypot (padatxin - firstpadatxin, padatyin - firstpadatyin);
                     if (Double.isNaN (closestdist) || (closestdist > dist)) {
                         closestpad  = pad;
