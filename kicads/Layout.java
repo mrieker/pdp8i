@@ -28,17 +28,22 @@ import java.util.TreeMap;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Graphics;
+import java.awt.GridLayout;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 public class Layout {
     public static boolean error;
@@ -50,7 +55,6 @@ public class Layout {
     public static final int PIXPER20THIN = 5;   // pixels per 20th inch
     public static final int PIXPERINCH = 20 * PIXPER20THIN;
 
-    public static PCB.Compon[][] compongrid;
     public static int numcols;
     public static int numrows;
     public static int colwid20thin;
@@ -64,6 +68,7 @@ public class Layout {
     private static Font labelfont = new Font ("Serif", Font.PLAIN, 10);
     private static JFrame jframe;
     private static Object editinprog = new Object ();
+    private static TreeMap<String,JCheckBox> typeckboxes;
 
     public static void main (String[] args)
             throws Exception
@@ -125,34 +130,41 @@ public class Layout {
         lowxin = minatx20thin / 20.0;
         lowyin = minaty20thin / 20.0;
 
-        // arrange chips in a grid
-        compongrid = new PCB.Compon[numcols][numrows];
-        for (PCB.Compon compon : iccompons.values ()) {
-            int atx20thin = (int) Math.round (compon.atxin * 20);
-            int aty20thin = (int) Math.round (compon.atyin * 20);
-            int col = atx20thin / colwid20thin;
-            int row = aty20thin / rowhit20thin;
-            compongrid[col][row] = compon;
-        }
-
-        // display editing screen
+        // make chip editing grid panel
         colwidpix = colwid20thin * PIXPER20THIN;
         rowhitpix = rowhit20thin * PIXPER20THIN;
-        MyPanel jpanel = new MyPanel ();
+        MyPanel mypanel = new MyPanel ();
         Dimension psize = new Dimension (numcols * colwidpix, numrows * rowhitpix);
-        jpanel.setMaximumSize (psize);
-        jpanel.setMinimumSize (psize);
-        jpanel.setPreferredSize (psize);
-        jpanel.setLayout (null);
+        mypanel.setMaximumSize (psize);
+        mypanel.setMinimumSize (psize);
+        mypanel.setPreferredSize (psize);
+        mypanel.setLayout (null);
 
-        ////JScrollPane jscroll = new JScrollPane (jpanel);
-        JPanel jscroll = jpanel;
+        // make checkboxes for every chip type
+        typeckboxes = new TreeMap<> ();
+        for (PCB.Compon compon : iccompons.values ()) {
+            // value = '74AHC00' etc
+            if (! typeckboxes.containsKey (compon.value)) {
+                JCheckBox typeckbox = new JCheckBox (compon.value);
+                typeckbox.addChangeListener (mypanel);
+                typeckboxes.put (compon.value, typeckbox);
+            }
+        }
+        int ntypeckboxes = typeckboxes.size ();
+        JPanel typecbpanel = new JPanel (new GridLayout (ntypeckboxes, 1));
+        for (JCheckBox typeckbox : typeckboxes.values ()) {
+            typecbpanel.add (typeckbox);
+        }
+
+        JPanel toppanel = new JPanel (new FlowLayout ());
+        toppanel.add (mypanel);
+        toppanel.add (typecbpanel);
 
         jframe = new JFrame ("Layout");
         updtotnetlen ();
         ////jframe.setSize (psize);
         jframe.setDefaultCloseOperation (JFrame.DISPOSE_ON_CLOSE);
-        jframe.add (jscroll);
+        jframe.add (toppanel);
         jframe.addWindowListener (new WindowAdapter () {
             @Override
             public void windowClosing (WindowEvent we)
@@ -181,7 +193,7 @@ public class Layout {
     }
 
 
-    private static class MyPanel extends JPanel implements MouseListener, MouseMotionListener {
+    private static class MyPanel extends JPanel implements ChangeListener, MouseListener, MouseMotionListener {
 
         private double mousedownxin;
         private double mousedownyin;
@@ -193,6 +205,12 @@ public class Layout {
         {
             addMouseListener (this);
             addMouseMotionListener (this);
+        }
+
+        @Override  // ChangeListener
+        public void stateChanged (ChangeEvent e)
+        {
+            repaint ();
         }
 
         @Override  // MouseListener
@@ -311,6 +329,11 @@ public class Layout {
             }
 
             // draw interconnections used to compute total trace lengths
+            // if any checkboxes checked, only draw lines connected to enabled chips
+            boolean anychecked = false;
+            for (JCheckBox typeckbox : typeckboxes.values ()) {
+                anychecked |= typeckbox.isSelected ();
+            }
             for (NetTotLen ntl : nettotlencache) {
                 if (ntl != null) {
                     for (PadPair pp : ntl.padpairs) {
@@ -318,12 +341,23 @@ public class Layout {
                         PCB.Pad padb = pp.padb;
                         PCB.Compon compa = pada.compon;
                         PCB.Compon compb = padb.compon;
-                        g.setColor ((compa == mousecompon) || (compb == mousecompon) ? Color.BLUE : Color.MAGENTA);
-                        int ax = (int) Math.round ((compa.atxin + pada.atxin) * PIXPERINCH);
-                        int ay = (int) Math.round ((compa.atyin + pada.atyin) * PIXPERINCH);
-                        int bx = (int) Math.round ((compb.atxin + padb.atxin) * PIXPERINCH);
-                        int by = (int) Math.round ((compb.atyin + padb.atyin) * PIXPERINCH);
-                        g.drawLine (ax, ay, bx, by);
+                        boolean drawit = ! anychecked;
+                        if (! drawit) {
+                            JCheckBox cba = typeckboxes.get (compa.value);
+                            if (cba != null) drawit = cba.isSelected ();
+                        }
+                        if (! drawit) {
+                            JCheckBox cbb = typeckboxes.get (compb.value);
+                            if (cbb != null) drawit = cbb.isSelected ();
+                        }
+                        if (drawit) {
+                            g.setColor ((compa == mousecompon) || (compb == mousecompon) ? Color.BLUE : Color.MAGENTA);
+                            int ax = (int) Math.round ((compa.atxin + pada.atxin) * PIXPERINCH);
+                            int ay = (int) Math.round ((compa.atyin + pada.atyin) * PIXPERINCH);
+                            int bx = (int) Math.round ((compb.atxin + padb.atxin) * PIXPERINCH);
+                            int by = (int) Math.round ((compb.atyin + padb.atyin) * PIXPERINCH);
+                            g.drawLine (ax, ay, bx, by);
+                        }
                     }
                 }
             }
