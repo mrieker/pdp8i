@@ -20,10 +20,16 @@
 
 // Graphic PCB layout
 
+// Put ICs on PCB in a grid with capacitors first
+// Then run this program which shuffles the chips around to come up with shortest total trace lengths
+// Click on graphics screen to stop random shuffling to perform manual shuffling
+// Close graphics screen to write result out
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.Random;
 import java.util.TreeMap;
 
 import java.awt.Color;
@@ -34,7 +40,6 @@ import java.awt.Graphics;
 import java.awt.GridLayout;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import javax.swing.JCheckBox;
@@ -50,11 +55,12 @@ public class Layout {
 
     public static TreeMap<String,PCB.Network>  netsbyname;
     public static TreeMap<Integer,PCB.Network> netsbynum;
-    public static TreeMap<String,PCB.Compon>   iccompons;
+    public static PCB.Compon[] iccompons;
 
     public static final int PIXPER20THIN = 5;   // pixels per 20th inch
     public static final int PIXPERINCH = 20 * PIXPER20THIN;
 
+    public static boolean runauto;
     public static int numcols;
     public static int numrows;
     public static int colwid20thin;
@@ -68,6 +74,7 @@ public class Layout {
     private static Font labelfont = new Font ("Serif", Font.PLAIN, 10);
     private static JFrame jframe;
     private static Object editinprog = new Object ();
+    private static Object syncit = new Object ();
     private static TreeMap<String,JCheckBox> typeckboxes;
 
     public static void main (String[] args)
@@ -80,15 +87,22 @@ public class Layout {
         netsbyname = pcb.netsbyname;
         netsbynum  = pcb.netsbynum;
 
-        iccompons = new TreeMap<> ();
+        int niccompons = 0;
         for (PCB.Compon compon : pcb.compons.values ()) {
             if (compon.refer.startsWith ("U")) {
-                iccompons.put (compon.refer, compon);
+                niccompons ++;
+            }
+        }
+        iccompons = new PCB.Compon[niccompons];
+        niccompons = 0;
+        for (PCB.Compon compon : pcb.compons.values ()) {
+            if (compon.refer.startsWith ("U")) {
+                iccompons[niccompons++] = compon;
             }
         }
 
     /***
-        for (PCB.Compon compon : iccompons.values ()) {
+        for (PCB.Compon compon : iccompons) {
             System.err.println ("comp " + compon.refer + " (" + compon.atxin + "," + compon.atyin + ")");
             for (PCB.Pad pad : compon.pads) {
                 if (pad == null) continue;
@@ -112,7 +126,7 @@ public class Layout {
         int maxatx20thin = -999999999;
         int minaty20thin = 1000000000;
         int maxaty20thin = -999999999;
-        for (PCB.Compon compon : iccompons.values ()) {
+        for (PCB.Compon compon : iccompons) {
             int atx20thin = (int) Math.round (compon.atxin () * 20);
             int aty20thin = (int) Math.round (compon.atyin () * 20);
             col20thins.add (atx20thin);
@@ -142,7 +156,7 @@ public class Layout {
 
         // make checkboxes for every chip type
         typeckboxes = new TreeMap<> ();
-        for (PCB.Compon compon : iccompons.values ()) {
+        for (PCB.Compon compon : iccompons) {
             // value = '74AHC00' etc
             if (! typeckboxes.containsKey (compon.value)) {
                 JCheckBox typeckbox = new JCheckBox (compon.value);
@@ -178,13 +192,52 @@ public class Layout {
         jframe.pack ();
         jframe.setVisible (true);
 
+        runauto = true;
+        int i = 0;
+        Random rand = new Random ();
+        double oldtotlen = nettotallen ();
+        while (runauto) {
+            ++ i;
+            int iica = rand.nextInt (niccompons);
+            int iicb = rand.nextInt (niccompons);
+            PCB.Compon ica = iccompons[iica];
+            PCB.Compon icb = iccompons[iicb];
+            double oldicax = ica.atxin ();
+            double oldicay = ica.atyin ();
+            double oldicbx = icb.atxin ();
+            double oldicby = icb.atyin ();
+            synchronized (syncit) {
+                ica.atxin (oldicbx);
+                ica.atyin (oldicby);
+                icb.atxin (oldicax);
+                icb.atyin (oldicay);
+                invalNetTotLen (ica);
+                invalNetTotLen (icb);
+                double newtotlen = nettotallen ();
+                if (oldtotlen > newtotlen) {
+                    System.err.println ("[" + i + "] swap " + ica.refer + " " + icb.refer + " => " +  newtotlen);
+                    oldtotlen = newtotlen;
+                    updtotnetlen ();
+                    mypanel.repaint ();
+                } else {
+                    if (i % 1000 == 0) System.err.println ("[" + i + "] newtotlen=" + newtotlen);
+                    ica.atxin (oldicax);
+                    ica.atyin (oldicay);
+                    icb.atxin (oldicbx);
+                    icb.atyin (oldicby);
+                    invalNetTotLen (ica);
+                    invalNetTotLen (icb);
+                }
+            }
+        }
+/***
         // wait for jframe closed
         synchronized (editinprog) {
             while (! editcomplete) {
                 editinprog.wait ();
             }
         }
-
+***/
         // write out modified pcb
         pcb.save (System.out);
     }
@@ -196,18 +249,13 @@ public class Layout {
     }
 
 
-    private static class MyPanel extends JPanel implements ChangeListener, MouseListener, MouseMotionListener {
+    private static class MyPanel extends JPanel implements ChangeListener, MouseListener {
 
-        private double mousedownxin;
-        private double mousedownyin;
-        private int mousedownxpix;
-        private int mousedownypix;
         private PCB.Compon mousecompon;
 
         public MyPanel ()
         {
             addMouseListener (this);
-            addMouseMotionListener (this);
         }
 
         @Override  // ChangeListener
@@ -218,7 +266,57 @@ public class Layout {
 
         @Override  // MouseListener
         public void mouseClicked (MouseEvent me)
-        { }
+        {
+            runauto = false;
+
+            int mousedownxpix = me.getX ();
+            int mousedownypix = me.getY ();
+
+            // find component being clicked if any
+            for (PCB.Compon compon : iccompons) {
+                int xpixleft = (int) Math.round ((compon.atxin () - lowxin) * PIXPERINCH);
+                int ypixtop  = (int) Math.round ((compon.atyin () - lowyin) * PIXPERINCH);
+                int xpixrite = xpixleft + colwidpix;
+                int ypixbot  = ypixtop  + rowhitpix;
+                if ((mousedownxpix > xpixleft) && (mousedownxpix < xpixrite) && (mousedownypix > ypixtop) && (mousedownypix < ypixbot)) {
+                    System.err.println ("clicked on " + compon.refer);
+                    if (mousecompon == null) {
+
+                        // first click with nothing else clicked, select the clicked-on component
+                        System.err.println ("  selected " + compon.refer);
+                        mousecompon = compon;
+                    } else if (mousecompon == compon) {
+
+                        // second click on same component, deselect the component
+                        System.err.println ("  deselected " + compon.refer);
+                        mousecompon = null;
+                    } else {
+                        System.err.println ("  swap with " + mousecompon.refer);
+
+                        // swap position of the two components
+                        double oldatxin = mousecompon.atxin ();
+                        double oldatyin = mousecompon.atyin ();
+                        double newatxin = compon.atxin ();
+                        double newatyin = compon.atyin ();
+                        mousecompon.atxin (newatxin);
+                        mousecompon.atyin (newatyin);
+                        compon.atxin (oldatxin);
+                        compon.atyin (oldatyin);
+
+                        // invalidate all connected network lengths
+                        invalNetTotLen (mousecompon);
+                        invalNetTotLen (compon);
+
+                        // recompute network lengths
+                        updtotnetlen ();
+                    }
+
+                    // redraw with new selections/positions
+                    repaint ();
+                    break;
+                }
+            }
+        }
 
         @Override  // MouseListener
         public void mouseEntered (MouseEvent me)
@@ -230,70 +328,10 @@ public class Layout {
 
         @Override  // MouseListener
         public void mousePressed (MouseEvent me)
-        {
-            mousecompon   = null;
-            mousedownxpix = me.getX ();
-            mousedownypix = me.getY ();
-            mousedownxin  = Double.NaN;
-            mousedownyin  = Double.NaN;
-
-            // find component being moved if any
-            for (PCB.Compon compon : iccompons.values ()) {
-                int xpixleft = (int) Math.round ((compon.atxin () - lowxin) * PIXPERINCH);
-                int ypixtop  = (int) Math.round ((compon.atyin () - lowyin) * PIXPERINCH);
-                int xpixrite = xpixleft + colwidpix;
-                int ypixbot  = ypixtop  + rowhitpix;
-                if ((mousedownxpix > xpixleft) && (mousedownxpix < xpixrite) && (mousedownypix > ypixtop) && (mousedownypix < ypixbot)) {
-                    mousecompon  = compon;
-                    mousedownxin = compon.atxin () - lowxin;
-                    mousedownyin = compon.atyin () - lowyin;
-                }
-            }
-
-            repaint ();
-        }
+        { }
 
         @Override  // MouseListener
         public void mouseReleased (MouseEvent me)
-        {
-            mousecompon = null;
-            repaint ();
-        }
-
-        @Override  // MouseMotionListener
-        public void mouseDragged (MouseEvent me)
-        {
-            if (mousecompon != null) {
-                int mouselastxpix = me.getX ();
-                int mouselastypix = me.getY ();
-
-                // mousedown*in  = left,top corner when mouse was pressed
-                // mousedown*pix = pixel where mouse was pressed down
-                // new*inch = left,top corner when dragged
-                double newxinch = mousedownxin + Math.round ((mouselastxpix - mousedownxpix) / (double) PIXPER20THIN) / 20.0;
-                double newyinch = mousedownyin + Math.round ((mouselastypix - mousedownypix) / (double) PIXPER20THIN) / 20.0;
-
-                if ((newxinch != mousecompon.atxin () - lowxin) || (newyinch != mousecompon.atyin () - lowyin)) {
-
-                    // set new position
-                    mousecompon.atxin (newxinch + lowxin);
-                    mousecompon.atyin (newyinch + lowyin);
-
-                    // invalidate all connected network lengths
-                    for (PCB.Pad pad : mousecompon.pads) {
-                        PCB.Network network = (pad == null) ? null : pad.padnet;
-                        if (network != null) nettotlencache[network.netnum] = null;
-                    }
-
-                    // update screen
-                    repaint ();
-                    updtotnetlen ();
-                }
-            }
-        }
-
-        @Override  // MouseMotionListener
-        public void mouseMoved (MouseEvent me)
         { }
 
         @Override
@@ -306,60 +344,48 @@ public class Layout {
             // highlight any selected one in yellow, others are white background
             g.setFont (labelfont);
 
-            for (PCB.Compon compon : iccompons.values ()) {
-                int xpixleft, ypixtop;
-                if (compon == mousecompon) {
-                    xpixleft = (int) Math.round (mousedownxin * PIXPERINCH);
-                    ypixtop  = (int) Math.round (mousedownyin * PIXPERINCH);
-                    g.setColor (Color.YELLOW);
-                } else {
-                    xpixleft = (int) Math.round ((compon.atxin () - lowxin) * PIXPERINCH);
-                    ypixtop  = (int) Math.round ((compon.atyin () - lowyin) * PIXPERINCH);
-                    g.setColor (Color.WHITE);
+            synchronized (syncit) {
+
+                for (PCB.Compon compon : iccompons) {
+                    g.setColor ((compon == mousecompon) ? Color.YELLOW : Color.WHITE);
+                    int xpixleft = (int) Math.round ((compon.atxin () - lowxin) * PIXPERINCH);
+                    int ypixtop  = (int) Math.round ((compon.atyin () - lowyin) * PIXPERINCH);
+                    g.fillRoundRect (xpixleft, ypixtop, colwidpix, rowhitpix, 10, 10);
+                    g.setColor (Color.BLACK);
+                    g.drawRoundRect (xpixleft, ypixtop, colwidpix, rowhitpix, 10, 10);
+                    g.drawString (compon.refer + "  " + compon.value, xpixleft + 10, ypixtop + 20);
                 }
-                g.fillRoundRect (xpixleft, ypixtop, colwidpix, rowhitpix, 10, 10);
-                g.setColor (Color.BLACK);
-                g.drawRoundRect (xpixleft, ypixtop, colwidpix, rowhitpix, 10, 10);
-                g.drawString (compon.refer + "  " + compon.value, xpixleft + 10, ypixtop + 20);
-            }
 
-            // if one is being dragged, show its new position in red
-            if (mousecompon != null) {
-                int xpix = (int) Math.round ((mousecompon.atxin () - lowxin) * PIXPERINCH);
-                int ypix = (int) Math.round ((mousecompon.atyin () - lowyin) * PIXPERINCH);
-                g.setColor (Color.RED);
-                g.fillRoundRect (xpix, ypix, colwidpix, rowhitpix, 10, 10);
-            }
-
-            // draw interconnections used to compute total trace lengths
-            // if any checkboxes checked, only draw lines connected to enabled chips
-            boolean anychecked = false;
-            for (JCheckBox typeckbox : typeckboxes.values ()) {
-                anychecked |= typeckbox.isSelected ();
-            }
-            for (NetTotLen ntl : nettotlencache) {
-                if (ntl != null) {
-                    for (PadPair pp : ntl.padpairs) {
-                        PCB.Pad pada = pp.pada;
-                        PCB.Pad padb = pp.padb;
-                        PCB.Compon compa = pada.compon;
-                        PCB.Compon compb = padb.compon;
-                        boolean drawit = ! anychecked;
-                        if (! drawit) {
-                            JCheckBox cba = typeckboxes.get (compa.value);
-                            if (cba != null) drawit = cba.isSelected ();
-                        }
-                        if (! drawit) {
-                            JCheckBox cbb = typeckboxes.get (compb.value);
-                            if (cbb != null) drawit = cbb.isSelected ();
-                        }
-                        if (drawit) {
-                            g.setColor ((compa == mousecompon) || (compb == mousecompon) ? Color.BLUE : Color.MAGENTA);
-                            int ax = (int) Math.round ((compa.atxin () + pada.atxin) * PIXPERINCH);
-                            int ay = (int) Math.round ((compa.atyin () + pada.atyin) * PIXPERINCH);
-                            int bx = (int) Math.round ((compb.atxin () + padb.atxin) * PIXPERINCH);
-                            int by = (int) Math.round ((compb.atyin () + padb.atyin) * PIXPERINCH);
-                            g.drawLine (ax, ay, bx, by);
+                // draw interconnections used to compute total trace lengths
+                // if any checkboxes checked, only draw lines connected to enabled chips
+                boolean anychecked = false;
+                for (JCheckBox typeckbox : typeckboxes.values ()) {
+                    anychecked |= typeckbox.isSelected ();
+                }
+                for (NetTotLen ntl : nettotlencache) {
+                    if (ntl != null) {
+                        for (PadPair pp : ntl.padpairs) {
+                            PCB.Pad pada = pp.pada;
+                            PCB.Pad padb = pp.padb;
+                            PCB.Compon compa = pada.compon;
+                            PCB.Compon compb = padb.compon;
+                            boolean drawit = ! anychecked;
+                            if (! drawit) {
+                                JCheckBox cba = typeckboxes.get (compa.value);
+                                if (cba != null) drawit = cba.isSelected ();
+                            }
+                            if (! drawit) {
+                                JCheckBox cbb = typeckboxes.get (compb.value);
+                                if (cbb != null) drawit = cbb.isSelected ();
+                            }
+                            if (drawit) {
+                                g.setColor ((compa == mousecompon) || (compb == mousecompon) ? Color.BLUE : Color.MAGENTA);
+                                int ax = (int) Math.round ((compa.atxin () + pada.atxin) * PIXPERINCH);
+                                int ay = (int) Math.round ((compa.atyin () + pada.atyin) * PIXPERINCH);
+                                int bx = (int) Math.round ((compb.atxin () + padb.atxin) * PIXPERINCH);
+                                int by = (int) Math.round ((compb.atyin () + padb.atyin) * PIXPERINCH);
+                                g.drawLine (ax, ay, bx, by);
+                            }
                         }
                     }
                 }
@@ -421,6 +447,7 @@ public class Layout {
     }
 
     private static NetTotLen[] nettotlencache;
+
     public static double nettotallen (PCB.Network network)
     {
         NetTotLen ntl = nettotlencache[network.netnum];
@@ -452,6 +479,17 @@ public class Layout {
             nettotlencache[network.netnum] = ntl;
         }
         return ntl.nettotlen ();
+    }
+
+    // invalidate network total lengths that are connected to the component
+    private static void invalNetTotLen (PCB.Compon compon)
+    {
+        for (PCB.Pad pad : compon.pads) {
+            PCB.Network network = (pad == null) ? null : pad.padnet;
+            if ((network != null) && (network.netnum < nettotlencache.length)) {
+                nettotlencache[network.netnum] = null;
+            }
+        }
     }
 
     // ignore power and unconnected networks
