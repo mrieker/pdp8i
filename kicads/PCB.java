@@ -60,9 +60,7 @@ public class PCB {
             // (net <number> <name>)
             if ("net".equals (elem.getarrname ())) {
                 SCM.ArrValue net = (SCM.ArrValue) elem;
-                Network network = new Network ();
-                network.netnum  = net.elems[1].asint ();
-                network.netname = net.elems[2].assym ();
+                Network network = new Network (net);
                 if (netsbyname.get (network.netname) != null) {
                     System.err.println ("duplicate network name " + network.netname);
                     error = true;
@@ -155,14 +153,24 @@ public class PCB {
     // network
 
     public class Network {
-        public int netnum;
-        public String netname;
+        public int netnum;          // network number
+        public String netname;      // sanitized name
         public int netrefs;         // <0: has an OUTPUT pin
                                     // >0: multiple TRISTATE pins
         public boolean netport;     // is referenced by a connector
         public Pad[] refdpads;      // list of pads the network connects to
 
+        public String netnamestr;   // unsanitized name including quotes and escapes
+
         public LinkedList<String> trinetnames = new LinkedList<> ();
+
+        public Network (SCM.ArrValue net)
+        {
+            // (net number "string")
+            netnum     = net.elems[1].asint ();
+            netname    = net.elems[2].assym ();
+            netnamestr = ((SCM.StrValue) net.elems[2]).str;
+        }
     }
 
     // component
@@ -243,7 +251,8 @@ public class PCB {
         public double atxin;    // (at x y)
         public double atyin;
 
-        private SCM.NumValue modulepadnetnum; // (net <number>)
+        private SCM.NumValue modulepadnetnum; // (net <number> "<string>")
+        private SCM.StrValue modulepadnetstr;
 
         public Pad (SCM.ArrValue modulepad)
                 throws Exception
@@ -269,6 +278,7 @@ public class PCB {
                 if ("net".equals (modulepadelem.getarrname ())) {
                     SCM.ArrValue modulepadnet = (SCM.ArrValue) modulepadelem;
                     modulepadnetnum = (SCM.NumValue) modulepadnet.elems[1];
+                    modulepadnetstr = (SCM.StrValue) modulepadnet.elems[2];
                 }
                 if ("at".equals (modulepadelem.getarrname ())) {
                     SCM.ArrValue padat = (SCM.ArrValue) modulepadelem;
@@ -292,14 +302,19 @@ public class PCB {
             }
         }
 
-        public Network padnet () {
+        // get network the pad is connected to
+        public Network padnet ()
+        {
             if (modulepadnetnum == null) return null;
             int padnetnum = (int) modulepadnetnum.num;
             return netsbynum.get (padnetnum);
         }
 
-        public void padnet (Network pn) {
+        // change network the pad is connected to
+        public void padnet (Network pn)
+        {
             modulepadnetnum.num = pn.netnum;
+            modulepadnetstr.str = pn.netnamestr;
             if (padnet () != pn) throw new RuntimeException ("bad network");
         }
     }
