@@ -26,7 +26,9 @@
 // Close graphics screen to write result out
 
 import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.InputStreamReader;
+import java.io.PrintStream;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Random;
@@ -42,6 +44,9 @@ public class Layout {
     public static TreeMap<Integer,PCB.Network> netsbynum;
     public static PCB.Compon[] iccompons;
     public static TreeMap<String,PCB.Compon[]> chipsoftype;  // all 7400s, 7410s, etc
+
+    public static SCM.ArrValue schemtop;
+    public static SCM.ArrValue[] schemsyms;
 
     public static final int PIXPER20THIN = 5;   // pixels per 20th inch
     public static final int PIXPERINCH = 20 * PIXPER20THIN;
@@ -143,6 +148,11 @@ public class Layout {
         colwidpix = colwid20thin * PIXPER20THIN;
         rowhitpix = rowhit20thin * PIXPER20THIN;
 
+        SCM schematic = new SCM (new BufferedReader (new FileReader ("procalu/procalu.kicad_sch")));
+        schemtop = (SCM.ArrValue) schematic.topvalue ();
+        if (! schemtop.getarrname ().equals ("kicad_sch")) throw new Exception ("not a kicad_sch");
+        schemsyms = schemtop.findsubarrays ("symbol");
+
         makeequivsubchips ();
         makeequivpads ();
 
@@ -174,6 +184,7 @@ public class Layout {
                 }
             }
 
+/*** no easy way to update schematic
             // try swapping a pair of same-function pads (eg, pin 1 and 2 of a 7400)
             for (String chiptype : equivpads.keySet ()) {
                 newtotlen = doPadSwap (oldtotlen, chiptype);
@@ -181,11 +192,13 @@ public class Layout {
                     oldtotlen = newtotlen;
                 }
             }
+***/
         }
 
         // write out modified pcb
         System.err.println ("saving output file");
         pcb.save (System.out);
+        schematic.save (new PrintStream ("procalu/procalu-new.kicad_sch"));
         System.err.println ("output file saved");
     }
 
@@ -395,15 +408,85 @@ public class Layout {
             // just swapped them back after first time failed, return with stuff swapped back
             if (! firstswap) return Double.NaN;
 
-            // first swap, if new total length less than old, return with pins swapped
+            // first swap, if new total length less than old, return with subchips swapped
             double newtotlen = nettotallen ();
             if (newtotlen < oldtotlen) {
+                // ica.refer = "U123"
+                // icsubchipa = 0,1,2,... for A,B,C,...
                 System.err.println ("swap " + ica.refer + (char)('A' + icsubchipa) + " " + icb.refer + (char)('A' + icsubchipb) + " => " + newtotlen);
+
+                // update the schematic
+                swapschemsubchips (ica.refer, icsubchipa + 1, icb.refer, icsubchipb + 1);
+
                 return newtotlen;
             }
 
             // swap failed, loop back to swap them back where they were
             firstswap = false;
+        }
+    }
+
+    // swap subchip references in the schematic file, eg, U35A <-> U72C
+    public static void swapschemsubchips (String refa, int unita, String refb, int unitb)
+    {
+        for (SCM.ArrValue schvalarr : schemsyms) {
+
+            // (symbol ... (unit 3) ... (property "Reference" "U118" ...) ...
+            //   (instances (project "..." (path "..." (reference "U118") (unit 3)))))
+
+            SCM.NumValue unitnumval  = null;
+            SCM.NumValue unitnumval2 = null;
+            SCM.StrValue refstrval   = null;
+            SCM.StrValue refstrval2  = null;
+
+            for (SCM.Value symval : schvalarr.elems) {
+                String symvalarrname = symval.getarrname ();
+                if (symvalarrname == null) continue;
+                SCM.ArrValue symvalarr = (SCM.ArrValue) symval;
+
+                // (unit 3)
+                if ("unit".equals (symvalarrname)) {
+                    unitnumval = (SCM.NumValue) symvalarr.elems[1];
+                }
+
+                // (property "Reference" "U118")
+                if ("property".equals (symvalarrname) && "Reference".equals (symvalarr.elems[1].assym ())) {
+                    refstrval = (SCM.StrValue) symvalarr.elems[2];
+                }
+
+                // (instances (project "..." (path "..." (reference "U118") (unit 3))))
+                if ("instances".equals (symvalarrname)) {
+                    SCM.ArrValue proj = symvalarr.findsubarray ("project");
+                    if (proj != null) {
+                        SCM.ArrValue path = proj.findsubarray ("path");
+                        if (path != null) {
+                            SCM.ArrValue refr = path.findsubarray ("reference");
+                            SCM.ArrValue unit = path.findsubarray ("unit");
+                            if (unit != null) unitnumval2 = (SCM.NumValue) unit.elems[1];
+                            if (refr != null) refstrval2  = (SCM.StrValue) refr.elems[1];
+                        }
+                    }
+                }
+            }
+
+            // should have all that stuff
+            if ((refstrval == null) || (unitnumval == null) || (refstrval2 == null) || (unitnumval2 == null)) continue;
+            if (! refstrval.str.equals (refstrval2.str) || (unitnumval.num != unitnumval2.num)) continue;
+
+            // if (symbol ... (unit unita) ... (property "Reference" "refa" ...) ...)
+            // change to            unitb                             refb
+            if (refstrval.noquotes ().equals (refa) && (unitnumval.asint () == unita)) {
+                refstrval.str  = refstrval2.str  = "\"" + refb + "\"";
+                unitnumval.num = unitnumval2.num = unitb;
+                continue;
+            }
+
+            // if (symbol ... (unit unitb) ... (property "Reference" "refb" ...) ...)
+            // change to            unita                             refa
+            if (refstrval.noquotes ().equals (refb) && (unitnumval.asint () == unitb)) {
+                refstrval.str  = refstrval2.str  = "\"" + refa + "\"";
+                unitnumval.num = unitnumval2.num = unita;
+            }
         }
     }
 

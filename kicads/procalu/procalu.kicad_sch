@@ -16834,10 +16834,10 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AC10") (at 548.64 180.34 0) (unit 1)
+  (symbol (lib_id "74xx:74AC10") (at 548.64 180.34 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 022c77c5-54dd-4c83-8d46-2f5253860c6d)
-    (property "Reference" "U146" (at 548.6317 171.45 0)
+    (property "Reference" "U150" (at 548.6317 171.45 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AC10" (at 548.6317 173.99 0)
@@ -16866,7 +16866,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U146") (unit 1)
+          (reference "U150") (unit 2)
         )
       )
     )
@@ -16923,7 +16923,7 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC08") (at 314.96 129.54 0) (unit 1)
+  (symbol (lib_id "74xx:74AHC08") (at 314.96 129.54 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 040981a6-328d-4b92-a320-faa2920b386a)
     (property "Reference" "U74" (at 314.9517 120.65 0)
@@ -16955,7 +16955,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U74") (unit 1)
+          (reference "U74") (unit 2)
         )
       )
     )
@@ -16997,7 +16997,7 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC32") (at 314.96 482.6 0) (unit 1)
+  (symbol (lib_id "74xx:74AHC32") (at 314.96 482.6 0) (unit 4)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 04a48935-cdac-46c5-8b41-15fdce63cbe7)
     (property "Reference" "U79" (at 314.96 473.71 0)
@@ -17029,13 +17029,13 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U79") (unit 1)
+          (reference "U79") (unit 4)
         )
       )
     )
   )
 
-  (symbol (lib_id "74xx:74AHC04") (at 48.26 652.78 0) (unit 5)
+  (symbol (lib_id "74xx:74AHC04") (at 48.26 652.78 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 04c1319a-5fa0-4e8c-aefa-91feab13b034)
     (property "Reference" "U128" (at 48.26 643.89 0)
@@ -17067,7 +17067,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U128") (unit 5)
+          (reference "U128") (unit 2)
         )
       )
     )
@@ -17149,10 +17149,10 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC00") (at 474.98 302.26 0) (unit 3)
+  (symbol (lib_id "74xx:74AHC00") (at 474.98 302.26 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 06da531f-00ce-4187-8a7c-6a9ccaee7a6d)
-    (property "Reference" "U151" (at 474.9717 293.37 0)
+    (property "Reference" "U158" (at 474.9717 293.37 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC00" (at 474.9717 295.91 0)
@@ -17181,7 +17181,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U151") (unit 3)
+          (reference "U158") (unit 1)
         )
       )
     )
@@ -17260,7 +17260,7 @@
     )
   )
 
-  (symbol (lib_id "myparts:74HC4075") (at 25.4 652.78 0) (unit 3)
+  (symbol (lib_id "myparts:74HC4075") (at 25.4 652.78 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 0757236a-f245-4925-add3-5a4f82e3240b)
     (property "Reference" "U171" (at 25.4 643.89 0)
@@ -17292,7 +17292,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U171") (unit 3)
+          (reference "U171") (unit 1)
         )
       )
     )
@@ -17336,10 +17336,10 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC00") (at 474.98 256.54 0) (unit 4)
+  (symbol (lib_id "74xx:74AHC00") (at 474.98 256.54 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 076306bb-bc43-47d4-aee4-b35683ac52aa)
-    (property "Reference" "U147" (at 474.9717 247.65 0)
+    (property "Reference" "U161" (at 474.9717 247.65 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC00" (at 474.9717 250.19 0)
@@ -17368,16 +17368,16 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U147") (unit 4)
+          (reference "U161") (unit 3)
         )
       )
     )
   )
 
-  (symbol (lib_id "74xx:74AHC02") (at 25.4 622.3 0) (unit 1)
+  (symbol (lib_id "74xx:74AHC02") (at 25.4 622.3 0) (unit 4)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 081443d4-2f2e-4093-a1bd-d250aae8165a)
-    (property "Reference" "U142" (at 25.4 613.41 0)
+    (property "Reference" "U144" (at 25.4 613.41 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC02" (at 25.4 615.95 0)
@@ -17406,13 +17406,13 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U142") (unit 1)
+          (reference "U144") (unit 4)
         )
       )
     )
   )
 
-  (symbol (lib_id "74xx:74AHC04") (at 612.14 510.54 0) (unit 6)
+  (symbol (lib_id "74xx:74AHC04") (at 612.14 510.54 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 0887aec9-fa6e-451c-903b-a777802f9c42)
     (property "Reference" "U124" (at 612.14 501.65 0)
@@ -17444,7 +17444,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U124") (unit 6)
+          (reference "U124") (unit 2)
         )
       )
     )
@@ -17475,10 +17475,10 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AC10") (at 548.64 302.26 0) (unit 3)
+  (symbol (lib_id "74xx:74AC10") (at 548.64 302.26 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 09d0ffaa-4815-49d5-9a06-e395c856474c)
-    (property "Reference" "U159" (at 548.6317 293.37 0)
+    (property "Reference" "U148" (at 548.6317 293.37 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AC10" (at 548.6317 295.91 0)
@@ -17507,7 +17507,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U159") (unit 3)
+          (reference "U148") (unit 2)
         )
       )
     )
@@ -17538,7 +17538,7 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC00") (at 474.98 424.18 0) (unit 2)
+  (symbol (lib_id "74xx:74AHC00") (at 474.98 424.18 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 0a73e677-fdcc-421c-99ea-5af22c3d8023)
     (property "Reference" "U151" (at 474.9717 415.29 0)
@@ -17570,7 +17570,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U151") (unit 2)
+          (reference "U151") (unit 1)
         )
       )
     )
@@ -17601,10 +17601,10 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC04") (at 718.82 581.66 0) (unit 4)
+  (symbol (lib_id "74xx:74AHC04") (at 718.82 581.66 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 0b34cea3-406d-45eb-9b7d-e3df7f003b1b)
-    (property "Reference" "U128" (at 718.82 572.77 0)
+    (property "Reference" "U125" (at 718.82 572.77 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC04" (at 718.82 575.31 0)
@@ -17633,7 +17633,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U128") (unit 4)
+          (reference "U125") (unit 1)
         )
       )
     )
@@ -17904,10 +17904,10 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC00") (at 548.64 88.9 0) (unit 4)
+  (symbol (lib_id "74xx:74AHC00") (at 548.64 88.9 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 10ad37eb-3331-4b07-9c19-315fb32b814d)
-    (property "Reference" "U151" (at 548.6317 80.01 0)
+    (property "Reference" "U156" (at 548.6317 80.01 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC00" (at 548.6317 82.55 0)
@@ -17936,7 +17936,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U151") (unit 4)
+          (reference "U156") (unit 3)
         )
       )
     )
@@ -17968,7 +17968,7 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC08") (at 314.96 553.72 0) (unit 1)
+  (symbol (lib_id "74xx:74AHC08") (at 314.96 553.72 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 1145352b-8a26-4f32-96fe-3230be7912d5)
     (property "Reference" "U80" (at 314.9517 544.83 0)
@@ -18000,7 +18000,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U80") (unit 1)
+          (reference "U80") (unit 3)
         )
       )
     )
@@ -18035,7 +18035,7 @@
   (symbol (lib_id "74xx:74AC10") (at 703.58 233.68 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 124ae38b-c5d5-41db-ae0e-8cba98e5fd5d)
-    (property "Reference" "U105" (at 703.5717 224.79 0)
+    (property "Reference" "U149" (at 703.5717 224.79 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AC10" (at 703.5717 227.33 0)
@@ -18064,7 +18064,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U105") (unit 2)
+          (reference "U149") (unit 2)
         )
       )
     )
@@ -18212,7 +18212,7 @@
     )
   )
 
-  (symbol (lib_id "74xx:74HC27") (at 703.58 198.12 0) (unit 2)
+  (symbol (lib_id "74xx:74HC27") (at 703.58 198.12 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 16647a3f-c0b7-4e60-b182-e4297b2ac70e)
     (property "Reference" "U170" (at 703.58 189.23 0)
@@ -18244,7 +18244,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U170") (unit 2)
+          (reference "U170") (unit 1)
         )
       )
     )
@@ -18253,7 +18253,7 @@
   (symbol (lib_id "74xx:74AHC08") (at 314.96 373.38 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 181ee318-524b-48c1-91e8-8d7cade6cc7f)
-    (property "Reference" "U77" (at 314.9517 364.49 0)
+    (property "Reference" "U56" (at 314.9517 364.49 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC08" (at 314.9517 367.03 0)
@@ -18282,7 +18282,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U77") (unit 3)
+          (reference "U56") (unit 3)
         )
       )
     )
@@ -18390,7 +18390,7 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AC11") (at 190.5 571.5 0) (unit 3)
+  (symbol (lib_id "74xx:74AC11") (at 190.5 571.5 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 1bbde9cc-ed84-4769-a21e-308a9afd6363)
     (property "Reference" "U57" (at 190.4917 562.61 0)
@@ -18422,7 +18422,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U57") (unit 3)
+          (reference "U57") (unit 1)
         )
       )
     )
@@ -18453,10 +18453,10 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC08") (at 314.96 589.28 0) (unit 3)
+  (symbol (lib_id "74xx:74AHC08") (at 314.96 589.28 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 1e18122b-92ba-4d15-a033-f4ce334eb02e)
-    (property "Reference" "U80" (at 314.9517 580.39 0)
+    (property "Reference" "U55" (at 314.9517 580.39 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC08" (at 314.9517 582.93 0)
@@ -18485,7 +18485,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U80") (unit 3)
+          (reference "U55") (unit 2)
         )
       )
     )
@@ -18551,7 +18551,7 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC04") (at 612.14 495.3 0) (unit 5)
+  (symbol (lib_id "74xx:74AHC04") (at 612.14 495.3 0) (unit 4)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 1eb13570-b528-41bf-8016-eab6b480d40c)
     (property "Reference" "U124" (at 612.14 486.41 0)
@@ -18583,13 +18583,13 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U124") (unit 5)
+          (reference "U124") (unit 4)
         )
       )
     )
   )
 
-  (symbol (lib_id "74xx:74AC10") (at 548.64 226.06 0) (unit 1)
+  (symbol (lib_id "74xx:74AC10") (at 548.64 226.06 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 1ef161b9-f4bd-4a9e-8216-5ce96169b41b)
     (property "Reference" "U160" (at 548.6317 217.17 0)
@@ -18621,7 +18621,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U160") (unit 1)
+          (reference "U160") (unit 2)
         )
       )
     )
@@ -18743,10 +18743,10 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC02") (at 129.54 421.64 0) (unit 4)
+  (symbol (lib_id "74xx:74AHC02") (at 129.54 421.64 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 206a02f2-d0a5-481b-8de1-fcd245201064)
-    (property "Reference" "U144" (at 129.54 412.75 0)
+    (property "Reference" "U27" (at 129.54 412.75 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC02" (at 129.54 415.29 0)
@@ -18775,7 +18775,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U144") (unit 4)
+          (reference "U27") (unit 2)
         )
       )
     )
@@ -18807,10 +18807,10 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC04") (at 48.26 637.54 0) (unit 6)
+  (symbol (lib_id "74xx:74AHC04") (at 48.26 637.54 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 21fcd622-d653-4832-9045-14e41150b83e)
-    (property "Reference" "U125" (at 48.26 628.65 0)
+    (property "Reference" "U128" (at 48.26 628.65 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC04" (at 48.26 631.19 0)
@@ -18839,7 +18839,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U125") (unit 6)
+          (reference "U128") (unit 3)
         )
       )
     )
@@ -18885,10 +18885,10 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC08") (at 73.66 591.82 0) (unit 1)
+  (symbol (lib_id "74xx:74AHC08") (at 73.66 591.82 0) (unit 4)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 225f275b-cc63-4e68-b345-b5e6a33d279c)
-    (property "Reference" "U56" (at 73.6517 582.93 0)
+    (property "Reference" "U55" (at 73.6517 582.93 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC08" (at 73.6517 585.47 0)
@@ -18917,13 +18917,13 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U56") (unit 1)
+          (reference "U55") (unit 4)
         )
       )
     )
   )
 
-  (symbol (lib_id "74xx:74AHC86") (at 215.9 127 0) (unit 3)
+  (symbol (lib_id "74xx:74AHC86") (at 215.9 127 0) (unit 4)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 23f26d43-161f-4c0f-9046-d74dcd4045ab)
     (property "Reference" "U58" (at 215.5952 118.11 0)
@@ -18955,16 +18955,16 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U58") (unit 3)
+          (reference "U58") (unit 4)
         )
       )
     )
   )
 
-  (symbol (lib_id "74xx:74AHC04") (at 744.22 535.94 0) (unit 6)
+  (symbol (lib_id "74xx:74AHC04") (at 744.22 535.94 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 2439250c-6efa-48fb-9db8-687f8ffce38f)
-    (property "Reference" "U141" (at 744.22 527.05 0)
+    (property "Reference" "U119" (at 744.22 527.05 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC04" (at 744.22 529.59 0)
@@ -18993,7 +18993,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U141") (unit 6)
+          (reference "U119") (unit 1)
         )
       )
     )
@@ -19274,7 +19274,7 @@
   (symbol (lib_id "74xx:74AHC02") (at 683.26 172.72 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 2ad5aeee-e157-4f49-9ebd-4698d9db53a6)
-    (property "Reference" "U27" (at 683.26 163.83 0)
+    (property "Reference" "U144" (at 683.26 163.83 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC02" (at 683.26 166.37 0)
@@ -19303,7 +19303,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U27") (unit 3)
+          (reference "U144") (unit 3)
         )
       )
     )
@@ -19405,7 +19405,7 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC32") (at 314.96 93.98 0) (unit 3)
+  (symbol (lib_id "74xx:74AHC32") (at 314.96 93.98 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 3324ee7a-1dd5-49bf-a684-f47962721c63)
     (property "Reference" "U73" (at 314.96 85.09 0)
@@ -19437,7 +19437,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U73") (unit 3)
+          (reference "U73") (unit 1)
         )
       )
     )
@@ -19468,7 +19468,7 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AC11") (at 73.66 637.54 0) (unit 1)
+  (symbol (lib_id "74xx:74AC11") (at 73.66 637.54 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 34f32f0f-5278-474e-ad95-f8d45ac330ee)
     (property "Reference" "U57" (at 73.6517 628.65 0)
@@ -19500,7 +19500,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U57") (unit 1)
+          (reference "U57") (unit 2)
         )
       )
     )
@@ -19723,7 +19723,7 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC00") (at 683.26 294.64 0) (unit 3)
+  (symbol (lib_id "74xx:74AHC00") (at 683.26 294.64 0) (unit 4)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 3d333f85-fcb2-4bdf-b7ab-b6f98009b668)
     (property "Reference" "U168" (at 683.2517 285.75 0)
@@ -19755,7 +19755,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U168") (unit 3)
+          (reference "U168") (unit 4)
         )
       )
     )
@@ -19799,7 +19799,7 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AC10") (at 474.98 226.06 0) (unit 2)
+  (symbol (lib_id "74xx:74AC10") (at 474.98 226.06 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 3d6de7bd-8e71-4be6-aedd-5cafd4acbe15)
     (property "Reference" "U149" (at 474.9717 217.17 0)
@@ -19831,13 +19831,13 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U149") (unit 2)
+          (reference "U149") (unit 1)
         )
       )
     )
   )
 
-  (symbol (lib_id "74xx:74AHC04") (at 612.14 464.82 0) (unit 3)
+  (symbol (lib_id "74xx:74AHC04") (at 612.14 464.82 0) (unit 5)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 3da67835-660a-4f83-9678-8616f9aaf4e8)
     (property "Reference" "U124" (at 612.14 455.93 0)
@@ -19869,16 +19869,16 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U124") (unit 3)
+          (reference "U124") (unit 5)
         )
       )
     )
   )
 
-  (symbol (lib_id "74xx:74AHC00") (at 548.64 134.62 0) (unit 2)
+  (symbol (lib_id "74xx:74AHC00") (at 548.64 134.62 0) (unit 4)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 3dbf127e-84dc-41bd-ab88-61c8c7517986)
-    (property "Reference" "U158" (at 548.6317 125.73 0)
+    (property "Reference" "U156" (at 548.6317 125.73 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC00" (at 548.6317 128.27 0)
@@ -19907,7 +19907,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U158") (unit 2)
+          (reference "U156") (unit 4)
         )
       )
     )
@@ -19976,10 +19976,10 @@
     )
   )
 
-  (symbol (lib_id "74xx:74LS02") (at 25.4 607.06 0) (unit 4)
+  (symbol (lib_id "74xx:74LS02") (at 25.4 607.06 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 3f05d2fd-dd74-4708-8af7-c43428aca059)
-    (property "Reference" "U27" (at 25.4 598.17 0)
+    (property "Reference" "U142" (at 25.4 598.17 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC02" (at 25.4 600.71 0)
@@ -20008,7 +20008,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U27") (unit 4)
+          (reference "U142") (unit 1)
         )
       )
     )
@@ -20052,10 +20052,10 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AC10") (at 548.64 241.3 0) (unit 3)
+  (symbol (lib_id "74xx:74AC10") (at 548.64 241.3 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 403bae48-3fac-416c-afb0-1f05263aee3b)
-    (property "Reference" "U150" (at 548.6317 232.41 0)
+    (property "Reference" "U159" (at 548.6317 232.41 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AC10" (at 548.6317 234.95 0)
@@ -20084,7 +20084,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U150") (unit 3)
+          (reference "U159") (unit 2)
         )
       )
     )
@@ -20116,10 +20116,10 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC00") (at 474.98 73.66 0) (unit 1)
+  (symbol (lib_id "74xx:74AHC00") (at 474.98 73.66 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 4052272b-2d80-489c-a3c6-d3bc37671f22)
-    (property "Reference" "U156" (at 474.9717 64.77 0)
+    (property "Reference" "U161" (at 474.9717 64.77 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC00" (at 474.9717 67.31 0)
@@ -20148,13 +20148,13 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U156") (unit 1)
+          (reference "U161") (unit 2)
         )
       )
     )
   )
 
-  (symbol (lib_id "74xx:74AHC32") (at 314.96 500.38 0) (unit 2)
+  (symbol (lib_id "74xx:74AHC32") (at 314.96 500.38 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 41ed6cbb-711a-4cdb-b5d0-74bda07cf7f3)
     (property "Reference" "U79" (at 314.96 491.49 0)
@@ -20186,7 +20186,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U79") (unit 2)
+          (reference "U79") (unit 1)
         )
       )
     )
@@ -20269,10 +20269,10 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC08") (at 129.54 485.14 0) (unit 2)
+  (symbol (lib_id "74xx:74AHC08") (at 129.54 485.14 0) (unit 4)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 4454810f-abe2-4f0c-a9a5-f8983a00e264)
-    (property "Reference" "U55" (at 129.5317 476.25 0)
+    (property "Reference" "U56" (at 129.5317 476.25 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC08" (at 129.5317 478.79 0)
@@ -20301,7 +20301,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U55") (unit 2)
+          (reference "U56") (unit 4)
         )
       )
     )
@@ -20386,10 +20386,10 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AC10") (at 548.64 104.14 0) (unit 2)
+  (symbol (lib_id "74xx:74AC10") (at 548.64 104.14 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 446efbcb-04da-4212-acd4-de29fc16b524)
-    (property "Reference" "U146" (at 548.6317 95.25 0)
+    (property "Reference" "U150" (at 548.6317 95.25 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AC10" (at 548.6317 97.79 0)
@@ -20418,7 +20418,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U146") (unit 2)
+          (reference "U150") (unit 1)
         )
       )
     )
@@ -20427,7 +20427,7 @@
   (symbol (lib_id "74xx:74AHC02") (at 751.84 213.36 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 447adc7e-ecea-41f4-932c-17712442fc35)
-    (property "Reference" "U142" (at 751.84 204.47 0)
+    (property "Reference" "U144" (at 751.84 204.47 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC02" (at 751.84 207.01 0)
@@ -20456,13 +20456,13 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U142") (unit 2)
+          (reference "U144") (unit 2)
         )
       )
     )
   )
 
-  (symbol (lib_id "74xx:74HC27") (at 703.58 182.88 0) (unit 1)
+  (symbol (lib_id "74xx:74HC27") (at 703.58 182.88 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 4609af62-598d-4f7a-bb3a-a3c791aebf40)
     (property "Reference" "U170" (at 703.58 173.99 0)
@@ -20494,7 +20494,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U170") (unit 1)
+          (reference "U170") (unit 3)
         )
       )
     )
@@ -20696,7 +20696,7 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC32") (at 314.96 111.76 0) (unit 4)
+  (symbol (lib_id "74xx:74AHC32") (at 314.96 111.76 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 4b83ced5-f1cf-43a0-ab9a-dd0589977b17)
     (property "Reference" "U73" (at 314.96 102.87 0)
@@ -20728,7 +20728,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U73") (unit 4)
+          (reference "U73") (unit 2)
         )
       )
     )
@@ -20798,10 +20798,10 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC04") (at 683.26 160.02 0) (unit 5)
+  (symbol (lib_id "74xx:74AHC04") (at 683.26 160.02 0) (unit 4)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 4c86ac14-9466-4b2f-8e06-cdc2a39ca504)
-    (property "Reference" "U125" (at 683.26 151.13 0)
+    (property "Reference" "U119" (at 683.26 151.13 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC04" (at 683.26 153.67 0)
@@ -20830,7 +20830,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U125") (unit 5)
+          (reference "U119") (unit 4)
         )
       )
     )
@@ -20839,7 +20839,7 @@
   (symbol (lib_id "74xx:74AHC00") (at 619.76 58.42 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 4d85b623-06b4-4796-9518-66ce1ab9db1f)
-    (property "Reference" "U161" (at 619.7517 49.53 0)
+    (property "Reference" "U158" (at 619.7517 49.53 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC00" (at 619.7517 52.07 0)
@@ -20868,13 +20868,13 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U161") (unit 2)
+          (reference "U158") (unit 2)
         )
       )
     )
   )
 
-  (symbol (lib_id "74xx:74AC10") (at 619.76 256.54 0) (unit 1)
+  (symbol (lib_id "74xx:74AC10") (at 619.76 256.54 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 4da8a845-eb33-48fe-8402-92bc8563d807)
     (property "Reference" "U159" (at 619.7517 247.65 0)
@@ -20906,7 +20906,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U159") (unit 1)
+          (reference "U159") (unit 3)
         )
       )
     )
@@ -20952,10 +20952,10 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AC10") (at 548.64 287.02 0) (unit 3)
+  (symbol (lib_id "74xx:74AC10") (at 548.64 287.02 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 4e3a99d5-b650-4576-9cfe-f0455772684b)
-    (property "Reference" "U149" (at 548.6317 278.13 0)
+    (property "Reference" "U105" (at 548.6317 278.13 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AC10" (at 548.6317 280.67 0)
@@ -20984,7 +20984,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U149") (unit 3)
+          (reference "U105") (unit 2)
         )
       )
     )
@@ -21144,10 +21144,10 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC02") (at 744.22 566.42 0) (unit 1)
+  (symbol (lib_id "74xx:74AHC02") (at 744.22 566.42 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 521c6de0-bde4-4aa4-9287-69c6a0298e35)
-    (property "Reference" "U144" (at 744.22 557.53 0)
+    (property "Reference" "U142" (at 744.22 557.53 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC02" (at 744.22 560.07 0)
@@ -21176,7 +21176,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U144") (unit 1)
+          (reference "U142") (unit 3)
         )
       )
     )
@@ -21222,7 +21222,7 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC86") (at 215.9 353.06 0) (unit 4)
+  (symbol (lib_id "74xx:74AHC86") (at 215.9 353.06 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 53b6c8b6-4b42-43ac-a650-60298a7ab8ad)
     (property "Reference" "U59" (at 215.5952 344.17 0)
@@ -21254,7 +21254,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U59") (unit 4)
+          (reference "U59") (unit 1)
         )
       )
     )
@@ -21337,10 +21337,10 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC08") (at 129.54 515.62 0) (unit 4)
+  (symbol (lib_id "74xx:74AHC08") (at 129.54 515.62 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 5665a1e1-b4cd-4b35-bc7b-e716f0d902fb)
-    (property "Reference" "U56" (at 129.5317 506.73 0)
+    (property "Reference" "U80" (at 129.5317 506.73 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC08" (at 129.5317 509.27 0)
@@ -21369,7 +21369,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U56") (unit 4)
+          (reference "U80") (unit 2)
         )
       )
     )
@@ -21378,7 +21378,7 @@
   (symbol (lib_id "74xx:74AC10") (at 474.98 180.34 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 5842a484-c427-4b46-97de-546cab60de97)
-    (property "Reference" "U105" (at 474.9717 171.45 0)
+    (property "Reference" "U148" (at 474.9717 171.45 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AC10" (at 474.9717 173.99 0)
@@ -21407,7 +21407,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U105") (unit 3)
+          (reference "U148") (unit 3)
         )
       )
     )
@@ -21514,7 +21514,7 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC86") (at 215.9 144.78 0) (unit 4)
+  (symbol (lib_id "74xx:74AHC86") (at 215.9 144.78 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 59dee903-5551-4977-8595-e6158c8c51ab)
     (property "Reference" "U58" (at 215.5952 135.89 0)
@@ -21546,7 +21546,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U58") (unit 4)
+          (reference "U58") (unit 1)
         )
       )
     )
@@ -21640,7 +21640,7 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC00") (at 474.98 165.1 0) (unit 3)
+  (symbol (lib_id "74xx:74AHC00") (at 474.98 165.1 0) (unit 4)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 5cd0dd91-e2c0-4657-9374-e6a5f52622d7)
     (property "Reference" "U147" (at 474.9717 156.21 0)
@@ -21672,13 +21672,13 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U147") (unit 3)
+          (reference "U147") (unit 4)
         )
       )
     )
   )
 
-  (symbol (lib_id "74xx:74AHC04") (at 612.14 576.58 0) (unit 4)
+  (symbol (lib_id "74xx:74AHC04") (at 612.14 576.58 0) (unit 6)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 5d678662-b291-4594-9034-07e34f8de85e)
     (property "Reference" "U125" (at 612.14 567.69 0)
@@ -21710,7 +21710,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U125") (unit 4)
+          (reference "U125") (unit 6)
         )
       )
     )
@@ -21741,7 +21741,7 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC02") (at 744.22 457.2 0) (unit 3)
+  (symbol (lib_id "74xx:74AHC02") (at 744.22 457.2 0) (unit 4)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 5e7ace7b-7f7b-4741-bacd-4162f63c363b)
     (property "Reference" "U142" (at 744.22 448.31 0)
@@ -21773,13 +21773,13 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U142") (unit 3)
+          (reference "U142") (unit 4)
         )
       )
     )
   )
 
-  (symbol (lib_id "74xx:74AHC86") (at 215.9 63.5 0) (unit 1)
+  (symbol (lib_id "74xx:74AHC86") (at 215.9 63.5 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 5f27851a-4dcd-4523-ab81-f7f39f7f6b64)
     (property "Reference" "U58" (at 215.5952 54.61 0)
@@ -21811,13 +21811,13 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U58") (unit 1)
+          (reference "U58") (unit 3)
         )
       )
     )
   )
 
-  (symbol (lib_id "74xx:74AHC02") (at 683.26 246.38 0) (unit 2)
+  (symbol (lib_id "74xx:74AHC02") (at 683.26 246.38 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 5f304a1d-79dd-421f-9e2e-649cb3fe4036)
     (property "Reference" "U144" (at 683.26 237.49 0)
@@ -21849,7 +21849,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U144") (unit 2)
+          (reference "U144") (unit 1)
         )
       )
     )
@@ -22089,7 +22089,7 @@
   (symbol (lib_id "74xx:74AHC04") (at 109.22 436.88 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 64b21acb-8109-4037-b01d-48e0a735f93b)
-    (property "Reference" "U128" (at 109.22 427.99 0)
+    (property "Reference" "U123" (at 109.22 427.99 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC04" (at 109.22 430.53 0)
@@ -22118,7 +22118,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U128") (unit 1)
+          (reference "U123") (unit 1)
         )
       )
     )
@@ -22327,10 +22327,10 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC08") (at 129.54 454.66 0) (unit 4)
+  (symbol (lib_id "74xx:74AHC08") (at 129.54 454.66 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 69fa9e8b-fce0-43d8-9efc-6bef5f5bba3f)
-    (property "Reference" "U55" (at 129.5317 445.77 0)
+    (property "Reference" "U56" (at 129.5317 445.77 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC08" (at 129.5317 448.31 0)
@@ -22359,13 +22359,13 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U55") (unit 4)
+          (reference "U56") (unit 2)
         )
       )
     )
   )
 
-  (symbol (lib_id "74xx:74AHC08") (at 314.96 571.5 0) (unit 2)
+  (symbol (lib_id "74xx:74AHC08") (at 314.96 571.5 0) (unit 4)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 6a840582-cd92-4956-88f1-f4791685ad6b)
     (property "Reference" "U80" (at 314.9517 562.61 0)
@@ -22397,7 +22397,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U80") (unit 2)
+          (reference "U80") (unit 4)
         )
       )
     )
@@ -22587,7 +22587,7 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC02") (at 683.26 147.32 0) (unit 1)
+  (symbol (lib_id "74xx:74AHC02") (at 683.26 147.32 0) (unit 4)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 71480172-94b8-43bb-a094-c8b0df26ff01)
     (property "Reference" "U27" (at 683.26 138.43 0)
@@ -22619,7 +22619,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U27") (unit 1)
+          (reference "U27") (unit 4)
         )
       )
     )
@@ -22741,7 +22741,7 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC86") (at 215.9 487.68 0) (unit 1)
+  (symbol (lib_id "74xx:74AHC86") (at 215.9 487.68 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 72d6d7e5-8cdb-4e83-b7fb-7e092d1bcc02)
     (property "Reference" "U60" (at 215.5952 478.79 0)
@@ -22773,7 +22773,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U60") (unit 1)
+          (reference "U60") (unit 3)
         )
       )
     )
@@ -22934,7 +22934,7 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC08") (at 314.96 355.6 0) (unit 2)
+  (symbol (lib_id "74xx:74AHC08") (at 314.96 355.6 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 761cbcad-f401-491b-907a-73a789e289f9)
     (property "Reference" "U77" (at 314.9517 346.71 0)
@@ -22966,7 +22966,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U77") (unit 2)
+          (reference "U77") (unit 1)
         )
       )
     )
@@ -23022,10 +23022,10 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC08") (at 73.66 607.06 0) (unit 2)
+  (symbol (lib_id "74xx:74AHC08") (at 73.66 607.06 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 79052f3b-f2f1-4558-9640-c35c9a90b165)
-    (property "Reference" "U56" (at 73.6517 598.17 0)
+    (property "Reference" "U55" (at 73.6517 598.17 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC08" (at 73.6517 600.71 0)
@@ -23054,13 +23054,13 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U56") (unit 2)
+          (reference "U55") (unit 3)
         )
       )
     )
   )
 
-  (symbol (lib_id "74xx:74AHC04") (at 744.22 520.7 0) (unit 5)
+  (symbol (lib_id "74xx:74AHC04") (at 744.22 520.7 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 7a177e43-ba1a-4e62-8aca-88787b1ffb6e)
     (property "Reference" "U141" (at 744.22 511.81 0)
@@ -23092,7 +23092,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U141") (unit 5)
+          (reference "U141") (unit 1)
         )
       )
     )
@@ -23230,7 +23230,7 @@
   (symbol (lib_id "74xx:74AHC04") (at 129.54 347.98 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 7d35d7fe-b530-4db2-a62a-6157ede87dc4)
-    (property "Reference" "U128" (at 129.54 339.09 0)
+    (property "Reference" "U123" (at 129.54 339.09 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC04" (at 129.54 341.63 0)
@@ -23259,13 +23259,13 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U128") (unit 3)
+          (reference "U123") (unit 3)
         )
       )
     )
   )
 
-  (symbol (lib_id "74xx:74AHC32") (at 314.96 284.48 0) (unit 2)
+  (symbol (lib_id "74xx:74AHC32") (at 314.96 284.48 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 7d4e9151-3341-497a-8a3e-c1de71c276d1)
     (property "Reference" "U76" (at 314.96 275.59 0)
@@ -23297,7 +23297,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U76") (unit 2)
+          (reference "U76") (unit 3)
         )
       )
     )
@@ -23422,7 +23422,7 @@
   (symbol (lib_id "74xx:74AHC08") (at 680.72 317.5 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 7eabfdb4-2ea6-4044-99a5-e475f5398c55)
-    (property "Reference" "U56" (at 680.7117 308.61 0)
+    (property "Reference" "U74" (at 680.7117 308.61 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC08" (at 680.7117 311.15 0)
@@ -23451,7 +23451,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U56") (unit 3)
+          (reference "U74") (unit 3)
         )
       )
     )
@@ -23520,7 +23520,7 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC86") (at 215.9 335.28 0) (unit 3)
+  (symbol (lib_id "74xx:74AHC86") (at 215.9 335.28 0) (unit 4)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 80d9501f-3080-4b27-9ede-a5ac332e347d)
     (property "Reference" "U59" (at 215.5952 326.39 0)
@@ -23552,7 +23552,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U59") (unit 3)
+          (reference "U59") (unit 4)
         )
       )
     )
@@ -23624,7 +23624,7 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC08") (at 314.96 337.82 0) (unit 1)
+  (symbol (lib_id "74xx:74AHC08") (at 314.96 337.82 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 8238f7c4-bca1-485b-8d55-ee199a0d0973)
     (property "Reference" "U77" (at 314.9517 328.93 0)
@@ -23656,13 +23656,13 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U77") (unit 1)
+          (reference "U77") (unit 2)
         )
       )
     )
   )
 
-  (symbol (lib_id "myparts:74HC4075") (at 706.12 314.96 0) (unit 1)
+  (symbol (lib_id "myparts:74HC4075") (at 706.12 314.96 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 827e4c5c-6712-446a-8472-2b7637137a17)
     (property "Reference" "U171" (at 706.12 306.07 0)
@@ -23694,7 +23694,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U171") (unit 1)
+          (reference "U171") (unit 2)
         )
       )
     )
@@ -23725,10 +23725,10 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AC10") (at 474.98 287.02 0) (unit 2)
+  (symbol (lib_id "74xx:74AC10") (at 474.98 287.02 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 8453049f-9654-4227-a8bc-dfc88d263508)
-    (property "Reference" "U150" (at 474.9717 278.13 0)
+    (property "Reference" "U105" (at 474.9717 278.13 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AC10" (at 474.9717 280.67 0)
@@ -23757,7 +23757,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U150") (unit 2)
+          (reference "U105") (unit 3)
         )
       )
     )
@@ -23803,10 +23803,10 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC00") (at 548.64 119.38 0) (unit 1)
+  (symbol (lib_id "74xx:74AHC00") (at 548.64 119.38 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 8697cf54-3adf-4667-81a9-2a7486b91e02)
-    (property "Reference" "U158" (at 548.6317 110.49 0)
+    (property "Reference" "U151" (at 548.6317 110.49 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC00" (at 548.6317 113.03 0)
@@ -23835,7 +23835,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U158") (unit 1)
+          (reference "U151") (unit 2)
         )
       )
     )
@@ -23906,10 +23906,10 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC00") (at 548.64 73.66 0) (unit 2)
+  (symbol (lib_id "74xx:74AHC00") (at 548.64 73.66 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 8920b4b2-4f73-4910-9498-6ce3c72a3ae8)
-    (property "Reference" "U147" (at 548.6317 64.77 0)
+    (property "Reference" "U168" (at 548.6317 64.77 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC00" (at 548.6317 67.31 0)
@@ -23938,7 +23938,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U147") (unit 2)
+          (reference "U168") (unit 1)
         )
       )
     )
@@ -23969,7 +23969,7 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC00") (at 751.84 228.6 0) (unit 3)
+  (symbol (lib_id "74xx:74AHC00") (at 751.84 228.6 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 897c5e4e-f589-4904-aae7-f29c2b3eb7bb)
     (property "Reference" "U156" (at 751.8317 219.71 0)
@@ -24001,7 +24001,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U156") (unit 3)
+          (reference "U156") (unit 1)
         )
       )
     )
@@ -24010,7 +24010,7 @@
   (symbol (lib_id "74xx:74AHC08") (at 129.54 500.38 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 8a83dc7f-b47f-4dac-8eb7-74c64196a41c)
-    (property "Reference" "U55" (at 129.5317 491.49 0)
+    (property "Reference" "U80" (at 129.5317 491.49 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC08" (at 129.5317 494.03 0)
@@ -24039,16 +24039,16 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U55") (unit 1)
+          (reference "U80") (unit 1)
         )
       )
     )
   )
 
-  (symbol (lib_id "74xx:74AHC08") (at 314.96 144.78 0) (unit 2)
+  (symbol (lib_id "74xx:74AHC08") (at 314.96 144.78 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 8ae2235f-af27-446c-b7ec-7a9bd004fc2f)
-    (property "Reference" "U74" (at 314.9517 135.89 0)
+    (property "Reference" "U77" (at 314.9517 135.89 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC08" (at 314.9517 138.43 0)
@@ -24077,13 +24077,13 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U74") (unit 2)
+          (reference "U77") (unit 3)
         )
       )
     )
   )
 
-  (symbol (lib_id "74xx:74AHC32") (at 314.96 518.16 0) (unit 3)
+  (symbol (lib_id "74xx:74AHC32") (at 314.96 518.16 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 8b149b19-0ffb-4706-a67e-aff312e0e6cb)
     (property "Reference" "U79" (at 314.96 509.27 0)
@@ -24115,7 +24115,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U79") (unit 3)
+          (reference "U79") (unit 2)
         )
       )
     )
@@ -24187,7 +24187,7 @@
   (symbol (lib_id "74xx:74AC10") (at 619.76 104.14 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 8c088a26-c041-45be-89ea-4c1d658c86b3)
-    (property "Reference" "U148" (at 619.7517 95.25 0)
+    (property "Reference" "U146" (at 619.7517 95.25 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AC10" (at 619.7517 97.79 0)
@@ -24216,7 +24216,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U148") (unit 3)
+          (reference "U146") (unit 3)
         )
       )
     )
@@ -24225,7 +24225,7 @@
   (symbol (lib_id "74xx:74AHC04") (at 612.14 591.82 0) (unit 4)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 8c64613e-12aa-4cb1-8b98-2ee6425df94e)
-    (property "Reference" "U119" (at 612.14 582.93 0)
+    (property "Reference" "U125" (at 612.14 582.93 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC04" (at 612.14 585.47 0)
@@ -24254,13 +24254,13 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U119") (unit 4)
+          (reference "U125") (unit 4)
         )
       )
     )
   )
 
-  (symbol (lib_id "74xx:74AC10") (at 73.66 622.3 0) (unit 2)
+  (symbol (lib_id "74xx:74AC10") (at 73.66 622.3 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 8d456b8c-dfdd-4306-a540-25156ec5a4dd)
     (property "Reference" "U159" (at 73.6517 613.41 0)
@@ -24292,7 +24292,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U159") (unit 2)
+          (reference "U159") (unit 1)
         )
       )
     )
@@ -24422,10 +24422,10 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC04") (at 48.26 591.82 0) (unit 3)
+  (symbol (lib_id "74xx:74AHC04") (at 48.26 591.82 0) (unit 5)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 8f339830-b4c3-48cc-a310-705d2d5e2e7b)
-    (property "Reference" "U123" (at 48.26 582.93 0)
+    (property "Reference" "U128" (at 48.26 582.93 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC04" (at 48.26 585.47 0)
@@ -24454,7 +24454,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U123") (unit 3)
+          (reference "U128") (unit 5)
         )
       )
     )
@@ -24463,7 +24463,7 @@
   (symbol (lib_id "74xx:74AHC00") (at 548.64 195.58 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 917aee03-543c-47a0-a5c9-6d2d7b86f681)
-    (property "Reference" "U158" (at 548.6317 186.69 0)
+    (property "Reference" "U151" (at 548.6317 186.69 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC00" (at 548.6317 189.23 0)
@@ -24492,7 +24492,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U158") (unit 3)
+          (reference "U151") (unit 3)
         )
       )
     )
@@ -24536,10 +24536,10 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC00") (at 474.98 149.86 0) (unit 1)
+  (symbol (lib_id "74xx:74AHC00") (at 474.98 149.86 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 920cfe96-c0ac-4116-812e-a7f75fda2aff)
-    (property "Reference" "U151" (at 474.9717 140.97 0)
+    (property "Reference" "U147" (at 474.9717 140.97 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC00" (at 474.9717 143.51 0)
@@ -24568,7 +24568,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U151") (unit 1)
+          (reference "U147") (unit 2)
         )
       )
     )
@@ -24603,7 +24603,7 @@
   (symbol (lib_id "74xx:74AHC32") (at 314.96 58.42 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 9220d52f-7210-4121-a93b-baa73de96a55)
-    (property "Reference" "U73" (at 314.96 49.53 0)
+    (property "Reference" "U110" (at 314.96 49.53 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC32" (at 314.96 52.07 0)
@@ -24632,7 +24632,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U73") (unit 1)
+          (reference "U110") (unit 1)
         )
       )
     )
@@ -24689,10 +24689,10 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC08") (at 129.54 469.9 0) (unit 3)
+  (symbol (lib_id "74xx:74AHC08") (at 129.54 469.9 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 9460b131-282d-4855-8402-622a834cb208)
-    (property "Reference" "U55" (at 129.5317 461.01 0)
+    (property "Reference" "U56" (at 129.5317 461.01 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC08" (at 129.5317 463.55 0)
@@ -24721,7 +24721,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U55") (unit 3)
+          (reference "U56") (unit 1)
         )
       )
     )
@@ -24779,10 +24779,10 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC04") (at 612.14 434.34 0) (unit 1)
+  (symbol (lib_id "74xx:74AHC04") (at 612.14 434.34 0) (unit 5)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 95d369e3-9464-44d5-b49b-4bf2f5aba5e7)
-    (property "Reference" "U124" (at 612.14 425.45 0)
+    (property "Reference" "U119" (at 612.14 425.45 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC04" (at 612.14 427.99 0)
@@ -24811,7 +24811,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U124") (unit 1)
+          (reference "U119") (unit 5)
         )
       )
     )
@@ -24843,10 +24843,10 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC04") (at 744.22 551.18 0) (unit 6)
+  (symbol (lib_id "74xx:74AHC04") (at 744.22 551.18 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 9611ea4d-27c9-487a-898a-27bfa0edf6af)
-    (property "Reference" "U128" (at 744.22 542.29 0)
+    (property "Reference" "U125" (at 744.22 542.29 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC04" (at 744.22 544.83 0)
@@ -24875,7 +24875,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U128") (unit 6)
+          (reference "U125") (unit 2)
         )
       )
     )
@@ -25047,7 +25047,7 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AC10") (at 474.98 119.38 0) (unit 3)
+  (symbol (lib_id "74xx:74AC10") (at 474.98 119.38 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 9adfbb3e-28ed-4699-8eca-4b738f6d51fd)
     (property "Reference" "U146" (at 474.9717 110.49 0)
@@ -25079,7 +25079,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U146") (unit 3)
+          (reference "U146") (unit 2)
         )
       )
     )
@@ -25123,10 +25123,10 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AC10") (at 548.64 317.5 0) (unit 2)
+  (symbol (lib_id "74xx:74AC10") (at 548.64 317.5 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 9bc1d355-d946-4bca-be69-cea2de3e4321)
-    (property "Reference" "U160" (at 548.6317 308.61 0)
+    (property "Reference" "U105" (at 548.6317 308.61 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AC10" (at 548.6317 311.15 0)
@@ -25155,7 +25155,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U160") (unit 2)
+          (reference "U105") (unit 1)
         )
       )
     )
@@ -25199,10 +25199,10 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC32") (at 25.4 637.54 0) (unit 1)
+  (symbol (lib_id "74xx:74AHC32") (at 25.4 637.54 0) (unit 4)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 9db78253-c503-479f-8dc3-a3ece6ba709f)
-    (property "Reference" "U110" (at 25.4 628.65 0)
+    (property "Reference" "U73" (at 25.4 628.65 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC32" (at 25.4 631.19 0)
@@ -25231,7 +25231,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U110") (unit 1)
+          (reference "U73") (unit 4)
         )
       )
     )
@@ -25322,7 +25322,7 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC32") (at 314.96 535.94 0) (unit 4)
+  (symbol (lib_id "74xx:74AHC32") (at 314.96 535.94 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 9f327e2e-98d8-40af-89a3-f8f8ebaaff72)
     (property "Reference" "U79" (at 314.96 527.05 0)
@@ -25354,7 +25354,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U79") (unit 4)
+          (reference "U79") (unit 3)
         )
       )
     )
@@ -25396,7 +25396,7 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC04") (at 444.5 396.24 0) (unit 2)
+  (symbol (lib_id "74xx:74AHC04") (at 444.5 396.24 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid a01a7d5a-e535-43fb-9bd6-420d72f4d7c5)
     (property "Reference" "U119" (at 444.5 387.35 0)
@@ -25428,7 +25428,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U119") (unit 2)
+          (reference "U119") (unit 3)
         )
       )
     )
@@ -25548,7 +25548,7 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC32") (at 314.96 320.04 0) (unit 4)
+  (symbol (lib_id "74xx:74AHC32") (at 314.96 320.04 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid a38c10fd-b6f7-4568-abda-c51edf1f1d31)
     (property "Reference" "U76" (at 314.96 311.15 0)
@@ -25580,7 +25580,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U76") (unit 4)
+          (reference "U76") (unit 1)
         )
       )
     )
@@ -25664,7 +25664,7 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AC11") (at 548.64 165.1 0) (unit 2)
+  (symbol (lib_id "74xx:74AC11") (at 548.64 165.1 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid a650b3fd-eadb-461c-b6fc-2a0eb8d2c542)
     (property "Reference" "U57" (at 548.6317 156.21 0)
@@ -25696,7 +25696,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U57") (unit 2)
+          (reference "U57") (unit 3)
         )
       )
     )
@@ -26073,7 +26073,7 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC04") (at 744.22 441.96 0) (unit 1)
+  (symbol (lib_id "74xx:74AHC04") (at 744.22 441.96 0) (unit 5)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid ad954edf-7401-418a-a758-717f82640081)
     (property "Reference" "U141" (at 744.22 433.07 0)
@@ -26105,7 +26105,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U141") (unit 1)
+          (reference "U141") (unit 5)
         )
       )
     )
@@ -26356,7 +26356,7 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC04") (at 612.14 480.06 0) (unit 4)
+  (symbol (lib_id "74xx:74AHC04") (at 612.14 480.06 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid b7c9150e-2bb1-4333-b727-6fa7655fefd9)
     (property "Reference" "U124" (at 612.14 471.17 0)
@@ -26388,7 +26388,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U124") (unit 4)
+          (reference "U124") (unit 3)
         )
       )
     )
@@ -26397,7 +26397,7 @@
   (symbol (lib_id "74xx:74AHC32") (at 314.96 76.2 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid b844786e-a605-423a-9dca-2f3d9de733a9)
-    (property "Reference" "U73" (at 314.96 67.31 0)
+    (property "Reference" "U110" (at 314.96 67.31 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC32" (at 314.96 69.85 0)
@@ -26426,7 +26426,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U73") (unit 2)
+          (reference "U110") (unit 2)
         )
       )
     )
@@ -26547,7 +26547,7 @@
   (symbol (lib_id "74xx:74AHC02") (at 772.16 193.04 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid bbbc02d9-8958-443d-be86-8220b446f299)
-    (property "Reference" "U144" (at 772.16 184.15 0)
+    (property "Reference" "U27" (at 772.16 184.15 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC02" (at 772.16 186.69 0)
@@ -26576,7 +26576,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U144") (unit 3)
+          (reference "U27") (unit 3)
         )
       )
     )
@@ -26686,10 +26686,10 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC02") (at 474.98 368.3 0) (unit 4)
+  (symbol (lib_id "74xx:74AHC02") (at 474.98 368.3 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid c34593c9-33b4-4026-8737-fc25665dd7f2)
-    (property "Reference" "U142" (at 474.98 359.41 0)
+    (property "Reference" "U27" (at 474.98 359.41 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC02" (at 474.98 361.95 0)
@@ -26718,7 +26718,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U142") (unit 4)
+          (reference "U27") (unit 1)
         )
       )
     )
@@ -26793,7 +26793,7 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC00") (at 723.9 292.1 0) (unit 1)
+  (symbol (lib_id "74xx:74AHC00") (at 723.9 292.1 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid c40ebfa2-f1a5-4c05-9d69-ab6dfd42520d)
     (property "Reference" "U168" (at 723.8917 283.21 0)
@@ -26825,16 +26825,16 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U168") (unit 1)
+          (reference "U168") (unit 3)
         )
       )
     )
   )
 
-  (symbol (lib_id "74xx:74AHC04") (at 474.98 104.14 0) (unit 5)
+  (symbol (lib_id "74xx:74AHC04") (at 474.98 104.14 0) (unit 6)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid c425cc47-958d-49ca-8bff-c3eea9f572ca)
-    (property "Reference" "U119" (at 474.98 95.25 0)
+    (property "Reference" "U128" (at 474.98 95.25 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC04" (at 474.98 97.79 0)
@@ -26863,7 +26863,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U119") (unit 5)
+          (reference "U128") (unit 6)
         )
       )
     )
@@ -26951,10 +26951,10 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC04") (at 619.76 271.78 0) (unit 1)
+  (symbol (lib_id "74xx:74AHC04") (at 619.76 271.78 0) (unit 4)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid c6fd5ff6-72ae-465f-856a-546b1108d0d3)
-    (property "Reference" "U119" (at 619.76 262.89 0)
+    (property "Reference" "U141" (at 619.76 262.89 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC04" (at 619.76 265.43 0)
@@ -26983,7 +26983,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U119") (unit 1)
+          (reference "U141") (unit 4)
         )
       )
     )
@@ -27040,7 +27040,7 @@
     )
   )
 
-  (symbol (lib_id "myparts:74HC4075") (at 474.98 210.82 0) (unit 2)
+  (symbol (lib_id "myparts:74HC4075") (at 474.98 210.82 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid cb08b911-5800-42f4-8934-169fb9fb8558)
     (property "Reference" "U171" (at 474.98 201.93 0)
@@ -27072,7 +27072,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U171") (unit 2)
+          (reference "U171") (unit 3)
         )
       )
     )
@@ -27294,7 +27294,7 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC04") (at 612.14 546.1 0) (unit 2)
+  (symbol (lib_id "74xx:74AHC04") (at 612.14 546.1 0) (unit 5)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid d0781ebf-c604-421f-8e30-c5a315eb608b)
     (property "Reference" "U125" (at 612.14 537.21 0)
@@ -27326,7 +27326,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U125") (unit 2)
+          (reference "U125") (unit 5)
         )
       )
     )
@@ -27358,10 +27358,10 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC04") (at 612.14 388.62 0) (unit 4)
+  (symbol (lib_id "74xx:74AHC04") (at 612.14 388.62 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid d0a16363-c568-4440-b0a6-2d7db4522554)
-    (property "Reference" "U123" (at 612.14 379.73 0)
+    (property "Reference" "U124" (at 612.14 379.73 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC04" (at 612.14 382.27 0)
@@ -27390,7 +27390,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U123") (unit 4)
+          (reference "U124") (unit 1)
         )
       )
     )
@@ -27421,7 +27421,7 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC32") (at 314.96 266.7 0) (unit 1)
+  (symbol (lib_id "74xx:74AHC32") (at 314.96 266.7 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid d2e2f85c-44fd-4e5e-b9a8-e4963ce396f5)
     (property "Reference" "U76" (at 314.96 257.81 0)
@@ -27453,13 +27453,13 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U76") (unit 1)
+          (reference "U76") (unit 2)
         )
       )
     )
   )
 
-  (symbol (lib_id "74xx:74AHC04") (at 612.14 403.86 0) (unit 5)
+  (symbol (lib_id "74xx:74AHC04") (at 612.14 403.86 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid d377c874-5d05-4de2-aa2d-5be9ae3538f4)
     (property "Reference" "U123" (at 612.14 394.97 0)
@@ -27491,7 +27491,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U123") (unit 5)
+          (reference "U123") (unit 2)
         )
       )
     )
@@ -27559,10 +27559,10 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AC20") (at 619.76 241.3 0) (unit 1)
+  (symbol (lib_id "74xx:74AC20") (at 619.76 241.3 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid d4df92e0-c066-46bc-8322-caaed0554044)
-    (property "Reference" "U118" (at 619.7503 232.41 0)
+    (property "Reference" "U122" (at 619.7503 232.41 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AC20" (at 619.7503 234.95 0)
@@ -27589,7 +27589,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U118") (unit 1)
+          (reference "U122") (unit 2)
         )
       )
     )
@@ -27598,7 +27598,7 @@
   (symbol (lib_id "74xx:74AC10") (at 474.98 317.5 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid d6d8d73b-12ef-4cee-9045-e2e8258b785a)
-    (property "Reference" "U149" (at 474.9717 308.61 0)
+    (property "Reference" "U146" (at 474.9717 308.61 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AC10" (at 474.9717 311.15 0)
@@ -27627,16 +27627,16 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U149") (unit 1)
+          (reference "U146") (unit 1)
         )
       )
     )
   )
 
-  (symbol (lib_id "74xx:74AC20") (at 772.16 172.72 0) (unit 2)
+  (symbol (lib_id "74xx:74AC20") (at 772.16 172.72 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid d8827b08-d849-42e1-93c6-94f567981509)
-    (property "Reference" "U118" (at 772.1503 163.83 0)
+    (property "Reference" "U122" (at 772.1503 163.83 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AC20" (at 772.1503 166.37 0)
@@ -27663,7 +27663,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U118") (unit 2)
+          (reference "U122") (unit 1)
         )
       )
     )
@@ -27694,10 +27694,10 @@
     )
   )
 
-  (symbol (lib_id "74xx:74HC27") (at 744.22 581.66 0) (unit 3)
+  (symbol (lib_id "74xx:74HC27") (at 744.22 581.66 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid d8ac2502-91aa-4cc9-9b14-1d53a63ba71e)
-    (property "Reference" "U152" (at 744.22 572.77 0)
+    (property "Reference" "U170" (at 744.22 572.77 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74HC27" (at 744.22 575.31 0)
@@ -27726,7 +27726,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U152") (unit 3)
+          (reference "U170") (unit 2)
         )
       )
     )
@@ -27880,7 +27880,7 @@
   (symbol (lib_id "74xx:74AHC00") (at 619.76 287.02 0) (unit 4)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid da7375a2-a7fc-4e13-93ca-35c47c64bd2c)
-    (property "Reference" "U161" (at 619.7517 278.13 0)
+    (property "Reference" "U158" (at 619.7517 278.13 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC00" (at 619.7517 280.67 0)
@@ -27909,7 +27909,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U161") (unit 4)
+          (reference "U158") (unit 4)
         )
       )
     )
@@ -27966,10 +27966,10 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC04") (at 619.76 119.38 0) (unit 2)
+  (symbol (lib_id "74xx:74AHC04") (at 619.76 119.38 0) (unit 5)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid dcc9ad86-a532-46a1-96ed-b12277402238)
-    (property "Reference" "U128" (at 619.76 110.49 0)
+    (property "Reference" "U123" (at 619.76 110.49 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC04" (at 619.76 113.03 0)
@@ -27998,7 +27998,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U128") (unit 2)
+          (reference "U123") (unit 5)
         )
       )
     )
@@ -28074,10 +28074,10 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC00") (at 683.26 274.32 0) (unit 4)
+  (symbol (lib_id "74xx:74AHC00") (at 683.26 274.32 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid dd6a76f7-85f4-4fef-b56f-8acc854f671e)
-    (property "Reference" "U168" (at 683.2517 265.43 0)
+    (property "Reference" "U147" (at 683.2517 265.43 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC00" (at 683.2517 267.97 0)
@@ -28106,7 +28106,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U168") (unit 4)
+          (reference "U147") (unit 3)
         )
       )
     )
@@ -28152,7 +28152,7 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC04") (at 703.58 218.44 0) (unit 3)
+  (symbol (lib_id "74xx:74AHC04") (at 703.58 218.44 0) (unit 6)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid e033a66a-f8fc-46f0-b81b-d6d8e3a08dab)
     (property "Reference" "U119" (at 703.58 209.55 0)
@@ -28184,7 +28184,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U119") (unit 3)
+          (reference "U119") (unit 6)
         )
       )
     )
@@ -28225,7 +28225,7 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC32") (at 314.96 302.26 0) (unit 3)
+  (symbol (lib_id "74xx:74AHC32") (at 314.96 302.26 0) (unit 4)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid e0838401-1554-486c-bef6-2ba5fb8f1e02)
     (property "Reference" "U76" (at 314.96 293.37 0)
@@ -28257,7 +28257,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U76") (unit 3)
+          (reference "U76") (unit 4)
         )
       )
     )
@@ -28266,7 +28266,7 @@
   (symbol (lib_id "74xx:74LS02") (at 25.4 591.82 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid e13f91c2-aaa0-4c0a-bd7a-df903a8368e1)
-    (property "Reference" "U27" (at 25.4 582.93 0)
+    (property "Reference" "U142" (at 25.4 582.93 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC02" (at 25.4 585.47 0)
@@ -28295,7 +28295,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U27") (unit 2)
+          (reference "U142") (unit 2)
         )
       )
     )
@@ -28329,7 +28329,7 @@
   (symbol (lib_id "74xx:74AHC00") (at 495.3 414.02 0) (unit 4)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid e30ae292-9c58-4207-af4f-4ac0163c038b)
-    (property "Reference" "U156" (at 495.2917 405.13 0)
+    (property "Reference" "U151" (at 495.2917 405.13 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC00" (at 495.2917 407.67 0)
@@ -28358,7 +28358,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U156") (unit 4)
+          (reference "U151") (unit 4)
         )
       )
     )
@@ -28546,10 +28546,10 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC32") (at 749.3 154.94 0) (unit 2)
+  (symbol (lib_id "74xx:74AHC32") (at 749.3 154.94 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid e5e97e27-23ec-4758-aff5-0b71d488f827)
-    (property "Reference" "U110" (at 749.3 146.05 0)
+    (property "Reference" "U73" (at 749.3 146.05 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC32" (at 749.3 148.59 0)
@@ -28578,7 +28578,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U110") (unit 2)
+          (reference "U73") (unit 3)
         )
       )
     )
@@ -28610,10 +28610,10 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC08") (at 314.96 607.06 0) (unit 4)
+  (symbol (lib_id "74xx:74AHC08") (at 314.96 607.06 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid e67838ed-279e-41e9-851e-9be3679b5c16)
-    (property "Reference" "U80" (at 314.9517 598.17 0)
+    (property "Reference" "U55" (at 314.9517 598.17 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC08" (at 314.9517 600.71 0)
@@ -28642,7 +28642,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U80") (unit 4)
+          (reference "U55") (unit 1)
         )
       )
     )
@@ -28724,7 +28724,7 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC86") (at 215.9 568.96 0) (unit 4)
+  (symbol (lib_id "74xx:74AHC86") (at 215.9 568.96 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid e847bf4e-197d-497f-9580-15b4e6f69d94)
     (property "Reference" "U60" (at 215.5952 560.07 0)
@@ -28756,7 +28756,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U60") (unit 4)
+          (reference "U60") (unit 1)
         )
       )
     )
@@ -28765,7 +28765,7 @@
   (symbol (lib_id "74xx:74LS00") (at 548.64 149.86 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid ea4816c4-b615-4d3f-83d4-6b2d1e24c82d)
-    (property "Reference" "U161" (at 548.6317 140.97 0)
+    (property "Reference" "U158" (at 548.6317 140.97 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC00" (at 548.6317 143.51 0)
@@ -28794,13 +28794,13 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U161") (unit 3)
+          (reference "U158") (unit 3)
         )
       )
     )
   )
 
-  (symbol (lib_id "74xx:74AHC04") (at 444.5 411.48 0) (unit 6)
+  (symbol (lib_id "74xx:74AHC04") (at 444.5 411.48 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid ea6ee905-4626-4444-9863-c126fde485ad)
     (property "Reference" "U119" (at 444.5 402.59 0)
@@ -28832,7 +28832,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U119") (unit 6)
+          (reference "U119") (unit 2)
         )
       )
     )
@@ -28888,10 +28888,10 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC04") (at 48.26 622.3 0) (unit 1)
+  (symbol (lib_id "74xx:74AHC04") (at 48.26 622.3 0) (unit 4)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid eac114ae-4045-47f8-bf15-d6bb30f5f8cc)
-    (property "Reference" "U125" (at 48.26 613.41 0)
+    (property "Reference" "U128" (at 48.26 613.41 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC04" (at 48.26 615.95 0)
@@ -28920,7 +28920,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U125") (unit 1)
+          (reference "U128") (unit 4)
         )
       )
     )
@@ -28952,7 +28952,7 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC86") (at 215.9 551.18 0) (unit 3)
+  (symbol (lib_id "74xx:74AHC86") (at 215.9 551.18 0) (unit 4)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid ebcbb47b-80ca-442d-be8e-3eef98350634)
     (property "Reference" "U60" (at 215.5952 542.29 0)
@@ -28984,7 +28984,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U60") (unit 3)
+          (reference "U60") (unit 4)
         )
       )
     )
@@ -29254,7 +29254,7 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC08") (at 314.96 160.02 0) (unit 3)
+  (symbol (lib_id "74xx:74AHC08") (at 314.96 160.02 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid f2665326-f8b6-448f-b17a-b3ad8acb12de)
     (property "Reference" "U74" (at 314.9517 151.13 0)
@@ -29286,7 +29286,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U74") (unit 3)
+          (reference "U74") (unit 1)
         )
       )
     )
@@ -29380,7 +29380,7 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC86") (at 215.9 271.78 0) (unit 1)
+  (symbol (lib_id "74xx:74AHC86") (at 215.9 271.78 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid f43ddca4-2c7f-4f39-81c0-6d701d1b7ae2)
     (property "Reference" "U59" (at 215.5952 262.89 0)
@@ -29412,7 +29412,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U59") (unit 1)
+          (reference "U59") (unit 3)
         )
       )
     )
@@ -29458,10 +29458,10 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AC10") (at 474.98 241.3 0) (unit 2)
+  (symbol (lib_id "74xx:74AC10") (at 474.98 241.3 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid f5c41999-09c3-4302-a347-4da59b985740)
-    (property "Reference" "U148" (at 474.9717 232.41 0)
+    (property "Reference" "U160" (at 474.9717 232.41 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AC10" (at 474.9717 234.95 0)
@@ -29490,7 +29490,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U148") (unit 2)
+          (reference "U160") (unit 1)
         )
       )
     )
@@ -29525,7 +29525,7 @@
   (symbol (lib_id "74xx:74AC20") (at 548.64 271.78 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid f6cd8b50-cee4-4bec-b437-54f2d6bbc3de)
-    (property "Reference" "U122" (at 548.6303 262.89 0)
+    (property "Reference" "U118" (at 548.6303 262.89 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AC20" (at 548.6303 265.43 0)
@@ -29552,7 +29552,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U122") (unit 2)
+          (reference "U118") (unit 2)
         )
       )
     )
@@ -29583,10 +29583,10 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC04") (at 48.26 607.06 0) (unit 2)
+  (symbol (lib_id "74xx:74AHC04") (at 48.26 607.06 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid f87b6e44-4143-44fa-b730-2c7df36d334f)
-    (property "Reference" "U123" (at 48.26 598.17 0)
+    (property "Reference" "U128" (at 48.26 598.17 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC04" (at 48.26 600.71 0)
@@ -29615,7 +29615,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U123") (unit 2)
+          (reference "U128") (unit 1)
         )
       )
     )
@@ -29646,7 +29646,7 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC04") (at 474.98 88.9 0) (unit 1)
+  (symbol (lib_id "74xx:74AHC04") (at 474.98 88.9 0) (unit 4)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid f89990bc-5254-4a05-9a7e-4bb0a8c835b7)
     (property "Reference" "U123" (at 474.98 80.01 0)
@@ -29678,13 +29678,13 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U123") (unit 1)
+          (reference "U123") (unit 4)
         )
       )
     )
   )
 
-  (symbol (lib_id "74xx:74AHC04") (at 612.14 449.58 0) (unit 2)
+  (symbol (lib_id "74xx:74AHC04") (at 612.14 449.58 0) (unit 6)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid f941d93b-b8c7-48ae-9333-561dac3a0c96)
     (property "Reference" "U124" (at 612.14 440.69 0)
@@ -29716,7 +29716,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U124") (unit 2)
+          (reference "U124") (unit 6)
         )
       )
     )
@@ -29725,7 +29725,7 @@
   (symbol (lib_id "74xx:74AHC00") (at 548.64 210.82 0) (unit 4)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid f95b04fc-966c-4672-9739-29e6a439d946)
-    (property "Reference" "U158" (at 548.6317 201.93 0)
+    (property "Reference" "U161" (at 548.6317 201.93 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC00" (at 548.6317 204.47 0)
@@ -29754,7 +29754,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U158") (unit 4)
+          (reference "U161") (unit 4)
         )
       )
     )
@@ -29789,7 +29789,7 @@
   (symbol (lib_id "74xx:74AC20") (at 619.76 149.86 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid fa07fa4a-8ded-43f9-9df7-ec5591d65afa)
-    (property "Reference" "U122" (at 619.7503 140.97 0)
+    (property "Reference" "U118" (at 619.7503 140.97 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AC20" (at 619.7503 143.51 0)
@@ -29816,7 +29816,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U122") (unit 1)
+          (reference "U118") (unit 1)
         )
       )
     )
@@ -29936,10 +29936,10 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AC10") (at 474.98 271.78 0) (unit 1)
+  (symbol (lib_id "74xx:74AC10") (at 474.98 271.78 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid fcf865c4-a5e5-4866-a82b-a0c6abb245e4)
-    (property "Reference" "U150" (at 474.9717 262.89 0)
+    (property "Reference" "U149" (at 474.9717 262.89 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AC10" (at 474.9717 265.43 0)
@@ -29968,13 +29968,13 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U150") (unit 1)
+          (reference "U149") (unit 3)
         )
       )
     )
   )
 
-  (symbol (lib_id "74xx:74AHC04") (at 744.22 505.46 0) (unit 4)
+  (symbol (lib_id "74xx:74AHC04") (at 744.22 505.46 0) (unit 6)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid fd1b1173-9e67-48b2-9e0f-69715db09c6f)
     (property "Reference" "U141" (at 744.22 496.57 0)
@@ -30006,7 +30006,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U141") (unit 4)
+          (reference "U141") (unit 6)
         )
       )
     )
@@ -30078,7 +30078,7 @@
   (symbol (lib_id "74xx:74HC27") (at 749.3 170.18 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid ff26cbee-86e5-47bc-9b98-22f68f346933)
-    (property "Reference" "U170" (at 749.3 161.29 0)
+    (property "Reference" "U152" (at 749.3 161.29 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74HC27" (at 749.3 163.83 0)
@@ -30107,7 +30107,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U170") (unit 3)
+          (reference "U152") (unit 3)
         )
       )
     )
@@ -30176,10 +30176,10 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AC10") (at 474.98 58.42 0) (unit 1)
+  (symbol (lib_id "74xx:74AC10") (at 474.98 58.42 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid ff9598c3-4f0b-4473-b90d-109ea410d9b5)
-    (property "Reference" "U105" (at 474.9717 50.8 0)
+    (property "Reference" "U150" (at 474.9717 50.8 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AC10" (at 474.9717 53.34 0)
@@ -30208,7 +30208,7 @@
     (instances
       (project "procalu"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U105") (unit 1)
+          (reference "U150") (unit 3)
         )
       )
     )

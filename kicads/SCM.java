@@ -196,6 +196,32 @@ public class SCM {
             ptr.level --;
             ptr.printstr (endln, ")");
         }
+
+        // find uniquely named subarray
+        public ArrValue findsubarray (String name)
+        {
+            ArrValue subarray = null;
+            for (Value elem : elems) {
+                if (name.equals (elem.getarrname ())) {
+                    if (subarray != null) return null;
+                    subarray = (ArrValue) elem;
+                }
+            }
+            return subarray;
+        }
+
+        // find all like-named subarrays
+        public ArrValue[] findsubarrays (String name)
+        {
+            ArrayList<ArrValue> subarrays = new ArrayList<> (elems.length);
+            for (Value elem : elems) {
+                if (name.equals (elem.getarrname ())) {
+                    subarrays.add ((ArrValue) elem);
+                }
+            }
+            if (subarrays.size () == 0) return null;
+            return subarrays.toArray (new ArrValue[subarrays.size()]);
+        }
     }
 
     // parsed numeric value
