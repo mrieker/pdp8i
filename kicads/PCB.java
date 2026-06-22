@@ -30,10 +30,9 @@ import java.util.TreeMap;
 
 public class PCB {
     private boolean error;
-    private BufferedReader inrdr;
-    private int linum;
+    private SCM pcbscm;
 
-    public ArrValue kicadpcb;
+    public SCM.ArrValue kicadpcb;
     public TreeMap<String,Network>  netsbyname;
     public TreeMap<Integer,Network> netsbynum;
     public TreeMap<String,Compon>   compons;
@@ -42,32 +41,25 @@ public class PCB {
             throws Exception
     {
         // parse the scheme syntax
-        inrdr = pcbrdr;
-        linum = 1;
-        Value value = parseValue ();
-        for (int ch; (ch = inrdr.read ()) >= 0;) {
-            if (ch == '\n') linum ++;
-            if (ch > ' ') {
-                throw new Exception ("extra tokens at end at line " + linum);
-            }
-        }
+        pcbscm = new SCM (pcbrdr);
+        SCM.Value value = pcbscm.topvalue ();
 
         // should be in form (kicad_pcb ...)
         if (! "kicad_pcb".equals (value.getarrname ())) {
             throw new Exception ("top-level not a 'kicad_pcb'");
         }
-        kicadpcb = (ArrValue) value;
+        kicadpcb = (SCM.ArrValue) value;
 
         // scan for networks and components
         netsbyname = new TreeMap<> ();
         netsbynum  = new TreeMap<> ();
         compons    = new TreeMap<> ();
 
-        for (Value elem : kicadpcb.elems) {
+        for (SCM.Value elem : kicadpcb.elems) {
 
             // (net <number> <name>)
             if ("net".equals (elem.getarrname ())) {
-                ArrValue net = (ArrValue) elem;
+                SCM.ArrValue net = (SCM.ArrValue) elem;
                 Network network = new Network ();
                 network.netnum  = net.elems[1].asint ();
                 network.netname = net.elems[2].assym ();
@@ -80,11 +72,11 @@ public class PCB {
             }
         }
 
-        for (Value elem : kicadpcb.elems) {
+        for (SCM.Value elem : kicadpcb.elems) {
 
             // (footprint ...)
             if ("footprint".equals (elem.getarrname ())) {
-                ArrValue module = (ArrValue) elem;
+                SCM.ArrValue module = (SCM.ArrValue) elem;
                 Compon compon = new Compon (module);
                 if (compon.refer != null) {
                     compons.put (compon.refer, compon);
@@ -96,8 +88,8 @@ public class PCB {
         for (Network network : netsbynum.values ()) {
             LinkedList<Pad> pads = new LinkedList<> ();
             for (Compon compon : compons.values ()) {
-                for (Pad pad : compon.pads) {
-                    Network padnet = (pad == null) ? null : pad.padnet;
+                for (Pad pad : compon.compads) {
+                    Network padnet = (pad == null) ? null : pad.padnet ();
                     if (padnet == network) pads.addLast (pad);
                 }
             }
@@ -110,8 +102,8 @@ public class PCB {
 
             // if it is a connector, mark all referenced networks as being ports to be listed in module statement
             if (compon.isconnector ()) {
-                for (Pad pad : compon.pads) {
-                    Network network = (pad == null) ? null : pad.padnet;
+                for (Pad pad : compon.compads) {
+                    Network network = (pad == null) ? null : pad.padnet ();
                     if (network != null) {
                         network.netport = true;
                     }
@@ -120,8 +112,8 @@ public class PCB {
 
             // if not a connector, mark nets connected to output pins as being driven
             else {
-                for (Pad pad : compon.pads) {
-                    Network network = (pad == null) ? null : pad.padnet;
+                for (Pad pad : compon.compads) {
+                    Network network = (pad == null) ? null : pad.padnet ();
                     if (network != null) {
                         switch (pad.pintype) {
                             case OUTPUT: {
@@ -155,262 +147,7 @@ public class PCB {
     public void save (PrintStream ps)
             throws Exception
     {
-        Printer ptr = new Printer ();
-        ptr.ps = ps;
-        kicadpcb.print (ptr);
-        ps.println ("");
-    }
-
-    private static class Printer {
-        public PrintStream ps;
-
-        private boolean spacesep = false;
-        private int level = 0;
-        private int linum = 1;
-
-        // print array element separator, '(', ' ', ')'
-        // update indent level accordingly
-        public void printsep (int toklinum, char c)
-        {
-            if (c == ' ') {
-                spacesep = true;
-            } else {
-                if (c == ')') level --;
-                if (linum < toklinum) {
-                    linum = toklinum;
-                    ps.println ("");
-                    for (int i = 0; i < level; i ++) ps.print ("  ");
-                    spacesep = false;
-                }
-                if (spacesep) {
-                    ps.print (' ');
-                    spacesep = false;
-                }
-                ps.print (c);
-                if (c == '(') level ++;
-            }
-        }
-
-        // print value string
-        // maybe start a new line inserting corresponding indent
-        public void printstr (int toklinum, String s)
-        {
-            if (linum < toklinum) {
-                linum = toklinum;
-                ps.println ("");
-                for (int i = 0; i < level; i ++) ps.print ("  ");
-                spacesep = false;
-            }
-            if (spacesep) {
-                ps.print (' ');
-                spacesep = false;
-            }
-            ps.print (s);
-        }
-    }
-
-    // parse one value from inrdr
-    private Value parseValue ()
-            throws Exception
-    {
-        int ch;
-        do {
-            ch = inrdr.read ();
-            if (ch < 0) throw new Exception ("end of file parsing token at line " + linum);
-            if (ch == '\n') linum ++;
-        } while (ch <= ' ');
-
-        if (ch == ')') return null;
-
-        int toklinum = linum;
-
-        if (ch == '(') {
-            LinkedList<Value> elems = new LinkedList<> ();
-            while (true) {
-                Value elem = parseValue ();
-                if (elem == null) break;
-                elems.addLast (elem);
-            }
-            ArrValue arrval = new ArrValue ();
-            arrval.linum = toklinum;
-            arrval.endln = linum;
-            arrval.elems = elems.toArray (new Value[elems.size()]);
-            return arrval;
-        }
-
-        if (ch == '"') {
-            StringBuilder sb = new StringBuilder ();
-            sb.append ('"');
-            while (true) {
-                ch = inrdr.read ();
-                if (ch < 0) throw new Exception ("end of file parsing token at line " + linum);
-                if (ch == '\n') linum ++;
-                if (ch == '"') break;
-                switch (ch) {
-                    case '\b': sb.append ("\\b"); break;
-                    case '\n': sb.append ("\\n"); break;
-                    case '\r': sb.append ("\\r"); break;
-                    case '\t': sb.append ("\\t"); break;
-                    case '\\': sb.append ('\\'); sb.append ((char) inrdr.read ()); break;
-                    default: sb.append ((char) ch); break;
-                }
-            }
-            sb.append ('"');
-            StrValue strval = new StrValue ();
-            strval.linum = toklinum;
-            strval.str = sb.toString ();
-            return strval;
-        }
-
-        StringBuilder sb = new StringBuilder ();
-        do {
-            sb.append ((char) ch);
-            inrdr.mark (1);
-            ch = inrdr.read ();
-            if (ch < 0) throw new Exception ("end of file parsing token at line " + linum);
-            if (ch == '\n') linum ++;
-        } while ((ch > ' ') && (ch != ')') && (ch != '"'));
-        inrdr.reset ();
-        String st = sb.toString ();
-        try {
-            double num = Double.parseDouble (st);
-            NumValue numval = new NumValue ();
-            numval.linum = toklinum;
-            numval.num = num;
-            return numval;
-        } catch (NumberFormatException nfe) {
-        }
-        SymValue symval = new SymValue ();
-        symval.linum = toklinum;
-        symval.sym = st;
-        return symval;
-    }
-
-    // base value class
-
-    public abstract class Value {
-        public int linum;                               // line number of first character of token
-        public String getarrname () { return null; }    // if array with symbol for first element, first element name
-        public int asint () { return 0; }               // as an integer if possible
-        public String assym () { return null; }         // as a symbol if possible
-        public abstract void print (Printer ptr);       // print the value
-    }
-
-    // parsed array (array of values between (...))
-
-    public class ArrValue extends Value {
-        public Value[] elems;
-
-        public int endln;
-
-        @Override
-        public String getarrname ()
-        {
-            return (elems.length < 1) ? null : elems[0].assym ();
-        }
-
-        @Override
-        public void print (Printer ptr)
-        {
-            ptr.printsep (linum, '(');
-            boolean first = true;
-            for (Value elem : elems) {
-                if (! first) ptr.printsep (linum, ' ');
-                elem.print (ptr);
-                first = false;
-            }
-            ptr.printsep (endln, ')');
-        }
-    }
-
-    // parsed numeric value
-
-    public class NumValue extends Value {
-        public double num;
-
-        @Override
-        public int asint ()
-        {
-            return (int) Math.round (num);
-        }
-
-        @Override
-        public void print (Printer ptr)
-        {
-            String str;
-            int ival = asint ();
-            if ((double) ival == num) {
-                str = Integer.toString (ival);
-            } else {
-                str = Double.toString (num);
-                if (str.endsWith (".0")) str = str.substring (0, str.length () - 2);
-            }
-            ptr.printstr (linum, str);
-        }
-    }
-
-    // parsed quoted string
-
-    public class StrValue extends Value {
-        public String str;  // includes quotes and escapes
-
-        @Override
-        public int asint ()
-        {
-            return Integer.parseInt (noquotes ());
-        }
-
-        @Override
-        public String assym ()
-        {
-            StringBuilder sb = new StringBuilder ();
-            String nq = noquotes ();
-            for (int i = 0; i < nq.length (); i ++) {
-                char ch = nq.charAt (i);
-                if ((i == 0) && (ch == '/')) continue;
-                switch (ch) {
-                case '>': sb.append ("gt"); break;
-                case '=': sb.append ("eq"); break;
-                case '<': sb.append ("lt"); break;
-                default:
-                    if ("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789".indexOf (ch) < 0) ch = '_';
-                    sb.append (ch);
-                    break;
-                }
-            }
-            return sb.toString ();
-        }
-
-        public String noquotes ()
-        {
-            int i = str.startsWith ("\"") ? 1 : 0;
-            int j = str.endsWith ("\"") ? 1 : 0;
-            return str.substring (i, str.length () - j);
-        }
-
-        @Override
-        public void print (Printer ptr)
-        {
-            ptr.printstr (linum, str);
-        }
-    }
-
-    // parsed symbol (unquoted string)
-
-    public class SymValue extends Value {
-        public String sym;
-
-        @Override
-        public String assym ()
-        {
-            return sym;
-        }
-
-        @Override
-        public void print (Printer ptr)
-        {
-            ptr.printstr (linum, sym);
-        }
+        pcbscm.save (ps);
     }
 
     public enum PinType { OTHER, INPUT, OUTPUT, POWERIN, TRISTATE };
@@ -433,25 +170,26 @@ public class PCB {
     public class Compon {
         public String refer;        // (fp_text reference <ref> ...)
         public String value;        // (fp_text value <ref> ...)
-        public Pad[] pads;          // (pad <idx> ... (net <num> ...) ...)
+        public Pad[] compads;       // (pad <idx> ... (net <num> ...) ...)
+                                    // compads[] indexed by <idx>, might have nulls
 
-        private NumValue atnodex;   // (at x y)
-        private NumValue atnodey;
+        private SCM.NumValue atnodex;   // (at x y)
+        private SCM.NumValue atnodey;
 
-        public Compon (ArrValue module)
+        public Compon (SCM.ArrValue module)
                 throws Exception
         {
             value = "\"\"";
             int padsize = 0;
             HashMap<Integer,Pad> padhash = new HashMap<> ();
-            for (Value moduleelem : module.elems) {
+            for (SCM.Value moduleelem : module.elems) {
                 if ("at".equals (moduleelem.getarrname ())) {
-                    ArrValue atnode = (ArrValue) moduleelem;
-                    atnodex = (NumValue) atnode.elems[1];
-                    atnodey = (NumValue) atnode.elems[2];
+                    SCM.ArrValue atnode = (SCM.ArrValue) moduleelem;
+                    atnodex = (SCM.NumValue) atnode.elems[1];
+                    atnodey = (SCM.NumValue) atnode.elems[2];
                 }
                 if ("fp_text".equals (moduleelem.getarrname ())) {
-                    ArrValue modulefptext = (ArrValue) moduleelem;
+                    SCM.ArrValue modulefptext = (SCM.ArrValue) moduleelem;
                     if (modulefptext.elems[1].assym ().equals ("reference")) {
                         refer = modulefptext.elems[2].assym ();
                     }
@@ -460,15 +198,15 @@ public class PCB {
                     }
                 }
                 if ("pad".equals (moduleelem.getarrname ())) {
-                    Pad pad = new Pad ((ArrValue) moduleelem);
+                    Pad pad = new Pad ((SCM.ArrValue) moduleelem);
                     pad.compon = this;
                     padhash.put (pad.padidx, pad);
                     if (padsize <= pad.padidx) padsize = pad.padidx + 1;
                 }
             }
-            pads = new Pad[padsize];
+            compads = new Pad[padsize];
             for (Integer idx : padhash.keySet ()) {
-                pads[idx] = padhash.get (idx);
+                compads[idx] = padhash.get (idx);
             }
         }
 
@@ -501,12 +239,13 @@ public class PCB {
     public class Pad {
         public Compon compon;
         public int padidx;
-        public Network padnet;
         public PinType pintype;
         public double atxin;    // (at x y)
         public double atyin;
 
-        public Pad (ArrValue modulepad)
+        private SCM.NumValue modulepadnetnum; // (net <number>)
+
+        public Pad (SCM.ArrValue modulepad)
                 throws Exception
         {
             padidx = modulepad.elems[1].asint ();
@@ -515,9 +254,9 @@ public class PCB {
             atxin = Double.NaN;
             atyin = Double.NaN;
 
-            for (Value modulepadelem : modulepad.elems) {
+            for (SCM.Value modulepadelem : modulepad.elems) {
                 if ("pintype".equals (modulepadelem.getarrname ())) {
-                    ArrValue modulepadnet = (ArrValue) modulepadelem;
+                    SCM.ArrValue modulepadnet = (SCM.ArrValue) modulepadelem;
                     String ptstr = modulepadnet.elems[1].assym ();
                     switch (ptstr) {
                         case "bidirectional": pintype = PinType.TRISTATE; break;
@@ -528,14 +267,13 @@ public class PCB {
                     }
                 }
                 if ("net".equals (modulepadelem.getarrname ())) {
-                    ArrValue modulepadnet = (ArrValue) modulepadelem;
-                    int padnetnum = modulepadnet.elems[1].asint ();
-                    padnet = netsbynum.get (padnetnum);
+                    SCM.ArrValue modulepadnet = (SCM.ArrValue) modulepadelem;
+                    modulepadnetnum = (SCM.NumValue) modulepadnet.elems[1];
                 }
                 if ("at".equals (modulepadelem.getarrname ())) {
-                    ArrValue padat = (ArrValue) modulepadelem;
-                    double v1 = ((NumValue) padat.elems[1]).num / 25.4;
-                    double v2 = ((NumValue) padat.elems[2]).num / 25.4;
+                    SCM.ArrValue padat = (SCM.ArrValue) modulepadelem;
+                    double v1 = ((SCM.NumValue) padat.elems[1]).num / 25.4;
+                    double v2 = ((SCM.NumValue) padat.elems[2]).num / 25.4;
                     int ang = (padat.elems.length > 3) ? padat.elems[3].asint () : 0;
                     switch (ang) {
                         case 0: {
@@ -552,6 +290,17 @@ public class PCB {
                     }
                 }
             }
+        }
+
+        public Network padnet () {
+            if (modulepadnetnum == null) return null;
+            int padnetnum = (int) modulepadnetnum.num;
+            return netsbynum.get (padnetnum);
+        }
+
+        public void padnet (Network pn) {
+            modulepadnetnum.num = pn.netnum;
+            if (padnet () != pn) throw new RuntimeException ("bad network");
         }
     }
 }

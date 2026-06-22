@@ -144,9 +144,9 @@ public class VeriPCB {
 
         // print wire statements for each tri-state pin
         //  wire <netname>_<uname>p<pinnum>;
-        for (PCB.Pad pad : compon.pads) {
+        for (PCB.Pad pad : compon.compads) {
             if ((pad != null) && (pad.pintype == PCB.PinType.TRISTATE)) {
-                PCB.Network network = pad.padnet;
+                PCB.Network network = pad.padnet ();
                 String tnn = network.netname + "_" + compon.refer + "p" + pad.padidx;
                 network.trinetnames.add (tnn);
                 System.out.println ("    wire " + tnn + ";");
@@ -159,9 +159,9 @@ public class VeriPCB {
         System.out.println ("        .zclock(zclock),");
         System.out.println ("        .zreset(zreset)");
         char sep = ',';
-        for (PCB.Pad pad : compon.pads) {
+        for (PCB.Pad pad : compon.compads) {
             if (pad != null) {
-                PCB.Network network = pad.padnet;
+                PCB.Network network = pad.padnet ();
                 if (network != null) {
                     int idx = pad.padidx;
                     String netname = network.netname;
