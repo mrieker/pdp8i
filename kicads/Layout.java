@@ -68,6 +68,7 @@ public class Layout {
 
     private static TreeMap<String,EquivSubChip> equivsubchips;  // 7400 U38A is swappable with 7400 U64C etc
     private static TreeMap<String,EquivPad> equivpads;          // 7400 U12A pin 1 swappable with 7400 U12A pin 2 etc
+    private static TreeMap<String,LinkedList<int[]>> swappedpads;
 
     public static void main (String[] args)
             throws Exception
@@ -75,7 +76,7 @@ public class Layout {
         String modname = args[0];
 
         // parse the pcb file
-        PCB pcb = new PCB (new BufferedReader (new InputStreamReader (System.in)));
+        PCB pcb = new PCB (new BufferedReader (new FileReader (modname + ".kicad_pcb")));
         netsbyname = pcb.netsbyname;
         netsbynum  = pcb.netsbynum;
 
@@ -118,7 +119,7 @@ public class Layout {
         }
 
         // compute total trace length
-        System.err.println ("totallen=" + inchstr (nettotallen ()));
+        System.out.println ("totallen=" + inchstr (nettotallen ()));
 
         // get cell row and column sizes and quantities
         HashSet<Integer> col20thins = new HashSet<> ();
@@ -141,16 +142,16 @@ public class Layout {
         numrows = row20thins.size ();
         colwid20thin = (maxatx20thin - minatx20thin) / (numcols - 1);
         rowhit20thin = (maxaty20thin - minaty20thin) / (numrows - 1);
-        System.err.println ("numcols=" + numcols + " numrows=" + numrows + " colwid=" + inchstr (colwid20thin / 20.0) + " rowhit=" + inchstr (rowhit20thin / 20.0));
+        System.out.println ("numcols=" + numcols + " numrows=" + numrows + " colwid=" + inchstr (colwid20thin / 20.0) + " rowhit=" + inchstr (rowhit20thin / 20.0));
         lowxin = minatx20thin / 20.0;
         lowyin = minaty20thin / 20.0;
 
         colwidpix = colwid20thin * PIXPER20THIN;
         rowhitpix = rowhit20thin * PIXPER20THIN;
 
-        SCM schematic = new SCM (new BufferedReader (new FileReader ("procalu/procalu.kicad_sch")));
+        SCM schematic = new SCM (new BufferedReader (new FileReader (modname + ".kicad_sch")));
         schemtop = (SCM.ArrValue) schematic.topvalue ();
-        if (! schemtop.getarrname ().equals ("kicad_sch")) throw new Exception ("not a kicad_sch");
+        if (! schemtop.getarrname ().equals ("kicad_sch")) throw new Exception (modname + ".kicad_sch not a kicad_sch");
         schemsyms = schemtop.findsubarrays ("symbol");
 
         makeequivsubchips ();
@@ -159,6 +160,10 @@ public class Layout {
         Signal.handle (new Signal ("INT"), new SignalHandler () {
             public void handle (Signal sig)
             {
+                if (! runauto) {
+                    System.err.println ("control-C aborting");
+                    System.exit (1);
+                }
                 System.err.println ("control-C");
                 runauto = false;
             }
@@ -196,10 +201,41 @@ public class Layout {
         }
 
         // write out modified pcb
-        System.err.println ("saving output file");
-        pcb.save (System.out);
-        schematic.save (new PrintStream ("procalu/procalu-new.kicad_sch"));
-        System.err.println ("output file saved");
+        System.out.println ("saving output file " + modname + "-new.kicad_pcb");
+        pcb.save (new PrintStream (modname + "-new.kicad_pcb"));
+        System.out.println ("saving output file " + modname + "-new.kicad_sch");
+        schematic.save (new PrintStream (modname + "-new.kicad_sch"));
+        System.out.println ("output files saved");
+
+        System.out.println ("");
+        System.out.println ("will have to apply these changes manually to schematic");
+        swappedpads = new TreeMap<> ();
+        runauto = true;
+        randgen = new Random (987654321);
+        while (runauto) {
+
+            // try swapping a pair of same-function pads (eg, pin 1 and 2 of a 7400)
+            for (String chiptype : equivpads.keySet ()) {
+                double newtotlen = doPadSwap (oldtotlen, chiptype);
+                if (! Double.isNaN (newtotlen)) {
+                    oldtotlen = newtotlen;
+                }
+            }
+        }
+
+        System.out.println ("saving output file " + modname + "-new2.kicad_pcb");
+        pcb.save (new PrintStream (modname + "-new2.kicad_pcb"));
+        System.out.println ("saving output file " + modname + "-new2.swappedpads");
+        PrintStream spps = new PrintStream (modname + "-new2.swappedpads");
+        for (String unum : swappedpads.keySet ()) {
+            spps.print (unum + ":");
+            for (int[] sp : swappedpads.get (unum)) {
+                spps.print ("  (" + sp[0] + " " + sp[1] + ")");
+            }
+            spps.println ("");
+        }
+        spps.close ();
+        System.out.println ("output files saved");
     }
 
     public static String inchstr (double inch)
@@ -303,7 +339,7 @@ public class Layout {
             // if so, use the change
             double newtotlen = nettotallen ();
             if (oldtotlen > newtotlen) {
-                System.err.println ("swap " +
+                System.out.println ("swap " +
                         (ica == null ? "empty" : ica.refer) + "(" + icola + "," + irowa + ") " +
                         (icb == null ? "empty" : icb.refer) + "(" + icolb + "," + irowb + ") => " + newtotlen);
                 return newtotlen;
@@ -413,7 +449,7 @@ public class Layout {
             if (newtotlen < oldtotlen) {
                 // ica.refer = "U123"
                 // icsubchipa = 0,1,2,... for A,B,C,...
-                System.err.println ("swap " + ica.refer + (char)('A' + icsubchipa) + " " + icb.refer + (char)('A' + icsubchipb) + " => " + newtotlen);
+                System.out.println ("swap " + ica.refer + (char)('A' + icsubchipa) + " " + icb.refer + (char)('A' + icsubchipb) + " => " + newtotlen);
 
                 // update the schematic
                 swapschemsubchips (ica.refer, icsubchipa + 1, icb.refer, icsubchipb + 1);
@@ -506,11 +542,11 @@ public class Layout {
         equivpads.put ("74AC20",   new EquivPad (new int[][] { new int[] { 1, 2, 4, 5 }, new int[] { 9, 10, 12, 13 } }));
         equivpads.put ("74HC21",   new EquivPad (new int[][] { new int[] { 1, 2, 4, 5 }, new int[] { 9, 10, 12, 13 } }));
 
-        equivpads.put ("74AHC00",  new EquivPad (new int[][] { new int[] { 1, 2 }, new int[] { 4, 5 }, new int[] { 9, 10 }, new int[] { 12, 13, 11 } }));
-        equivpads.put ("74AHC02",  new EquivPad (new int[][] { new int[] { 2, 3 }, new int[] { 5, 6 }, new int[] { 8, 9  }, new int[] { 11, 12, 13 } }));
-        equivpads.put ("74AHC08",  new EquivPad (new int[][] { new int[] { 1, 2 }, new int[] { 4, 5 }, new int[] { 9, 10 }, new int[] { 12, 13, 11 } }));
-        equivpads.put ("74AHC32",  new EquivPad (new int[][] { new int[] { 1, 2 }, new int[] { 4, 5 }, new int[] { 9, 10 }, new int[] { 12, 13, 11 } }));
-        equivpads.put ("74AHC86",  new EquivPad (new int[][] { new int[] { 1, 2 }, new int[] { 4, 5 }, new int[] { 9, 10 }, new int[] { 12, 13, 11 } }));
+        equivpads.put ("74AHC00",  new EquivPad (new int[][] { new int[] { 1, 2 }, new int[] { 4, 5 }, new int[] { 9, 10 }, new int[] { 12, 13 } }));
+        equivpads.put ("74AHC02",  new EquivPad (new int[][] { new int[] { 2, 3 }, new int[] { 5, 6 }, new int[] { 8, 9  }, new int[] { 11, 12 } }));
+        equivpads.put ("74AHC08",  new EquivPad (new int[][] { new int[] { 1, 2 }, new int[] { 4, 5 }, new int[] { 9, 10 }, new int[] { 12, 13 } }));
+        equivpads.put ("74AHC32",  new EquivPad (new int[][] { new int[] { 1, 2 }, new int[] { 4, 5 }, new int[] { 9, 10 }, new int[] { 12, 13 } }));
+        equivpads.put ("74AHC86",  new EquivPad (new int[][] { new int[] { 1, 2 }, new int[] { 4, 5 }, new int[] { 9, 10 }, new int[] { 12, 13 } }));
 
         equivpads.put ("74HC30",   new EquivPad (new int[][] { new int[] { 1, 2, 3, 4, 5, 6, 11, 12 } }));
     }
@@ -567,7 +603,14 @@ public class Layout {
         // if new total length less than old, return with pins swapped
         double newtotlen = nettotallen ();
         if (newtotlen < oldtotlen) {
-            System.err.println ("swap " + ic.refer + (char)('A' + icsubchip) + " pads " + ipada + " " + ipadb + " => " + newtotlen);
+            String subref = ic.refer + (char)('A' + icsubchip);     // eg, "U78C"
+            System.out.println ("swap " + subref + " pads " + ipada + " " + ipadb + " => " + newtotlen);
+            LinkedList<int[]> splist = swappedpads.get (subref);
+            if (splist == null) {
+                splist = new LinkedList<> ();
+                swappedpads.put (subref, splist);
+            }
+            splist.addLast (new int[] { ipada, ipadb });
             return newtotlen;
         }
 
