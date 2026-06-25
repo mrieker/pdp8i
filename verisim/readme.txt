@@ -23,6 +23,12 @@ Test using zynq pdp8ifpi2c.v scanning circuits:
     export usefpi2c=1
     ./simtest.sh
 
+Use faster clocking for stress testing:
+    export clkratm1=9   # 100nS => 1.60uS mem cycle (defaukt)
+    export clkratm1=8   #  90nS => 1.44uS mem cycle
+    export clkratm1=7   #  80nS => 1.28uS mem cycle
+    export clkratm1=6   #  70nS => 1.12uS mem cycle (doesn't work)
+
 Script ./last.sh prints every 100th instruction and saves
 all of the last 4M output in case of error.
 

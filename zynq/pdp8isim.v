@@ -66,7 +66,6 @@ module pdp8isim (
 
     wire zclock = CLOCK;
     wire zreset = RESET;
-    wire yclock = iCLOCK;
 
     // combined bus signals
     wire _busION, _busLINK, _busPAUSE, _busREADSR, _busRUN, _busBRKRQST,
@@ -167,7 +166,6 @@ module pdp8isim (
                                              12'o0000;  // switches all zeroes (gpio buttons all need to be off or they jam mcp23017 buttons)
 
     console conboard (
-        .yclock (yclock),
         .zclock (zclock),
         .zreset (zreset),
         .GND    (1'b0),
@@ -395,7 +393,6 @@ module pdp8isim (
     wire[11:00] _eaeINBUS;
 
     extarith eaeboard (
-        .yclock (yclock),
         .zclock (zclock),
         .zreset (zreset),
         .GND    (1'b0),
@@ -526,7 +523,6 @@ module pdp8isim (
     wire[2:0] _memDFLD, _memIFLD;
 
     extmemory meminst (
-        .yclock (yclock),
         .zclock (zclock),
         .zreset (zreset),
         .GND    (1'b0),
@@ -651,7 +647,6 @@ module pdp8isim (
     wire[11:00] _os8zappedinbus = os8zap ? 12'o0000 : _busINBUS;
 
     procalu aluboard (
-        .yclock (yclock),
         .zclock (zclock),
         .zreset (zreset),
         .GND    (1'b0),
@@ -793,7 +788,6 @@ module pdp8isim (
     );
 
     procreg regboard (
-        .yclock (yclock),
         .zclock (zclock),
         .zreset (zreset),
         .GND    (1'b0),
@@ -983,7 +977,6 @@ module pdp8isim (
     );
 
     procseq seqboard (
-        .yclock (yclock),
         .zclock (zclock),
         .zreset (zreset),
         .GND    (1'b0),

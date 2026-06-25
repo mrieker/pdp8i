@@ -57,10 +57,10 @@ set testdma  [getenv testdma  1]
 set testexar [getenv testexar 1]  ;# test extended arithmetic
 set testxmem [getenv testxmem 1]  ;# test extended memory
 set runquiet [getenv runquiet 1]  ;# tell runstep command to keep quiet
-set clockns  [expr {[clk ratio] * 5}]
 
 proc simtest {} {
     global acum
+    global begclkns
     global cmat1
     global cmat2
     global cmdmarqst
@@ -83,7 +83,6 @@ proc simtest {} {
     global perclock
     global pctr
     global sctr
-    global startclockno
     global swdfpend
     global swifpend
     global swregpend
@@ -115,14 +114,25 @@ proc simtest {} {
     set ercode [catch {mem 0}]
     set hasmemcmd [expr {$ercode == 0}]
 
-    ;# reset then start processor
+    ;# usefpi2c=0: use console.kicad_sch internal counters to scan lights/switches
+    ;#          1: use pdp8ifpi2c.v fpga counters to scan lights/switches
     set usefpi2c [getenv usefpi2c 0]
     puts "simtest: usefpi2c=$usefpi2c"
+
+    ;# clkratm1: clock pdp at 100MHz / (clkratm1 + 1)
+    set clkratm1 [getenv clkratm1 9]
+    puts "simtest: clkratm1=$clkratm1"
+    arm set 4 $clkratm1     ;# 4 = zynq.v regctld
+
+    ;# reset then start processor
     hardreset
+    puts "simtest: hardreset complete"
+
     set cmat0 [arm find CM]
     set ttat0 [arm find TT]
     startat 0
     waitassert TS1
+    puts "simtest: startat 0 complete"
     verify12 [bus oMADR] 0 "bad start PC"
     set acum [bus oACUM]
     set linc [bus oLINK]
@@ -144,6 +154,7 @@ proc simtest {} {
     set instrno 0
     set lastopc -1
     set nextfetch 0
+    set begclkns -1
 
     while {! [ctrlcflag]} {
         set ercode [catch {
@@ -446,19 +457,23 @@ proc simtest {} {
 }
 
 proc startline {} {
-    global acum instrno linc mquo pctr sctr startclockno xmem_dfld xmem_ifld
+    global acum begclkns instrno linc mquo pctr sctr xmem_dfld xmem_ifld
 
     puts -nonewline [format "%10u : L.AC=%o.%04o MQ=%04o PC=%o%04o SC=%02o DF=%o : " \
         [incr instrno] $linc $acum $mquo $xmem_ifld $pctr $sctr $xmem_dfld]
 
-    set startclockno [clk 0]
+    if {$begclkns < 0} {
+        set begclkns [clk simns]
+    }
 }
 
-;# print how many cycles it took
+;# print how much time it took
 proc finishline {} {
-    global clockns startclockno
-    set clocks [expr {([clk 0] - $startclockno) * $clockns}]
-    puts [format "  (%u.%03u uS)" [expr {$clocks / 1000}] [expr {$clocks % 1000}]]
+    global begclkns
+    set endclkns [clk simns]
+    set deltclkns [expr {$endclkns - $begclkns}]
+    puts [format "  (%u.%03u uS)" [expr {$deltclkns / 1000}] [expr {$deltclkns % 1000}]]
+    set begclkns $endclkns
 }
 
 ;# perform DMA (1 or 3) cycle

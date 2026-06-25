@@ -82,6 +82,8 @@ static PinDef const pindefs[] = {
     { "dev_iIOSKIP",     DEV_8I, Z_RC, c_dev_iIOSKIP,  false },
     { "dev_iPAUSE",      DEV_8I, Z_RC, c_dev_iPAUSE,   false },
 
+    { "clkratm1",        DEV_8I, Z_RD, d_clkratm1,     true  },
+
     { "simit",           DEV_8I, Z_RE, e_simit,        true  },
     { "fpgareset",       DEV_8I, Z_RE, e_fpgareset,    true  },
     { "nanocontin",      DEV_8I, Z_RE, e_nanocontin,   true  },
@@ -291,7 +293,7 @@ int cmd_pin (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj *const
             *ptr = (*ptr & ~ mask) | val * (mask & - mask);
         } else {
             uint32_t val = (*ptr & mask) / (mask & - mask);
-            gotvals[ngotvals++] = Tcl_NewIntObj (val);
+            gotvals[ngotvals++] = Tcl_NewLongObj (val);
         }
     }
 

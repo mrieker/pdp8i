@@ -72,6 +72,7 @@ proc hardreset {} {
             if {$i > 2000} {                ;# usually takes 914
                 error "pdp8ifpi2c startup timed out"
             }
+            clk
         }
     }
 }
@@ -450,8 +451,8 @@ proc runstep {} {
     global lastgpio lightrows runquiet
     global swrowpends
 
-    ;# kerchunk the 10MHz clock and get cycle count
-    set c [clk]
+    ;# kerchunk the 10MHz clock
+    clk
 
     ;# here we pretend to be the pidp panel
     ;# capture what console.kicad_sch is feeding the lights
@@ -566,12 +567,12 @@ proc swtch {args} {
 ;# ...including any debounce time
 proc swtchwait {name valu} {
     swtch set $name $valu
-    for {set i 0} {$i < 200000} {incr i} {
-        set actual [swtch $name]
-        if {$actual == $valu} return
+    for {set i 0} {[swtch $name] != $valu} {incr i} {
+        if {$i > 200000} {
+            error "timed out setting sw$name to $valu"
+        }
         runstep
     }
-    error "timed out setting sw$name to $valu (is $actual)"
 }
 
 # wait for processor to halt if it isn't already

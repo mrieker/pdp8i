@@ -10,14 +10,8 @@
 #include <tcl8.6/tcl.h>
 #include <unistd.h>
 
-#ifdef VERLTR
 #include "obj_dir/Vbackplane.h"
 #include "obj_dir/Vbackplane_extmemory.h"
-#endif
-#ifdef ZTURN
-#include <sys/file.h>
-#include <sys/mman.h>
-#endif
 
 #include "assemble.h"
 #include "disassemble.h"
@@ -27,29 +21,17 @@
 
 struct Pin {
     int bits;
-#ifdef VERLTR
     int size;
     void *addr;
-#endif
-#ifdef ZTURN
-    uint32_t mask;
-    int indx;
-#endif
     bool writ;
     char const *name;
 };
 
 static bool volatile ctrlcflag;
-static double simulationtime;
-static int clkratio;
 static int cyclenum;
+static uint64_t simulationns;
 
-#ifdef VERLTR
 static Vbackplane *vbkpl;
-#endif
-#ifdef ZTURN
-static uint32_t volatile *zpage;
-#endif
 
 static Tcl_ObjCmdProc cmd_arm;
 static Tcl_ObjCmdProc cmd_asmop;
@@ -69,7 +51,7 @@ static int cmdpintable (int pincount, Pin const *pintable, Tcl_Interp *interp, i
 static int findev (char const *ident);
 static uint32_t armread (uint32_t armaddr);
 static void armwrite (uint32_t armaddr, uint32_t armdata);
-static void armclock ();
+static void zynqclock ();
 static void Tcl_SetResultF (Tcl_Interp *interp, char const *fmt, ...);
 static void siginthand (int signum);
 
@@ -108,40 +90,12 @@ int main (int argc, char **argv)
 
     signal (SIGINT, siginthand);
 
-    clkratio = 20;
-    char const *env = getenv ("clkratio");
-    if (env != NULL) clkratio = atoi (env);
-
-#ifdef VERLTR
     Vbackplane vbackplane;
     vbkpl = &vbackplane;
-#endif
-#ifdef ZTURN
-    int zfd = open ("/proc/zynqpdp8i", O_RDWR);
-    if (zfd < 0) {
-        fprintf (stderr, "error opening /proc/zynqpdp8i: %m\n");
-        ABORT ();
-    }
-    if (flock (zfd, LOCK_EX | LOCK_NB) < 0) {
-        fprintf (stderr, "error locking /proc/zynqpdp8i: %m\n");
-        ABORT ();
-    }
-    void *zp = mmap (NULL, 4096, PROT_READ | PROT_WRITE, MAP_SHARED, zfd, 0);
-    if (zp == MAP_FAILED) {
-        fprintf (stderr, "error mapping /proc/zynqpdp8i: %m\n");
-        ABORT ();
-    }
-    zpage = (uint32_t volatile *)zp;
-    if ((zpage[0] & 0xFFFF0000) != 0x38480000) {
-        fprintf (stderr, "bad magic number %08X\n", zpage[0]);
-        ABORT ();
-    }
-    fprintf (stderr, "magic number %08X\n", zpage[0]);
-#endif
 
     vbkpl->zreset = 1;
     for (int i = 0; i < 100; i ++) {
-        armclock ();
+        zynqclock ();
     }
     vbkpl->zreset = 0;
 
@@ -253,7 +207,7 @@ static int cmd_arm (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj
             armwrite (addr, data);
         } else {
             uint32_t data = armread (addr);
-            getobjs[ngetobjs++] = Tcl_NewIntObj (data);
+            getobjs[ngetobjs++] = Tcl_NewLongObj (data);
         }
     }
     if (ngetobjs == 1) {
@@ -290,13 +244,7 @@ static int cmd_asmop (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_O
     return TCL_OK;
 }
 
-#ifdef VERLTR
 #define OFFS(x) sizeof (vbkpl->x), &vbkpl->x
-#endif
-#ifdef ZTURN
-#include "zdefs.h"
-#define OFFS(x) x##_M, x##_I
-#endif
 
 static int sortpin (void const *a, void const *b)
 {
@@ -350,12 +298,6 @@ static int cmd_bus (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj
             { 12, OFFS (swreg),    false, "swreg"    },
             {  3, OFFS (swdf),     false, "swdf"     },
             {  3, OFFS (swif),     false, "swif"     },
-#ifdef ZTURN
-            { 12, OFFS (businbus), false, "businbus" },
-            {  1, OFFS (busacclr), false, "busacclr" },
-            {  1, OFFS (busintrq), false, "busintrq" },
-            {  1, OFFS (busioskp), false, "busioskp" },
-#endif
 
             { 12, OFFS (oACUM),    false, "oACUM"    },
             {  1, OFFS (oBRKGNTO), false, "oBRKGNTO" },   // break grant chain
@@ -386,11 +328,15 @@ static int cmd_bus (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj
 }
 
 // clk [n]
-//  returns total number of clock cycles
+//  clock given number of PDP clock cycles
+//  returns halfway through cycle with clock still high
+//  returns total number of PDP clock cycles
+// clk simns
+//  returns number of simulation nanoseconds
 static int cmd_clk (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
-    if ((objc > 1) && (strcasecmp (Tcl_GetString (objv[1]), "ratio") == 0)) {
-        Tcl_SetObjResult (interp, Tcl_NewIntObj (clkratio));
+    if ((objc > 1) && (strcasecmp (Tcl_GetString (objv[1]), "simns") == 0)) {
+        Tcl_SetObjResult (interp, Tcl_NewLongObj (simulationns));
         return TCL_OK;
     }
     int num = 1;
@@ -462,20 +408,10 @@ static int cmd_gpio (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Ob
         int num = 0;
         int rc = Tcl_GetIntFromObj (interp, objv[1], &num);
         if (rc != TCL_OK) return rc;
-#ifdef VERLTR
         vbkpl->gpin = scramgpio (num);
-#endif
-#ifdef ZTURN
-        zpage[Z_RH] = scramgpio (num);
-#endif
     } else {
-#ifdef VERLTR
-        int num = scramgpio (vbkpl->gpout);
-#endif
-#ifdef ZTURN
-        int num = scramgpio (zpage[Z_RI]);
-#endif
-        Tcl_SetObjResult (interp, Tcl_NewIntObj (num));
+        uint32_t num = scramgpio (vbkpl->gpout);
+        Tcl_SetObjResult (interp, Tcl_NewLongObj (num));
     }
     return TCL_OK;
 }
@@ -612,7 +548,6 @@ static int demngmembyte (int data)
 
 static int cmd_mem (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
-#ifdef VERLTR
     switch (objc) {
 
         // mem addr - read memory
@@ -658,11 +593,6 @@ static int cmd_mem (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj
             return TCL_ERROR;
         }
     }
-#endif
-#ifdef ZTURN
-    Tcl_SetResultF (interp, "not supported for zturn");
-    return TCL_ERROR;
-#endif
 }
 
 // randbits nbits
@@ -719,33 +649,18 @@ static uint32_t scramgpio (uint32_t x)
 }
 
 // call with 10MHz clock still low and input signals just changed
-// returns with output signals updated and 10MHz clock just set low
+// returns with output signals updated and 10MHz clock just went low
 static void kerchunk ()
 {
     // 20 200MHz cycles step the 10MHz osc through a cycle
     // each 200MHz step progresses signals through gates and flipflops
 
-#ifdef ZTURN
-    uint32_t ctla = zpage[zclock_I];
-#endif
-    for (int i = 0; i < clkratio; i ++) {
-#ifdef VERLTR
-        vbkpl->eval ();     // let input signals soak in
-        vbkpl->yclock = (i * 2 >= clkratio);
-        vbkpl->zclock = 1;  // clock progress through gates and flipflops
-        vbkpl->eval ();     // let new state settle in
-        vbkpl->zclock = 0;
-#endif
-#ifdef ZTURN
-        zpage[zclock_I] = ctla | zclock_M;
-        zpage[zclock_I] = ctla;
-#endif
-        simulationtime += 5;
+    bool lastoclock = vbkpl->oCLOCK;
+    for (int i = 0; i < 256; i ++) {
+        zynqclock ();
+        if (lastoclock && ! vbkpl->oCLOCK) break;
+        lastoclock = vbkpl->oCLOCK;
     }
-#ifdef VERLTR
-    vbkpl->yclock = 0;
-#endif
-    ++ cyclenum;            // one more clock cycle done
 }
 
 // process a pintable-type command
@@ -788,23 +703,13 @@ static int cmdpintable (int pincount, Pin const *pintable, Tcl_Interp *interp, i
                 Tcl_SetResultF (interp, "value %u out of range for pin %s", val, arg);
                 return TCL_ERROR;
             }
-#ifdef VERLTR
             memcpy (pin->addr, &val, pin->size);
             vbkpl->eval ();
-#endif
-#ifdef ZTURN
-            zpage[pin->indx] = (zpage[pin->indx] & ~ pin->mask) | (val * (pin->mask & - pin->mask));
-#endif
         } else {
-#ifdef VERLTR
-            int val = 0;
+            uint32_t val = 0;
             if (pin->size > (int) sizeof val) abort ();
             memcpy (&val, pin->addr, pin->size);
-#endif
-#ifdef ZTURN
-            int val = (zpage[pin->indx] & pin->mask) / (pin->mask & - pin->mask);
-#endif
-            getobjs[ngetobjs++] = Tcl_NewIntObj (val);
+            getobjs[ngetobjs++] = Tcl_NewLongObj (val);
         }
     }
     if (ngetobjs == 1) {
@@ -844,7 +749,7 @@ static uint32_t armread (uint32_t armaddr)
     for (int i = 0; vbkpl->saxi_ARVALID | vbkpl->saxi_RREADY; i ++) {
         if (i > 100) ABORT ();
         bool arready = vbkpl->saxi_ARREADY;
-        armclock ();
+        zynqclock ();
         if (arready) vbkpl->saxi_ARVALID = 0;
         if (vbkpl->saxi_RVALID & vbkpl->saxi_RREADY) {
             armdata = vbkpl->saxi_RDATA;
@@ -866,19 +771,46 @@ static void armwrite (uint32_t armaddr, uint32_t armdata)
         if (i > 100) ABORT ();
         bool awready = vbkpl->saxi_AWREADY;
         bool wready  = vbkpl->saxi_WREADY;
-        armclock ();
+        zynqclock ();
         if (awready) vbkpl->saxi_AWVALID = 0;
         if (wready)  vbkpl->saxi_WVALID  = 0;
         if (vbkpl->saxi_BVALID) vbkpl->saxi_BREADY = 0;
     }
 }
 
-static void armclock ()
+// advance clock 10nS
+// zclock = 200MHz, clocks gates and flipflops in chips-varns.v
+// yclock = 100MHz, clocks zynq fpga
+//  input:
+//   yclock just went low after being high for 5nS
+//   zclock just went low after being high for 2.5nS
+//  output:
+//   yclock just went low after being high for 5nS
+//   zclock just went low after being high for 2.5nS
+static void zynqclock ()
 {
-    vbkpl->eval ();     // let pre-clock signals soak into fpga
-    vbkpl->zclock = 1;  // drive clock high
-    vbkpl->eval ();     // let fpga generate post-clock signals
-    vbkpl->zclock = 0;  // get ready for 2nd half of cycle
+    if (vbkpl->yclock | vbkpl->zclock) ABORT();
+
+    bool lastoclock = vbkpl->oCLOCK;
+
+    vbkpl->eval ();     // run for 2.5nS with yclock=0, zclock=0
+    vbkpl->zclock = 1;
+    vbkpl->eval ();     // run for 2.5nS with yclock=0, zclock=1
+    vbkpl->zclock = 0;
+    vbkpl->yclock = 1;
+    simulationns += 5;
+
+    vbkpl->eval ();     // run for 2.5nS with yclock=1, zclock=0
+    vbkpl->zclock = 1;
+    vbkpl->eval ();     // run for 2.5nS with yclock=1, zclock=1
+    vbkpl->zclock = 0;
+    vbkpl->yclock = 0;
+    simulationns += 5;
+
+    // maybe 10MHz PDP clock just went low
+    // count the cycle if so
+    // actual freq is determined by zynq.v regctld clkratm1 (normally 9 for 10MHz)
+    if (lastoclock && ! vbkpl->oCLOCK) ++ cyclenum;
 }
 
 // set result to formatted string
@@ -902,5 +834,5 @@ static void siginthand (int signum)
 
 double sc_time_stamp()
 {
-    return simulationtime;
+    return (double) simulationns;
 }

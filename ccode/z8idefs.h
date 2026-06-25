@@ -83,6 +83,8 @@
 #define c_dev_iIOSKIP       (1U << 22)
 #define c_dev_iPAUSE        (1U << 23)
 
+#define d_clkratm1     (077U << 0)  //rw clock ratio minus 1, eg, 9 for 10MHz = 100MHz / (d_clkratm1 + 1)
+
 #define e_simit         (1U <<  0)  //rw 0=real PDP-8/I; 1=pdp8isim.v
 #define e_fpgareset     (1U <<  1)  //rw 0=normal; 1=power-on-reset
 #define e_nanocontin    (1U <<  2)  //rw 0=single step mode (sim only); 1=normal continuous running
@@ -111,6 +113,8 @@
 #define f_oTS3          (1U << 26)
 #define f_oTS4          (1U << 27)
 #define f_oMAJST      (017U << 28)
+
+#define h_100MHz       0xFFFFFFFFU
 
 #if 000
 #define g_lbAC      (07777U <<  0)  //ro sim_...

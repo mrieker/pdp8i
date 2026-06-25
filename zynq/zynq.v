@@ -41,7 +41,7 @@ endmodule
 //       CLOCK = fpga 100MHz clock
 //  dev_iCLOCK = 10MHz PDP clock
 
-module Zynq #(parameter BIDIRCONSDA=1, parameter CLOCKDIVIDE=5) (
+module Zynq #(parameter BIDIRCONSDA=1) (
     input         CLOCK,        // 100MHz
     input         RESET_N,      // FPGA reset
     output        LEDoutR,      // IO_B34_LN6 R14
@@ -129,8 +129,8 @@ module Zynq #(parameter BIDIRCONSDA=1, parameter CLOCKDIVIDE=5) (
     //  arm_i... : signals from arm processor as an internal io device (merged onto dev_i... bus)
     //  arm uses dev_o... signals instead of having arm_o... signals
 
-    wire[31:00] regctla, regctlb, regctlc, regctld, regctle, regctlf, regctlg, regctli;
-    reg[31:00] regctlh;
+    wire[31:00] regctla, regctlb, regctlc, regctle, regctlf, regctlg, regctli;
+    reg[31:00] regctld, regctlh;
 
     wire[11:00] sim_oACUM;
     wire        sim_oBRKCYC;
@@ -313,14 +313,12 @@ module Zynq #(parameter BIDIRCONSDA=1, parameter CLOCKDIVIDE=5) (
     reg[5:0] clkdiv;
     reg yclock;
     always @(posedge CLOCK) begin
-        if (~ RESET_N) begin
+        if (~ RESET_N | (clkdiv == regctld[5:0])) begin
             clkdiv <= 0;
             yclock <= 0;
-        end else if (clkdiv != CLOCKDIVIDE-1) begin
-            clkdiv <= clkdiv + 1;
         end else begin
-            clkdiv <= 0;
-            yclock <= ~ yclock;
+            clkdiv <= clkdiv + 1;
+            if (clkdiv == { 1'b0, regctld[5:1] }) yclock <= 1;
         end
     end
     assign dev_iCLOCK = yclock;
@@ -386,6 +384,7 @@ module Zynq #(parameter BIDIRCONSDA=1, parameter CLOCKDIVIDE=5) (
             saxi_WREADY  <= 0;                          // we are not ready to accept write data
             saxi_BVALID  <= 0;                          // we are not acknowledging any write
 
+            regctld     <= 9;                           // default 10MHz PDP clock
             simit       <= 0;                           // assume want to access real PDP-8/I by default
             fpgareset   <= 0;                           // we are resetting FPGA, don't do infinite reset loop
             nanocontin  <= 1;                           // turn on 100MHz FPGA clocking
@@ -441,6 +440,10 @@ module Zynq #(parameter BIDIRCONSDA=1, parameter CLOCKDIVIDE=5) (
                         arm_swSSTEP  <= saxi_WDATA[11];
                         arm_swSTART  <= saxi_WDATA[12];
                         arm_swSREG   <= saxi_WDATA[24:13];
+                    end
+
+                    10'b0000000100: begin
+                        regctld[5:0] <= saxi_WDATA[5:0];
                     end
 
                     10'b0000000101: begin
@@ -736,7 +739,6 @@ module Zynq #(parameter BIDIRCONSDA=1, parameter CLOCKDIVIDE=5) (
     wire[3:0] sim_majst;
     wire sim_run, sim_swldad, sim_swdepos, sim_swexam, sim_swstart, sim_swcont;
 
-    assign regctld = 0;
     assign regctlg = 0;
 
     pdp8isim siminst (

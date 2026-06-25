@@ -1,9 +1,9 @@
 
 module backplane (
-    input yclock,                   // 10MHz clock coming from xtal osc on console
-    input zclock,                   // 100MHz
-    input zreset,
-    input reset,                    // power-on reset
+    input yclock,                   // 100MHz clock for FPGA
+    input zclock,                   // 200MHz clock for gate delays
+    input zreset,                   // power-on reset
+    input reset,                    // hardreset
 
     input[15:04] gpin,              // switches from verimain.cc
     output[27:04] gpout,            // light bulbs to verimain.cc
@@ -25,6 +25,7 @@ module backplane (
     output oBRKCYC,                 // break cycle
     output oBUSINI,                 // initialize bus devices
     output oBWCOV,                  // 3-cycle DMA wordcount overflowed
+    output oCLOCK,                  // 10MHz PDP clock
     output oION,                    // interrupts enabled
     output oIOP,                    // io instruction pulse
     output oLINK,                   // link register
@@ -79,6 +80,7 @@ module backplane (
     assign oBRKCYC  = ~ _busBRKCYC;
     assign oBUSINI  = ~ _busBUSINI;
     assign oBWCOV   = ~ _busBWCOV;
+    assign oCLOCK   = ~ _busCLOCK;
     assign oION     = ~ _busION;
     assign oIOP     = ~ _busIOP;
     assign oLINK    = ~ _busLINK;
@@ -115,7 +117,6 @@ module backplane (
     wire lttime, swtime;
 
     console conboard (
-        .yclock (yclock),
         .zclock (zclock),
         .zreset (zreset),
         .GND    (1'b0),
@@ -343,7 +344,6 @@ module backplane (
     wire[11:00] _eaeINBUS;
 
     extarith eaeboard (
-        .yclock (yclock),
         .zclock (zclock),
         .zreset (zreset),
         .GND    (1'b0),
@@ -475,7 +475,6 @@ module backplane (
     wire[2:0] _memDFLD, _memIFLD;
 
     extmemory meminst (
-        .yclock (yclock),
         .zclock (zclock),
         .zreset (zreset),
         .GND    (1'b0),
@@ -599,7 +598,6 @@ module backplane (
     wire cout, memacsw, nxtms_0, nxtms_1, nxtms_2, nxtms_3;
 
     procalu aluboard (
-        .yclock (yclock),
         .zclock (zclock),
         .zreset (zreset),
         .GND    (1'b0),
@@ -741,7 +739,6 @@ module backplane (
     );
 
     procreg regboard (
-        .yclock (yclock),
         .zclock (zclock),
         .zreset (zreset),
         .GND    (1'b0),
@@ -931,7 +928,6 @@ module backplane (
     );
 
     procseq seqboard (
-        .yclock (yclock),
         .zclock (zclock),
         .zreset (zreset),
         .GND    (1'b0),
@@ -1026,8 +1022,8 @@ module backplane (
     wire[2:0] zynDMAFLD;
     wire[11:00] zynINBUS;
 
-    Zynq #(.BIDIRCONSDA (0), .CLOCKDIVIDE (10)) zynqinst (
-        .CLOCK   (zclock),
+    Zynq #(.BIDIRCONSDA (0)) zynqinst (
+        .CLOCK   (yclock),
         .RESET_N (~ zreset),
         .LEDoutR (),      // IO_B34_LN6 R14
         .LEDoutG (),      // IO_B34_LP7 Y16
@@ -1137,7 +1133,6 @@ module backplane (
 
     dmatest testa (
         .seed   (1),
-        .yclock (yclock),
         .zclock (zclock),
         .zreset (zreset),
 
@@ -1230,7 +1225,6 @@ module backplane (
 
     dmatest testb (
         .seed   (2),
-        .yclock (yclock),
         .zclock (zclock),
         .zreset (zreset),
 
@@ -1326,7 +1320,7 @@ module backplane (
     assign _busIOSKIP  = _eaeIOSKIP   & ~ iIOSKIP  & ~ zynIOSKIP;
     assign _busMEMDIS  = ~ memdisab;
     assign _busPAUSE   = _eaePAUSE    & ~ iPAUSE   & ~ zynPAUSE;
-    assign _busRESET   =                ~ zynRESET;
+    assign _busRESET   = ~ reset      & ~ zynRESET;
 
     // break grant chain
     assign zynBRKGNTI = ~ _cpuBRKGNTO;

@@ -49,7 +49,7 @@ public class VeriPCB {
         // print networks
         // - if referenced by a connector, it is an input/output pin for the module
         // - if not refd by a connector, it is a wire
-        System.out.println ("module " + modname + " (input yclock, zclock, zreset");
+        System.out.println ("module " + modname + " (input zclock, zreset");
         char sep = ',';
         sep = printconpins (sep, "input");
         sep = printconpins (sep, "inout");
@@ -155,7 +155,6 @@ public class VeriPCB {
 
         // output module instantiation
         System.out.println ("    X" + compon.value + " " + compon.refer + " (");
-        System.out.println ("        .yclock(yclock),");
         System.out.println ("        .zclock(zclock),");
         System.out.println ("        .zreset(zreset)");
         char sep = ',';
