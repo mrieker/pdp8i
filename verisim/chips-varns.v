@@ -2374,3 +2374,6 @@ endmodule
 
 module XC (input zclock, input zreset, input p1, input p2);
 endmodule
+
+module XLOGO (input zclock, input zreset);
+endmodule

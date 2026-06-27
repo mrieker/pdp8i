@@ -1764,3 +1764,9 @@ module XC (input zclock, input zreset, input p1, input p2);
     always @(posedge zclock) begin
     end
 endmodule
+
+module XLOGO (input zclock, input zreset);
+    // dummy loop to make vivado happy
+    always @(posedge zclock) begin
+    end
+endmodule
