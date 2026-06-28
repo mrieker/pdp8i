@@ -1,0 +1,4 @@
+(fp_lib_table
+  (version 7)
+  (lib (name "myfoots")(type "KiCad")(uri "/home/nfs/mrieker/pdp8i/kicads/myfoots.pretty")(options "")(descr ""))
+)

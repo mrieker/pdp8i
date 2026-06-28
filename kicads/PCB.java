@@ -286,14 +286,24 @@ public class PCB {
                     double v2 = ((SCM.NumValue) padat.elems[2]).num / 25.4;
                     int ang = (padat.elems.length > 3) ? padat.elems[3].asint () : 0;
                     switch (ang) {
-                        case 0: {
+                        case   0: {
                             atxin =   v1;
                             atyin =   v2;
                             break;
                         }
-                        case 90: {
+                        case  90: {
                             atxin =   v2;
                             atyin = - v1;
+                            break;
+                        }
+                        case 180: {
+                            atxin = - v1;
+                            atyin = - v2;
+                            break;
+                        }
+                        case 270: {
+                            atxin = - v2;
+                            atyin =   v1;
                             break;
                         }
                         default: throw new Exception ("unsupported angle " + ang);
