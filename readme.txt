@@ -22,8 +22,9 @@ The circuit is a re-design using currently available
 74AC, 74AHC and 74HC series chips.  It uses a 10MHz
 signal for timing instead of delay lines.  It
 preserves the TS1,TS2,TS3,TS4 timing states for the
-most part.  In this design, each takes 400nS (four
-10MHz cycles), giving an overall cycle time of 1.6uS.
+most part.  In this design, TS1 takes 300nS (three
+10MHz cycles), TS2,3,4 each take 400nS (four 10MHz
+cycles), giving an overall cycle time of 1.5uS.
 
     TS1 - read memory into MBUF
     TS2 - compute memory update into MBUF
@@ -39,13 +40,13 @@ If present, the ZTurn board provides the 10MHz signal.
 Otherwise it must be provided via crystal oscillator on
 the timing board.
 
-I/O instructions are also 1.6uS instead of being extended
+I/O instructions are also 1.5uS instead of being extended
 to 4.25uS.  There is just one io pulse regardless of the
 low three opcode bits that occurs starting 100nS into TS2
-and ends at end of TS3.  I/O devices can use TP2 to clock
-data coming from the processor (from ACUM bus lines).  The
-processor clocks data from the I/O device (ACCLEAR, INBUS,
-IOSKIP) at TP3.
+and ends at end of TS3.  I/O devices can use TP2 or TP3 to
+clock data coming from the processor (from ACUM bus lines).
+The processor clocks data from the I/O device (ACCLEAR,
+INBUS, IOSKIP bus lines) at TP3.
 
 The major states are the same (FETCH, DEFER, EXEC, WRDCT,
 CURAD, BREAK), but with the addition of:

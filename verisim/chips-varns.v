@@ -1,7 +1,27 @@
+//    Copyright (C) Mike Rieker, Beverly, MA USA
+//    www.outerworldapps.com
+//
+//    This program is free software; you can redistribute it and/or modify
+//    it under the terms of the GNU General Public License as published by
+//    the Free Software Foundation; version 2 of the License.
+//
+//    This program is distributed in the hope that it will be useful,
+//    but WITHOUT ANY WARRANTY; without even the implied warranty of
+//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//    GNU General Public License for more details.
+//
+//    EXPECT it to FAIL when someone's HeALTh or PROpeRTy is at RISk.
+//
+//    You should have received a copy of the GNU General Public License
+//    along with this program; if not, write to the Free Software
+//    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+//
+//    http://www.gnu.org/licenses/gpl-2.0.html
 
 // variable-nanosecond delays approximating real-world gates
-// uses worst case timing
+// uses worst case timing from datasheets
 // assumes zclock is clocked at 5nS
+// - verimain clocks it as fast as it can then counts it as 5nS
 
 module X74HC00 (input zclock, zreset,
           input      p1
