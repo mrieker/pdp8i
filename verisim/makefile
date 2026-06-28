@@ -5,7 +5,7 @@ GPP    := g++ $(CFLAGS) -std=c++11 -g -Wall
 VFILES := \
 	backplane.v \
 	blk_mem_gen_0.v \
-	chips.v \
+	chips-varns.v \
 	dmatest.v \
 	mcp23017.v \
 	../kicads/console/console.v \
@@ -39,17 +39,11 @@ OFILES := \
 
 default: verimain.$(MACH)
 
-verimain.armv7l: $(OFILES)
-	$(GPP) -g -o verimain.$(MACH) $(OFILES) -lreadline -ltcl8.6
-
 verimain.x86_64: $(OFILES) verilated.$(MACH).o obj_dir/Vbackplane__ALL.a
 	$(GPP) -g -o verimain.$(MACH) $(OFILES) verilated.$(MACH).o obj_dir/Vbackplane__ALL.a /home/mrieker/nfs/tcl8.6.17/install/lib/libtcl8.6.so -lreadline
 
-verimain.armv7l.o: verimain.cc
-	$(GPP) -g -fPIC -c -o verimain.$(MACH).o -DZTURN verimain.cc
-
 verimain.x86_64.o: verimain.cc obj_dir/Vbackplane.h
-	$(GPP) -g -fPIC -c -o verimain.$(MACH).o -I/usr/share/verilator/include/ -DVERLTR verimain.cc
+	$(GPP) -g -fPIC -c -o verimain.$(MACH).o -I/usr/share/verilator/include/ verimain.cc
 
 assemble.$(MACH).o: assemble.cc
 	$(GPP) -g -fPIC -c -o assemble.$(MACH).o assemble.cc
