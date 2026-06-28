@@ -37,13 +37,22 @@ OFILES := \
 	disassemble.$(MACH).o \
 	readprompt.$(MACH).o \
 
-default: verimain.$(MACH)
+default: verimain.$(MACH) testprocalu.$(MACH)
 
-verimain.x86_64: $(OFILES) verilated.$(MACH).o obj_dir/Vbackplane__ALL.a
+verimain.$(MACH): $(OFILES) verilated.$(MACH).o obj_dir/Vbackplane__ALL.a
 	$(GPP) -g -o verimain.$(MACH) $(OFILES) verilated.$(MACH).o obj_dir/Vbackplane__ALL.a /home/mrieker/nfs/tcl8.6.17/install/lib/libtcl8.6.so -lreadline
 
-verimain.x86_64.o: verimain.cc obj_dir/Vbackplane.h
+verimain.$(MACH).o: verimain.cc obj_dir/Vbackplane.h
 	$(GPP) -g -fPIC -c -o verimain.$(MACH).o -I/usr/share/verilator/include/ verimain.cc
+
+testprocalu.$(MACH): testprocalu.$(MACH).o testlib.$(MACH).o verilated.$(MACH).o veriprocalu/Vprocalu__ALL.a
+	$(GPP) -g -o testprocalu.$(MACH) testprocalu.$(MACH).o testlib.$(MACH).o verilated.$(MACH).o veriprocalu/Vprocalu__ALL.a
+
+testprocalu.$(MACH).o: testprocalu.cc testlib.h obj_dir/Vbackplane.h
+	$(GPP) -g -fPIC -c -o testprocalu.$(MACH).o -I/usr/share/verilator/include/ testprocalu.cc
+
+testlib.$(MACH).o: testlib.cc testlib.h
+	$(GPP) -g -fPIC -c -o testlib.$(MACH).o testlib.cc
 
 assemble.$(MACH).o: assemble.cc
 	$(GPP) -g -fPIC -c -o assemble.$(MACH).o assemble.cc
@@ -63,6 +72,13 @@ obj_dir/Vbackplane__ALL.a: obj_dir/Vbackplane.mk
 obj_dir/Vbackplane.cpp obj_dir/Vbackplane.h obj_dir/Vbackplane.mk: $(VFILES)
 	rm -rf obj_dir
 	verilator --cc --top-module backplane $(VFILES)
+
+veriprocalu/Vprocalu__ALL.a: veriprocalu/Vprocalu.mk
+	make -C veriprocalu -f Vprocalu.mk
+
+veriprocalu/Vprocalu.cpp veriprocalu/Vprocalu.h veriprocalu/Vprocalu.mk: ../kicads/procalu/procalu.v chips-varns.v
+	rm -rf veriprocalu
+	verilator --cc --Mdir veriprocalu --top-module procalu ../kicads/procalu/procalu.v chips-varns.v
 
 ../kicads/console/console.v: ../kicads/console/console.kicad_pcb
 	cd ../kicads/console ; ../veripcb.sh console
