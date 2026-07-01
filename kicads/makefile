@@ -1,5 +1,11 @@
 
-default: Layout.jar VeriPCB.jar
+default: Backpln.jar Layout.jar VeriPCB.jar
+
+Backpln.jar: Backpln.java PCB.jar
+	rm -f Backpln*.class Backpln.jar
+	javac -cp PCB.jar:SCM.jar Backpln.java
+	jar cf Backpln.jar Backpln*.class
+	rm -f Backpln*.class
 
 Layout.jar: Layout.java PCB.jar
 	rm -f Layout*.class Layout.jar
