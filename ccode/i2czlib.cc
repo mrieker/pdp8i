@@ -18,8 +18,8 @@
 //
 //    http://www.gnu.org/licenses/gpl-2.0.html
 
-// Access the front panel lights and switches via I2C bus to PCB3 piggy-backed on backplane
-// z8ipanel.cc -> i2czlib.cc -> pdp8ifpi2c.v -> i2cmaster.v -> i2c -> pcb3 -> mcp23017s -> lights & switches
+// Access the pidp-8 panel lights and switches via I2C bus to MCP23017 on console board
+// z8ipanel.cc -> i2czlib.cc -> pdp8ifpi2c.v -> i2cmaster.v -> i2c -> console.kicad_sch -> mcp23017 -> gpio connector -> lights & switches
 
 #include <errno.h>
 #include <fcntl.h>
@@ -47,7 +47,7 @@ I2CZLib::~I2CZLib ()
     fpat  = NULL;
 }
 
-// get exclusive access
+// get exclusive access to pdp8ifpi2c.v registers
 void I2CZLib::lockpads ()
 {
     pthread_mutex_lock (&mutex);
@@ -56,7 +56,7 @@ void I2CZLib::lockpads ()
         fpat[6] = mypid;
         uint32_t lkpid = fpat[6];
         if (lkpid == mypid) break;
-        if ((kill (lkpid, 0) < 0) && (errno == ESRCH)) {
+        if ((lkpid > 0) && (kill (lkpid, 0) < 0) && (errno == ESRCH)) {
             fprintf (stderr, "I2CZLib::lockpads: unlocking from dead pid %u\n", lkpid);
             fpat[6] = lkpid;
             usleep (123456);
