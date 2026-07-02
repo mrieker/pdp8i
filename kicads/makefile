@@ -1,5 +1,5 @@
 
-default: Backpln.jar Layout.jar VeriPCB.jar
+default: Backpln.jar Layout.jar VeriPCB.jar ZTurnPins.jar
 
 Backpln.jar: Backpln.java PCB.jar
 	rm -f Backpln*.class Backpln.jar
@@ -18,6 +18,12 @@ VeriPCB.jar: VeriPCB.java PCB.jar
 	javac -cp PCB.jar:SCM.jar VeriPCB.java
 	jar cf VeriPCB.jar VeriPCB*.class
 	rm -f VeriPCB*.class
+
+ZTurnPins.jar: ZTurnPins.java PCB.jar
+	rm -f ZTurnPins*.class ZTurnPins.jar
+	javac -cp PCB.jar:SCM.jar ZTurnPins.java
+	jar cf ZTurnPins.jar ZTurnPins*.class
+	rm -f ZTurnPins*.class
 
 PCB.jar: PCB.java SCM.jar
 	rm -f PCB*.class PCB.jar
