@@ -69,25 +69,34 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     input         hdw_oTS3,
     input         hdw_oTS4,
 
-    output        hdw_iACCLEAR,
-    output        hdw_iBRKGNTO, // grant going out to end-side of bus
-    output        hdw_iBRKRQST,
-    output        hdw_iBRKWRM,
-    output        hdw_iCAINC,
-    output        hdw_iCLOCK,   // 10MHz from external processor
-    output        hdw_iCYCLE3,
-    output[2:0]   hdw_iDMAFLD,
-    output[11:00] hdw_iINBUS,
-    output        hdw_iINTRQST,
-    output        hdw_iIOSKIP,
-    output        hdw_iPAUSE,
-    output        hdw_iRESET,   // external boards should do a power-on reset
+    output        hdw_iACCLEAR, // [_ioenabd]
+    output        hdw_iBRKGNTO, // [always on] grant going out to end-side of bus
+    output        hdw_iBRKRQST, // [open collector]
+    output        hdw_iBRKWRM,  // [_dmagntd]
+    output        hdw_iCAINC,   // [_dmagntd]
+    output        hdw_iCLOCK,   // [always on] 10MHz to external processor
+    output        hdw_iCYCLE3,  // [_dmagntd]
+    output[2:0]   hdw_iDMAFLD,  // [_dmagntd]
+    output[11:00] hdw_iINBUS,   // [_ioenabd]
+    output        hdw_iINTRQST, // [open collector]
+    output        hdw_iIOSKIP,  // [_ioenabd]
+    output        hdw_iPAUSE,   // [open collector]
+    output        hdw_iRESET,   // [always on] external boards should do a power-on reset
+    output        hdw_ioenabd_n,  // my io cycle | dma granted & TS4 | dma granted & BRKCYC & TS2
+    output        hdw_dmagntd_n,  // enable the dma cycle outputs
+    output reg    hdw_poweron_n,  // enable the 'always on' and 'open collector' outputs
 
     // i2c interface to hardware front panel
     output        hdw_iCONSCK,
     inout         hdw_bCONSDA,
     output        hdw_iCONSDA,
     input         hdw_oCONSDA,
+
+    // spare pins not used for anything
+    input         spare1,
+    input         spare2,
+    input         spare3,
+    input         spare4,
 
     // arm processor memory bus interface (AXI)
     // we are a slave for accessing the control registers (read and write)
@@ -245,22 +254,22 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     // rtc interface wires
     wire[31:00] rcardata;
     wire[11:00] rcibus;
-    wire rcacclr, rcintrq, rcioskp;
+    wire rcacclr, rcintrq, rciosel, rcioskp;
 
     // tty interface wires
     wire[31:00] ttardata;
     wire[11:00] ttibus;
-    wire ttacclr, ttintrq, ttioskp;
+    wire ttacclr, ttintrq, ttiosel, ttioskp;
 
     // dc02 interface wires
     wire[31:00] dcardata;
     wire[11:00] dcibus;
-    wire dcacclr, dcintrq, dcioskp;
+    wire dcacclr, dcintrq, dciosel, dcioskp;
 
     // disk interface wires
     wire[31:00] rkardata;
     wire[11:00] rkibus;
-    wire rkacclr, rkintrq, rkioskp;
+    wire rkacclr, rkintrq, rkiosel, rkioskp;
 
     // front panel i2c interface
     wire[31:00] fpi2crdata;
@@ -268,33 +277,33 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     // core memory interface wires
     wire[31:00] cmardata;
     wire cmbrkrqst, cmbrkwrite, cmbrk3cycl, cmbrkcainc;
-    wire cmbrkgnti, cmbrkgnto;
+    wire cmbrkgnti, cmbrkgnto, cmdmagntd;
     wire[11:00] cmbrkinbus;
     wire[2:0] cmbrkema;
 
     // tape interface wires
     wire[31:00] tcardata;
     wire[11:00] tcibus;
-    wire tcacclr, tcintrq, tcioskp;
+    wire tcacclr, tcintrq, tciosel, tcioskp;
 
     // paper tape reader interface wires
     wire[31:00] prardata;
     wire[11:00] pribus;
-    wire pracclr, printrq, prioskp;
+    wire pracclr, printrq, priosel, prioskp;
 
     // paper tape punch interface wires
     wire[31:00] ppardata;
-    wire ppintrq, ppioskp;
+    wire ppintrq, ppiosel, ppioskp;
 
     // video interface wires
     wire[31:00] vcardata;
     wire[11:00] vcibus;
-    wire vcacclr, vcintrq, vcioskp;
+    wire vcacclr, vcintrq, vciosel, vcioskp;
 
     // pulsebit interface wires
     wire[31:00] pbardata;
     wire[11:00] pbibus;
-    wire pbacclr, pbioskp;
+    wire pbacclr, pbiosel, pbioskp;
     wire pulsebit;
 
     // bus values that are constants
@@ -384,6 +393,8 @@ module Zynq #(parameter BIDIRCONSDA=1) (
             saxi_WREADY  <= 0;                          // we are not ready to accept write data
             saxi_BVALID  <= 0;                          // we are not acknowledging any write
 
+            hdw_poweron_n <= 1;                         // start with 'always on' outputs turned off
+
             regctld     <= 9;                           // default 10MHz PDP clock
             simit       <= 0;                           // assume want to access real PDP-8/I by default
             fpgareset   <= 0;                           // we are resetting FPGA, don't do infinite reset loop
@@ -414,6 +425,8 @@ module Zynq #(parameter BIDIRCONSDA=1) (
 
             // check for PS sending us write data
             if (armwrite) begin
+                hdw_poweron_n <= 0;                         // z8ipanel or some such is running, turn 'always on' outputs on
+
                 case (writeaddr)                            // write data to register
                      10'b0000000001: begin
                         arm_iACCLEAR <= saxi_WDATA[00];
@@ -569,9 +582,13 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     assign hdw_iDMAFLD  = simit ? 0 : dev_iDMAFLD;
     assign hdw_iINBUS   = simit ? 0 : dev_iINBUS;
     assign hdw_iINTRQST = simit ? 0 : dev_iINTRQST;
+    wire   hdw_iIOSEL   = simit ? 0 : dev_iIOSEL;
     assign hdw_iIOSKIP  = simit ? 0 : dev_iIOSKIP;
     assign hdw_iPAUSE   = simit ? 0 : dev_iPAUSE;
     assign hdw_iRESET   = simit ? 1 : dev_iRESET;
+
+    assign hdw_ioenabd_n = hdw_poweron_n; //// ~ (hdw_iIOSEL | ????????);    // enable 74AHC540s to drive io signals to bus
+    assign hdw_dmagntd_n = hdw_poweron_n; //// ~ (????????);                 // enable 74AHC540s to drive dma signals to bus
 
     // when simulating, send signals from the simulated PDP-8/I on to the internal devices
     // when not simming, send signals from the hardware PDP-8/I on to the internal devices
@@ -706,6 +723,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     assign dev_iINBUS   = arm_iINBUS   | ttibus  | rkibus  | vcibus  | tcibus  | pribus  | pbibus  | dcibus  | rcibus  | cmbrkinbus;
     assign dev_iINTRQST = arm_iINTRQST | ttintrq | rkintrq | vcintrq | tcintrq | printrq | ppintrq | dcintrq | rcintrq;
     assign dev_iIOSKIP  = arm_iIOSKIP  | ttioskp | rkioskp | vcioskp | tcioskp | prioskp | ppioskp | dcioskp | rcioskp | pbioskp;
+    assign dev_iIOSEL   =                ttiosel | rkiosel | vciosel | tciosel | priosel | ppiosel | dciosel | rciosel | pbiosel;
     assign dev_iPAUSE   = arm_iPAUSE;
 
     ///////////////////////////////////
@@ -897,7 +915,8 @@ module Zynq #(parameter BIDIRCONSDA=1) (
         .devtocpu (ttibus),
         .AC_CLEAR (ttacclr),
         .IO_SKIP  (ttioskp),
-        .INT_RQST (ttintrq)
+        .INT_RQST (ttintrq),
+        .SELECTED (ttiosel)
     );
 
     // terminal multiplexor
@@ -922,7 +941,8 @@ module Zynq #(parameter BIDIRCONSDA=1) (
         .devtocpu (dcibus),
         .AC_CLEAR (dcacclr),
         .IO_SKIP  (dcioskp),
-        .INT_RQST (dcintrq)
+        .INT_RQST (dcintrq),
+        .SELECTED (dciosel)
     );
 
     // disk interface
@@ -947,7 +967,8 @@ module Zynq #(parameter BIDIRCONSDA=1) (
         .devtocpu (rkibus),
         .AC_CLEAR (rkacclr),
         .IO_SKIP  (rkioskp),
-        .INT_RQST (rkintrq)
+        .INT_RQST (rkintrq),
+        .SELECTED (rkiosel)
     );
 
     // core memory interface
@@ -973,6 +994,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
         .brkinbus (cmbrkinbus),                 //> address and write data
         .brkrqsto (cmbrkrqst),                  //> requesting dma cycle
         .brkgnto  (cmbrkgnto),                  //> outgoing dma grant
+        .dmagntd  (cmdmagntd),
 
         .busini   (dev_oBUSINI),
         .brkrqsti (dev_oBRKRQST),               //< something is requesting dma cycle
@@ -1007,7 +1029,8 @@ module Zynq #(parameter BIDIRCONSDA=1) (
         .devtocpu (tcibus),
         .AC_CLEAR (tcacclr),
         .IO_SKIP  (tcioskp),
-        .INT_RQST (tcintrq)
+        .INT_RQST (tcintrq),
+        .SELECTED (tciosel)
     );
 
     // video interface
@@ -1032,7 +1055,8 @@ module Zynq #(parameter BIDIRCONSDA=1) (
         .devtocpu (vcibus),
         .AC_CLEAR (vcacclr),
         .IO_SKIP  (vcioskp),
-        .INT_RQST (vcintrq)
+        .INT_RQST (vcintrq),
+        .SELECTED (vciosel)
     );
 
     wire fpi2c_clock, fpi2c_datao, fpi2c_datai;
@@ -1083,7 +1107,8 @@ module Zynq #(parameter BIDIRCONSDA=1) (
         .devtocpu (pribus),
         .AC_CLEAR (pracclr),
         .IO_SKIP  (prioskp),
-        .INT_RQST (printrq)
+        .INT_RQST (printrq),
+        .SELECTED (priosel)
     );
 
     // pulse bit interface
@@ -1106,6 +1131,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
         .devtocpu (pbibus),
         .AC_CLEAR (pbacclr),
         .IO_SKIP  (pbioskp),
+        .SELECTED (pbiosel),
 
         .pulse (pulsebit)
     );
@@ -1129,7 +1155,8 @@ module Zynq #(parameter BIDIRCONSDA=1) (
         .cputodev (dev_oACUM),
 
         .IO_SKIP  (ppioskp),
-        .INT_RQST (ppintrq)
+        .INT_RQST (ppintrq),
+        .SELECTED (ppiosel)
     );
 
     // realtime clock interface
@@ -1154,7 +1181,8 @@ module Zynq #(parameter BIDIRCONSDA=1) (
         .devtocpu (rcibus),
         .AC_CLEAR (rcacclr),
         .IO_SKIP  (rcioskp),
-        .INT_RQST (rcintrq)
+        .INT_RQST (rcintrq),
+        .SELECTED (rciosel)
     );
 
     // integrated logic analyzer

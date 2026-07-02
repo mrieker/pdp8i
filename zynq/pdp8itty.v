@@ -43,11 +43,12 @@ module pdp8itty
     output reg[11:00] devtocpu,
     output reg AC_CLEAR,
     output reg IO_SKIP,
-    output INT_RQST
+    output INT_RQST,
+    output reg SELECTED
 );
 
-    localparam[11:00] kbio = 12'o6000 + ({ 6'b0, KBDEV } << 3);
-    localparam[11:00] ttio = 12'o6010 + ({ 6'b0, KBDEV } << 3);
+    localparam[11:00] kbio = 12'o6000 + { 3'b0, KBDEV, 3'b0 };
+    localparam[11:00] ttio = 12'o6010 + { 3'b0, KBDEV, 3'b0 };
 
     reg enable, intenab, kbflag, prflag, prfull;
     reg[11:00] kbchar, prchar;
@@ -88,6 +89,7 @@ module pdp8itty
             // process the IOP only on the leading edge
             // ...but leave output signals to PDP-8/I in place until given the all clear
             if (iopstart & enable) begin
+                SELECTED <= (ioopcode & 12'o7770 == kbio) | (ioopcode & 12'o7770 == ttio);
                 case (ioopcode)
                     kbio+1: begin IO_SKIP <= kbflag; end                                // skip if kb char ready
                     kbio+2: begin AC_CLEAR <= 1; kbflag <= 0; end                       // clear accum, clear flag
@@ -107,6 +109,7 @@ module pdp8itty
                 AC_CLEAR <= 0;
                 devtocpu <= 0;
                 IO_SKIP  <= 0;
+                SELECTED <= 0;
             end
         end
     end

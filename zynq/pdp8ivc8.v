@@ -36,7 +36,8 @@ module pdp8ivc8 (
     output reg[11:00] devtocpu,
     output reg AC_CLEAR,
     output reg IO_SKIP,
-    output INT_RQST
+    output INT_RQST,
+    output reg SELECTED
 );
 
     localparam EF_M_DN = 12'o4000;      // done executing last command
@@ -130,7 +131,7 @@ module pdp8ivc8 (
                 if (typee) begin
 
                     // VC-8/E style
-
+                    SELECTED <= ioopcode[11:03] == 9'o605;
                     case (ioopcode)
 
                         // we can't do DILC - logic clear - cuz opcode 6050 ends in 0
@@ -186,6 +187,7 @@ module pdp8ivc8 (
                     // VC-8/I style
 
                     if (ioopcode[11:03] == 9'o605) begin
+                        SELECTED <= 1;
                         xcobuf <= newixcobuf;
                         if (ioopcode[02]) begin
                             vidaddra <= insert;
@@ -197,6 +199,7 @@ module pdp8ivc8 (
                     end
 
                     if (ioopcode[11:03] == 9'o606) begin
+                        SELECTED <= 1;
                         ycobuf <= newiycobuf;
                         if (ioopcode[02]) begin
                             vidaddra <= insert;
@@ -208,6 +211,7 @@ module pdp8ivc8 (
                     end
 
                     if (ioopcode[11:03] == 9'o607) begin
+                        SELECTED <= 1;
                         if (ioopcode[02]) intens <= ioopcode[1:0];
                     end
                 end

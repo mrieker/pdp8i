@@ -36,7 +36,8 @@ module pdp8itc08 (
     output reg[11:00] devtocpu,
     output reg AC_CLEAR,
     output reg IO_SKIP,
-    output INT_RQST
+    output INT_RQST,
+    output reg SELECTED
 );
 
     reg[11:00] status_a, status_b;
@@ -78,6 +79,7 @@ module pdp8itc08 (
 
                 // 676x opcodes
                 if (ioopcode[11:03] == 9'o676) begin
+                    SELECTED <= 1;
                     if (ioopcode[02]) begin
                         status_a <= new_status_a;                   // maybe clear status_a, maybe start IO
                         if (~ cputodev[00]) status_b[00] <= 0;      // clear dectape flag
@@ -94,6 +96,7 @@ module pdp8itc08 (
 
                 // 677x opcodes
                 if (ioopcode[11:03] == 9'o677) begin
+                    SELECTED <= 1;
                     if (ioopcode[02]) begin
                         status_b[05:03] <= cputodev[05:03];         // load DMA extended address bits of status register B
                         AC_CLEAR <= 1;                              // clear accumulator
@@ -112,6 +115,7 @@ module pdp8itc08 (
                 AC_CLEAR <= 0;
                 devtocpu <= 0;
                 IO_SKIP  <= 0;
+                SELECTED <= 0;
             end
         end
     end

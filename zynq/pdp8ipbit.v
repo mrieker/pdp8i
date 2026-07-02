@@ -40,6 +40,7 @@ module pdp8ipbit (
     output reg[11:00] devtocpu,
     output reg AC_CLEAR,
     output reg IO_SKIP,
+    output reg SELECTED,
 
     output reg pulse
 );
@@ -97,6 +98,7 @@ module pdp8ipbit (
 
                     // maybe do increment accumulator and skip if zero
                     if (iszac & (ioopcode == 12'o6004)) begin
+                        SELECTED <= 1;
                         AC_CLEAR <= 1;
                         { IO_SKIP, devtocpu } <= { 1'b0, cputodev } + 13'o00001;
                     end
@@ -105,6 +107,7 @@ module pdp8ipbit (
                         devtocpu <= 0;
                         AC_CLEAR <= 0;
                         IO_SKIP  <= 0;
+                        SELECTED <= 0;
                     end
                     if (count != 0) begin
                         count <= count - 1;

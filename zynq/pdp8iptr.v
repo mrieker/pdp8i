@@ -40,7 +40,8 @@ module pdp8iptr (
     output reg[11:00] devtocpu,
     output reg AC_CLEAR,
     output reg IO_SKIP,
-    output INT_RQST
+    output INT_RQST,
+    output reg SELECTED
 );
 
     reg enable, rdflag, rdstep;
@@ -78,6 +79,7 @@ module pdp8iptr (
             // process the IOP only on the leading edge
             // ...but leave output signals to PDP-8/I in place until given the all clear
             if (iopstart & enable & (ioopcode[11:03] == 9'o601)) begin
+                SELECTED <= 1;
                 if (ioopcode[00]) begin IO_SKIP <= rdflag; end                              // skip if reader char ready
                 if (ioopcode[01]) begin devtocpu <= rdchar; rdflag <= 0; end                // read char, clear flag
                 if (ioopcode[02]) begin rdflag <= 0; rdstep <= 1; end                       // clear flag, step reader
@@ -88,6 +90,7 @@ module pdp8iptr (
                 AC_CLEAR <= 0;
                 devtocpu <= 0;
                 IO_SKIP  <= 0;
+                SELECTED <= 0;
             end
         end
     end

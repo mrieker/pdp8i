@@ -96,13 +96,16 @@ public class ZTurnPins {
 
                     String zynqpad = jpins[pad.padidx-1];
                     int j = netname.lastIndexOf ('_');
+                    boolean needdashzero = true;
                     if (j > 0) {
                         try {
                             int n = Integer.parseInt (netname.substring (j + 1));
-                            netname = "{" + netname.substring (0, j) + "[" + n + "]}";
+                            netname = "{" + netname.substring (0, j) + "_0[" + n + "]}";
+                            needdashzero = false;
                         } catch (NumberFormatException nfe) {
                         }
                     }
+                    if (needdashzero) netname += "_0";
                     System.out.println (
                         "set_property PACKAGE_PIN " + zynqpad +
                         " [get_ports " + netname +

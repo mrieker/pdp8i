@@ -36,7 +36,8 @@ module pdp8irk8je (
     output reg[11:00] devtocpu,
     output reg AC_CLEAR,
     output reg IO_SKIP,
-    output INT_RQST
+    output INT_RQST,
+    output reg SELECTED
 );
 
     localparam ST_DONE = 11;    // transfer complete
@@ -96,6 +97,7 @@ module pdp8irk8je (
         // ...but leave output signals to PDP-8/I in place until given the all clear
         else if (CSTEP) begin
             if (iopstart & enable) begin
+                SELECTED <= ioopcode & 12'o7770 == 12'o6740;
                 case (ioopcode)
 
                     // DSKP - skip if transfer done or error
@@ -202,6 +204,7 @@ module pdp8irk8je (
                 AC_CLEAR <= 0;
                 devtocpu <= 0;
                 IO_SKIP  <= 0;
+                SELECTED <= 0;
             end
         end
     end

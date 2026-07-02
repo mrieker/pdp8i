@@ -48,6 +48,7 @@ module pdp8icmem (
     output brkgnto,
     output brkrqsto,
     output brkwrite,
+    output dmagntd,
     output[2:0] brkema,
     output[11:00] brkinbus,
 
@@ -101,6 +102,7 @@ module pdp8icmem (
     assign brkcainc = gatecontrolsout ? ctlcainc       : 0;
     assign brkwrite = gatecontrolsout ? ctlwrite       : 0;
     assign brkema   = gatecontrolsout ? ctladdr[14:12] : 0;
+    assign dmagntd  = gatecontrolsout;
 
     always @(posedge CLOCK) begin
         if (RESET) begin

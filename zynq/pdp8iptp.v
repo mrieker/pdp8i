@@ -39,7 +39,8 @@ module pdp8iptp (
     input[11:00] cputodev,
 
     output reg IO_SKIP,
-    output INT_RQST
+    output INT_RQST,
+    output reg SELECTED
 );
 
     reg enable, wrbusy, wrflag;
@@ -72,6 +73,7 @@ module pdp8iptp (
             // process the IOP only on the leading edge
             // ...but leave output signals to PDP-8/I in place until given the all clear
             if (iopstart & enable & (ioopcode[11:03] == 9'o602)) begin
+                SELECTED <= 1;
                 if (ioopcode[00]) IO_SKIP <= wrflag;
                 if (ioopcode[01]) wrflag  <= 0;
                 if (ioopcode[02]) begin wrchar <= cputodev; wrbusy <= 1; end
@@ -79,7 +81,8 @@ module pdp8iptp (
 
             // processor no longer sending an IOP, stop sending data over the bus so it doesn't jam other devices
             else if (iopstop) begin
-                IO_SKIP <= 0;
+                IO_SKIP  <= 0;
+                SELECTED <= 0;
             end
         end
     end

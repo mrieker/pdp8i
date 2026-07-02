@@ -51,7 +51,8 @@ module pdp8idc02
     output reg[11:00] devtocpu,
     output reg AC_CLEAR,
     output reg IO_SKIP,
-    output INT_RQST
+    output INT_RQST,
+    output reg SELECTED
 );
 
     reg enable, intenab;
@@ -110,6 +111,7 @@ module pdp8idc02
             // process the IOP only on the leading edge
             // ...but leave output signals to PDP-8/I in place until given the all clear
             if (iopstart & enable) begin
+                SELECTED <= (ioopcode & 12'o7770 == 12'o6110) | (ioopcode & 12'o7770 == 12'o6120);
                 case (ioopcode)
 
                     // MKSF - skip if enabled keyboard ready
@@ -242,6 +244,7 @@ module pdp8idc02
                 AC_CLEAR <= 0;
                 devtocpu <= 0;
                 IO_SKIP  <= 0;
+                SELECTED <= 0;
             end
         end
     end

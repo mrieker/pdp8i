@@ -37,6 +37,7 @@ entity myboard_wrapper is
     LEDoutG_0 : out STD_LOGIC;
     LEDoutR_0 : out STD_LOGIC;
     hdw_bCONSDA_0 : inout STD_LOGIC;
+    hdw_dmagntd_n_0 : out STD_LOGIC;
     hdw_iACCLEAR_0 : out STD_LOGIC;
     hdw_iBRKGNTO_0 : out STD_LOGIC;
     hdw_iBRKRQST_0 : out STD_LOGIC;
@@ -51,6 +52,7 @@ entity myboard_wrapper is
     hdw_iIOSKIP_0 : out STD_LOGIC;
     hdw_iPAUSE_0 : out STD_LOGIC;
     hdw_iRESET_0 : out STD_LOGIC;
+    hdw_ioenabd_n_0 : out STD_LOGIC;
     hdw_oACUM_0 : in STD_LOGIC_VECTOR ( 11 downto 0 );
     hdw_oBRKCYC_0 : in STD_LOGIC;
     hdw_oBRKGNTI_0 : in STD_LOGIC;
@@ -62,7 +64,6 @@ entity myboard_wrapper is
     hdw_oMAJST_0 : in STD_LOGIC_VECTOR ( 3 downto 0 );
     hdw_oMBUF_0 : in STD_LOGIC_VECTOR ( 11 downto 0 );
     hdw_oMEAD_0 : in STD_LOGIC_VECTOR ( 2 downto 0 );
-    hdw_oRESET_0 : in STD_LOGIC;
     hdw_oTP1_0 : in STD_LOGIC;
     hdw_oTP2_0 : in STD_LOGIC;
     hdw_oTP3_0 : in STD_LOGIC;
@@ -70,7 +71,12 @@ entity myboard_wrapper is
     hdw_oTS1_0 : in STD_LOGIC;
     hdw_oTS2_0 : in STD_LOGIC;
     hdw_oTS3_0 : in STD_LOGIC;
-    hdw_oTS4_0 : in STD_LOGIC
+    hdw_oTS4_0 : in STD_LOGIC;
+    hdw_poweron_n_0 : out STD_LOGIC;
+    spare1_0 : in STD_LOGIC;
+    spare2_0 : in STD_LOGIC;
+    spare3_0 : in STD_LOGIC;
+    spare4_0 : in STD_LOGIC
   );
 end myboard_wrapper;
 
@@ -102,6 +108,7 @@ architecture STRUCTURE of myboard_wrapper is
     LEDoutG_0 : out STD_LOGIC;
     LEDoutR_0 : out STD_LOGIC;
     hdw_bCONSDA_0 : inout STD_LOGIC;
+    hdw_dmagntd_n_0 : out STD_LOGIC;
     hdw_iACCLEAR_0 : out STD_LOGIC;
     hdw_iBRKGNTO_0 : out STD_LOGIC;
     hdw_iBRKRQST_0 : out STD_LOGIC;
@@ -116,6 +123,7 @@ architecture STRUCTURE of myboard_wrapper is
     hdw_iIOSKIP_0 : out STD_LOGIC;
     hdw_iPAUSE_0 : out STD_LOGIC;
     hdw_iRESET_0 : out STD_LOGIC;
+    hdw_ioenabd_n_0 : out STD_LOGIC;
     hdw_oACUM_0 : in STD_LOGIC_VECTOR ( 11 downto 0 );
     hdw_oBRKCYC_0 : in STD_LOGIC;
     hdw_oBRKGNTI_0 : in STD_LOGIC;
@@ -127,7 +135,6 @@ architecture STRUCTURE of myboard_wrapper is
     hdw_oMAJST_0 : in STD_LOGIC_VECTOR ( 3 downto 0 );
     hdw_oMBUF_0 : in STD_LOGIC_VECTOR ( 11 downto 0 );
     hdw_oMEAD_0 : in STD_LOGIC_VECTOR ( 2 downto 0 );
-    hdw_oRESET_0 : in STD_LOGIC;
     hdw_oTP1_0 : in STD_LOGIC;
     hdw_oTP2_0 : in STD_LOGIC;
     hdw_oTP3_0 : in STD_LOGIC;
@@ -135,7 +142,12 @@ architecture STRUCTURE of myboard_wrapper is
     hdw_oTS1_0 : in STD_LOGIC;
     hdw_oTS2_0 : in STD_LOGIC;
     hdw_oTS3_0 : in STD_LOGIC;
-    hdw_oTS4_0 : in STD_LOGIC
+    hdw_oTS4_0 : in STD_LOGIC;
+    hdw_poweron_n_0 : out STD_LOGIC;
+    spare1_0 : in STD_LOGIC;
+    spare2_0 : in STD_LOGIC;
+    spare3_0 : in STD_LOGIC;
+    spare4_0 : in STD_LOGIC
   );
   end component myboard;
 begin
@@ -166,6 +178,7 @@ myboard_i: component myboard
     LEDoutG_0 => LEDoutG_0,
     LEDoutR_0 => LEDoutR_0,
     hdw_bCONSDA_0 => hdw_bCONSDA_0,
+    hdw_dmagntd_n_0 => hdw_dmagntd_n_0,
     hdw_iACCLEAR_0 => hdw_iACCLEAR_0,
     hdw_iBRKGNTO_0 => hdw_iBRKGNTO_0,
     hdw_iBRKRQST_0 => hdw_iBRKRQST_0,
@@ -180,6 +193,7 @@ myboard_i: component myboard
     hdw_iIOSKIP_0 => hdw_iIOSKIP_0,
     hdw_iPAUSE_0 => hdw_iPAUSE_0,
     hdw_iRESET_0 => hdw_iRESET_0,
+    hdw_ioenabd_n_0 => hdw_ioenabd_n_0,
     hdw_oACUM_0(11 downto 0) => hdw_oACUM_0(11 downto 0),
     hdw_oBRKCYC_0 => hdw_oBRKCYC_0,
     hdw_oBRKGNTI_0 => hdw_oBRKGNTI_0,
@@ -191,7 +205,6 @@ myboard_i: component myboard
     hdw_oMAJST_0(3 downto 0) => hdw_oMAJST_0(3 downto 0),
     hdw_oMBUF_0(11 downto 0) => hdw_oMBUF_0(11 downto 0),
     hdw_oMEAD_0(2 downto 0) => hdw_oMEAD_0(2 downto 0),
-    hdw_oRESET_0 => hdw_oRESET_0,
     hdw_oTP1_0 => hdw_oTP1_0,
     hdw_oTP2_0 => hdw_oTP2_0,
     hdw_oTP3_0 => hdw_oTP3_0,
@@ -199,6 +212,11 @@ myboard_i: component myboard
     hdw_oTS1_0 => hdw_oTS1_0,
     hdw_oTS2_0 => hdw_oTS2_0,
     hdw_oTS3_0 => hdw_oTS3_0,
-    hdw_oTS4_0 => hdw_oTS4_0
+    hdw_oTS4_0 => hdw_oTS4_0,
+    hdw_poweron_n_0 => hdw_poweron_n_0,
+    spare1_0 => spare1_0,
+    spare2_0 => spare2_0,
+    spare3_0 => spare3_0,
+    spare4_0 => spare4_0
   );
 end STRUCTURE;

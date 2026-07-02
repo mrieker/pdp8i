@@ -273,6 +273,9 @@
           "hdw_bCONSDA": {
             "direction": "IO"
           },
+          "hdw_dmagntd_n": {
+            "direction": "O"
+          },
           "hdw_iACCLEAR": {
             "direction": "O"
           },
@@ -320,6 +323,9 @@
             "direction": "O"
           },
           "hdw_iRESET": {
+            "direction": "O"
+          },
+          "hdw_ioenabd_n": {
             "direction": "O"
           },
           "hdw_oACUM": {
@@ -390,6 +396,21 @@
             "direction": "I"
           },
           "hdw_oTS4": {
+            "direction": "I"
+          },
+          "hdw_poweron_n": {
+            "direction": "O"
+          },
+          "spare1": {
+            "direction": "I"
+          },
+          "spare2": {
+            "direction": "I"
+          },
+          "spare3": {
+            "direction": "I"
+          },
+          "spare4": {
             "direction": "I"
           }
         },
@@ -1789,7 +1810,7 @@
       }
     },
     "design_info": {
-      "boundary_crc": "0xBB664610407BC3AD",
+      "boundary_crc": "0x8590D9B399C2D140",
       "device": "xc7z020clg400-1",
       "name": "myboard",
       "synth_flow_mode": "None",
@@ -1926,6 +1947,12 @@
           "LEDoutR_0"
         ]
       },
+      "Zynq_0_hdw_dmagntd_n": {
+        "ports": [
+          "Zynq_0/hdw_dmagntd_n",
+          "hdw_dmagntd_n_0"
+        ]
+      },
       "Zynq_0_hdw_iACCLEAR": {
         "ports": [
           "Zynq_0/hdw_iACCLEAR",
@@ -2016,6 +2043,18 @@
           "hdw_iRESET_0"
         ]
       },
+      "Zynq_0_hdw_ioenabd_n": {
+        "ports": [
+          "Zynq_0/hdw_ioenabd_n",
+          "hdw_ioenabd_n_0"
+        ]
+      },
+      "Zynq_0_hdw_poweron_n": {
+        "ports": [
+          "Zynq_0/hdw_poweron_n",
+          "hdw_poweron_n_0"
+        ]
+      },
       "hdw_oACUM_0_1": {
         "ports": [
           "hdw_oACUM_0",
@@ -2080,11 +2119,6 @@
         "ports": [
           "hdw_oMEAD_0",
           "Zynq_0/hdw_oMEAD"
-        ]
-      },
-      "hdw_oRESET_0_1": {
-        "ports": [
-          "hdw_oRESET_0"
         ]
       },
       "hdw_oTP1_0_1": {
@@ -2168,6 +2202,30 @@
           "processing_system7_0/UART0_TX",
           "processing_system7_0/UART0_RX"
         ]
+      },
+      "spare1_0_1": {
+        "ports": [
+          "spare1_0",
+          "Zynq_0/spare1"
+        ]
+      },
+      "spare2_0_1": {
+        "ports": [
+          "spare2_0",
+          "Zynq_0/spare2"
+        ]
+      },
+      "spare3_0_1": {
+        "ports": [
+          "spare3_0",
+          "Zynq_0/spare3"
+        ]
+      },
+      "spare4_0_1": {
+        "ports": [
+          "spare4_0",
+          "Zynq_0/spare4"
+        ]
       }
     },
     "ports": {
@@ -2203,6 +2261,9 @@
       },
       "hdw_bCONSDA_0": {
         "direction": "IO"
+      },
+      "hdw_dmagntd_n_0": {
+        "direction": "O"
       },
       "hdw_iACCLEAR_0": {
         "direction": "O"
@@ -2250,6 +2311,9 @@
       "hdw_iRESET_0": {
         "direction": "O"
       },
+      "hdw_ioenabd_n_0": {
+        "direction": "O"
+      },
       "hdw_oACUM_0": {
         "direction": "I",
         "left": "11",
@@ -2293,9 +2357,6 @@
         "left": "2",
         "right": "0"
       },
-      "hdw_oRESET_0": {
-        "direction": "I"
-      },
       "hdw_oTP1_0": {
         "direction": "I"
       },
@@ -2318,6 +2379,21 @@
         "direction": "I"
       },
       "hdw_oTS4_0": {
+        "direction": "I"
+      },
+      "hdw_poweron_n_0": {
+        "direction": "O"
+      },
+      "spare1_0": {
+        "direction": "I"
+      },
+      "spare2_0": {
+        "direction": "I"
+      },
+      "spare3_0": {
+        "direction": "I"
+      },
+      "spare4_0": {
         "direction": "I"
       }
     }
