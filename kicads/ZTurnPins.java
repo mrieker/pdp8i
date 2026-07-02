@@ -63,7 +63,7 @@ public class ZTurnPins {
         // read zturnpins.csv
         String[] j11pins = new String[80];
         String[] j12pins = new String[80];
-        BufferedReader ztpcsv = new BufferedReader (new FileReader ("../zturnpins.csv"));
+        BufferedReader ztpcsv = new BufferedReader (new FileReader ("zturnpins.csv"));
         for (String csvline; (csvline = ztpcsv.readLine ()) != null;) {
             String[] parts = csvline.split (",");
             if (parts.length >= 3) {
