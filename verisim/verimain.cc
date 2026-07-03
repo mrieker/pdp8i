@@ -308,7 +308,6 @@ static int cmd_bus (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj
             {  3, OFFS (memfield), false, "memfield" },
             { 12, OFFS (mquo),     false, "mquo"     },
             { 12, OFFS (pctr),     false, "pctr"     },
-            {  1, OFFS (reset),    true,  "reset"    },
             {  5, OFFS (sctr),     false, "sctr"     },
 
             {  1, OFFS (swcont),   false, "swcont"   },

@@ -32,10 +32,14 @@ endmodule
 // it operates as an I/O device for the PDP-8/I
 // it also has an I2C connection to the PDP-8/I front panel
 
+// real mode tested a pc with cd verisim ; ./simtest.sh
+// sim mode tested on a zynq with demo program, eg, cd demos ; ../ccode/z8ipanel -sim kaleid.tcl e
+
 // RESETS
-//     RESET_N = fpga power-on reset
-//   fpgareset = arm-commanded reset
-//  dev_iRESET = ~ RESET_N | fpgareset
+//      RESET_N = fpga power-on reset       reset everything including AXI bus state
+//    fpgareset = arm-commanded reset       reset everything except AXI bus state
+//   dev_iRESET = ~ RESET_N | fpgareset     reset devices and processor to power-on state
+//  dev_iBUSINI = dev_iRESET | startswitch  reset devices to power-on state
 
 // CLOCKS
 //       CLOCK = fpga 100MHz clock
@@ -69,19 +73,19 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     input         hdw_oTS3,
     input         hdw_oTS4,
 
-    output        hdw_iACCLEAR, // [_ioenabd]
-    output        hdw_iBRKGNTO, // [always on] grant going out to end-side of bus
-    output        hdw_iBRKRQST, // [open collector]
-    output        hdw_iBRKWRM,  // [_dmagntd]
-    output        hdw_iCAINC,   // [_dmagntd]
-    output        hdw_iCLOCK,   // [always on] 10MHz to external processor
-    output        hdw_iCYCLE3,  // [_dmagntd]
-    output[2:0]   hdw_iDMAFLD,  // [_dmagntd]
-    output[11:00] hdw_iINBUS,   // [_ioenabd]
-    output        hdw_iINTRQST, // [open collector]
-    output        hdw_iIOSKIP,  // [_ioenabd]
-    output        hdw_iPAUSE,   // [open collector]
-    output        hdw_iRESET,   // [always on] external boards should do a power-on reset
+    output        hdw_iACCLEAR, // [hdw_ioenabd]
+    output        hdw_iBRKGNTO, // [hdw_poweron] grant going out to end-side of bus
+    output        hdw_iBRKRQST, // [hdw_poweron] open collector
+    output        hdw_iBRKWRM,  // [hdw_dmagntd]
+    output        hdw_iCAINC,   // [hdw_dmagntd]
+    output        hdw_iCLOCK,   // [hdw_poweron] 10MHz to external processor
+    output        hdw_iCYCLE3,  // [hdw_dmagntd]
+    output[2:0]   hdw_iDMAFLD,  // [hdw_dmagntd]
+    output[11:00] hdw_iINBUS,   // [hdw_ioenabd]
+    output        hdw_iINTRQST, // [hdw_poweron] open collector
+    output        hdw_iIOSKIP,  // [hdw_ioenabd]
+    output        hdw_iPAUSE,   // [hdw_poweron] open collector
+    output        hdw_iRESET,   // [hdw_poweron] external boards should do a power-on reset
     output        hdw_ioenabd_n,  // my io cycle | dma granted & TS4 | dma granted & BRKCYC & TS2
     output        hdw_dmagntd_n,  // enable the dma cycle outputs
     output reg    hdw_poweron_n,  // enable the 'always on' and 'open collector' outputs
@@ -210,6 +214,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     wire[11:00] dev_iINBUS;
     wire        dev_iINTRQST;
     wire        dev_iIOSKIP;
+    wire        dev_iIOSEL;
     wire        dev_iPAUSE;
     wire        dev_iRESET;
 
@@ -587,8 +592,15 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     assign hdw_iPAUSE   = simit ? 0 : dev_iPAUSE;
     assign hdw_iRESET   = simit ? 1 : dev_iRESET;
 
-    assign hdw_ioenabd_n = hdw_poweron_n; //// ~ (hdw_iIOSEL | ????????);    // enable 74AHC540s to drive io signals to bus
-    assign hdw_dmagntd_n = hdw_poweron_n; //// ~ (????????);                 // enable 74AHC540s to drive dma signals to bus
+    // enable 74AHC540s to drive io signals to bus during iop whenever
+    // any of our io devices is selected by current io instruction
+    // also whenever dma granted and TS4 to output dma address over inbus
+    //                           and TS2 of BREAK cycle to output write data over inbus
+    assign hdw_ioenabd_n = ~ (hdw_iIOSEL | ~ hdw_dmagntd_n & hdw_oTS4 | ~ hdw_dmagntd_n & hdw_oBRKCYC & hdw_oTS2);
+
+    // enable 74AHC540s to drive dma signals to bus
+    // while grated use of dma bus lines
+    assign hdw_dmagntd_n = simit ? 1 : ~ cmdmagntd;
 
     // when simulating, send signals from the simulated PDP-8/I on to the internal devices
     // when not simming, send signals from the hardware PDP-8/I on to the internal devices
@@ -994,7 +1006,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
         .brkinbus (cmbrkinbus),                 //> address and write data
         .brkrqsto (cmbrkrqst),                  //> requesting dma cycle
         .brkgnto  (cmbrkgnto),                  //> outgoing dma grant
-        .dmagntd  (cmdmagntd),
+        .dmagntd  (cmdmagntd),                  //> granted use of dma bus signals
 
         .busini   (dev_oBUSINI),
         .brkrqsti (dev_oBRKRQST),               //< something is requesting dma cycle

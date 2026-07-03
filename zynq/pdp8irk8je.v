@@ -97,7 +97,7 @@ module pdp8irk8je (
         // ...but leave output signals to PDP-8/I in place until given the all clear
         else if (CSTEP) begin
             if (iopstart & enable) begin
-                SELECTED <= ioopcode & 12'o7770 == 12'o6740;
+                SELECTED <= (ioopcode & 12'o7770) == 12'o6740;
                 case (ioopcode)
 
                     // DSKP - skip if transfer done or error

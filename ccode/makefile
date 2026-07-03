@@ -21,7 +21,8 @@ VFILES := \
 	../verisim/chips-10ns.v \
 	../verisim/mcp23017.v \
 	../kicads/console/console.v \
-	../kicads/extarith/extarith.v \
+	../kicads/extarctrl/extarctrl.v \
+	../kicads/extardata/extardata.v \
 	../kicads/extmemory/extmemory.v \
 	../kicads/procalu/procalu.v \
 	../kicads/procreg/procreg.v \

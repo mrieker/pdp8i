@@ -70,7 +70,7 @@ module pdp8irtc (
             // process the IOP only on the leading edge
             // ...but leave output signals to PDP-8/I in place until given the all clear
             if (iopstart) begin
-                SELECTED <= ioopcode & 12'o7770 == 12'o6130;
+                SELECTED <= (ioopcode & 12'o7770) == 12'o6130;
                 case (ioopcode)
                     12'o6130: enable  <= enable & ~ cputodev;       // clear enable bits
                     12'o6131: IO_SKIP <= status11;                  // skip on clock overflow

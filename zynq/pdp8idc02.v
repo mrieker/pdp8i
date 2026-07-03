@@ -111,7 +111,7 @@ module pdp8idc02
             // process the IOP only on the leading edge
             // ...but leave output signals to PDP-8/I in place until given the all clear
             if (iopstart & enable) begin
-                SELECTED <= (ioopcode & 12'o7770 == 12'o6110) | (ioopcode & 12'o7770 == 12'o6120);
+                SELECTED <= ((ioopcode & 12'o7770) == 12'o6110) | ((ioopcode & 12'o7770) == 12'o6120);
                 case (ioopcode)
 
                     // MKSF - skip if enabled keyboard ready

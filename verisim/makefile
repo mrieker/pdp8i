@@ -10,7 +10,8 @@ VFILES := \
 	mcp23017.v \
 	../kicads/console/console.v \
 	../kicads/dmatester/dmatester.v \
-	../kicads/extarith/extarith.v \
+	../kicads/extarctrl/extarctrl.v \
+	../kicads/extardata/extardata.v \
 	../kicads/extmemory/extmemory.v \
 	../kicads/procalu/procalu.v \
 	../kicads/procreg/procreg.v \
@@ -86,8 +87,11 @@ veriprocalu/Vprocalu.cpp veriprocalu/Vprocalu.h veriprocalu/Vprocalu.mk: ../kica
 ../kicads/dmatester/dmatester.v: ../kicads/dmatester/dmatester.kicad_pcb
 	cd ../kicads/dmatester ; ../veripcb.sh dmatester
 
-../kicads/extarith/extarith.v: ../kicads/extarith/extarith.kicad_pcb
-	cd ../kicads/extarith ; ../veripcb.sh extarith
+../kicads/extarctrl/extarctrl.v: ../kicads/extarctrl/extarctrl.kicad_pcb
+	cd ../kicads/extarctrl ; ../veripcb.sh extarctrl
+
+../kicads/extardata/extardata.v: ../kicads/extardata/extardata.kicad_pcb
+	cd ../kicads/extardata ; ../veripcb.sh extardata
 
 ../kicads/extmemory/extmemory.v: ../kicads/extmemory/extmemory.kicad_pcb
 	cd ../kicads/extmemory ; ../veripcb.sh extmemory

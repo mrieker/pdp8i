@@ -123,6 +123,7 @@ proc simtest {} {
     set clkratm1 [getenv clkratm1 9]
     puts "simtest: clkratm1=$clkratm1"
     arm set 4 $clkratm1     ;# 4 = zynq.v regctld
+                            ;# also asserts hdw_poweron
 
     ;# reset then start processor
     hardreset

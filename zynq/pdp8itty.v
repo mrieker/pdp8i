@@ -89,7 +89,7 @@ module pdp8itty
             // process the IOP only on the leading edge
             // ...but leave output signals to PDP-8/I in place until given the all clear
             if (iopstart & enable) begin
-                SELECTED <= (ioopcode & 12'o7770 == kbio) | (ioopcode & 12'o7770 == ttio);
+                SELECTED <= ((ioopcode & 12'o7770) == kbio) | ((ioopcode & 12'o7770) == ttio);
                 case (ioopcode)
                     kbio+1: begin IO_SKIP <= kbflag; end                                // skip if kb char ready
                     kbio+2: begin AC_CLEAR <= 1; kbflag <= 0; end                       // clear accum, clear flag

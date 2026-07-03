@@ -25,7 +25,6 @@ module backplane (
     input yclock,                   // 100MHz clock for FPGA
     input zclock,                   // 200MHz clock for gate delays
     input zreset,                   // power-on reset
-    input reset,                    // hardreset
 
     input[15:04] gpin,              // switches from verimain.cc
     output[27:04] gpout,            // light bulbs to verimain.cc
@@ -362,32 +361,20 @@ module backplane (
     //  EXTENDED ARITHMETIC  //
     ///////////////////////////
 
-    wire _eaeACCLEAR, _eaeIOSKIP, _eaePAUSE;
-    wire[11:00] _eaeINBUS;
+    wire _eaeACCLEAR, _eaeIOSKIP, _eaePAUSE, _extop_dvi, _extop_muy, _s3clk;
+    wire dviover, extarex, majst_000x, sctr_5;
+    wire[3:1] _extop;
+    wire[4:1] extop;
+    wire[11:00] _eaeINBUS, myac, myacstep2;
 
-    extarith eaeboard (
+    extarctrl eaectlbd (
         .zclock (zclock),
         .zreset (zreset),
         .GND    (1'b0),
         .VCC    (1'b1),
 
-
-        ._ACUM_0    (_busACUM[0]),
-        ._ACUM_1    (_busACUM[1]),
-        ._ACUM_2    (_busACUM[2]),
-        ._ACUM_3    (_busACUM[3]),
-        ._ACUM_4    (_busACUM[4]),
-        ._ACUM_5    (_busACUM[5]),
-        ._ACUM_6    (_busACUM[6]),
-        ._ACUM_7    (_busACUM[7]),
-        ._ACUM_8    (_busACUM[8]),
-        ._ACUM_9    (_busACUM[9]),
-        ._ACUM_10   (_busACUM[10]),
-        ._ACUM_11   (_busACUM[11]),
-
         ._BUSINI    (_busBUSINI),
         ._CLOCK     (_busCLOCK),
-        ._LINK      (_busLINK),
 
         ._MAJST_0   (_busMAJST[0]),
         ._MAJST_1   (_busMAJST[1]),
@@ -408,10 +395,175 @@ module backplane (
         ._MBUF_11   (_busMBUF[11]),
 
         ._TP1       (_busTP1),
+        ._TS2       (_busTS2),
+        ._TS3       (_busTS3),
+
+        .extop_1    (extop[1]),
+        .extop_2    (extop[2]),
+        .extop_3    (extop[3]),
+        .extop_4    (extop[4]),
+
+        .myac_0     (myac[0]),
+        .myac_1     (myac[1]),
+        .myac_2     (myac[2]),
+        .myac_3     (myac[3]),
+        .myac_4     (myac[4]),
+        .myac_5     (myac[5]),
+        .myac_6     (myac[6]),
+        .myac_7     (myac[7]),
+        .myac_8     (myac[8]),
+        .myac_9     (myac[9]),
+        .myac_10    (myac[10]),
+        .myac_11    (myac[11]),
+
+        .myacstep2_0  (myacstep2[0]),
+        .myacstep2_1  (myacstep2[1]),
+        .myacstep2_2  (myacstep2[2]),
+        .myacstep2_3  (myacstep2[3]),
+        .myacstep2_4  (myacstep2[4]),
+        .myacstep2_5  (myacstep2[5]),
+        .myacstep2_6  (myacstep2[6]),
+        .myacstep2_7  (myacstep2[7]),
+        .myacstep2_8  (myacstep2[8]),
+        .myacstep2_9  (myacstep2[9]),
+        .myacstep2_10 (myacstep2[10]),
+        .myacstep2_11 (myacstep2[11]),
+
+        .dviover    (dviover),
+        .extarex    (extarex),
+        .majst_000x (majst_000x),
+        .sctr_5     (sctr_5),
+
+        ._extop_1   (_extop[1]),
+        ._extop_2   (_extop[2]),
+        ._extop_3   (_extop[3]),
+
+        ._extop_dvi (_extop_dvi),
+        ._extop_muy (_extop_muy),
+        ._s3clk     (_s3clk),
+
+        ._INBUS_0   (_busINBUS[0]),
+        ._INBUS_1   (_busINBUS[1]),
+        ._INBUS_2   (_busINBUS[2]),
+        ._INBUS_3   (_busINBUS[3]),
+        ._INBUS_4   (_busINBUS[4]),
+        ._INBUS_5   (_busINBUS[5]),
+        ._INBUS_6   (_busINBUS[6]),
+        ._INBUS_8   (_busINBUS[8]),
+        ._INBUS_9   (_busINBUS[9]),
+        ._INBUS_10  (_busINBUS[10]),
+        ._INBUS_11  (_busINBUS[11]),
+
+        ._MQUO_0    (_busMQUO[0]),
+        ._MQUO_1    (_busMQUO[1]),
+        ._MQUO_2    (_busMQUO[2]),
+        ._MQUO_3    (_busMQUO[3]),
+        ._MQUO_4    (_busMQUO[4]),
+        ._MQUO_5    (_busMQUO[5]),
+        ._MQUO_6    (_busMQUO[6]),
+        ._MQUO_7    (_busMQUO[7]),
+        ._MQUO_8    (_busMQUO[8]),
+        ._MQUO_9    (_busMQUO[9]),
+        ._MQUO_10   (_busMQUO[10]),
+        ._MQUO_11   (_busMQUO[11]),
+
+        ._PAUSE     (_busPAUSE),
+        ._PAUSE_o   (_eaePAUSE),
+
+        ._SCTR_0    (_busSCTR[0]),
+        ._SCTR_1    (_busSCTR[1]),
+        ._SCTR_2    (_busSCTR[2]),
+        ._SCTR_3    (_busSCTR[3]),
+        ._SCTR_4    (_busSCTR[4])
+    );
+
+    extardata eaedatbd (
+        .zclock (zclock),
+        .zreset (zreset),
+        .GND    (1'b0),
+        .VCC    (1'b1),
+
+
+        ._ACUM_0    (_busACUM[0]),
+        ._ACUM_1    (_busACUM[1]),
+        ._ACUM_2    (_busACUM[2]),
+        ._ACUM_3    (_busACUM[3]),
+        ._ACUM_4    (_busACUM[4]),
+        ._ACUM_5    (_busACUM[5]),
+        ._ACUM_6    (_busACUM[6]),
+        ._ACUM_7    (_busACUM[7]),
+        ._ACUM_8    (_busACUM[8]),
+        ._ACUM_9    (_busACUM[9]),
+        ._ACUM_10   (_busACUM[10]),
+        ._ACUM_11   (_busACUM[11]),
+
+        ._BUSINI    (_busBUSINI),
+        ._LINK      (_busLINK),
+
+        ._MAJST_0   (_busMAJST[0]),
+
+        ._MBUF_0    (_busMBUF[0]),
+        ._MBUF_1    (_busMBUF[1]),
+        ._MBUF_2    (_busMBUF[2]),
+        ._MBUF_3    (_busMBUF[3]),
+        ._MBUF_4    (_busMBUF[4]),
+        ._MBUF_5    (_busMBUF[5]),
+        ._MBUF_6    (_busMBUF[6]),
+        ._MBUF_7    (_busMBUF[7]),
+        ._MBUF_8    (_busMBUF[8]),
+        ._MBUF_9    (_busMBUF[9]),
+        ._MBUF_10   (_busMBUF[10]),
+        ._MBUF_11   (_busMBUF[11]),
+
+        ._TP1       (_busTP1),
         ._TP2       (_busTP2),
         ._TS1       (_busTS1),
         ._TS2       (_busTS2),
         ._TS3       (_busTS3),
+
+        .extop_1    (extop[1]),
+        .extop_2    (extop[2]),
+        .extop_3    (extop[3]),
+        .extop_4    (extop[4]),
+
+        .myac_0     (myac[0]),
+        .myac_1     (myac[1]),
+        .myac_2     (myac[2]),
+        .myac_3     (myac[3]),
+        .myac_4     (myac[4]),
+        .myac_5     (myac[5]),
+        .myac_6     (myac[6]),
+        .myac_7     (myac[7]),
+        .myac_8     (myac[8]),
+        .myac_9     (myac[9]),
+        .myac_10    (myac[10]),
+        .myac_11    (myac[11]),
+
+        .myacstep2_0  (myacstep2[0]),
+        .myacstep2_1  (myacstep2[1]),
+        .myacstep2_2  (myacstep2[2]),
+        .myacstep2_3  (myacstep2[3]),
+        .myacstep2_4  (myacstep2[4]),
+        .myacstep2_5  (myacstep2[5]),
+        .myacstep2_6  (myacstep2[6]),
+        .myacstep2_7  (myacstep2[7]),
+        .myacstep2_8  (myacstep2[8]),
+        .myacstep2_9  (myacstep2[9]),
+        .myacstep2_10 (myacstep2[10]),
+        .myacstep2_11 (myacstep2[11]),
+
+        .dviover    (dviover),
+        .extarex    (extarex),
+        .majst_000x (majst_000x),
+        .sctr_5     (sctr_5),
+
+        ._extop_1   (_extop[1]),
+        ._extop_2   (_extop[2]),
+        ._extop_3   (_extop[3]),
+
+        ._extop_dvi (_extop_dvi),
+        ._extop_muy (_extop_muy),
+        ._s3clk     (_s3clk),
 
         ._ACCLEAR   (_busACCLEAR),
         ._ACCLEAR_o (_eaeACCLEAR),
@@ -472,9 +624,6 @@ module backplane (
         ._MQUO_9_o  (_busMQUO[9]),
         ._MQUO_10_o (_busMQUO[10]),
         ._MQUO_11_o (_busMQUO[11]),
-
-        ._PAUSE     (_busPAUSE),
-        ._PAUSE_o   (_eaePAUSE),
 
         ._SCTR_0    (_busSCTR[0]),
         ._SCTR_1    (_busSCTR[1]),
@@ -1041,6 +1190,7 @@ module backplane (
 
     wire zynACCLEAR, zynBRKGNTI, zynBRKGNTO, zynBRKRQST, zynBRKWRM, zynCAINC;
     wire zynCLOCK, zynCYCLE3, zynINTRQST, zynIOSKIP, zynPAUSE, zynRESET;
+    wire _zyndmagntd, _zynioenabd, _zynpoweron;
     wire[2:0] zynDMAFLD;
     wire[11:00] zynINBUS;
 
@@ -1086,11 +1236,22 @@ module backplane (
         .hdw_iPAUSE   (zynPAUSE),
         .hdw_iRESET   (zynRESET),       // zreset + arm regctle<fpgareset>
 
+        // output driver enables
+        .hdw_dmagntd_n (_zyndmagntd),
+        .hdw_ioenabd_n (_zynioenabd),
+        .hdw_poweron_n (_zynpoweron),
+
         // i2c interface to hardware front panel
         .hdw_iCONSCK  (zynCONSCK),
         .hdw_bCONSDA  (),
         .hdw_iCONSDA  (zynCONSDA),
         .hdw_oCONSDA  (conCONSDA),
+
+        // spares
+        .spare1 (1'b0),
+        .spare2 (1'b0),
+        .spare3 (1'b0),
+        .spare4 (1'b0),
 
         // arm processor memory bus interface (AXI)
         // we are a slave for accessing the control registers (read and write)
@@ -1328,24 +1489,24 @@ module backplane (
     /////////////////////////////
 
     // active low signals getting wire-anded on the backplane
-    assign _busACCLEAR = _eaeACCLEAR  & ~ iACCLEAR   & ~ zynACCLEAR;
-    assign _busBRKRQST =   ~ iBRKRQST & ~ zynBRKRQST;
-    assign _busBRKWRM  =   ~ iBRKWRM  & ~ zynBRKWRM;
-    assign _busCAINC   =  ~ iCAINC    & ~ zynCAINC;
-    assign _busCLOCK   =                ~ zynCLOCK;
-    assign _busCYCLE3  =  ~ iCYCLE3   & ~ zynCYCLE3;
+    assign _busACCLEAR = _eaeACCLEAR  & ~ iACCLEAR   & (_zynioenabd | ~ zynACCLEAR);
+    assign _busBRKRQST =   ~ iBRKRQST & (_zynpoweron | ~ zynBRKRQST);
+    assign _busBRKWRM  =   ~ iBRKWRM  & (_zyndmagntd | ~ zynBRKWRM);
+    assign _busCAINC   =  ~ iCAINC    & (_zyndmagntd | ~ zynCAINC);
+    assign _busCLOCK   =                (_zynpoweron | ~ zynCLOCK);
+    assign _busCYCLE3  =  ~ iCYCLE3   & (_zyndmagntd | ~ zynCYCLE3);
     assign _busDFLD    = _conDFLD     &  _memDFLD;
-    assign _busDMAFLD  =  ~ iDMAFLD   & ~ zynDMAFLD;
+    assign _busDMAFLD  =  ~ iDMAFLD   & (_zyndmagntd ? 3'o7 : ~ zynDMAFLD);
     assign _busIFLD    = _conIFLD     &  _memIFLD;
-    assign _busINBUS   = _conINBUS    &  _eaeINBUS & ~ iINBUS & _memINBUS & ~ zynINBUS;
-    assign _busINTRQST = ~ iINTRQST   & ~ zynINTRQST;
-    assign _busIOSKIP  = _eaeIOSKIP   & ~ iIOSKIP  & ~ zynIOSKIP;
+    assign _busINBUS   = _conINBUS    &  _eaeINBUS & ~ iINBUS & _memINBUS & (_zynioenabd ? 12'o7777 : ~ zynINBUS);
+    assign _busINTRQST = ~ iINTRQST   & (_zynpoweron | ~ zynINTRQST);
+    assign _busIOSKIP  = _eaeIOSKIP   & ~ iIOSKIP  & (_zynioenabd | ~ zynIOSKIP);
     assign _busMEMDIS  = ~ memdisab;
-    assign _busPAUSE   = _eaePAUSE    & ~ iPAUSE   & ~ zynPAUSE;
-    assign _busRESET   = ~ reset      & ~ zynRESET;
+    assign _busPAUSE   = _eaePAUSE    & ~ iPAUSE   & (_zynpoweron | ~ zynPAUSE);
+    assign _busRESET   =                (_zynpoweron | ~ zynRESET);
 
     // break grant chain
     assign zynBRKGNTI = ~ _cpuBRKGNTO;
-    assign   oBRKGNTO =    zynBRKGNTO;
+    assign   oBRKGNTO = ~ _zynpoweron & zynBRKGNTO;
 
 endmodule
