@@ -60,10 +60,12 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     input         hdw_oBUSINI,  // hdw_iRESET + start switch
     input         hdw_oBWCOV,
     input         hdw_oIOP,
+    input         hdw_oLINK,
     input[11:00]  hdw_oMADR,
     input[11:00]  hdw_oMBUF,
     input[2:0]    hdw_oMEAD,
     input[3:0]    hdw_oMAJST,
+    input         hdw_oRUN,
     input         hdw_oTP1,
     input         hdw_oTP2,
     input         hdw_oTP3,
@@ -152,10 +154,12 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     wire        sim_oBUSINI;
     wire        sim_oBWCOV;
     wire        sim_oIOP;
+    wire        sim_oLINK;
     wire[11:00] sim_oMADR;
     wire[11:00] sim_oMBUF;
     wire[2:0]   sim_oMEAD;
     wire[3:0]   sim_oMAJST;
+    wire        sim_oRUN;
     wire        sim_oTP1;
     wire        sim_oTP2;
     wire        sim_oTP3;
@@ -190,10 +194,12 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     wire        dev_oBUSINI;
     wire        dev_oBWCOV;
     wire        dev_oIOP;
+    wire        dev_oLINK;
     wire[11:00] dev_oMADR;
     wire[11:00] dev_oMBUF;
     wire[2:0]   dev_oMEAD;
     wire[3:0]   dev_oMAJST;
+    wire        dev_oRUN;
     wire        dev_oTP1;
     wire        dev_oTP2;
     wire        dev_oTP3;
@@ -612,10 +618,12 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     assign dev_oBUSINI  = simit ? sim_oBUSINI  : hsy_oBUSINI;
     assign dev_oBWCOV   = simit ? sim_oBWCOV   : hdw_oBWCOV;
     assign dev_oIOP     = simit ? sim_oIOP     : hsy_oIOP;
+    assign dev_oLINK    = simit ? sim_oLINK    : hdw_oLINK;
     assign dev_oMADR    = simit ? sim_oMADR    : hdw_oMADR;
     assign dev_oMBUF    = simit ? sim_oMBUF    : hdw_oMBUF;
     assign dev_oMEAD    = simit ? sim_oMEAD    : hdw_oMEAD;
     assign dev_oMAJST   = simit ? sim_oMAJST   : hdw_oMAJST;
+    assign dev_oRUN     = simit ? sim_oRUN     : hdw_oRUN;
     assign dev_oTP1     = simit ? sim_oTP1     : hsy_oTP1;
     assign dev_oTP2     = simit ? sim_oTP2     : hsy_oTP2;
     assign dev_oTP3     = simit ? sim_oTP3     : hsy_oTP3;
@@ -680,9 +688,9 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     assign regctlf[14]    = dev_oBRKRQST;
     assign regctlf[15]    = dev_oBUSINI;
     assign regctlf[16]    = dev_oBWCOV;
-    assign regctlf[17]    = 0;
-    assign regctlf[18]    = dev_oIOP;
-    assign regctlf[19]    = 0;
+    assign regctlf[17]    = dev_oIOP;
+    assign regctlf[18]    = dev_oLINK;
+    assign regctlf[19]    = dev_oRUN;
     assign regctlf[20]    = dev_oTP1;
     assign regctlf[21]    = dev_oTP2;
     assign regctlf[22]    = dev_oTP3;
@@ -795,10 +803,12 @@ module Zynq #(parameter BIDIRCONSDA=1) (
         .oBUSINI        (sim_oBUSINI),
         .oBWCOV         (sim_oBWCOV),
         .oIOP           (sim_oIOP),
+        .oLINK          (sim_oLINK),
         .oMADR          (sim_oMADR),
         .oMBUF          (sim_oMBUF),
         .oMEAD          (sim_oMEAD),
         .oMAJST         (sim_oMAJST),
+        .oRUN           (sim_oRUN),
         .oTP1           (sim_oTP1),
         .oTP2           (sim_oTP2),
         .oTP3           (sim_oTP3),
@@ -832,56 +842,55 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     //  shadow PDP-8/I processor  //
     ////////////////////////////////
 
+    // verifies that the processor is doing what it should be doing
+
     wire shad_error, shad_freeze;
     wire[3:0] shad_tstate;
     wire[3:0] shad_tdelay;
 /***
     pdp8ishad shadinst (
-        .CLOCK (CLOCK),
-        .CSTEP (nanocstep),
-        .RESET (~ RESET_N),
+        .CLOCK      (CLOCK),
+        .CSTEP      (nanocstep),
+        .RESET      (~ RESET_N),
 
-        .armwrite (shawrite),
-        .armraddr (readaddr[4:2]),
-        .armwaddr (writeaddr[4:2]),
-        .armwdata (saxi_WDATA),
-        .armrdata (shardata),
+        .armwrite   (shawrite),
+        .armraddr   (readaddr[4:2]),
+        .armwaddr   (writeaddr[4:2]),
+        .armwdata   (saxi_WDATA),
+        .armrdata   (shardata),
 
-        .iACCLEAR       (dev_iACCLEAR),
-        .iBRKGNTO       (dev_iBRKGNTO),
-        .iBRKRQST       (dev_iBRKRQST),
-        .iBRKWRM        (dev_iBRKWRM),
-        .iCAINC         (dev_iCAINC),
-        .iCLOCK         (dev_iCLOCK),
-        .iCYCLE3        (dev_iCYCLE3),
-        .iDMAFLD        (dev_iDMAFLD),
-        .iINBUS         (dev_iINBUS),
-        .iINTRQST       (dev_iINTRQST),
-        .iIOSKIP        (dev_iIOSKIP),
-        .iPAUSE         (dev_iPAUSE),
-        .iRESET         (dev_iRESET),
+        // fpga is sole sorce of CLOCK and RESET
+        .iCLOCK     (dev_iCLOCK),
+        .iRESET     (dev_iRESET),
 
-        .oACUM          (dev_oACUM),
-        .oBRKCYC        (dev_oBRKCYC),
-        .oBRKGNTI       (dev_oBRKGNTI),
-        .oBRKRQST       (dev_oBRKRQST),
-        .oBUSINI        (dev_oBUSINI),
-        .oBWCOV         (dev_oBWCOV),
-        .oIOP           (dev_oIOP),
-        .oMBUF          (dev_oMBUF),
-        .oTP1           (dev_oTP1),
-        .oTP2           (dev_oTP2),
-        .oTP3           (dev_oTP3),
-        .oTP4           (dev_oTP4),
-        .oTS1           (dev_oTS1),
-        .oTS2           (dev_oTS2),
-        .oTS3           (dev_oTS3),
-        .oTS4           (dev_oTS4),
+        // all signals coming in from the bus
+        .oACUM      (dev_oACUM),
+        .oBRKCYC    (dev_oBRKCYC),
+        .oBRKGNTI   (dev_oBRKGNTI),
+        .oBRKRQST   (dev_oBRKRQST),
+        .oBUSINI    (dev_oBUSINI),
+        .oBWCOV     (dev_oBWCOV),
+        .oIOP       (dev_oIOP),
+        .oLINK      (dev_oLINK),
+        .oMADR      (dev_oMADR),
+        .oMBUF      (dev_oMBUF),
+        .oMEAD      (dev_oMEAD),
+        .oMAJST     (dev_oMAJST),
+        .oRUN       (dev_oRUN),
+        .oTP1       (dev_oTP1),
+        .oTP2       (dev_oTP2),
+        .oTP3       (dev_oTP3),
+        .oTP4       (dev_oTP4),
+        .oTS1       (dev_oTS1),
+        .oTS2       (dev_oTS2),
+        .oTS3       (dev_oTS3),
+        .oTS4       (dev_oTS4),
 
-        .timestate      (shad_tstate),
-        .timedelay      (shad_tdelay),
-        .error          (shad_error),
-        .freeze         (shad_freeze)
+        // shadowing status
+        .timestate  (shad_tstate),
+        .timedelay  (shad_tdelay),
+        .error      (shad_error),
+        .freeze     (shad_freeze)
     );
 ***/
     /////////////////////

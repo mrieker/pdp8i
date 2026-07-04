@@ -167,13 +167,13 @@ int main (int argc, char **argv)
         printf ("  oBRKRQST=%o    iBRKWRM=%o      lbION=%o      swEXAM=%o  %s", FLD(Z_RF,f_oBRKRQST), FLD(Z_RC,c_dev_iBRKWRM),  pads.light.ion,  pads.button.exam,  eol);
         printf ("  oBUSINI=%o     iCAINC=%o       lbLINK=%o     swIFLD=%o  %s", FLD(Z_RF,f_oBUSINI),  FLD(Z_RC,c_dev_iCAINC),   pads.light.link, pads.togval.ifld,  eol);
         printf ("  oBWCOV=%o      iCYCLE3=%o      lbPAU=%o      swLDAD=%o  %s", FLD(Z_RF,f_oBWCOV),   FLD(Z_RC,c_dev_iCYCLE3),  pads.light.pau,  pads.button.ldad,  eol);
-        printf ("  oCLOCK=%o      iDMAFLD=%o      lbMB=%04o    swSINST=%o %s", FLD(Z_RF,f_oCLOCK),   FLD(Z_RC,c_dev_iDMAFLD),  pads.light.mb,   pads.togval.sinst, eol);
-        printf ("  oIOP=%o        iINBUS=%04o    lbMQ=%04o    swSSTEP=%o %s", FLD(Z_RF,f_oIOP),     FLD(Z_RC,c_dev_iINBUS),   pads.light.mq,   pads.togval.sstep, eol);
+        printf ("  oIOP=%o        iDMAFLD=%o      lbMB=%04o    swSINST=%o %s", FLD(Z_RF,f_oIOP),    FLD(Z_RC,c_dev_iDMAFLD),  pads.light.mb,   pads.togval.sinst, eol);
+        printf ("  oLINK=%o       iINBUS=%04o    lbMQ=%04o    swSSTEP=%o %s", FLD(Z_RF,f_oLINK),    FLD(Z_RC,c_dev_iINBUS),   pads.light.mq,   pads.togval.sstep, eol);
         printf ("  oMBUF=%04o    iINTRQST=%o     lbMS=%X       swSTART=%o %s", FLD(Z_RE,e_oMBUF),    FLD(Z_RC,c_dev_iINTRQST), pads.light.ms,   pads.button.start, eol);
-        printf ("  oRESET=%o      iIOSKIP=%o      lbIR=%o       swSR=%04o  %s", FLD(Z_RF,f_oRESET),   FLD(Z_RC,c_dev_iIOSKIP),  pads.light.ir,   pads.togval.sr,    eol);
+        printf ("  oRUN=%o        iIOSKIP=%o      lbIR=%o       swSR=%04o  %s", FLD(Z_RF,f_oRUN),   FLD(Z_RC,c_dev_iIOSKIP),  pads.light.ir,   pads.togval.sr,    eol);
         printf ("  oTP=%04o      iPAUSE=%o       lbRUN=%o                %s", timepulse,            FLD(Z_RC,c_dev_iPAUSE),   pads.light.run,                     eol);
-        printf ("  oTS=%04o                     lbPC=%04o               %s", timestate,                                      pads.light.pc,                      eol);
-        printf ("                               lbDF=%o                 %s",                                                 pads.light.dfld,                    eol);
+        printf ("  oTS=%04o      iCLOCK=%o       lbPC=%04o               %s", timestate,            FLD(Z_RC,c_dev_iCLOCK),   pads.light.pc,                      eol);
+        printf ("                iRESET=%o       lbDF=%o                 %s",                       FLD(Z_RC,c_dev_iRESET),   pads.light.dfld,                    eol);
         printf ("  memcycctr=%08X           lbEA=%o                 %s", z8is[14],                                           pads.light.ema,                     eol);
         printf ("  regctld=%08X             lbIF=%o                 %s", z8is[4],                                            pads.light.ifld,                    eol);
         printf ("  regctlg=%08X%s", z8is[7], eol);

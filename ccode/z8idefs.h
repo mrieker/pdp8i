@@ -82,6 +82,8 @@
 #define c_dev_iINTRQST      (1U << 21)
 #define c_dev_iIOSKIP       (1U << 22)
 #define c_dev_iPAUSE        (1U << 23)
+#define c_dev_iCLOCK        (1U << 24)
+#define c_dev_iRESET        (1U << 25)
 
 #define d_clkratm1     (077U << 0)  //rw clock ratio minus 1, eg, 9 for 10MHz = 100MHz / (d_clkratm1 + 1)
 
@@ -101,9 +103,9 @@
 #define f_oBRKRQST      (1U << 14)
 #define f_oBUSINI       (1U << 15)
 #define f_oBWCOV        (1U << 16)
-#define f_oCLOCK        (1U << 17)
-#define f_oIOP          (1U << 18)
-#define f_oRESET        (1U << 19)
+#define f_oIOP          (1U << 17)
+#define f_oLINK         (1U << 18)
+#define f_oRUN          (1U << 19)
 #define f_oTP1          (1U << 20)
 #define f_oTP2          (1U << 21)
 #define f_oTP3          (1U << 22)

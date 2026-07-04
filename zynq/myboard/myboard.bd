@@ -354,6 +354,9 @@
           "hdw_oIOP": {
             "direction": "I"
           },
+          "hdw_oLINK": {
+            "direction": "I"
+          },
           "hdw_oMADR": {
             "direction": "I",
             "left": "11",
@@ -373,6 +376,9 @@
             "direction": "I",
             "left": "2",
             "right": "0"
+          },
+          "hdw_oRUN": {
+            "direction": "I"
           },
           "hdw_oTP1": {
             "direction": "I"
@@ -1810,7 +1816,7 @@
       }
     },
     "design_info": {
-      "boundary_crc": "0x8590D9B399C2D140",
+      "boundary_crc": "0xBD65C6F6B31485BE",
       "device": "xc7z020clg400-1",
       "name": "myboard",
       "synth_flow_mode": "None",
@@ -2097,6 +2103,12 @@
           "Zynq_0/hdw_oIOP"
         ]
       },
+      "hdw_oLINK_0_1": {
+        "ports": [
+          "hdw_oLINK_0",
+          "Zynq_0/hdw_oLINK"
+        ]
+      },
       "hdw_oMADR_0_1": {
         "ports": [
           "hdw_oMADR_0",
@@ -2119,6 +2131,12 @@
         "ports": [
           "hdw_oMEAD_0",
           "Zynq_0/hdw_oMEAD"
+        ]
+      },
+      "hdw_oRUN_0_1": {
+        "ports": [
+          "hdw_oRUN_0",
+          "Zynq_0/hdw_oRUN"
         ]
       },
       "hdw_oTP1_0_1": {
@@ -2337,6 +2355,9 @@
       "hdw_oIOP_0": {
         "direction": "I"
       },
+      "hdw_oLINK_0": {
+        "direction": "I"
+      },
       "hdw_oMADR_0": {
         "direction": "I",
         "left": "11",
@@ -2356,6 +2377,9 @@
         "direction": "I",
         "left": "2",
         "right": "0"
+      },
+      "hdw_oRUN_0": {
+        "direction": "I"
       },
       "hdw_oTP1_0": {
         "direction": "I"

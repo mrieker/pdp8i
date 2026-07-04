@@ -44,10 +44,12 @@ module pdp8isim (
     output oBUSINI,                 // initialize bus devices
     output oBWCOV,                  // 3-cycle DMA wordcount overflowed
     output oIOP,                    // io instruction pulse
+    output oLINK,
     output[11:00] oMADR,
     output[11:00] oMBUF,
     output[2:0] oMEAD,
     output[3:0] oMAJST,
+    output oRUN,
     output oTP1, oTP2, oTP3, oTP4,
     output oTS1, oTS2, oTS3, oTS4,
 
@@ -1246,10 +1248,12 @@ module pdp8isim (
     assign oBUSINI  = ~ _busBUSINI;
     assign oBWCOV   = ~ _busBWCOV;
     assign oIOP     = ~ _busIOP;
+    assign oLINK    = ~ _busLINK;
     assign oMADR    = ~ _busMADR;
     assign oMBUF    = ~ _busMBUF;
     assign oMEAD    = ~ _busMEAD;
     assign oMAJST   = ~ _busMAJST;
+    assign oRUN     = ~ _busRUN;
     assign oTP1     = ~ _busTP1;
     assign oTP2     = ~ _busTP2;
     assign oTP3     = ~ _busTP3;

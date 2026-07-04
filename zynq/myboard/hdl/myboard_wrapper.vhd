@@ -60,10 +60,12 @@ entity myboard_wrapper is
     hdw_oBUSINI_0 : in STD_LOGIC;
     hdw_oBWCOV_0 : in STD_LOGIC;
     hdw_oIOP_0 : in STD_LOGIC;
+    hdw_oLINK_0 : in STD_LOGIC;
     hdw_oMADR_0 : in STD_LOGIC_VECTOR ( 11 downto 0 );
     hdw_oMAJST_0 : in STD_LOGIC_VECTOR ( 3 downto 0 );
     hdw_oMBUF_0 : in STD_LOGIC_VECTOR ( 11 downto 0 );
     hdw_oMEAD_0 : in STD_LOGIC_VECTOR ( 2 downto 0 );
+    hdw_oRUN_0 : in STD_LOGIC;
     hdw_oTP1_0 : in STD_LOGIC;
     hdw_oTP2_0 : in STD_LOGIC;
     hdw_oTP3_0 : in STD_LOGIC;
@@ -131,10 +133,12 @@ architecture STRUCTURE of myboard_wrapper is
     hdw_oBUSINI_0 : in STD_LOGIC;
     hdw_oBWCOV_0 : in STD_LOGIC;
     hdw_oIOP_0 : in STD_LOGIC;
+    hdw_oLINK_0 : in STD_LOGIC;
     hdw_oMADR_0 : in STD_LOGIC_VECTOR ( 11 downto 0 );
     hdw_oMAJST_0 : in STD_LOGIC_VECTOR ( 3 downto 0 );
     hdw_oMBUF_0 : in STD_LOGIC_VECTOR ( 11 downto 0 );
     hdw_oMEAD_0 : in STD_LOGIC_VECTOR ( 2 downto 0 );
+    hdw_oRUN_0 : in STD_LOGIC;
     hdw_oTP1_0 : in STD_LOGIC;
     hdw_oTP2_0 : in STD_LOGIC;
     hdw_oTP3_0 : in STD_LOGIC;
@@ -201,10 +205,12 @@ myboard_i: component myboard
     hdw_oBUSINI_0 => hdw_oBUSINI_0,
     hdw_oBWCOV_0 => hdw_oBWCOV_0,
     hdw_oIOP_0 => hdw_oIOP_0,
+    hdw_oLINK_0 => hdw_oLINK_0,
     hdw_oMADR_0(11 downto 0) => hdw_oMADR_0(11 downto 0),
     hdw_oMAJST_0(3 downto 0) => hdw_oMAJST_0(3 downto 0),
     hdw_oMBUF_0(11 downto 0) => hdw_oMBUF_0(11 downto 0),
     hdw_oMEAD_0(2 downto 0) => hdw_oMEAD_0(2 downto 0),
+    hdw_oRUN_0 => hdw_oRUN_0,
     hdw_oTP1_0 => hdw_oTP1_0,
     hdw_oTP2_0 => hdw_oTP2_0,
     hdw_oTP3_0 => hdw_oTP3_0,
