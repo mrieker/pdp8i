@@ -21,7 +21,7 @@
 // Act as master of I2C bus
 //  inputs:
 //   RESET = reset to power-on state
-//   CLOCK = fpga clock
+//   CLOCK = fpga clock (100MHz)
 //   CSTEP = clock step
 //   wrcmd = comand being written by arm processor
 //   command[63:62] = 00: done; 01: restart; 10: read; 11: write [61:54]
@@ -29,6 +29,8 @@
 //     11: followed by 8 bits to send to i2c bus
 //   scli = i2c bus clock input
 //   sdai = i2c bus data input
+//   speed = half clock cycle - 1, eg, 49 for 1MHz
+//           must be minimum 9 (5MHz)
 // outputs:
 //   status[63] = busy
 //   status[62] = error, ack not received for a WRITE
@@ -55,7 +57,9 @@ module i2cmaster (CLOCK, RESET, CSTEP, wrcmd, command, comand, status, sclo, scl
     wire countloend = countlo >= speed;
 
     wire[14:00] countloinc = { count[14:10], count[09:00] + 10'b1 };
-    wire[14:00] counthiinc = { count[14:10] + 5'b1, 10'b0 };
+    wire[14:00] counthiinc = { count[14:10] + 5'b1, 10'd0 };            // wait speed
+    wire[14:00] counthiim5 = { count[14:10] + 5'b1, 10'd5 };            // wait speed - 50nS
+    wire[14:00] counthiinq = { count[14:10] + 5'b1, speed - 10'd4 };    // wait 50nS
 
     localparam[2:0] IDLE  = 0;
     localparam[2:0] START = 1;
@@ -206,13 +210,7 @@ module i2cmaster (CLOCK, RESET, CSTEP, wrcmd, command, comand, status, sclo, scl
                                 count <= counthiinc;
                                 sclo  <= 1;
                             end
-                        1, 3, 5, 7, 9, 11, 13:
-                            begin
-                                count <= counthiinc;
-                                sclo  <= 0;
-                                status[55:00] <= { status[54:00], sdai };
-                            end
-                        15:
+                        1, 3, 5, 7, 9, 11, 13, 15:
                             begin
                                 count <= counthiinc;
                                 sclo  <= 0;
@@ -243,11 +241,11 @@ module i2cmaster (CLOCK, RESET, CSTEP, wrcmd, command, comand, status, sclo, scl
 
                 // clock and count all zero to start
                 // data is data bit 7 to start
+                //  wait 5uS,  clock up
                 // repeat 7 times:
-                //  wait 5uS, clock up
-                //  wait 5uS, clock down
-                //  wait 5uS, send data bits 6..0
-                // wait 5uS, clock up
+                //  wait 5uS,  clock down
+                //  wait 50nS, send data bits 6..0
+                //  wait 4.95uS, clock up
                 // wait 5uS, clock down
                 // wait 5uS, data up to open-drain data line
                 // wait 5uS, clock up
@@ -263,18 +261,18 @@ module i2cmaster (CLOCK, RESET, CSTEP, wrcmd, command, comand, status, sclo, scl
                         case (counthi)
                         0, 3, 6, 9, 12, 15, 18, 21:
                             begin
-                                count <= counthiinc;
+                                count <= counthiinc;    // wait 5uS after driving clock high
                                 sclo  <= 1;
                             end
                         1, 4, 7, 10, 13, 16, 19, 22:
                             begin
-                                count <= counthiinc;
+                                count <= counthiinq;    // wait 50nS after driving clock low
                                 sclo  <= 0;
                             end
                         2, 5, 8, 11, 14, 17, 20:
                             begin
                                 comand <= { comand[62:00], 1'b0 };
-                                count  <= counthiinc;
+                                count  <= counthiim5;   // wait 4.95uS after changing data bit
                                 sdao   <= comand[62];
                             end
                         23:

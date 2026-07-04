@@ -203,7 +203,7 @@ module pdp8ifpi2c (
                 13: begin
                     dbnlimit <= armwdata[31:26];
                     ltspeed  <= armwdata[25:10];
-                    i2cspeed <= armwdata[09:00];
+                    i2cspeed <= (armwdata[09:00] >= 10) ? armwdata[09:00] : 10'd9;
                 end
             endcase
 
