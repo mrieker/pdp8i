@@ -40,7 +40,8 @@ int tclmain (
     int scriptargc,
     char const *const *scriptargv,
     bool repeat = false,
-    char const *const *initargs = NULL);
+    char const *const *initargs = NULL,
+    bool immed = false);
 
 void Tcl_SetResultF (Tcl_Interp *interp, char const *fmt, ...);
 

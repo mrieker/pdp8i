@@ -27,6 +27,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string>
 #include <string.h>
 #include <sys/time.h>
 #include <sys/wait.h>
@@ -81,7 +82,8 @@ int tclmain (
     int scriptargc,                 // script filename or 0
     char const *const *scriptargv,  // script filename or NULL
     bool repeat,                    // repeated prompts from tty
-    char const *const *initargs)    // init script args or NULL
+    char const *const *initargs,    // init script args or NULL
+    bool immed)                     // script args are command string, not filename
 {
     Tcl_FindExecutable (argv0);
 
@@ -186,26 +188,48 @@ int tclmain (
     // if given a filename, process that file as a whole
     if (scriptargc > 0) {
 
-        // get tcl filename from first argument
-        char const *scriptfn = scriptargv[0];
+        if (immed) {
 
-        // pass remaining arguments as list 'argv'
-        Tcl_Obj *scriptargobjs[scriptargc-1];
-        for (int i = 0; ++ i < scriptargc;) {
-            scriptargobjs[i-1] = Tcl_NewStringObj (scriptargv[i], -1);
-        }
-        if (Tcl_ObjSetVar2 (interp, Tcl_NewStringObj ("argv", 4), NULL, Tcl_NewListObj (scriptargc - 1, scriptargobjs), TCL_GLOBAL_ONLY) == NULL) {
-            ABORT ();
-        }
+            // make single string of scriptargv elements
+            std::string cmdstr;
+            for (int i = 0; i < scriptargc; i ++) {
+                if (i > 0) cmdstr.push_back (' ');
+                cmdstr.append (scriptargv[i]);
+            }
 
-        // evaluate the script file as a whole
-        rc = Tcl_EvalFile (interp, scriptfn);
-        if (rc != TCL_OK) {
-            char const *res = Tcl_GetStringResult (interp);
-            if ((res == NULL) || (res[0] == 0)) fprintf (stderr, "%s: error %d evaluating script %s\n", progname, rc, scriptfn);
-                                  else fprintf (stderr, "%s: error %d evaluating script %s: %s\n", progname, rc, scriptfn, res);
-            Tcl_EvalEx (interp, "puts $::errorInfo", -1, TCL_EVAL_GLOBAL);
-            return 1;
+            // execute it as immediate command
+            char const *cmdbuf = cmdstr.c_str ();
+            rc = Tcl_EvalEx (interp, cmdbuf, -1, TCL_EVAL_GLOBAL);
+            if (rc != TCL_OK) {
+                char const *res = Tcl_GetStringResult (interp);
+                if ((res == NULL) || (res[0] == 0)) fprintf (stderr, "%s: error %d evaluating command\n", progname, rc);
+                                      else fprintf (stderr, "%s: error %d evaluating command: %s\n", progname, rc, res);
+                Tcl_EvalEx (interp, "puts $::errorInfo", -1, TCL_EVAL_GLOBAL);
+                return 1;
+            }
+        } else {
+
+            // get tcl filename from first argument
+            char const *scriptfn = scriptargv[0];
+
+            // pass remaining arguments as list 'argv'
+            Tcl_Obj *scriptargobjs[scriptargc-1];
+            for (int i = 0; ++ i < scriptargc;) {
+                scriptargobjs[i-1] = Tcl_NewStringObj (scriptargv[i], -1);
+            }
+            if (Tcl_ObjSetVar2 (interp, Tcl_NewStringObj ("argv", 4), NULL, Tcl_NewListObj (scriptargc - 1, scriptargobjs), TCL_GLOBAL_ONLY) == NULL) {
+                ABORT ();
+            }
+
+            // evaluate the script file as a whole
+            rc = Tcl_EvalFile (interp, scriptfn);
+            if (rc != TCL_OK) {
+                char const *res = Tcl_GetStringResult (interp);
+                if ((res == NULL) || (res[0] == 0)) fprintf (stderr, "%s: error %d evaluating script %s\n", progname, rc, scriptfn);
+                                      else fprintf (stderr, "%s: error %d evaluating script %s: %s\n", progname, rc, scriptfn, res);
+                Tcl_EvalEx (interp, "puts $::errorInfo", -1, TCL_EVAL_GLOBAL);
+                return 1;
+            }
         }
     }
 

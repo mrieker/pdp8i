@@ -102,6 +102,7 @@ int main (int argc, char **argv)
 
     setlinebuf (stdout);
 
+    bool imm  = false;
     bool real = false;
     bool sim  = false;
     char const *logname = NULL;
@@ -109,8 +110,9 @@ int main (int argc, char **argv)
     for (int i = 0; ++ i < argc;) {
         if (strcmp (argv[i], "-?") == 0) {
             puts ("");
-            puts ("  ./z8ipanel [-log <logfile>] [-real | -sim] [<scriptfile.tcl>]");
+            puts ("  ./z8ipanel [-imm] [-log <logfile>] [-real | -sim] [<scriptfile.tcl>]");
             puts ("     access pdp-8/i front panel");
+            puts ("         -imm : scriptfile arg is immediate command string");
             puts ("         -log : record output to given log file");
             puts ("        -real : use real pdp-8/i (resets processor)");
             puts ("         -sim : simulate the pdp-8/i (resets processor)");
@@ -121,6 +123,10 @@ int main (int argc, char **argv)
             puts ("     display ascii-art front panel");
             puts ("");
             return 0;
+        }
+        if (strcasecmp (argv[i], "-imm") == 0) {
+            imm = true;
+            continue;
         }
         if (strcasecmp (argv[i], "-log") == 0) {
             if ((++ i >= argc) || (argv[i][0] == '-')) {
@@ -155,7 +161,7 @@ int main (int argc, char **argv)
     char const *initargs[2] = { NULL, NULL };
     if (real) initargs[0] = "-real";
     if (sim)  initargs[0] = "-sim";
-    return tclmain (fundefs, argv[0], "z8ipanel", logname, getenv ("z8ipanelini"), argc - tclargs, argv + tclargs, false, initargs);
+    return tclmain (fundefs, argv[0], "z8ipanel", logname, getenv ("z8ipanelini"), argc - tclargs, argv + tclargs, false, initargs, imm);
 }
 
 
