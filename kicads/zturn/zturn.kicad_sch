@@ -5981,7 +5981,7 @@
     (property "Reference" "U17" (at 162.2141 187.96 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
-    (property "Value" "74AHCT540" (at 162.2141 190.5 0)
+    (property "Value" "74ACT540" (at 162.2141 190.5 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Footprint" "Package_DIP:DIP-20_W7.62mm" (at 160.02 208.28 0)
