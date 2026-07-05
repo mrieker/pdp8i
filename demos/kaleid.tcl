@@ -19,5 +19,5 @@ wrmem 021 $inity
 setsw sr 0
 startat $startaddr
 relsw sr
-exec -ignorestderr $Z8IHOME/z8ivc8 -killit -pms 120 -size [getenv vcsize 800] $vt
+exec -ignorestderr $Z8IHOME/z8ivc8 -killit -pms 120 -size [getenv vcsize 720] $vt
 exit
