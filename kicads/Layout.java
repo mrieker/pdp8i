@@ -22,8 +22,7 @@
 
 // Put ICs on PCB in a grid with capacitors first
 // Then run this program which shuffles the chips around to come up with shortest total trace lengths
-// Click on graphics screen to stop random shuffling to perform manual shuffling
-// Close graphics screen to write result out
+// Press control-C to stop random shuffling
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -275,6 +274,8 @@ public class Layout {
         double nettotlen = 0;
         for (int j = 0; j < network.refdpads.length; j ++) {
             PCB.Pad firstpad = network.refdpads[j];
+            if (firstpad.compon.refer.equals ("J6")) continue;
+            if (firstpad.compon.refer.startsWith ("R")) continue;
             double firstpadatxin = firstpad.atxin + firstpad.compon.atxin ();
             double firstpadatyin = firstpad.atyin + firstpad.compon.atyin ();
             double closestdist = Double.NaN;
@@ -406,9 +407,11 @@ public class Layout {
 
     // try swapping random chip/subchips of the given chiptype (74AHC00, etc)
     public static double doSubChipSwap (double oldtotlen, String chiptype)
+            throws Exception
     {
         // get list of chips of the given type
         PCB.Compon[] ictypecompons = chipsoftype.get (chiptype);
+        if (ictypecompons == null) return Double.NaN;
         int nictypecompons = ictypecompons.length;
 
         // get number of subchips per chip of that type (eg, 4 for 7400)
@@ -565,6 +568,7 @@ public class Layout {
     {
         // get list of chips of the given type
         PCB.Compon[] ictypecompons = chipsoftype.get (chiptype);
+        if (ictypecompons == null) return Double.NaN;
         int nictypecompons = ictypecompons.length;
 
         // get number of subchips per chip of that type (eg, 4 for 7400)

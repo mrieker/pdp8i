@@ -60,9 +60,7 @@ module backplane (
     output[3:0] majst,
     output[4:0] sctr,
     output swstart, swldad, swdepos, swexam,
-    output swcont, swsstep, swsinst,
-    output[2:0] swdf, swif,
-    output[11:00] swreg
+    output swcont, swsstep, swsinst
 
     ,input[11:00]  saxi_ARADDR
     ,output reg    saxi_ARREADY
@@ -335,26 +333,7 @@ module backplane (
         ._SWEXAM_o  (_busSWEXAM),     //button examine (debounced)
         ._SWCONT_o  (_busSWCONT),     //button continue (debounced)
         ._SWSSTEP_o (_busSWSSTEP),    //toggle single cycle
-        ._SWSINST_o (_busSWSINST),    //toggle single instruction
-
-        .swreg_0  (swreg[00]),
-        .swreg_1  (swreg[01]),
-        .swreg_2  (swreg[02]),
-        .swreg_3  (swreg[03]),
-        .swreg_4  (swreg[04]),
-        .swreg_5  (swreg[05]),
-        .swreg_6  (swreg[06]),
-        .swreg_7  (swreg[07]),
-        .swreg_8  (swreg[08]),
-        .swreg_9  (swreg[09]),
-        .swreg_10 (swreg[10]),
-        .swreg_11 (swreg[11]),
-        .swdfld_0  (swdf[00]),
-        .swdfld_1  (swdf[01]),
-        .swdfld_2  (swdf[02]),
-        .swifld_0  (swif[00]),
-        .swifld_1  (swif[01]),
-        .swifld_2  (swif[02])
+        ._SWSINST_o (_busSWSINST)     //toggle single instruction
     );
 
     ///////////////////////////

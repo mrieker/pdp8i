@@ -34,6 +34,7 @@
 #include <unistd.h>
 
 #include "obj_dir/Vbackplane.h"
+#include "obj_dir/Vbackplane_console.h"
 #include "obj_dir/Vbackplane_extmemory.h"
 
 #include "assemble.h"
@@ -317,9 +318,9 @@ static int cmd_bus (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj
             {  1, OFFS (swldad),   false, "swldad"   },
             {  1, OFFS (swexam),   false, "swexam"   },
             {  1, OFFS (swdepos),  false, "swdepos"  },
-            { 12, OFFS (swreg),    false, "swreg"    },
-            {  3, OFFS (swdf),     false, "swdf"     },
-            {  3, OFFS (swif),     false, "swif"     },
+            { 12,   -1, NULL,      false, "swreg"    },
+            {  3,   -2, NULL,      false, "swdf"     },
+            {  3,   -3, NULL,      false, "swif"     },
 
             { 12, OFFS (oACUM),    false, "oACUM"    },
             {  1, OFFS (oBRKGNTO), false, "oBRKGNTO" },   // break grant chain
@@ -725,12 +726,52 @@ static int cmdpintable (int pincount, Pin const *pintable, Tcl_Interp *interp, i
                 Tcl_SetResultF (interp, "value %u out of range for pin %s", val, arg);
                 return TCL_ERROR;
             }
+            if ((pin->size <= 0) || (pin->size > (int) sizeof val) || (pin->addr == NULL)) ABORT ();
             memcpy (pin->addr, &val, pin->size);
             vbkpl->eval ();
         } else {
             uint32_t val = 0;
-            if (pin->size > (int) sizeof val) abort ();
-            memcpy (&val, pin->addr, pin->size);
+            if (pin->addr != NULL) {
+                if ((pin->size <= 0) || (pin->size > (int) sizeof val)) ABORT ();
+                memcpy (&val, pin->addr, pin->size);
+            } else {
+                switch (pin->size) {
+                    case -1: {  // "swreg"
+                        Vbackplane_console *vcon = vbkpl->__PVT__backplane__DOT__conboard;
+                        val =
+                            ((vcon->__PVT__swreg_11 & 1) << 11) |
+                            ((vcon->__PVT__swreg_10 & 1) << 10) |
+                            ((vcon->__PVT__swreg_9  & 1) <<  9) |
+                            ((vcon->__PVT__swreg_8  & 1) <<  8) |
+                            ((vcon->__PVT__swreg_7  & 1) <<  7) |
+                            ((vcon->__PVT__swreg_6  & 1) <<  6) |
+                            ((vcon->__PVT__swreg_5  & 1) <<  5) |
+                            ((vcon->__PVT__swreg_4  & 1) <<  4) |
+                            ((vcon->__PVT__swreg_3  & 1) <<  3) |
+                            ((vcon->__PVT__swreg_2  & 1) <<  2) |
+                            ((vcon->__PVT__swreg_1  & 1) <<  1) |
+                            ((vcon->__PVT__swreg_0  & 1) <<  0);
+                        break;
+                    }
+                    case -2: {  // "swdf"
+                        Vbackplane_console *vcon = vbkpl->__PVT__backplane__DOT__conboard;
+                        val =
+                            ((vcon->__PVT__swdfld_2 & 1) << 2) |
+                            ((vcon->__PVT__swdfld_1 & 1) << 1) |
+                            ((vcon->__PVT__swdfld_0 & 1) << 0);
+                        break;
+                    }
+                    case -3: {  // "swif"
+                        Vbackplane_console *vcon = vbkpl->__PVT__backplane__DOT__conboard;
+                        val =
+                            ((vcon->__PVT__swifld_2 & 1) << 2) |
+                            ((vcon->__PVT__swifld_1 & 1) << 1) |
+                            ((vcon->__PVT__swifld_0 & 1) << 0);
+                        break;
+                    }
+                    default: ABORT ();
+                }
+            }
             getobjs[ngetobjs++] = Tcl_NewLongObj (val);
         }
     }
