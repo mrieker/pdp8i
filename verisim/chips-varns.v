@@ -2389,6 +2389,9 @@ module XMCP23017_SP (input zclock, zreset,
 
 endmodule
 
+module X330 (input zclock, input zreset, input p1, input p2);
+endmodule
+
 module X47K (input zclock, input zreset, input p1, input p2);
 endmodule
 
