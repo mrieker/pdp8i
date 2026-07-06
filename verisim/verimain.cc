@@ -305,7 +305,6 @@ static int cmd_bus (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj
             {  1, OFFS (iPAUSE),   true,  "iPAUSE"   },   // pause processor clocking (stretch cycle)
 
             {  4, OFFS (majst),    false, "majst"    },
-            {  1, OFFS (memdisab), true,  "memdisab" },
             {  3, OFFS (memfield), false, "memfield" },
             { 12, OFFS (mquo),     false, "mquo"     },
             { 12, OFFS (pctr),     false, "pctr"     },

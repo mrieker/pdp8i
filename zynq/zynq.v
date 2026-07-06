@@ -86,9 +86,10 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     output[11:00] hdw_iINBUS,   // [hdw_ioenabd]
     output        hdw_iINTRQST, // [hdw_poweron] open collector
     output        hdw_iIOSKIP,  // [hdw_ioenabd]
+    output        hdw_iMEMDIS,  // [hdw_poweron]
     output        hdw_iPAUSE,   // [hdw_poweron] open collector
     output        hdw_iRESET,   // [hdw_poweron] external boards should do a power-on reset
-    output        hdw_ioenabd_n,  // my io cycle | dma granted & TS4 | dma granted & BRKCYC & TS2
+    output        hdw_ioenabd_n,  // my io cycle | dma granted & TS4 | dma granted & BRKCYC & TS2 | memdis & TS1
     output        hdw_dmagntd_n,  // enable the dma cycle outputs
     output reg    hdw_poweron_n,  // enable the 'always on' and 'open collector' outputs
 
@@ -102,7 +103,6 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     input         spare1,
     input         spare2,
     input         spare3,
-    input         spare4,
 
     // arm processor memory bus interface (AXI)
     // we are a slave for accessing the control registers (read and write)
@@ -180,6 +180,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     wire[11:00] sim_iINBUS;
     wire        sim_iINTRQST;
     wire        sim_iIOSKIP;
+    wire        sim_iMEMDIS;
     wire        sim_iPAUSE;
     wire        sim_iRESET;
 
@@ -219,8 +220,9 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     wire[2:0]   dev_iDMAFLD;
     wire[11:00] dev_iINBUS;
     wire        dev_iINTRQST;
-    wire        dev_iIOSKIP;
     wire        dev_iIOSEL;
+    wire        dev_iIOSKIP;
+    wire        dev_iMEMDIS;
     wire        dev_iPAUSE;
     wire        dev_iRESET;
 
@@ -244,6 +246,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     reg[11:00] arm_iINBUS;
     reg        arm_iINTRQST;
     reg        arm_iIOSKIP;
+    reg        arm_iMEMDIS;
     reg        arm_iPAUSE;
     reg        arm_swCONT;
     reg        arm_swDEPOS;
@@ -321,6 +324,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     assign saxi_BRESP = 0;  // A3.4.4/A10.3 transfer OK
     assign saxi_RRESP = 0;  // A3.4.4/A10.3 transfer OK
 
+    // our own integrated logic analyzer
     reg[31:00] ilaarray[4095:0], ilardata;
     reg[11:00] ilaafter, ilaindex;
     reg ilaarmed;
@@ -450,7 +454,8 @@ module Zynq #(parameter BIDIRCONSDA=1) (
                         arm_iINBUS   <= saxi_WDATA[20:09];
                         arm_iINTRQST <= saxi_WDATA[21];
                         arm_iIOSKIP  <= saxi_WDATA[22];
-                        arm_iPAUSE   <= saxi_WDATA[23];
+                        arm_iMEMDIS  <= saxi_WDATA[23];
+                        arm_iPAUSE   <= saxi_WDATA[24];
                     end
 
                     10'b0000000010: begin
@@ -508,6 +513,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
             arm_iINBUS   <= 0;
             arm_iINTRQST <= 0;
             arm_iIOSKIP  <= 0;
+            arm_iMEMDIS  <= 0;
             arm_iPAUSE   <= 0;
             arm_swCONT   <= 0;
             arm_swDEPOS  <= 0;
@@ -580,6 +586,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     assign sim_iINBUS   = simit ? dev_iINBUS   : 0;
     assign sim_iINTRQST = simit ? dev_iINTRQST : 0;
     assign sim_iIOSKIP  = simit ? dev_iIOSKIP  : 0;
+    assign sim_iMEMDIS  = simit ? dev_iMEMDIS  : 0;
     assign sim_iPAUSE   = simit ? dev_iPAUSE   : 0;
     assign sim_iRESET   = simit ? dev_iRESET   : 1;
 
@@ -595,6 +602,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     assign hdw_iINTRQST = simit ? 0 : dev_iINTRQST;
     wire   hdw_iIOSEL   = simit ? 0 : dev_iIOSEL;
     assign hdw_iIOSKIP  = simit ? 0 : dev_iIOSKIP;
+    assign hdw_iMEMDIS  = simit ? 0 : dev_iMEMDIS;
     assign hdw_iPAUSE   = simit ? 0 : dev_iPAUSE;
     assign hdw_iRESET   = simit ? 1 : dev_iRESET;
 
@@ -602,7 +610,11 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     // any of our io devices is selected by current io instruction
     // also whenever dma granted and TS4 to output dma address over inbus
     //                           and TS2 of BREAK cycle to output write data over inbus
-    assign hdw_ioenabd_n = ~ (hdw_iIOSEL | ~ hdw_dmagntd_n & hdw_oTS4 | ~ hdw_dmagntd_n & hdw_oBRKCYC & hdw_oTS2);
+    //               and during TS1 if memory chips on extmemory.kicad_sch are disabled (arm provides data on arm_iINBUS)
+    assign hdw_ioenabd_n = ~ (hdw_iIOSEL |
+                            ~ hdw_dmagntd_n & hdw_oTS4 |
+                            ~ hdw_dmagntd_n & hdw_oBRKCYC & hdw_oTS2 |
+                              hdw_iMEMDIS & hdw_oTS1);
 
     // enable 74AHC540s to drive dma signals to bus
     // while grated use of dma bus lines
@@ -643,8 +655,9 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     assign regctla[20:09] = arm_iINBUS;
     assign regctla[21]    = arm_iINTRQST;
     assign regctla[22]    = arm_iIOSKIP;
-    assign regctla[23]    = arm_iPAUSE;
-    assign regctla[31:24] = 0;
+    assign regctla[23]    = arm_iMEMDIS;
+    assign regctla[24]    = arm_iPAUSE;
+    assign regctla[31:25] = 0;
 
     assign regctlb[00]    = arm_swCONT;
     assign regctlb[01]    = arm_swDEPOS;
@@ -668,10 +681,11 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     assign regctlc[20:09] = dev_iINBUS;
     assign regctlc[21]    = dev_iINTRQST;
     assign regctlc[22]    = dev_iIOSKIP;
-    assign regctlc[23]    = dev_iPAUSE;
-    assign regctlc[24]    = dev_iCLOCK;
-    assign regctlc[25]    = dev_iRESET;
-    assign regctlc[31:26] = 0;
+    assign regctlc[23]    = dev_iMEMDIS;
+    assign regctlc[24]    = dev_iPAUSE;
+    assign regctlc[25]    = dev_iCLOCK;
+    assign regctlc[26]    = dev_iRESET;
+    assign regctlc[31:27] = 0;
 
     assign regctle[00]    = simit;
     assign regctle[01]    = fpgareset;
@@ -742,8 +756,9 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     assign dev_iDMAFLD  = arm_iDMAFLD  | cmbrkema;
     assign dev_iINBUS   = arm_iINBUS   | ttibus  | rkibus  | vcibus  | tcibus  | pribus  | pbibus  | dcibus  | rcibus  | cmbrkinbus;
     assign dev_iINTRQST = arm_iINTRQST | ttintrq | rkintrq | vcintrq | tcintrq | printrq | ppintrq | dcintrq | rcintrq;
-    assign dev_iIOSKIP  = arm_iIOSKIP  | ttioskp | rkioskp | vcioskp | tcioskp | prioskp | ppioskp | dcioskp | rcioskp | pbioskp;
     assign dev_iIOSEL   =                ttiosel | rkiosel | vciosel | tciosel | priosel | ppiosel | dciosel | rciosel | pbiosel;
+    assign dev_iIOSKIP  = arm_iIOSKIP  | ttioskp | rkioskp | vcioskp | tcioskp | prioskp | ppioskp | dcioskp | rcioskp | pbioskp;
+    assign dev_iMEMDIS  = arm_iMEMDIS;
     assign dev_iPAUSE   = arm_iPAUSE;
 
     ///////////////////////////////////
@@ -794,6 +809,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
         .iINBUS         (sim_iINBUS),
         .iINTRQST       (sim_iINTRQST),
         .iIOSKIP        (sim_iIOSKIP),
+        .iMEMDIS        (sim_iMEMDIS),
         .iPAUSE         (sim_iPAUSE),
         .iRESET         (sim_iRESET),
 

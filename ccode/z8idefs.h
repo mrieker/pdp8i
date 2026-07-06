@@ -18,12 +18,12 @@
 //
 //    http://www.gnu.org/licenses/gpl-2.0.html
 
-// bits provided by pdp8i.v in the zynq
+// bits provided by zynq.v in the zynq
 
 #ifndef _Z8IDEFS
 #define _Z8IDEFS
 
-#define Z_VER 0     // pdp8i.v version number
+#define Z_VER 0     // zynq.v version number
 #define Z_RA 1      // contain the various bits
 #define Z_RB 2
 #define Z_RC 3
@@ -56,7 +56,8 @@
 #define a_arm_iINBUS    (07777U <<  9)
 #define a_arm_iINTRQST      (1U << 21)
 #define a_arm_iIOSKIP       (1U << 22)
-#define a_arm_iPAUSE        (1U << 23)
+#define a_arm_iMEMDIS       (1U << 23)
+#define a_arm_iPAUSE        (1U << 24)
 
 #if 000
 #define b_arm_swCONT        (1U <<  0)
@@ -81,9 +82,10 @@
 #define c_dev_iINBUS    (07777U <<  9)
 #define c_dev_iINTRQST      (1U << 21)
 #define c_dev_iIOSKIP       (1U << 22)
-#define c_dev_iPAUSE        (1U << 23)
-#define c_dev_iCLOCK        (1U << 24)
-#define c_dev_iRESET        (1U << 25)
+#define c_dev_iMEMDIS       (1U << 23)
+#define c_dev_iPAUSE        (1U << 24)
+#define c_dev_iCLOCK        (1U << 25)
+#define c_dev_iRESET        (1U << 26)
 
 #define d_clkratm1     (077U << 0)  //rw clock ratio minus 1, eg, 9 for 10MHz = 100MHz / (d_clkratm1 + 1)
 

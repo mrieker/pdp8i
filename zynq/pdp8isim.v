@@ -35,6 +35,7 @@ module pdp8isim (
     input[11:00] iINBUS,            // device sending data for PIO or DMA
     input iINTRQST,                 // request interrupt
     input iIOSKIP,                  // increment PC at end of IO pulse
+    input iMEMDIS,                  // disable internal memory
     input iPAUSE,                   // pause processor clocking (stretch cycle)
     input iRESET,                   // zynq power-on reset + arm-commanded hard reset
 
@@ -83,6 +84,11 @@ module pdp8isim (
 
     // 10MHz clock
     wire _busCLOCK = ~ iCLOCK;
+
+    // disable internal memory
+    // arm must provide read data on INBUS during TS1
+    //  and can capture write data from MBUF during TS3
+    wire _busMEMDIS = ~ iMEMDIS;
 
     // power-on reset (zynq power-on reset + arm-commanded hard reset)
     wire _busRESET = ~ iRESET;
@@ -706,7 +712,7 @@ module pdp8isim (
         ._MBUF_10    (_busMBUF[10]),
         ._MBUF_11    (_busMBUF[11]),
 
-        ._MEMDIS     (1),
+        ._MEMDIS     (_busMEMDIS),
         ._RESET      (_busRESET),
         ._SWLDAD     (_busSWLDAD),
 

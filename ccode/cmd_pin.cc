@@ -55,6 +55,7 @@ static PinDef const pindefs[] = {
     { "arm_iINBUS",      DEV_8I, Z_RA, a_arm_iINBUS,   true  },
     { "arm_iINTRQST",    DEV_8I, Z_RA, a_arm_iINTRQST, true  },
     { "arm_iIOSKIP",     DEV_8I, Z_RA, a_arm_iIOSKIP,  true  },
+    { "arm_iMEMDIS",     DEV_8I, Z_RA, a_arm_iMEMDIS,  true  },
     { "arm_iPAUSE",      DEV_8I, Z_RA, a_arm_iPAUSE,   true  },
 
 #if 000
@@ -80,6 +81,7 @@ static PinDef const pindefs[] = {
     { "dev_iINBUS",      DEV_8I, Z_RC, c_dev_iINBUS,   false },
     { "dev_iINTRQST",    DEV_8I, Z_RC, c_dev_iINTRQST, false },
     { "dev_iIOSKIP",     DEV_8I, Z_RC, c_dev_iIOSKIP,  false },
+    { "dev_iMEMDIS",     DEV_8I, Z_RC, c_dev_iMEMDIS,  false },
     { "dev_iPAUSE",      DEV_8I, Z_RC, c_dev_iPAUSE,   false },
 
     { "clkratm1",        DEV_8I, Z_RD, d_clkratm1,     true  },

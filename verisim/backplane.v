@@ -40,7 +40,6 @@ module backplane (
     input iIOSKIP,                  // increment PC at end of IO pulse
     input[2:0] iDMAFLD,             // device sending address for DMA
     input[11:00] iINBUS,            // device sending data for PIO or DMA
-                                    // also memory read data if memdisab set
     input iPAUSE,                   // pause processor clocking (stretch cycle)
     output oBRKGNTO,                // chained break grant
     output oBRKCYC,                 // break cycle
@@ -54,7 +53,6 @@ module backplane (
     output oTP1, oTP2, oTP3, oTP4, oTS1, oTS2, oTS3, oTS4,
     output[11:00] oMADR, oMBUF, oACUM,
 
-    input memdisab,                 // disable internal memory chip
     output[11:00] mquo, pctr,
     output[2:0] memfield,
     output[3:0] majst,
@@ -1168,7 +1166,7 @@ module backplane (
     //////////////////////////////////
 
     wire zynACCLEAR, zynBRKGNTI, zynBRKGNTO, zynBRKRQST, zynBRKWRM, zynCAINC;
-    wire zynCLOCK, zynCYCLE3, zynINTRQST, zynIOSKIP, zynPAUSE, zynRESET;
+    wire zynCLOCK, zynCYCLE3, zynINTRQST, zynIOSKIP, zynMEMDIS, zynPAUSE, zynRESET;
     wire _zyndmagntd, _zynioenabd, _zynpoweron;
     wire[2:0] zynDMAFLD;
     wire[11:00] zynINBUS;
@@ -1214,6 +1212,7 @@ module backplane (
         .hdw_iINBUS   (zynINBUS),
         .hdw_iINTRQST (zynINTRQST),
         .hdw_iIOSKIP  (zynIOSKIP),
+        .hdw_iMEMDIS  (zynMEMDIS),
         .hdw_iPAUSE   (zynPAUSE),
         .hdw_iRESET   (zynRESET),       // zreset + arm regctle<fpgareset>
 
@@ -1232,7 +1231,6 @@ module backplane (
         .spare1 (1'b0),
         .spare2 (1'b0),
         .spare3 (1'b0),
-        .spare4 (1'b0),
 
         // arm processor memory bus interface (AXI)
         // we are a slave for accessing the control registers (read and write)
@@ -1482,7 +1480,7 @@ module backplane (
     assign _busINBUS   = _conINBUS    &  _eaeINBUS & ~ iINBUS & _memINBUS & (_zynioenabd ? 12'o7777 : ~ zynINBUS);
     assign _busINTRQST = ~ iINTRQST   & (_zynpoweron | ~ zynINTRQST);
     assign _busIOSKIP  = _eaeIOSKIP   & ~ iIOSKIP  & (_zynioenabd | ~ zynIOSKIP);
-    assign _busMEMDIS  = ~ memdisab;
+    assign _busMEMDIS  =                (_zynpoweron | ~ zynMEMDIS);
     assign _busPAUSE   = _eaePAUSE    & ~ iPAUSE   & (_zynpoweron | ~ zynPAUSE);
     assign _busRESET   =                (_zynpoweron | ~ zynRESET);
 
