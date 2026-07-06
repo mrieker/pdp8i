@@ -319,6 +319,9 @@
           "hdw_iIOSKIP": {
             "direction": "O"
           },
+          "hdw_iMEMDIS": {
+            "direction": "O"
+          },
           "hdw_iPAUSE": {
             "direction": "O"
           },
@@ -414,9 +417,6 @@
             "direction": "I"
           },
           "spare3": {
-            "direction": "I"
-          },
-          "spare4": {
             "direction": "I"
           }
         },
@@ -1816,7 +1816,7 @@
       }
     },
     "design_info": {
-      "boundary_crc": "0xBD65C6F6B31485BE",
+      "boundary_crc": "0xA20FACBA14F6BF75",
       "device": "xc7z020clg400-1",
       "name": "myboard",
       "synth_flow_mode": "None",
@@ -2037,6 +2037,12 @@
           "hdw_iIOSKIP_0"
         ]
       },
+      "Zynq_0_hdw_iMEMDIS": {
+        "ports": [
+          "Zynq_0/hdw_iMEMDIS",
+          "hdw_iMEMDIS_0"
+        ]
+      },
       "Zynq_0_hdw_iPAUSE": {
         "ports": [
           "Zynq_0/hdw_iPAUSE",
@@ -2241,8 +2247,7 @@
       },
       "spare4_0_1": {
         "ports": [
-          "spare4_0",
-          "Zynq_0/spare4"
+          "spare4_0"
         ]
       }
     },
@@ -2321,6 +2326,9 @@
         "direction": "O"
       },
       "hdw_iIOSKIP_0": {
+        "direction": "O"
+      },
+      "hdw_iMEMDIS_0": {
         "direction": "O"
       },
       "hdw_iPAUSE_0": {

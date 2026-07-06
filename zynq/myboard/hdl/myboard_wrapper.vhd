@@ -50,6 +50,7 @@ entity myboard_wrapper is
     hdw_iINBUS_0 : out STD_LOGIC_VECTOR ( 11 downto 0 );
     hdw_iINTRQST_0 : out STD_LOGIC;
     hdw_iIOSKIP_0 : out STD_LOGIC;
+    hdw_iMEMDIS_0 : out STD_LOGIC;
     hdw_iPAUSE_0 : out STD_LOGIC;
     hdw_iRESET_0 : out STD_LOGIC;
     hdw_ioenabd_n_0 : out STD_LOGIC;
@@ -123,6 +124,7 @@ architecture STRUCTURE of myboard_wrapper is
     hdw_iINBUS_0 : out STD_LOGIC_VECTOR ( 11 downto 0 );
     hdw_iINTRQST_0 : out STD_LOGIC;
     hdw_iIOSKIP_0 : out STD_LOGIC;
+    hdw_iMEMDIS_0 : out STD_LOGIC;
     hdw_iPAUSE_0 : out STD_LOGIC;
     hdw_iRESET_0 : out STD_LOGIC;
     hdw_ioenabd_n_0 : out STD_LOGIC;
@@ -195,6 +197,7 @@ myboard_i: component myboard
     hdw_iINBUS_0(11 downto 0) => hdw_iINBUS_0(11 downto 0),
     hdw_iINTRQST_0 => hdw_iINTRQST_0,
     hdw_iIOSKIP_0 => hdw_iIOSKIP_0,
+    hdw_iMEMDIS_0 => hdw_iMEMDIS_0,
     hdw_iPAUSE_0 => hdw_iPAUSE_0,
     hdw_iRESET_0 => hdw_iRESET_0,
     hdw_ioenabd_n_0 => hdw_ioenabd_n_0,
