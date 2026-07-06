@@ -106,7 +106,7 @@ int main (int argc, char **argv)
             printf ("%6.2f %o %o%o%o%o%o%o%o%o %o %o %o%o%o%o%o %o %o %X %o%o%o%o %o%o%o%o\n",
                 (i - DEPTH + AFTER + 1) / 100.0,        // trigger shows as 0.00uS
 
-                (unsigned) (thisentry >> 31) & 1,       // fpgareset
+                (unsigned) (thisentry >> 31) & 1,       // arm_iRESET
                 (unsigned) (thisentry >> 30) & 1,       // ffswstop
                 (unsigned) (thisentry >> 29) & 1,       // ffswstart
                 (unsigned) (thisentry >> 28) & 1,       // ffswsstep

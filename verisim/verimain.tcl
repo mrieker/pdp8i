@@ -52,10 +52,9 @@ proc hardreset {} {
     global usefpi2c
 
     ;# power-on reset for 10uS
-    set oldregctle [arm 5]
-    arm set 5 [expr {$oldregctle |  2}]     ;# fpgareset = 1
+    arm set 1 0x4000000                     ;# arm_iRESET = 1
     clk 100
-    arm set 5 [expr {$oldregctle & ~2}]     ;# fpgareset = 0
+    arm set 1 0                             ;# arm_iRESET = 0
 
     ;# maybe use pdp8ifpi2c.v to scan panel
     ;# otherwise console.kicad_sch internal counters scan panel

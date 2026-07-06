@@ -276,7 +276,7 @@ proc hardreset {} {
     pin set nanocontin 1 fp_manual 0        ;# make sure pdp8ifpi2c.v is scanning
     pin set fp_ovrsstep 1 fp_ovrstart 1     ;# set START + SSTEP
     pin set fp_setsstep 1 fp_setstart 1     ;# ...holds processor in reset state
-    pin set fpgareset 1 fpgareset 0         ;# pulse fpga reset
+    pin set arm_iRESET 1 arm_iRESET 0       ;# pulse fpga reset
     setsw start 0                           ;# release START
     setsw sstep 0                           ;# release SSTEP
     if {! $oldsstepovr} {

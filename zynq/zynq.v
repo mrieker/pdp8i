@@ -36,10 +36,10 @@ endmodule
 // sim mode tested on a zynq with demo program, eg, cd demos ; ../ccode/z8ipanel -sim kaleid.tcl e
 
 // RESETS
-//      RESET_N = fpga power-on reset       reset everything including AXI bus state
-//    fpgareset = arm-commanded reset       reset everything except AXI bus state
-//   dev_iRESET = ~ RESET_N | fpgareset     reset devices and processor to power-on state
-//  dev_iBUSINI = dev_iRESET | startswitch  reset devices to power-on state
+//      RESET_N = fpga power-on reset       reset everything including AXI bus state        pulsed when zynq boots (or verimain or verizynq started)
+//   arm_iRESET = arm-commanded reset       reset everything except AXI bus state           pulsed by hardreset TCL command
+//   dev_iRESET = ~ RESET_N | arm_iRESET    reset devices and processor to power-on state   pulsed by either of the above
+//  dev_iBUSINI = dev_iRESET | startswitch  reset devices to power-on state                 pulsed by any of the above + start switch
 
 // CLOCKS
 //       CLOCK = fpga 100MHz clock
@@ -229,7 +229,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     reg[9:0] meminprog;
 
     reg simit, lastts3, didio;
-    reg nanocontin, nanocstep, nanotrigger, fpgareset;
+    reg nanocontin, nanocstep, nanotrigger;
     wire acclr, intrq, ioskp;
     reg[3:0] iopsetcount;               // count fpga cycles where an IOP is on
     reg[3:0] iopclrcount;               // count fpga cycles where no IOP is on
@@ -249,6 +249,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     reg        arm_iIOSKIP;
     reg        arm_iMEMDIS;
     reg        arm_iPAUSE;
+    reg        arm_iRESET;
     reg        arm_swCONT;
     reg        arm_swDEPOS;
     reg[2:0]   arm_swDFLD;
@@ -329,10 +330,6 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     reg[31:00] ilaarray[4095:0], ilardata;
     reg[11:00] ilaafter, ilaindex;
     reg ilaarmed;
-
-    // some arm program is commanding reset or zynq is powering up
-    // - resets PDP and devices
-    assign dev_iRESET = fpgareset | ~ RESET_N;
 
     // generate 10MHz PDP clock
     // or whatever frequency is selected in regctld[5:0]:
@@ -418,9 +415,10 @@ module Zynq #(parameter BIDIRCONSDA=1) (
 
             hdw_poweron_n <= 1;                         // start with 'always on' outputs turned off
 
+            arm_iRESET  <= 0;
+
             regctld     <= 9;                           // default 10MHz PDP clock
             simit       <= 0;                           // assume want to access real PDP-8/I by default
-            fpgareset   <= 0;                           // we are resetting FPGA, don't do infinite reset loop
             nanocontin  <= 1;                           // turn on 100MHz FPGA clocking
 
         end else begin
@@ -465,6 +463,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
                         arm_iIOSKIP  <= saxi_WDATA[23];
                         arm_iMEMDIS  <= saxi_WDATA[24];
                         arm_iPAUSE   <= saxi_WDATA[25];
+                        arm_iRESET   <= saxi_WDATA[26];
                     end
 
                     10'b0000000010: begin
@@ -486,7 +485,6 @@ module Zynq #(parameter BIDIRCONSDA=1) (
 
                     10'b0000000101: begin
                         simit        <= saxi_WDATA[00];
-                        fpgareset    <= saxi_WDATA[01];
                         nanocontin   <= saxi_WDATA[02];
                     end
 
@@ -667,7 +665,8 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     assign regctla[23]    = arm_iIOSKIP;
     assign regctla[24]    = arm_iMEMDIS;
     assign regctla[25]    = arm_iPAUSE;
-    assign regctla[31:26] = 0;
+    assign regctla[26]    = arm_iRESET;
+    assign regctla[31:27] = 0;
 
     assign regctlb[00]    = arm_swCONT;
     assign regctlb[01]    = arm_swDEPOS;
@@ -698,7 +697,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     assign regctlc[31:27] = 0;
 
     assign regctle[00]    = simit;
-    assign regctle[01]    = fpgareset;
+    assign regctle[01]    = 0;
     assign regctle[02]    = nanocontin;
     assign regctle[03]    = nanotrigger;
     assign regctle[04]    = nanocstep;
@@ -770,6 +769,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     assign dev_iIOSKIP  = arm_iIOSKIP  | ttioskp | rkioskp | vcioskp | tcioskp | prioskp | ppioskp | dcioskp | rcioskp | pbioskp;
     assign dev_iMEMDIS  = arm_iMEMDIS;
     assign dev_iPAUSE   = arm_iPAUSE;
+    assign dev_iRESET   = arm_iRESET   | ~ RESET_N;
 
     ///////////////////////////////////
     //  simulated PDP-8/I processor  //
@@ -1258,7 +1258,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
                 // capture signals while before trigger and for ilaafter cycles thereafter
                 if (ilaarmed | (ilaafter != 0)) begin
                     ilaarray[ilaindex] <= {
-                        fpgareset,
+                        arm_iRESET,
                         regctld[24:16],
                         sim_iRESET,
                         sim_swldad,

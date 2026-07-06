@@ -59,6 +59,7 @@
 #define a_arm_iIOSKIP       (1U << 23)
 #define a_arm_iMEMDIS       (1U << 24)
 #define a_arm_iPAUSE        (1U << 25)
+#define a_arm_iRESET        (1U << 26)
 
 #if 000
 #define b_arm_swCONT        (1U <<  0)
@@ -91,7 +92,6 @@
 #define d_clkratm1     (077U << 0)  //rw clock ratio minus 1, eg, 9 for 10MHz = 100MHz / (d_clkratm1 + 1)
 
 #define e_simit         (1U <<  0)  //rw 0=real PDP-8/I; 1=pdp8isim.v
-#define e_fpgareset     (1U <<  1)  //rw 0=normal; 1=power-on-reset
 #define e_nanocontin    (1U <<  2)  //rw 0=single step mode (sim only); 1=normal continuous running
 #define e_nanotrigger   (1U <<  3)  //rw 0=ignored; 1=trigger single step (sim only)
 #define e_nanocstep     (1U <<  4)  //ro 0=stopped; 1=stepping

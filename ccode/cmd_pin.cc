@@ -58,6 +58,7 @@ static PinDef const pindefs[] = {
     { "arm_iIOSKIP",     DEV_8I, Z_RA, a_arm_iIOSKIP,  true  },
     { "arm_iMEMDIS",     DEV_8I, Z_RA, a_arm_iMEMDIS,  true  },
     { "arm_iPAUSE",      DEV_8I, Z_RA, a_arm_iPAUSE,   true  },
+    { "arm_iRESET",      DEV_8I, Z_RA, a_arm_iRESET,   true  },
 
 #if 000
     { "arm_swCONT",      DEV_8I, Z_RB, b_arm_swCONT,   true  },
@@ -85,11 +86,11 @@ static PinDef const pindefs[] = {
     { "dev_iIOSKIP",     DEV_8I, Z_RC, c_dev_iIOSKIP,  false },
     { "dev_iMEMDIS",     DEV_8I, Z_RC, c_dev_iMEMDIS,  false },
     { "dev_iPAUSE",      DEV_8I, Z_RC, c_dev_iPAUSE,   false },
+    { "dev_iRESET",      DEV_8I, Z_RC, c_dev_iRESET,   false },
 
     { "clkratm1",        DEV_8I, Z_RD, d_clkratm1,     true  },
 
     { "simit",           DEV_8I, Z_RE, e_simit,        true  },
-    { "fpgareset",       DEV_8I, Z_RE, e_fpgareset,    true  },
     { "nanocontin",      DEV_8I, Z_RE, e_nanocontin,   true  },
     { "nanotrigger",     DEV_8I, Z_RE, e_nanotrigger,  true  },
     { "nanocstep",       DEV_8I, Z_RE, e_nanocstep,    true  },
