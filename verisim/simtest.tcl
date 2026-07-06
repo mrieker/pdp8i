@@ -545,12 +545,6 @@ proc memorycycle {state field addr rdata wdata} {
 
     incr memcycno
 
-    ;# 0 = use extmemory.v backdoor to access internal 32KW memory chip
-    ;# 1 = supply read data on iINBUS during TS1
-    ;#     get write data from oMBUF during TS3
-    set memdisab 0 ;## [expr {! $hasmemcmd || [randbits 1]}]
-    bus set memdisab $memdisab
-
     ;# maybe flip on an halt switch if none flipped on already
     ;# takes several cycles to soak through console board
     ;# don't do for exam/depos cycles so we don't interfere with subsequent start switch
@@ -570,17 +564,10 @@ proc memorycycle {state field addr rdata wdata} {
     verify12 [bus majst] $state "bad state at start of mem cycle"
 
     ;# get the read data on the INBUS so cpu can read it
+    ;# put read data directly in extmemory.v chip
+    ;# it should then soak onto INBUS
     set expaddr [expr {($field << 12) | $addr}]
-    if {$memdisab} {
-        ;# this script is the memory, so put read data directly on the INBUS
-        bus set iINBUS $rdata
-        ;# put unrelated number in extmemory.v chip in case it is interfering
-        if {$hasmemcmd} {mem $expaddr [randbits 12]}
-    } else {
-        ;# extmemory.v memory chip in use, so put read data directly in chip
-        ;# it should then soak onto INBUS
-        mem $expaddr $rdata
-    }
+    mem $expaddr $rdata
 
     ;# maybe generate a dma request via pdp8icmem.v
     ;# these have higher priority than plain dmarqsts
@@ -598,11 +585,6 @@ proc memorycycle {state field addr rdata wdata} {
 
     ;# end of TS1 means it finished reading that memory location into MB
     waitnegate TS1
-
-    ;# stop dumping memory read value onto iINBUS
-    if {$memdisab} {
-        bus set iINBUS 0
-    }
 
     ;# maybe put dma write data out on the inbus during TS2
     if {$dmarqst && $dmawrmem && ($state == $MS_BREAK) && [bus oBRKGNTO]} {
@@ -683,9 +665,7 @@ proc memorycycle {state field addr rdata wdata} {
     }
 
     ;# verify the extmemory.v memory contents
-    if {! $memdisab} {
-        verify12 [mem $expaddr] $wdata [format "address %05o mismatch" $expaddr]
-    }
+    verify12 [mem $expaddr] $wdata [format "address %05o mismatch" $expaddr]
 
     ;# if requesting break and it is granted, output address during all TS4s
     if {$dmarqst && [bus oBRKGNTO]} {
