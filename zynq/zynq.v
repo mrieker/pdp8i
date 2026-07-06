@@ -215,7 +215,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     wire        dev_iBRKRQST;
     wire        dev_iBRKWRM;
     wire        dev_iCAINC;
-    wire        dev_iCLOCK;
+    reg         dev_iCLOCK;
     wire        dev_iCYCLE3;
     wire[2:0]   dev_iDMAFLD;
     wire[11:00] dev_iINBUS;
@@ -241,6 +241,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     reg        arm_iBRKRQST;
     reg        arm_iBRKWRM;
     reg        arm_iCAINC;
+    reg        arm_iCLOCK;
     reg        arm_iCYCLE3;
     reg[2:0]   arm_iDMAFLD;
     reg[11:00] arm_iINBUS;
@@ -334,18 +335,25 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     assign dev_iRESET = fpgareset | ~ RESET_N;
 
     // generate 10MHz PDP clock
+    // or whatever frequency is selected in regctld[5:0]:
+    //  0: use arm_iCLOCK to clock from arm
+    //  1:  20nS = 50.0MHz
+    //  7:  80nS = 12.5MHz
+    //  8:  90nS = 11.1MHz
+    //  9: 100nS = 10.0MHz (default)
+    // 10: 110nS =  9.1MHz
+    // 11: 120nS =  8.3MHz
+    // 63: 640nS =  1.6MHz
     reg[5:0] clkdiv;
-    reg yclock;
     always @(posedge CLOCK) begin
         if (~ RESET_N | (clkdiv == regctld[5:0])) begin
             clkdiv <= 0;
-            yclock <= 0;
+            dev_iCLOCK <= arm_iCLOCK;
         end else begin
             clkdiv <= clkdiv + 1;
-            if (clkdiv == { 1'b0, regctld[5:1] }) yclock <= 1;
+            if (clkdiv == { 1'b0, regctld[5:1] }) dev_iCLOCK <= 1;
         end
     end
-    assign dev_iCLOCK = yclock;
 
     /////////////////////////////////////
     // send register being read to ARM //
@@ -449,13 +457,14 @@ module Zynq #(parameter BIDIRCONSDA=1) (
                         arm_iBRKRQST <= saxi_WDATA[02];
                         arm_iBRKWRM  <= saxi_WDATA[03];
                         arm_iCAINC   <= saxi_WDATA[04];
-                        arm_iCYCLE3  <= saxi_WDATA[05];
-                        arm_iDMAFLD  <= saxi_WDATA[08:06];
-                        arm_iINBUS   <= saxi_WDATA[20:09];
-                        arm_iINTRQST <= saxi_WDATA[21];
-                        arm_iIOSKIP  <= saxi_WDATA[22];
-                        arm_iMEMDIS  <= saxi_WDATA[23];
-                        arm_iPAUSE   <= saxi_WDATA[24];
+                        arm_iCLOCK   <= saxi_WDATA[05];
+                        arm_iCYCLE3  <= saxi_WDATA[06];
+                        arm_iDMAFLD  <= saxi_WDATA[09:07];
+                        arm_iINBUS   <= saxi_WDATA[21:10];
+                        arm_iINTRQST <= saxi_WDATA[22];
+                        arm_iIOSKIP  <= saxi_WDATA[23];
+                        arm_iMEMDIS  <= saxi_WDATA[24];
+                        arm_iPAUSE   <= saxi_WDATA[25];
                     end
 
                     10'b0000000010: begin
@@ -650,14 +659,15 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     assign regctla[02]    = arm_iBRKRQST;
     assign regctla[03]    = arm_iBRKWRM;
     assign regctla[04]    = arm_iCAINC;
-    assign regctla[05]    = arm_iCYCLE3;
-    assign regctla[08:06] = arm_iDMAFLD;
-    assign regctla[20:09] = arm_iINBUS;
-    assign regctla[21]    = arm_iINTRQST;
-    assign regctla[22]    = arm_iIOSKIP;
-    assign regctla[23]    = arm_iMEMDIS;
-    assign regctla[24]    = arm_iPAUSE;
-    assign regctla[31:25] = 0;
+    assign regctla[05]    = arm_iCLOCK;
+    assign regctla[06]    = arm_iCYCLE3;
+    assign regctla[09:07] = arm_iDMAFLD;
+    assign regctla[21:10] = arm_iINBUS;
+    assign regctla[22]    = arm_iINTRQST;
+    assign regctla[23]    = arm_iIOSKIP;
+    assign regctla[24]    = arm_iMEMDIS;
+    assign regctla[25]    = arm_iPAUSE;
+    assign regctla[31:26] = 0;
 
     assign regctlb[00]    = arm_swCONT;
     assign regctlb[01]    = arm_swDEPOS;
@@ -676,14 +686,14 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     assign regctlc[02]    = dev_iBRKRQST;
     assign regctlc[03]    = dev_iBRKWRM;
     assign regctlc[04]    = dev_iCAINC;
-    assign regctlc[05]    = dev_iCYCLE3;
-    assign regctlc[08:06] = dev_iDMAFLD;
-    assign regctlc[20:09] = dev_iINBUS;
-    assign regctlc[21]    = dev_iINTRQST;
-    assign regctlc[22]    = dev_iIOSKIP;
-    assign regctlc[23]    = dev_iMEMDIS;
-    assign regctlc[24]    = dev_iPAUSE;
-    assign regctlc[25]    = dev_iCLOCK;
+    assign regctlc[05]    = dev_iCLOCK;
+    assign regctlc[06]    = dev_iCYCLE3;
+    assign regctlc[09:07] = dev_iDMAFLD;
+    assign regctlc[21:10] = dev_iINBUS;
+    assign regctlc[22]    = dev_iINTRQST;
+    assign regctlc[23]    = dev_iIOSKIP;
+    assign regctlc[24]    = dev_iMEMDIS;
+    assign regctlc[25]    = dev_iPAUSE;
     assign regctlc[26]    = dev_iRESET;
     assign regctlc[31:27] = 0;
 
