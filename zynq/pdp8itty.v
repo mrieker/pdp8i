@@ -28,7 +28,7 @@
 
 module pdp8itty
     #(parameter[8:3] KBDEV=6'o03) (
-    input CLOCK, CSTEP, RESET, BINIT,
+    input CLOCK, RESET, BINIT,
 
     input armwrite,
     input[1:0] armraddr, armwaddr,
@@ -84,7 +84,7 @@ module pdp8itty
                 //         and sets prfull = 0 indicating prchar is empty
                 2: begin prflag <= armwdata[31]; prfull <= armwdata[30]; end
             endcase
-        end else if (CSTEP) begin
+        end else begin
 
             // process the IOP only on the leading edge
             // ...but leave output signals to PDP-8/I in place until given the all clear

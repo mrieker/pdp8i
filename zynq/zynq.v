@@ -229,10 +229,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     reg[9:0] meminprog;
 
     reg simit, lastts3, didio;
-    reg nanocontin, nanocstep, nanotrigger;
     wire acclr, intrq, ioskp;
-    reg[3:0] iopsetcount;               // count fpga cycles where an IOP is on
-    reg[3:0] iopclrcount;               // count fpga cycles where no IOP is on
     reg[31:00] memcycctr;
 
     // arm interface wires;
@@ -419,7 +416,6 @@ module Zynq #(parameter BIDIRCONSDA=1) (
 
             regctld     <= 9;                           // default 10MHz PDP clock
             simit       <= 0;                           // assume want to access real PDP-8/I by default
-            nanocontin  <= 1;                           // turn on 100MHz FPGA clocking
 
         end else begin
 
@@ -485,7 +481,6 @@ module Zynq #(parameter BIDIRCONSDA=1) (
 
                     10'b0000000101: begin
                         simit        <= saxi_WDATA[00];
-                        nanocontin   <= saxi_WDATA[02];
                     end
 
                     default: begin end
@@ -697,10 +692,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     assign regctlc[31:27] = 0;
 
     assign regctle[00]    = simit;
-    assign regctle[01]    = 0;
-    assign regctle[02]    = nanocontin;
-    assign regctle[03]    = nanotrigger;
-    assign regctle[04]    = nanocstep;
+    assign regctle[04:01] = 0;
     assign regctle[16:05] = dev_oMADR;
     assign regctle[19:17] = dev_oMEAD;
     assign regctle[31:20] = dev_oMBUF;
@@ -747,7 +739,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     always @(posedge CLOCK) begin
         if (dev_iRESET) begin
             meminprog <= 0;
-        end else if (nanocstep) begin
+        end else begin
             if (dev_oTS1) begin
                 meminprog <= 1023;
             end else if (meminprog != 0) begin
@@ -775,26 +767,6 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     //  simulated PDP-8/I processor  //
     ///////////////////////////////////
 
-    // when nanocontin is set to 1 by the arm,
-    //   this continuously shifts 1s into nanotrigger and nanoctep and everything runs normally
-    // when nanocontin is set to 0 by the arm,
-    //   it continuously shifts 0s into nanotrigger and nanocstep and everything stops
-    //   but then when a 1 is written to nanotrigger by the arm,
-    //     it shifts a 1 into nanocstep for 1 cycle and so everyting steps exactly one cycle
-    //     then it resumes shifting 0s into nanotrigger and nanocstep so everything stops
-    //     thus cstep lasts for a single cycle separate from an arm write
-    always @(posedge CLOCK) begin
-        if (~ RESET_N) begin
-            nanotrigger <= 0;
-            nanocstep   <= 1;////0;
-        end else begin
-            // we can shift nanotrigger only when it is not being written by the arm
-            nanotrigger <= (armwrite & (writeaddr == 10'b0000000101)) ? saxi_WDATA[03] : nanocontin;
-            // nanocstep is read-only to the arm so can always be shifted other than reset
-            nanocstep   <= 1;////nanotrigger;
-        end
-    end
-
     assign LEDoutR = simit;
     assign LEDoutG = ~ (dev_oTS1 | dev_oTS2 | dev_oTS3 | dev_oTS4);
     assign LEDoutB = 1;
@@ -806,7 +778,6 @@ module Zynq #(parameter BIDIRCONSDA=1) (
 
     pdp8isim siminst (
         .CLOCK          (CLOCK),
-        .CSTEP          (nanocstep),
         .RESET          (~ RESET_N),
 
         .iACCLEAR       (sim_iACCLEAR),
@@ -876,7 +847,6 @@ module Zynq #(parameter BIDIRCONSDA=1) (
 /***
     pdp8ishad shadinst (
         .CLOCK      (CLOCK),
-        .CSTEP      (nanocstep),
         .RESET      (~ RESET_N),
 
         .armwrite   (shawrite),
@@ -944,7 +914,6 @@ module Zynq #(parameter BIDIRCONSDA=1) (
 
     pdp8itty ttinst (
         .CLOCK (CLOCK),
-        .CSTEP (nanocstep),
         .RESET (dev_iRESET),
         .BINIT (dev_oBUSINI),
 
@@ -970,7 +939,6 @@ module Zynq #(parameter BIDIRCONSDA=1) (
 
     pdp8idc02 dcinst (
         .CLOCK (CLOCK),
-        .CSTEP (nanocstep),
         .RESET (dev_iRESET),
         .BINIT (dev_oBUSINI),
 
@@ -996,7 +964,6 @@ module Zynq #(parameter BIDIRCONSDA=1) (
 
     pdp8irk8je rkinst (
         .CLOCK (CLOCK),
-        .CSTEP (nanocstep),
         .RESET (dev_iRESET),
         .BINIT (dev_oBUSINI),
 
@@ -1058,7 +1025,6 @@ module Zynq #(parameter BIDIRCONSDA=1) (
 
     pdp8itc08 tcinst (
         .CLOCK (CLOCK),
-        .CSTEP (nanocstep),
         .RESET (dev_iRESET),
         .BINIT (dev_oBUSINI),
 
@@ -1084,7 +1050,6 @@ module Zynq #(parameter BIDIRCONSDA=1) (
 
     pdp8ivc8 vcinst (
         .CLOCK (CLOCK),
-        .CSTEP (nanocstep),
         .RESET (dev_iRESET),
         .BINIT (dev_oBUSINI),
 
@@ -1136,7 +1101,6 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     // paper tape reader interface
     pdp8iptr prinst (
         .CLOCK (CLOCK),
-        .CSTEP (nanocstep),
         .RESET (dev_iRESET),
         .BINIT (dev_oBUSINI),
 
@@ -1161,7 +1125,6 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     // pulse bit interface
     pdp8ipbit pbinst (
         .CLOCK (CLOCK),
-        .CSTEP (nanocstep),
         .RESET (dev_iRESET),
 
         .armwrite (pbawrite),
@@ -1186,7 +1149,6 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     // paper tape punch interface
     pdp8iptp ppinst (
         .CLOCK (CLOCK),
-        .CSTEP (nanocstep),
         .RESET (dev_iRESET),
         .BINIT (dev_oBUSINI),
 
@@ -1210,7 +1172,6 @@ module Zynq #(parameter BIDIRCONSDA=1) (
 
     pdp8irtc rcinst (
         .CLOCK (CLOCK),
-        .CSTEP (nanocstep),
         .RESET (dev_iRESET),
         .BINIT (dev_oBUSINI),
 

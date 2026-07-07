@@ -36,7 +36,7 @@
 
 module pdp8idc02
 (
-    input CLOCK, CSTEP, RESET, BINIT,
+    input CLOCK, RESET, BINIT,
 
     input armwrite,
     input[2:0] armraddr, armwaddr,
@@ -106,7 +106,7 @@ module pdp8idc02
                 if (armwdata[27]) prflags[wn] <= armwdata[30];
                 if (armwdata[28]) kbflags[wn] <= armwdata[31];
             end
-        end else if (CSTEP) begin
+        end else begin
 
             // process the IOP only on the leading edge
             // ...but leave output signals to PDP-8/I in place until given the all clear

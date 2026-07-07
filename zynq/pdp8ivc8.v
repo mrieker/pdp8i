@@ -21,7 +21,7 @@
 // PDP-8/I VC-8 interface
 
 module pdp8ivc8 (
-    input CLOCK, CSTEP, RESET, BINIT,
+    input CLOCK, RESET, BINIT,
 
     input armwrite,
     input[2:0] armraddr, armwaddr,
@@ -126,7 +126,7 @@ module pdp8ivc8 (
             endcase
         end
 
-        else if (CSTEP) begin
+        else begin
             if (iopstart) begin
                 if (typee) begin
 
@@ -226,7 +226,7 @@ module pdp8ivc8 (
         end
 
         // 2 cycle latency writing ram
-        if (~ CSTEP | ~ iopstart) case (vidramwritebsy)
+        if (~ iopstart) case (vidramwritebsy)
             1: begin vidramwritebsy <= 2; insert <= incdinsert; if (incdinsert == remove) remove <= incdremove; end
             2: begin videnaba <= 0; vidwrena <= 0; vidramwritebsy <= 0; end
         endcase

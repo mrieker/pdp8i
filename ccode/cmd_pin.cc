@@ -91,9 +91,6 @@ static PinDef const pindefs[] = {
     { "clkratm1",        DEV_8I, Z_RD, d_clkratm1,     true  },
 
     { "simit",           DEV_8I, Z_RE, e_simit,        true  },
-    { "nanocontin",      DEV_8I, Z_RE, e_nanocontin,   true  },
-    { "nanotrigger",     DEV_8I, Z_RE, e_nanotrigger,  true  },
-    { "nanocstep",       DEV_8I, Z_RE, e_nanocstep,    true  },
     { "oMADR",           DEV_8I, Z_RE, e_oMADR,        false },
     { "oMEAD",           DEV_8I, Z_RE, e_oMEAD,        false },
     { "oMBUF",           DEV_8I, Z_RE, e_oMBUF,        false },

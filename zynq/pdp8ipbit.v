@@ -25,7 +25,7 @@
 //  [1] = iszac 00000 width count
 
 module pdp8ipbit (
-    input CLOCK, CSTEP, RESET,
+    input CLOCK, RESET,
 
     input armwrite,
     input[2:0] armraddr, armwaddr,
@@ -89,7 +89,7 @@ module pdp8ipbit (
                         sampbytes <= 0;
                     end
                 endcase
-            end else if (CSTEP) begin
+            end else begin
                 if (iopstart) begin
 
                     // any I/O instruction, start pulse going

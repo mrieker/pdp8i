@@ -273,7 +273,7 @@ proc getrestofttyline {{tmsec 30000}} {
 # halt and reset the CPU
 proc hardreset {} {
     set oldsstepovr [pin fp_ovrsstep]       ;# save SSTEP override state
-    pin set nanocontin 1 fp_manual 0        ;# make sure pdp8ifpi2c.v is scanning
+    pin set fp_manual 0                     ;# make sure pdp8ifpi2c.v is scanning
     pin set fp_ovrsstep 1 fp_ovrstart 1     ;# set START + SSTEP
     pin set fp_setsstep 1 fp_setstart 1     ;# ...holds processor in reset state
     pin set arm_iRESET 1 arm_iRESET 0       ;# pulse fpga reset
@@ -881,9 +881,6 @@ proc zeromem {start stop} {
         domemcyc dep
     }
 }
-
-# make sure fpga clocking is turned on
-pin set nanocontin 1
 
 # maybe initialize real or sim mode
 # ...passed from z8ipanel command line

@@ -18,10 +18,8 @@
 //
 //    http://www.gnu.org/licenses/gpl-2.0.html
 
-// Runs PIPan8I on a Zynq board programmed with 8/I emulation code
-// It does not write to the zynq memory pages so does not alter zynq state
-
-//  ./z8idump.armv7l [-once | -step] [-xmem <lo>..<hi>]...
+// Dumps 4K zynq register page
+// Reads do not have any side-effects, so this program can run at any time
 
 #include <alloca.h>
 #include <signal.h>
@@ -67,7 +65,6 @@ int main (int argc, char **argv)
 
     bool oncemode = false;
     bool pagemode = false;
-    bool stepmode = false;
     char const *eol = EOL;
     int fps = 20;
     for (int i = 0; ++ i < argc;) {
@@ -76,11 +73,10 @@ int main (int argc, char **argv)
             puts ("     Dump ZTurn FPGA state");
             puts ("     Does not alter the state");
             puts ("");
-            puts ("  ./z8idump.armv7l [-fps <num> | -once | -page | -step]");
+            puts ("  ./z8idump.armv7l [-fps <num> | -once | -page]");
             puts ("      -fps : this many frames per second 1..1000 (default 20)");
             puts ("     -once : just print the state once, else update continually");
             puts ("     -page : just dump the raw page then exit");
-            puts ("     -step : prompt between updates");
             puts ("");
             return 0;
         }
@@ -106,10 +102,6 @@ int main (int argc, char **argv)
             pagemode = true;
             continue;
         }
-        if (strcasecmp (argv[i], "-step") == 0) {
-            stepmode = true;
-            continue;
-        }
         fprintf (stderr, "unknown argument %s\n", argv[i]);
         return 1;
     }
@@ -132,11 +124,7 @@ int main (int argc, char **argv)
         return 0;
     }
 
-    if (stepmode) {
-        pdpat[Z_RE] &= ~ (e_nanocontin | e_nanotrigger);
-    } else {
-        signal (SIGINT, siginthand);
-    }
+    signal (SIGINT, siginthand);
 
     I2CZLib i2czlib;
 
@@ -225,14 +213,6 @@ int main (int argc, char **argv)
 
         printf (EOP);
         fflush (stdout);
-
-        if (stepmode) {
-            char temp[8];
-            printf ("\n > ");
-            fflush (stdout);
-            if (fgets (temp, sizeof temp, stdin) == NULL) break;
-            pdpat[Z_RE] |= e_nanotrigger;
-        }
     }
     printf ("\n");
     return 0;

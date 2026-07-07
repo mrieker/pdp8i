@@ -124,7 +124,6 @@ module pdp8ifpi2c (
     i2cmaster fpi2cintf (
         .CLOCK (CLOCK),
         .RESET (iRESET),        // reset i2c on processor reset (matches console.kicad_sh mcp23017 reset)
-        .CSTEP (1'b1),
         .wrcmd (startbit),
         .command (command),
         .comand (comand),

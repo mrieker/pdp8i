@@ -25,7 +25,7 @@
 //  [1] = <rdflag> <enable> <rdstep> 00000000000000000 <rdchar>
 
 module pdp8iptr (
-    input CLOCK, CSTEP, RESET, BINIT,
+    input CLOCK, RESET, BINIT,
 
     input armwrite,
     input armraddr, armwaddr,
@@ -74,7 +74,7 @@ module pdp8iptr (
                     rdchar <= armwdata[11:00];
                 end
             endcase
-        end else if (CSTEP) begin
+        end else begin
 
             // process the IOP only on the leading edge
             // ...but leave output signals to PDP-8/I in place until given the all clear

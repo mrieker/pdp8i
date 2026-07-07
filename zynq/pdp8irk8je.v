@@ -21,7 +21,7 @@
 // PDP-8/I RK8JE interface
 
 module pdp8irk8je (
-    input CLOCK, CSTEP, RESET, BINIT,
+    input CLOCK, RESET, BINIT,
 
     input armwrite,
     input[2:0] armraddr, armwaddr,
@@ -95,7 +95,7 @@ module pdp8irk8je (
 
         // process the IOP only on the leading edge
         // ...but leave output signals to PDP-8/I in place until given the all clear
-        else if (CSTEP) begin
+        else begin
             if (iopstart & enable) begin
                 SELECTED <= (ioopcode & 12'o7770) == 12'o6740;
                 case (ioopcode)

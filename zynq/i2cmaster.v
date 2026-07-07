@@ -22,7 +22,6 @@
 //  inputs:
 //   RESET = reset to power-on state
 //   CLOCK = fpga clock (100MHz)
-//   CSTEP = clock step
 //   wrcmd = comand being written by arm processor
 //   command[63:62] = 00: done; 01: restart; 10: read; 11: write [61:54]
 //     10: shifts 8 bits from i2c bus into bottom of status register
@@ -41,8 +40,8 @@
 //   sclo = i2c bus clock output
 //   sdao = i2c bus data output
 
-module i2cmaster (CLOCK, RESET, CSTEP, wrcmd, command, comand, status, sclo, scli, sdao, sdai, speed, state, count);
-    input CLOCK, RESET, CSTEP, wrcmd, scli, sdai;
+module i2cmaster (CLOCK, RESET, wrcmd, command, comand, status, sclo, scli, sdao, sdai, speed, state, count);
+    input CLOCK, RESET, wrcmd, scli, sdai;
     output reg sclo, sdao;
     input[9:0] speed;
     input[63:00] command;
@@ -90,9 +89,8 @@ module i2cmaster (CLOCK, RESET, CSTEP, wrcmd, command, comand, status, sclo, scl
             end
         end
 
-        // count time if enabled by CSTEP (clock stepper)
-        // but block if outputting clock high (sclo=1) while device is stretching clock (scli=0)
-        else if (CSTEP & (~ sclo | scli)) begin
+        // hold state if outputting clock high (sclo=1) while device is stretching clock (scli=0)
+        else if (~ sclo | scli) begin
             case (state)
 
                 // send out start bit, starts with clock and data both high

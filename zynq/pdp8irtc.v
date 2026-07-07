@@ -22,7 +22,7 @@
 // small-computer-handbook-1972.pdf p7-26/p246
 
 module pdp8irtc (
-    input CLOCK, CSTEP, RESET, BINIT,
+    input CLOCK, RESET, BINIT,
 
     input armwrite,
     input armraddr, armwaddr,

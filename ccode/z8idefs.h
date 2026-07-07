@@ -92,9 +92,6 @@
 #define d_clkratm1     (077U << 0)  //rw clock ratio minus 1, eg, 9 for 10MHz = 100MHz / (d_clkratm1 + 1)
 
 #define e_simit         (1U <<  0)  //rw 0=real PDP-8/I; 1=pdp8isim.v
-#define e_nanocontin    (1U <<  2)  //rw 0=single step mode (sim only); 1=normal continuous running
-#define e_nanotrigger   (1U <<  3)  //rw 0=ignored; 1=trigger single step (sim only)
-#define e_nanocstep     (1U <<  4)  //ro 0=stopped; 1=stepping
 #define e_oMADR     (07777U <<  5)  //ro dev_oMADR
 #define e_oMEAD         (7U << 17)  //ro dev_oMEAD
 #define e_oMBUF     (07777U << 20)  //ro dev_oMBUF

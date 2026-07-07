@@ -22,7 +22,6 @@
 
 module pdp8isim (
     input CLOCK,                    // zynq 100MHz clock
-    input CSTEP,
     input RESET,                    // zynq power-on reset
 
     input iACCLEAR,                 // io pulse clears AC

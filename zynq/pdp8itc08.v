@@ -21,7 +21,7 @@
 // PDP-8/I TC08 interface
 
 module pdp8itc08 (
-    input CLOCK, CSTEP, RESET, BINIT,
+    input CLOCK, RESET, BINIT,
 
     input armwrite,
     input armraddr, armwaddr,
@@ -74,7 +74,7 @@ module pdp8itc08 (
 
         // process the IOP only on the leading edge
         // ...but leave output signals to PDP-8/I in place until given the all clear
-        else if (CSTEP) begin
+        else begin
             if (iopstart & enable) begin
 
                 // 676x opcodes
