@@ -12,12 +12,12 @@ set dmarqst      0
 set dmawdata     0
 set haltdelay    0
 set haltwhy      ""
-set hasmemcmd    0
 set instrno      0
 set intdelayed   0
 set intenabled   0
 set intrequest   0
 set linc         0
+set memdis       0
 set memcycno     0
 set memcycwcover 0
 set mquo         0
@@ -71,7 +71,6 @@ proc simtest {} {
     global dmawdata
     global dmaaddr
     global dmafield
-    global hasmemcmd
     global instrno
     global intdelayed
     global intenabled
@@ -107,12 +106,6 @@ proc simtest {} {
     global MS_INTAK
     global MS_DEPOS
     global MS_EXAM
-
-    ;# see if mem command works
-    ;# - verilator: yes, it has backdoor access to extmemory.v 32KW memory chip
-    ;# - zynq: no, no backdoor access to 32KW memory chip
-    set ercode [catch {mem 0}]
-    set hasmemcmd [expr {$ercode == 0}]
 
     ;# usefpi2c=0: use console.kicad_sch internal counters to scan lights/switches
     ;#          1: use pdp8ifpi2c.v fpga counters to scan lights/switches
@@ -539,11 +532,21 @@ proc dodmacycle {dma3cycle dmaaddr dmacainc dmawrmem dmawdata dmafield} {
 proc memorycycle {state field addr rdata wdata} {
     global cmat1 cmdmarqst
     global dma3cycle dmacainc dmarqst dmawrmem dmawdata dmaaddr dmafield
-    global hasmemcmd memcycwcover opcode
+    global memcycwcover opcode
     global MS_BREAK MS_CURAD MS_DEPOS MS_EXAM MS_EXEC MS_FETCH MS_INTAK MS_WRDCT
-    global haltdelay haltwhy memcycno panelhalt testcons
+    global haltdelay haltwhy memcycno memdis panelhalt testcons
 
     incr memcycno
+
+    ;# maybe flip memdis flag
+    ;#  memdis = 0 : extmemory.kicad_sch ram chips read data will be gated onto inbus during ts1
+    ;#           1 : the ram chip data will not be gated onto inbus
+    ;#               ...this tcl code must put read data directly on inbus during ts1
+    if {$memcycno % 1024 == 0} {
+        set memdis [randbits 1]
+        arm set 1 [expr {$memdis << 24}]    ;# arm_iMEMDIS
+        puts -nonewline " <<memdis=$memdis>>"
+    }
 
     ;# maybe flip on an halt switch if none flipped on already
     ;# takes several cycles to soak through console board
@@ -564,10 +567,17 @@ proc memorycycle {state field addr rdata wdata} {
     verify12 [bus majst] $state "bad state at start of mem cycle"
 
     ;# get the read data on the INBUS so cpu can read it
-    ;# put read data directly in extmemory.v chip
-    ;# it should then soak onto INBUS
     set expaddr [expr {($field << 12) | $addr}]
-    mem $expaddr $rdata
+    if {$memdis} {
+        ;# this script is the memory, so put read data directly on the INBUS
+        bus set iINBUS $rdata
+        ;# put unrelated number in extmemory.kicad_sch chip in case it is interfering
+        mem $expaddr [randbits 12]
+    } else {
+        ;# extmemory.kicad_sch memory chip enabled, so put read data directly in chip
+        ;# it should then soak onto INBUS
+        mem $expaddr $rdata
+    }
 
     ;# maybe generate a dma request via pdp8icmem.v
     ;# these have higher priority than plain dmarqsts
@@ -585,6 +595,11 @@ proc memorycycle {state field addr rdata wdata} {
 
     ;# end of TS1 means it finished reading that memory location into MB
     waitnegate TS1
+
+    ;# stop dumping memory read value onto iINBUS
+    if {$memdis} {
+        bus set iINBUS 0
+    }
 
     ;# maybe put dma write data out on the inbus during TS2
     if {$dmarqst && $dmawrmem && ($state == $MS_BREAK) && [bus oBRKGNTO]} {
@@ -664,8 +679,10 @@ proc memorycycle {state field addr rdata wdata} {
         bus set iACCLEAR 0 iIOSKIP 0 iINBUS 0
     }
 
-    ;# verify the extmemory.v memory contents
-    verify12 [mem $expaddr] $wdata [format "address %05o mismatch" $expaddr]
+    ;# verify the extmemory.kicad_sch memory contents
+    if {! $memdis} {
+        verify12 [mem $expaddr] $wdata [format "address %05o mismatch" $expaddr]
+    }
 
     ;# if requesting break and it is granted, output address during all TS4s
     if {$dmarqst && [bus oBRKGNTO]} {
