@@ -33,9 +33,9 @@ entity myboard_wrapper is
     FIXED_IO_ps_clk : inout STD_LOGIC;
     FIXED_IO_ps_porb : inout STD_LOGIC;
     FIXED_IO_ps_srstb : inout STD_LOGIC;
-    LEDoutB_0 : out STD_LOGIC;
-    LEDoutG_0 : out STD_LOGIC;
-    LEDoutR_0 : out STD_LOGIC;
+    LEDoutB_N_0 : out STD_LOGIC;
+    LEDoutG_N_0 : out STD_LOGIC;
+    LEDoutR_N_0 : out STD_LOGIC;
     hdw_bCONSDA_0 : inout STD_LOGIC;
     hdw_dmagntd_n_0 : out STD_LOGIC;
     hdw_iACCLEAR_0 : out STD_LOGIC;
@@ -107,9 +107,9 @@ architecture STRUCTURE of myboard_wrapper is
     FIXED_IO_ps_clk : inout STD_LOGIC;
     FIXED_IO_ps_porb : inout STD_LOGIC;
     FIXED_IO_ps_srstb : inout STD_LOGIC;
-    LEDoutB_0 : out STD_LOGIC;
-    LEDoutG_0 : out STD_LOGIC;
-    LEDoutR_0 : out STD_LOGIC;
+    LEDoutB_N_0 : out STD_LOGIC;
+    LEDoutG_N_0 : out STD_LOGIC;
+    LEDoutR_N_0 : out STD_LOGIC;
     hdw_bCONSDA_0 : inout STD_LOGIC;
     hdw_dmagntd_n_0 : out STD_LOGIC;
     hdw_iACCLEAR_0 : out STD_LOGIC;
@@ -180,9 +180,9 @@ myboard_i: component myboard
     FIXED_IO_ps_clk => FIXED_IO_ps_clk,
     FIXED_IO_ps_porb => FIXED_IO_ps_porb,
     FIXED_IO_ps_srstb => FIXED_IO_ps_srstb,
-    LEDoutB_0 => LEDoutB_0,
-    LEDoutG_0 => LEDoutG_0,
-    LEDoutR_0 => LEDoutR_0,
+    LEDoutB_N_0 => LEDoutB_N_0,
+    LEDoutG_N_0 => LEDoutG_N_0,
+    LEDoutR_N_0 => LEDoutR_N_0,
     hdw_bCONSDA_0 => hdw_bCONSDA_0,
     hdw_dmagntd_n_0 => hdw_dmagntd_n_0,
     hdw_iACCLEAR_0 => hdw_iACCLEAR_0,

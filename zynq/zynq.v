@@ -48,9 +48,9 @@ endmodule
 module Zynq #(parameter BIDIRCONSDA=1) (
     input         CLOCK,        // 100MHz
     input         RESET_N,      // FPGA reset
-    output        LEDoutR,      // IO_B34_LN6 R14
-    output        LEDoutG,      // IO_B34_LP7 Y16
-    output        LEDoutB,      // IO_B34_LN7 Y17
+    output        LEDoutR_N,    // IO_B34_LN6 R14
+    output        LEDoutG_N,    // IO_B34_LP7 Y16
+    output        LEDoutB_N,    // IO_B34_LN7 Y17
 
     // io bus connections
     input[11:00]  hdw_oACUM,
@@ -767,9 +767,9 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     //  simulated PDP-8/I processor  //
     ///////////////////////////////////
 
-    assign LEDoutR = simit;
-    assign LEDoutG = ~ (dev_oTS1 | dev_oTS2 | dev_oTS3 | dev_oTS4);
-    assign LEDoutB = 1;
+    assign LEDoutR_N = simit;
+    assign LEDoutG_N = ~ (dev_oTS1 | dev_oTS2 | dev_oTS3 | dev_oTS4);
+    assign LEDoutB_N = 1;
 
     wire[3:0] sim_majst;
     wire sim_run, sim_swldad, sim_swdepos, sim_swexam, sim_swstart, sim_swcont;

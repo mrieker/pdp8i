@@ -257,13 +257,13 @@
             },
             "type": "clk"
           },
-          "LEDoutB": {
+          "LEDoutB_N": {
             "direction": "O"
           },
-          "LEDoutG": {
+          "LEDoutG_N": {
             "direction": "O"
           },
-          "LEDoutR": {
+          "LEDoutR_N": {
             "direction": "O"
           },
           "RESET_N": {
@@ -1850,7 +1850,7 @@
       }
     },
     "design_info": {
-      "boundary_crc": "0xA20FACBA14F6BF75",
+      "boundary_crc": "0xBDF1DF0540B245B9",
       "device": "xc7z020clg400-1",
       "name": "myboard",
       "synth_flow_mode": "None",
@@ -1971,22 +1971,22 @@
           "Zynq_0/hdw_bCONSDA"
         ]
       },
-      "Zynq_0_LEDoutB": {
+      "Zynq_0_LEDoutB_N": {
         "ports": [
-          "Zynq_0/LEDoutB",
-          "LEDoutB_0"
+          "Zynq_0/LEDoutB_N",
+          "LEDoutB_N_0"
         ]
       },
-      "Zynq_0_LEDoutG": {
+      "Zynq_0_LEDoutG_N": {
         "ports": [
-          "Zynq_0/LEDoutG",
-          "LEDoutG_0"
+          "Zynq_0/LEDoutG_N",
+          "LEDoutG_N_0"
         ]
       },
-      "Zynq_0_LEDoutR": {
+      "Zynq_0_LEDoutR_N": {
         "ports": [
-          "Zynq_0/LEDoutR",
-          "LEDoutR_0"
+          "Zynq_0/LEDoutR_N",
+          "LEDoutR_N_0"
         ]
       },
       "Zynq_0_hdw_dmagntd_n": {
@@ -2288,35 +2288,14 @@
       }
     },
     "ports": {
-      "LEDoutB_0": {
-        "direction": "O",
-        "parameters": {
-          "LAYERED_METADATA": {
-            "value": "undef",
-            "value_src": "default"
-          }
-        },
-        "type": "data"
+      "LEDoutB_N_0": {
+        "direction": "O"
       },
-      "LEDoutG_0": {
-        "direction": "O",
-        "parameters": {
-          "LAYERED_METADATA": {
-            "value": "undef",
-            "value_src": "default"
-          }
-        },
-        "type": "data"
+      "LEDoutG_N_0": {
+        "direction": "O"
       },
-      "LEDoutR_0": {
-        "direction": "O",
-        "parameters": {
-          "LAYERED_METADATA": {
-            "value": "undef",
-            "value_src": "default"
-          }
-        },
-        "type": "data"
+      "LEDoutR_N_0": {
+        "direction": "O"
       },
       "hdw_bCONSDA_0": {
         "direction": "IO"
