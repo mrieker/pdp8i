@@ -431,11 +431,31 @@
       "axi_interconnect_1": {
         "components": {
           "m00_couplers": {
+            "components": {
+              "auto_pc": {
+                "parameters": {
+                  "MI_PROTOCOL": {
+                    "value": "AXI4LITE"
+                  },
+                  "SI_PROTOCOL": {
+                    "value": "AXI4"
+                  }
+                },
+                "vlnv": "xilinx.com:ip:axi_protocol_converter:2.1",
+                "xci_name": "myboard_auto_pc_0"
+              }
+            },
             "interface_nets": {
-              "m00_couplers_to_m00_couplers": {
+              "auto_pc_to_m00_couplers": {
+                "interface_ports": [
+                  "M_AXI",
+                  "auto_pc/M_AXI"
+                ]
+              },
+              "m00_couplers_to_auto_pc": {
                 "interface_ports": [
                   "S_AXI",
-                  "M_AXI"
+                  "auto_pc/S_AXI"
                 ]
               }
             },
@@ -447,6 +467,20 @@
               "S_AXI": {
                 "mode": "Slave",
                 "vlnv": "xilinx.com:interface:aximm_rtl:1.0"
+              }
+            },
+            "nets": {
+              "S_ACLK_1": {
+                "ports": [
+                  "S_ACLK",
+                  "auto_pc/aclk"
+                ]
+              },
+              "S_ARESETN_1": {
+                "ports": [
+                  "S_ARESETN",
+                  "auto_pc/aresetn"
+                ]
               }
             },
             "ports": {
@@ -543,14 +577,14 @@
               "auto_pc": {
                 "parameters": {
                   "MI_PROTOCOL": {
-                    "value": "AXI4LITE"
+                    "value": "AXI4"
                   },
                   "SI_PROTOCOL": {
                     "value": "AXI3"
                   }
                 },
                 "vlnv": "xilinx.com:ip:axi_protocol_converter:2.1",
-                "xci_name": "myboard_auto_pc_0"
+                "xci_name": "myboard_auto_pc_1"
               }
             },
             "interface_nets": {
@@ -1827,7 +1861,9 @@
       "SyncReset_0": "",
       "Zynq_0": "",
       "axi_interconnect_1": {
-        "m00_couplers": { },
+        "m00_couplers": {
+          "auto_pc": ""
+        },
         "m01_couplers": { },
         "s00_couplers": {
           "auto_pc": ""
