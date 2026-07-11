@@ -533,13 +533,14 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     //  synchronize signals output by the PDP-8/I  //
     /////////////////////////////////////////////////
 
-    wire hsy_oBRKGNTI, hsy_oBRKRQST, hsy_oBUSINI, hsy_oIOP, hsy_oTP1, hsy_oTP2;
-    wire hsy_oTP3,     hsy_oTP4,     hsy_oTS1,    hsy_oTS2, hsy_oTS3, hsy_oTS4;
+    wire hsy_oBRKGNTI, hsy_oBRKRQST, hsy_oBUSINI, hsy_oIOP, hsy_oRUN, hsy_oTP1;
+    wire hsy_oTP2, hsy_oTP3, hsy_oTP4, hsy_oTS1, hsy_oTS2, hsy_oTS3, hsy_oTS4;
 
     synk synkbg (CLOCK, hsy_oBRKGNTI, hdw_oBRKGNTI);
     synk synkbr (CLOCK, hsy_oBRKRQST, hdw_oBRKRQST);
     synk synkbi (CLOCK, hsy_oBUSINI,  hdw_oBUSINI);
     synk synkip (CLOCK, hsy_oIOP,     hdw_oIOP);
+    synk synkrn (CLOCK, hsy_oRUN,     hdw_oRUN);
     synk synkp1 (CLOCK, hsy_oTP1,     hdw_oTP1);
     synk synkp2 (CLOCK, hsy_oTP2,     hdw_oTP2);
     synk synkp3 (CLOCK, hsy_oTP3,     hdw_oTP3);
@@ -636,7 +637,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     assign dev_oMBUF    = simit ? sim_oMBUF    : hdw_oMBUF;
     assign dev_oMEAD    = simit ? sim_oMEAD    : hdw_oMEAD;
     assign dev_oMAJST   = simit ? sim_oMAJST   : hdw_oMAJST;
-    assign dev_oRUN     = simit ? sim_oRUN     : hdw_oRUN;
+    assign dev_oRUN     = simit ? sim_oRUN     : hsy_oRUN;
     assign dev_oTP1     = simit ? sim_oTP1     : hsy_oTP1;
     assign dev_oTP2     = simit ? sim_oTP2     : hsy_oTP2;
     assign dev_oTP3     = simit ? sim_oTP3     : hsy_oTP3;
@@ -840,10 +841,6 @@ module Zynq #(parameter BIDIRCONSDA=1) (
 
     // verifies that the processor is doing what it should be doing
 
-    wire shad_error, shad_freeze;
-    wire[3:0] shad_tstate;
-    wire[3:0] shad_tdelay;
-/***
     pdp8ishad shadinst (
         .CLOCK      (CLOCK),
         .RESET      (~ RESET_N),
@@ -853,10 +850,6 @@ module Zynq #(parameter BIDIRCONSDA=1) (
         .armwaddr   (writeaddr[4:2]),
         .armwdata   (saxi_WDATA),
         .armrdata   (shardata),
-
-        // fpga is sole sorce of CLOCK and RESET
-        .iCLOCK     (dev_iCLOCK),
-        .iRESET     (dev_iRESET),
 
         // all signals coming in from the bus
         .oACUM      (dev_oACUM),
@@ -881,13 +874,31 @@ module Zynq #(parameter BIDIRCONSDA=1) (
         .oTS3       (dev_oTS3),
         .oTS4       (dev_oTS4),
 
-        // shadowing status
-        .timestate  (shad_tstate),
-        .timedelay  (shad_tdelay),
-        .error      (shad_error),
+        // fpga outputs these signals conditionally
+        // otherwise we do not know their state on the bus
+        .dmagntd    (cmdmagntd),
+        .iBRKWRM    (dev_iBRKWRM),
+        .iCAINC     (dev_iCAINC),
+        .iCYCLE3    (dev_iCYCLE3),
+        .iDMAFLD    (dev_iDMAFLD),
+
+        .ioenabd    (~ hdw_ioenabd_n | simit),
+        .iACCLEAR   (dev_iACCLEAR),
+        .iINBUS     (dev_iINBUS),
+        .iIOSKIP    (dev_iIOSKIP),
+
+        .poweron    (~ hdw_poweron_n | simit),
+        .iCLOCK     (dev_iCLOCK),
+        .iMEMDIS    (dev_iMEMDIS),
+        .iRESET     (dev_iRESET),
+        .iBRKRQST   (dev_iBRKRQST),
+        .iINTRQST   (dev_iINTRQST),
+        .iPAUSE     (dev_iPAUSE),
+
+        // stop clocking processor
         .freeze     (shad_freeze)
     );
-***/
+
     /////////////////////
     //  io interfaces  //
     /////////////////////
