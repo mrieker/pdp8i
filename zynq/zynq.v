@@ -262,6 +262,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     wire hizmembus;
 
     // shadow interface wires
+    wire shad_freeze;
     wire[31:00] shardata;
 
     // rtc interface wires
@@ -329,7 +330,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     reg ilaarmed;
 
     // generate 10MHz PDP clock
-    // or whatever frequency is selected in regctld[5:0]:
+    // or whatever frequency is selected in regctld[05:00]
     //  0: use arm_iCLOCK to clock from arm
     //  1:  20nS = 50.0MHz
     //  7:  80nS = 12.5MHz
@@ -373,15 +374,14 @@ module Zynq #(parameter BIDIRCONSDA=1) (
         (readaddr[11:05] ==  7'b0000111)    ? vcardata   :
         (readaddr[11:05] ==  7'b0001000)    ? pbardata   :
         (readaddr[11:05] ==  7'b0001001)    ? dcardata   :
-        (readaddr[11:04] ==  8'b00010100)   ? cmardata   :
-        (readaddr[11:04] ==  8'b00010101)   ? ttardata   :
-        (readaddr[11:03] ==  9'b000101100)  ? prardata   :
-        (readaddr[11:03] ==  9'b000101101)  ? ppardata   :
-        (readaddr[11:03] ==  9'b000101110)  ? tcardata   :
-        (readaddr[11:03] ==  9'b000101111)  ? rcardata   :
+        (readaddr[11:05] ==  7'b0001010)    ? shardata   :
+        (readaddr[11:04] ==  8'b00010110)   ? cmardata   :
+        (readaddr[11:04] ==  8'b00010111)   ? ttardata   :
+        (readaddr[11:03] ==  9'b000110000)  ? prardata   :
+        (readaddr[11:03] ==  9'b000110001)  ? ppardata   :
+        (readaddr[11:03] ==  9'b000110010)  ? tcardata   :
+        (readaddr[11:03] ==  9'b000110011)  ? rcardata   :
         32'hDEADBEEF;
-
-    ////(readaddr[11:05] ==  7'b0001001)    ? shardata   :
 
     wire armwrite   = saxi_WREADY & saxi_WVALID;    // arm is writing a register (single fpga clock cycle)
     wire fpi2cwrite = armwrite & writeaddr[11:06] == 6'b000010;
@@ -389,14 +389,13 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     wire vcawrite   = armwrite & writeaddr[11:05] == 7'b0000111;
     wire pbawrite   = armwrite & writeaddr[11:05] == 7'b0001000;
     wire dcawrite   = armwrite & writeaddr[11:05] == 7'b0001001;
-    wire cmawrite   = armwrite & writeaddr[11:04] == 8'b00010100;
-    wire ttawrite   = armwrite & writeaddr[11:04] == 8'b00010101;
-    wire prawrite   = armwrite & writeaddr[11:03] == 9'b000101100;
-    wire ppawrite   = armwrite & writeaddr[11:03] == 9'b000101101;
-    wire tcawrite   = armwrite & writeaddr[11:03] == 9'b000101110;
-    wire rcawrite   = armwrite & writeaddr[11:03] == 9'b000101111;
-
-    //// shawrite   = armwrite & writeaddr[11:05] == 7'b0001001;
+    wire shawrite   = armwrite & writeaddr[11:05] == 7'b0001010;
+    wire cmawrite   = armwrite & writeaddr[11:04] == 8'b00010110;
+    wire ttawrite   = armwrite & writeaddr[11:04] == 8'b00010111;
+    wire prawrite   = armwrite & writeaddr[11:03] == 9'b000110000;
+    wire ppawrite   = armwrite & writeaddr[11:03] == 9'b000110001;
+    wire tcawrite   = armwrite & writeaddr[11:03] == 9'b000110010;
+    wire rcawrite   = armwrite & writeaddr[11:03] == 9'b000110011;
 
     // A3.3.1 Read transaction dependencies
     // A3.3.1 Write transaction dependencies
@@ -476,7 +475,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
                     end
 
                     10'b0000000100: begin
-                        regctld[5:0] <= saxi_WDATA[5:0];
+                        regctld[05:00] <= saxi_WDATA[05:00];
                     end
 
                     10'b0000000101: begin
