@@ -341,7 +341,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     // 11: 120nS =  8.3MHz
     // 63: 640nS =  1.6MHz
     always @(posedge CLOCK) begin
-        if (~ RESET_N | (clkdiv == regctld[5:0])) begin
+        if (~ RESET_N | (clkdiv == regctld[5:0]) | shad_freeze) begin
             clkdiv <= 0;
             dev_iCLOCK <= arm_iCLOCK;
         end else begin
@@ -1230,7 +1230,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
                 if (ilaarmed | (ilaafter != 0)) begin
                     ilaarray[ilaindex] <= {
                         arm_iRESET,
-                        8'b0,
+                        9'b0,
                         sim_iRESET,
                         sim_swldad,
                         sim_swdepos,
