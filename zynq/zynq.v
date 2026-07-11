@@ -767,9 +767,9 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     //  simulated PDP-8/I processor  //
     ///////////////////////////////////
 
-    assign LEDoutR_N = simit;
-    assign LEDoutG_N = ~ (dev_oTS1 | dev_oTS2 | dev_oTS3 | dev_oTS4);
-    assign LEDoutB_N = 1;
+    assign LEDoutR_N = ~ shad_freeze;   // turn on when frozen
+    assign LEDoutG_N = ~ dev_oRUN;      // turn on when running
+    assign LEDoutB_N = ~ simit;         // turn on when simming
 
     wire[3:0] sim_majst;
     wire sim_run, sim_swldad, sim_swdepos, sim_swexam, sim_swstart, sim_swcont;
