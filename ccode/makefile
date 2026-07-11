@@ -38,6 +38,7 @@ VFILES := \
 	../zynq/pdp8iptr.v \
 	../zynq/pdp8ipbit.v \
 	../zynq/pdp8iptp.v \
+	../zynq/pdp8ishad.v \
 	../zynq/pdp8itty.v \
 	../zynq/pdp8ivc8.v \
 	../zynq/dmareq.v \

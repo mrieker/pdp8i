@@ -176,29 +176,22 @@
 #define PR_FULL 0x40000000
 
 // pdp8ishad.v registers
-#define SH_ACKNOWN  (1U << 31)
-#define SH_EAKNOWN  (1U << 30)
-#define SH_IRKNOWN  (1U << 29)
-#define SH_LNKNOWN  (1U << 28)
-#define SH_MAKNOWN  (1U << 27)
-#define SH_MBKNOWN  (1U << 26)
-#define SH_PCKNOWN  (1U << 25)
-#define SH_FRZONERR (1U << 17)
-#define SH_CLEARIT  (1U << 16)
-#define SH_ERROR    (0177777U)
-
-#define SH2_MAJSTATE  (15U << 28)
-#define SH2_TIMESTATE (15U << 24)
-#define SH2_IREG   (07777U << 12)
-#define SH2_PCTR   (07777U <<  0)
-
-#define SH3_TIMEDELAY (15U << 28)
-#define SH3_MBUF   (07777U << 12)
-#define SH3_MADR   (07777U <<  0)
-
-#define SH4_LINK     (1U << 24)
-#define SH4_ACUM (07777U << 12)
-#define SH4_EADR (07777U <<  0)
+#define sh1_frzonerr  (1U << 31)
+#define sh1_clearit   (1U << 30)
+#define sh1_maknown   (1U << 29)
+#define sh1_pcknown   (1U << 28)
+#define sh1_err       (0xFFFFFFFU)
+#define sh2_majst     (15U << 28)
+#define sh2_timestate (15U << 24)
+#define sh2_ireg      (07777U << 12)
+#define sh2_pctr      (07777U <<  0)
+#define sh3_mred      (07777U << 12)
+#define sh3_madr      (07777U <<  0)
+#define sh4_mwbk      (07777U << 13)
+#define sh4_link      (1U     << 12)
+#define sh4_acum      (07777U <<  0)
+#define sh5_sctr      (037U   << 12)
+#define sh5_mquo      (07777U <<  0)
 
 // pdp8ixmem.v registers
 #define XM_OS8ZAP (1U <<  0)

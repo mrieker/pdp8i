@@ -232,49 +232,43 @@ void Z8IPage::cmunlk ()
 }
 
 // format shadow string
-char *formatshadow (uint32_t *shat)
+char *formatshadow (uint32_t const *shat)
 {
-    static char const *const msstr[] = { "--", "F ", "D ", "E ", "WC", "CA", "BR", "IA",
-                                         "ST", "09", "10", "11", "12", "13", "14", "15" };
+    static char const *const msstr[] = { "---", "FET", "DEF", "EXE", "WCT", "CAD", "BRK", "IAK",
+                                         "DEP", "EXM", "10 ", "11 ", "12 ", "13 ", "14 ", "15 " };
 
     uint32_t sh1 = shat[1];
     uint32_t sh2 = shat[2];
     uint32_t sh3 = shat[3];
     uint32_t sh4 = shat[4];
-
-    char iregstr[5], pctrstr[5], mbufstr[5], madrstr[5], acumstr[5], eadrstr[5];
-    sprintf (iregstr, "%04o", (sh2 & SH2_IREG) / (SH2_IREG & - SH2_IREG));
-    sprintf (pctrstr, "%04o", (sh2 & SH2_PCTR) / (SH2_PCTR & - SH2_PCTR));
-    sprintf (mbufstr, "%04o", (sh3 & SH3_MBUF) / (SH3_MBUF & - SH3_MBUF));
-    sprintf (madrstr, "%04o", (sh3 & SH3_MADR) / (SH3_MADR & - SH3_MADR));
-    sprintf (acumstr, "%04o", (sh4 & SH4_ACUM) / (SH4_ACUM & - SH4_ACUM));
-    sprintf (eadrstr, "%04o", (sh4 & SH4_EADR) / (SH4_EADR & - SH4_EADR));
+    uint32_t sh5 = shat[5];
 
     char *buf;
     int rc = asprintf (&buf,
-        "err=%04X"
-        " foe=%o"
-        " ms=%s"
-        " ts=%u+%2u"
-        " ir=%s"
-        " pc=%s"
-        " mb=%s"
-        " ma=%s"
-        " l.ac=%c.%s"
-        " ea=%s",
+        "foe=%o "
+        "clr=%o "
+        "err=%07X "
+        "ms=%s "
+        "ts=%u "
+        "ir=%04o "
+        "pc=%04o "
+        "ma=%04o "
+        "l.ac=%o.%04o "
+        "sc=%02o "
+        "mq=%04o",
 
-        (sh1 & SH_ERROR) / (SH_ERROR & - SH_ERROR),
-        (sh1 & SH_FRZONERR) / SH_FRZONERR,
-        msstr[(sh2&SH2_MAJSTATE)/(SH2_MAJSTATE&-SH2_MAJSTATE)],
-        (sh2 & SH2_TIMESTATE) / (SH2_TIMESTATE & - SH2_TIMESTATE),
-                (sh3 & SH3_TIMEDELAY) / (SH3_TIMEDELAY & - SH3_TIMEDELAY),
-        (sh1 & SH_IRKNOWN) ? iregstr : "----",
-        (sh1 & SH_PCKNOWN) ? pctrstr : "----",
-        (sh1 & SH_MBKNOWN) ? mbufstr : "----",
-        (sh1 & SH_MAKNOWN) ? madrstr : "----",
-        (sh1 & SH_LNKNOWN) ? '0' + (sh4 & SH4_LINK) / SH4_LINK : '-',
-                (sh1 & SH_ACKNOWN) ? acumstr : "----",
-        (sh1 & SH_EAKNOWN) ? eadrstr : "----");
+        EXT (sh1, sh1_frzonerr),
+        EXT (sh1, sh1_clearit),
+        EXT (sh1, sh1_err),
+        msstr[EXT(sh2,sh2_majst)],
+        EXT (sh2, sh2_timestate),
+        EXT (sh2, sh2_ireg),
+        EXT (sh2, sh2_pctr),
+        EXT (sh3, sh3_madr),
+        EXT (sh4, sh4_link),
+        EXT (sh4, sh4_acum),
+        EXT (sh5, sh5_sctr),
+        EXT (sh5, sh5_mquo));
 
     ASSERT (rc > 0);
     return buf;

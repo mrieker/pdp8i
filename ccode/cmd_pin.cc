@@ -40,8 +40,9 @@ struct PinDef {
 #define DEV_CM 1
 #define DEV_TT 2
 #define DEV_FP 3
+#define DEV_SH 4
 
-static Z8IU32 *devs[4];
+static Z8IU32 *devs[5];
 
 static PinDef const pindefs[] = {
 
@@ -177,6 +178,23 @@ static PinDef const pindefs[] = {
     { "FP_I2CSPEED",     DEV_FP, 13, fp13_i2cspeed,        true  },
     { "FP_LTSPEED",      DEV_FP, 13, fp13_ltspeed,         true  },
 
+    { "sh_frzonerr",     DEV_SH,  1, sh1_frzonerr,         true  },
+    { "sh_clearit",      DEV_SH,  1, sh1_clearit,          true  },
+    { "sh_maknown",      DEV_SH,  1, sh1_maknown,          false },
+    { "sh_pcknown",      DEV_SH,  1, sh1_pcknown,          false },
+    { "sh_err",          DEV_SH,  1, sh1_err,              true  },
+    { "sh_majst",        DEV_SH,  2, sh2_majst,            false },
+    { "sh_timestate",    DEV_SH,  2, sh2_timestate,        false },
+    { "sh_ireg",         DEV_SH,  2, sh2_ireg,             false },
+    { "sh_pctr",         DEV_SH,  2, sh2_pctr,             false },
+    { "sh_mred",         DEV_SH,  3, sh3_mred,             false },
+    { "sh_madr",         DEV_SH,  3, sh3_madr,             false },
+    { "sh_mwbk",         DEV_SH,  4, sh4_mwbk,             false },
+    { "sh_link",         DEV_SH,  4, sh4_link,             false },
+    { "sh_acum",         DEV_SH,  4, sh4_acum,             false },
+    { "sh_sctr",         DEV_SH,  5, sh5_sctr,             false },
+    { "sh_mquo",         DEV_SH,  5, sh5_mquo,             false },
+
     { "", 0, 0, 0, false }
 };
 
@@ -218,6 +236,7 @@ int cmd_pin (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj *const
         devs[DEV_CM] = z8ipage.findev ("CM", NULL, NULL, false);
         devs[DEV_TT] = z8ipage.findev ("TT", NULL, NULL, false);
         devs[DEV_FP] = z8ipage.findev ("FP", NULL, NULL, false);
+        devs[DEV_SH] = z8ipage.findev ("SH", NULL, NULL, false);
     }
 
     bool setmode = false;
