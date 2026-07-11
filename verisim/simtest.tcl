@@ -26,6 +26,7 @@ set panelhalt    0
 set perclock     0
 set pctr         0
 set sctr         0
+set shat1        0
 set ttat1        0
 set ttat2        0
 set ttinten      1
@@ -82,6 +83,7 @@ proc simtest {} {
     global perclock
     global pctr
     global sctr
+    global shat1
     global swdfpend
     global swifpend
     global swregpend
@@ -122,6 +124,10 @@ proc simtest {} {
     hardreset
     puts "simtest: hardreset complete"
 
+    set shat0 [arm find SH]
+    set shat1 [expr {$shat0 + 1}]
+    arm set $shat1 0x80000000   ;# sh_frzonerr : freeze clocking on error
+
     set cmat0 [arm find CM]
     set ttat0 [arm find TT]
     startat 0
@@ -149,6 +155,7 @@ proc simtest {} {
     set lastopc -1
     set nextfetch 0
     set begclkns -1
+    set needmqsca 0
 
     while {! [ctrlcflag]} {
         set ercode [catch {
@@ -236,35 +243,53 @@ proc simtest {} {
                     ;# delayed ION active now that we are about to do a fetch
                     set intenabled $intdelayed
 
-                    ;# send random opcode
-                    while true {
-                        set opcode [randbits 12]
-                        if {($opcode & 06000) != 06000} break       ;# and,tad,isz,dca,jms,jmp
-                        if {$opcode == 06001} break                 ;# ION
-                        if {$opcode == 06002} break                 ;# IOF
-                        if {$opcode == 06004} break                 ;# used to test skip/acclr
-                        if {$testxmem && ($lastopc != 06001)} {     ;# don't do memext opcodes if instruction after ION
-                            if {($opcode & 07704) == 06200} break
-                            if {($opcode & 07707) == 06204} break
-                        }
-                        if {($opcode & 07770) == 06030} break       ;# tty keyboard opcodes
-                        if {($opcode & 07770) == 06040} break       ;# tty printer opcodes
-                        if {($opcode & 07400) == 07000} {           ;# group 1
-                            ##if {($opcode & 016) == 002} continue    ;# bsw
-                            if {($opcode & 014) == 014} continue    ;# 6,7
-                            break
-                        }
-                        if {($opcode & 07401) == 07400} {           ;# group 2
-                            if {($opcode & 2) && (! $testcons || ([randbits 2] != 0))} {
-                                incr opcode -2                      ;# don't do HLT
+                    switch $needmqsca {
+                        0 {
+                            ;# send random opcode
+                            while true {
+                                set opcode [randbits 12]
+                                if {($opcode & 06000) != 06000} break       ;# and,tad,isz,dca,jms,jmp
+                                if {$opcode == 06001} break                 ;# ION
+                                if {$opcode == 06002} break                 ;# IOF
+                                if {$opcode == 06004} break                 ;# used to test skip/acclr
+                                if {$testxmem && ($lastopc != 06001)} {     ;# don't do memext opcodes if instruction after ION
+                                    if {($opcode & 07704) == 06200} break
+                                    if {($opcode & 07707) == 06204} break
+                                }
+                                if {($opcode & 07770) == 06030} break       ;# tty keyboard opcodes
+                                if {($opcode & 07770) == 06040} break       ;# tty printer opcodes
+                                if {($opcode & 07400) == 07000} {           ;# group 1
+                                    ##if {($opcode & 016) == 002} continue    ;# bsw
+                                    if {($opcode & 014) == 014} continue    ;# 6,7
+                                    break
+                                }
+                                if {($opcode & 07401) == 07400} {           ;# group 2
+                                    if {($opcode & 2) && (! $testcons || ([randbits 2] != 0))} {
+                                        incr opcode -2                      ;# don't do HLT
+                                    }
+                                    set swregsent [swtch reg]
+                                    if {$swregsent != $swregpend} {         ;# see if processor has absorbed switches
+                                        set opcode [expr {$opcode & 07773}] ;# if not, don't do OSR
+                                    }
+                                    break
+                                }
+                                if {$testexar && (($opcode & 07401) == 07401)} {  ;# group 3 (extended arithmetic)
+                                    ;# follow SCL,MUY,DVI,NMI,SHL,ASR,LSR with CLA MQA then CLA SCA so pdp8ishad.v can verify MQ and SC
+                                    if {$opcode & 14} {
+                                        set needmqsca 1
+                                    }
+                                    break
+                                }
                             }
-                            set swregsent [swtch reg]
-                            if {$swregsent != $swregpend} {         ;# see if processor has absorbed switches
-                                set opcode [expr {$opcode & 07773}] ;# if not, don't do OSR
-                            }
-                            break
                         }
-                        if {$testexar && (($opcode & 07401) == 07401)} break  ;# group 3 (extended arithmetic)
+                        1 {
+                            set opcode 07501                                ;# CLA MQA - read MQ into AC
+                            set needmqsca 2
+                        }
+                        2 {
+                            set opcode 07441                                ;# CLA SCA - read SC into AC
+                            set needmqsca 0
+                        }
                     }
                     puts -nonewline [format "OP=%04o  %s" $opcode [disop $pctr $opcode]]
                     set lastopc $opcode

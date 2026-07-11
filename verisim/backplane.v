@@ -58,7 +58,8 @@ module backplane (
     output[3:0] majst,
     output[4:0] sctr,
     output swstart, swldad, swdepos, swexam,
-    output swcont, swsstep, swsinst
+    output swcont, swsstep, swsinst,
+    output shad_freeze
 
     ,input[11:00]  saxi_ARADDR
     ,output reg    saxi_ARREADY
@@ -1170,13 +1171,15 @@ module backplane (
     wire _zyndmagntd, _zynioenabd, _zynpoweron;
     wire[2:0] zynDMAFLD;
     wire[11:00] zynINBUS;
+    wire _running, _shfreez, _simming;
+    assign shad_freeze = ~ _shfreez;
 
     Zynq #(.BIDIRCONSDA (0)) zynqinst (
-        .CLOCK   (yclock),
-        .RESET_N (~ zreset),
-        .LEDoutR (),      // IO_B34_LN6 R14
-        .LEDoutG (),      // IO_B34_LP7 Y16
-        .LEDoutB (),      // IO_B34_LN7 Y17
+        .CLOCK     (yclock),
+        .RESET_N   (~ zreset),
+        .LEDoutR_N (_shfreez),
+        .LEDoutG_N (_running),
+        .LEDoutB_N (_simming),
 
         // io bus connections
         .hdw_oACUM    (~ _busACUM),

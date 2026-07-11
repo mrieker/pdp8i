@@ -70,7 +70,6 @@ static Tcl_ObjCmdProc cmd_mem;
 static Tcl_ObjCmdProc cmd_randbits;
 
 static uint32_t scramgpio (uint32_t x);
-static void kerchunk ();
 static int cmdpintable (int pincount, Pin const *pintable, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
 static int findev (char const *ident);
 static uint32_t armread (uint32_t armaddr);
@@ -367,7 +366,36 @@ static int cmd_clk (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj
         if (rc != TCL_OK) return rc;
     }
     while (-- num >= 0) {
-        kerchunk ();
+
+        // 20 200MHz cycles step the 10MHz osc through a cycle
+        // each 200MHz step progresses signals through gates and flipflops
+
+        bool lastoclock = vbkpl->oCLOCK;
+        for (int i = 0; i < 256; i ++) {
+
+            // error if shadow has frozen the clock
+            if (vbkpl->shad_freeze) {
+                int shat = findev ("SH");
+                if (shat < 0) {
+                    Tcl_SetResult (interp, (char *) "shadow error", TCL_STATIC);
+                } else {
+                    uint32_t shad1 = armread (shat + 1);
+                    uint32_t shad2 = armread (shat + 2);
+                    uint32_t shad3 = armread (shat + 3);
+                    uint32_t shad4 = armread (shat + 4);
+                    uint32_t shad5 = armread (shat + 5);
+                    Tcl_SetResultF (interp, "shadow error %08X %08X %08X %08X %08X", shad1, shad2, shad3, shad4, shad5);
+                }
+                return TCL_ERROR;
+            }
+
+            // pulse zclock (200MHz) and yclock (100MHz)
+            zynqclock ();
+
+            // stop looping on high-to-low 10MHz clock
+            if (lastoclock && ! vbkpl->oCLOCK) break;
+            lastoclock = vbkpl->oCLOCK;
+        }
     }
     Tcl_SetObjResult (interp, Tcl_NewIntObj (cyclenum));
     return TCL_OK;
@@ -668,21 +696,6 @@ static uint32_t scramgpio (uint32_t x)
     if (x & 0x100) y |= 0x002;
     if (x & 0x200) y |= 0x001;
     return y;
-}
-
-// call with 10MHz clock still low and input signals just changed
-// returns with output signals updated and 10MHz clock just went low
-static void kerchunk ()
-{
-    // 20 200MHz cycles step the 10MHz osc through a cycle
-    // each 200MHz step progresses signals through gates and flipflops
-
-    bool lastoclock = vbkpl->oCLOCK;
-    for (int i = 0; i < 256; i ++) {
-        zynqclock ();
-        if (lastoclock && ! vbkpl->oCLOCK) break;
-        lastoclock = vbkpl->oCLOCK;
-    }
 }
 
 // process a pintable-type command
