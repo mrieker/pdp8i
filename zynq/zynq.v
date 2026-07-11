@@ -145,7 +145,8 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     //  arm uses dev_o... signals instead of having arm_o... signals
 
     wire[31:00] regctla, regctlb, regctlc, regctle, regctlf, regctlg, regctli;
-    reg[31:00] regctld, regctlh;
+    reg[05:00] regctld, clkdiv;
+    reg[31:00] regctlh;
 
     wire[11:00] sim_oACUM;
     wire        sim_oBRKCYC;
@@ -339,7 +340,6 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     // 10: 110nS =  9.1MHz
     // 11: 120nS =  8.3MHz
     // 63: 640nS =  1.6MHz
-    reg[5:0] clkdiv;
     always @(posedge CLOCK) begin
         if (~ RESET_N | (clkdiv == regctld[5:0])) begin
             clkdiv <= 0;
@@ -359,7 +359,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
         (readaddr        == 10'b0000000001) ? regctla    :
         (readaddr        == 10'b0000000010) ? regctlb    :
         (readaddr        == 10'b0000000011) ? regctlc    :
-        (readaddr        == 10'b0000000100) ? regctld    :
+        (readaddr        == 10'b0000000100) ? { 20'b0, clkdiv, regctld } :
         (readaddr        == 10'b0000000101) ? regctle    :
         (readaddr        == 10'b0000000110) ? regctlf    :
         (readaddr        == 10'b0000000111) ? regctlg    :
@@ -1219,7 +1219,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
                 if (ilaarmed | (ilaafter != 0)) begin
                     ilaarray[ilaindex] <= {
                         arm_iRESET,
-                        regctld[24:16],
+                        8'b0,
                         sim_iRESET,
                         sim_swldad,
                         sim_swdepos,

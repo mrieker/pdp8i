@@ -9,6 +9,7 @@
 #
 cd `dirname $0`
 mydir=`pwd`
+set -e
 
 rm -f $mydir/BOOT.BIN.gz
 
@@ -19,4 +20,5 @@ cd petakernl/zturn
 rm -f images/linux/BOOT.BIN
 petalinux-package --boot --force --fsbl ./images/linux/zynq_fsbl.elf --fpga $mydir/pdp8i.runs/impl_1/myboard_wrapper.bit --u-boot
 
-gzip -c images/linux/BOOT.BIN > $mydir/BOOT.BIN.gz
+gzip -c images/linux/BOOT.BIN > $mydir/BOOT.BIN.temp.gz
+mv $mydir/BOOT.BIN.temp.gz $mydir/BOOT.BIN.gz
