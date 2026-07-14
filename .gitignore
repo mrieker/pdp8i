@@ -3,6 +3,7 @@
 *.class
 *.jar
 *.log
+*.armv6l*
 *.armv7l*
 *.x86_64*
 .nfs*

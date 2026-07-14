@@ -33,9 +33,9 @@
 #include <tcl8.6/tcl.h>
 #include <unistd.h>
 
-#include "obj_dir/Vbackplane.h"
-#include "obj_dir/Vbackplane_console.h"
-#include "obj_dir/Vbackplane_extmemory.h"
+#include "Vbackplane.h"
+#include "Vbackplane_console.h"
+#include "Vbackplane_extmemory.h"
 
 #include "assemble.h"
 #include "disassemble.h"

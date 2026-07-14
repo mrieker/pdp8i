@@ -139,7 +139,7 @@ int i2cmaster (int bus, uint64_t command, uint64_t *readdata)
                     setclock (1);
                     waithalf ();
                     setclock (0);
-                    data = data + getdata ();
+                    data += data + getdata ();
                 }
                 setdata  ((command >> 62) != 2);
                 waithalf ();

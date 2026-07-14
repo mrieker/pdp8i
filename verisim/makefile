@@ -2,6 +2,16 @@ CFLAGS ?= -O2 -Werror
 MACH   := $(shell uname -m)
 GPP    := g++ $(CFLAGS) -std=c++11 -g -Wall
 
+ifeq ($(MACH),armv6l)
+	DEFAULT := resetmcp.$(MACH) testprocalu.$(MACH)
+endif
+ifeq ($(MACH),armv7l)
+	DEFAULT := resetmcp.$(MACH) testprocalu.$(MACH)
+endif
+ifeq ($(MACH),x86_64)
+	DEFAULT := verimain.$(MACH)
+endif
+
 VFILES := \
 	backplane.v \
 	blk_mem_gen_0.v \
@@ -39,22 +49,31 @@ OFILES := \
 	disassemble.$(MACH).o \
 	readprompt.$(MACH).o \
 
-default: verimain.$(MACH) testprocalu.$(MACH)
+default: $(DEFAULT)
 
-verimain.$(MACH): $(OFILES) verilated.$(MACH).o obj_dir/Vbackplane__ALL.a
-	$(GPP) -g -o verimain.$(MACH) $(OFILES) verilated.$(MACH).o obj_dir/Vbackplane__ALL.a /home/mrieker/nfs/tcl8.6.17/install/lib/libtcl8.6.so -lreadline
+verimain.$(MACH): $(OFILES) verilated.$(MACH).o vbackplane.$(MACH)/Vbackplane__ALL.a
+	$(GPP) -g -o verimain.$(MACH) $(OFILES) verilated.$(MACH).o vbackplane.$(MACH)/Vbackplane__ALL.a /home/mrieker/nfs/tcl8.6.17/install/lib/libtcl8.6.so -lreadline
 
-verimain.$(MACH).o: verimain.cc obj_dir/Vbackplane.h
-	$(GPP) -g -fPIC -c -o verimain.$(MACH).o -I/usr/share/verilator/include/ verimain.cc
+verimain.$(MACH).o: verimain.cc vbackplane.$(MACH)/Vbackplane.h
+	$(GPP) -g -fPIC -c -o verimain.$(MACH).o -Ivbackplane.$(MACH) -I/usr/share/verilator/include/ verimain.cc
 
-testprocalu.$(MACH): testprocalu.$(MACH).o testlib.$(MACH).o verilated.$(MACH).o veriprocalu/Vprocalu__ALL.a
-	$(GPP) -g -o testprocalu.$(MACH) testprocalu.$(MACH).o testlib.$(MACH).o verilated.$(MACH).o veriprocalu/Vprocalu__ALL.a
+testprocalu.$(MACH): testprocalu.$(MACH).o testlib.$(MACH).o i2cmaster.$(MACH).o verilated.$(MACH).o veriprocalu.$(MACH)/Vprocalu__ALL.a
+	$(GPP) -g -o testprocalu.$(MACH) testprocalu.$(MACH).o testlib.$(MACH).o i2cmaster.$(MACH).o verilated.$(MACH).o veriprocalu.$(MACH)/Vprocalu__ALL.a
 
-testprocalu.$(MACH).o: testprocalu.cc testlib.h obj_dir/Vbackplane.h
-	$(GPP) -g -fPIC -c -o testprocalu.$(MACH).o -I/usr/share/verilator/include/ testprocalu.cc
+testprocalu.$(MACH).o: testprocalu.cc testlib.h testerdefs.h i2cmaster.h veriprocalu.$(MACH)/Vprocalu.h
+	$(GPP) -g -fPIC -c -o testprocalu.$(MACH).o -Iveriprocalu.$(MACH) -I/usr/share/verilator/include/ testprocalu.cc
 
-testlib.$(MACH).o: testlib.cc testlib.h
+resetmcp.$(MACH): resetmcp.$(MACH).o testlib.$(MACH).o i2cmaster.$(MACH).o
+	$(GPP) -g -o resetmcp.$(MACH) resetmcp.$(MACH).o testlib.$(MACH).o i2cmaster.$(MACH).o
+
+resetmcp.$(MACH).o: resetmcp.cc testlib.h testerdefs.h i2cmaster.h
+	$(GPP) -g -fPIC -c -o resetmcp.$(MACH).o resetmcp.cc
+
+testlib.$(MACH).o: testlib.cc testlib.h testerdefs.h i2cmaster.h
 	$(GPP) -g -fPIC -c -o testlib.$(MACH).o testlib.cc
+
+i2cmaster.$(MACH).o: i2cmaster.cc i2cmaster.h
+	$(GPP) -g -fPIC -c -o i2cmaster.$(MACH).o i2cmaster.cc
 
 assemble.$(MACH).o: assemble.cc
 	$(GPP) -g -fPIC -c -o assemble.$(MACH).o assemble.cc
@@ -68,19 +87,19 @@ readprompt.$(MACH).o: readprompt.cc
 verilated.$(MACH).o: /usr/share/verilator/include/verilated.cpp
 	$(GPP) -Wno-sign-compare -g -fPIC -c -o verilated.$(MACH).o -I/usr/share/verilator/include/ /usr/share/verilator/include/verilated.cpp
 
-obj_dir/Vbackplane__ALL.a: obj_dir/Vbackplane.mk
-	make -C obj_dir -f Vbackplane.mk
+vbackplane.$(MACH)/Vbackplane__ALL.a: vbackplane.$(MACH)/Vbackplane.mk
+	make -C vbackplane.$(MACH) -f Vbackplane.mk
 
-obj_dir/Vbackplane.cpp obj_dir/Vbackplane.h obj_dir/Vbackplane.mk: $(VFILES)
-	rm -rf obj_dir
-	verilator --cc --top-module backplane $(VFILES)
+vbackplane.$(MACH)/Vbackplane.cpp vbackplane.$(MACH)/Vbackplane.h vbackplane.$(MACH)/Vbackplane.mk: $(VFILES)
+	rm -rf vbackplane.$(MACH)
+	verilator --cc --Mdir vbackplane.$(MACH) --top-module backplane $(VFILES)
 
-veriprocalu/Vprocalu__ALL.a: veriprocalu/Vprocalu.mk
-	make -C veriprocalu -f Vprocalu.mk
+veriprocalu.$(MACH)/Vprocalu__ALL.a: veriprocalu.$(MACH)/Vprocalu.mk
+	make -C veriprocalu.$(MACH) -f Vprocalu.mk
 
-veriprocalu/Vprocalu.cpp veriprocalu/Vprocalu.h veriprocalu/Vprocalu.mk: ../kicads/procalu/procalu.v chips-varns.v
-	rm -rf veriprocalu
-	verilator --cc --Mdir veriprocalu --top-module procalu ../kicads/procalu/procalu.v chips-varns.v
+veriprocalu.$(MACH)/Vprocalu.cpp veriprocalu.$(MACH)/Vprocalu.h veriprocalu.$(MACH)/Vprocalu.mk: ../kicads/procalu/procalu.v chips-varns.v
+	rm -rf veriprocalu.$(MACH)
+	verilator --cc --Mdir veriprocalu.$(MACH) --top-module procalu ../kicads/procalu/procalu.v chips-varns.v
 
 ../kicads/console/console.v: ../kicads/console/console.kicad_pcb
 	cd ../kicads/console ; ../veripcb.sh console
@@ -112,6 +131,9 @@ veriprocalu/Vprocalu.cpp veriprocalu/Vprocalu.h veriprocalu/Vprocalu.mk: ../kica
 ../kicads/dmatester/dmatester.kicad_pcb: ../kicads/dmatester/dmatester.kicad_sch
 	error update dmatester.kicad_pcb
 
+testerdefs.h: ../kicads/tester/tester.kicad_pcb
+	cd ../kicads ; ./testerdefs.sh > $(CURDIR)/testerdefs.h
+
 ../kicads/extarith/extarith.kicad_pcb: ../kicads/extarith/extarith.kicad_sch
 	error update extarith.kicad_pcb
 
@@ -120,4 +142,7 @@ veriprocalu/Vprocalu.cpp veriprocalu/Vprocalu.h veriprocalu/Vprocalu.mk: ../kica
 
 ../kicads/processor/processor.kicad_pcb: ../kicads/processor/processor.kicad_sch
 	error update processor.kicad_pcb
+
+../kicads/tester/tester.kicad_pcb: ../kicads/tester/tester.kicad_sch
+	error update tester.kicad_pcb
 
