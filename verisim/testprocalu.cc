@@ -164,10 +164,7 @@ int main ()
         procalu.update ();
         procalu.printsent ();
         procalu.printrcvd ();
-        if (! procalu.verify ()) {
-            char temp[8];
-            if (read (0, temp, sizeof temp) <= 0) break;
-        }
+        if (! procalu.verify ()) break;
     }
 
     return 0;

@@ -2,14 +2,17 @@ CFLAGS ?= -O2 -Werror
 MACH   := $(shell uname -m)
 GPP    := g++ $(CFLAGS) -std=c++11 -g -Wall
 
+COMMON := bgrep.$(MACH) last16k.$(MACH)
+ARMVxL := $(COMMON) resetmcp.$(MACH) testprocalu.$(MACH)
+
 ifeq ($(MACH),armv6l)
-	DEFAULT := resetmcp.$(MACH) testprocalu.$(MACH)
+	DEFAULT := $(ARMVxL)
 endif
 ifeq ($(MACH),armv7l)
-	DEFAULT := resetmcp.$(MACH) testprocalu.$(MACH)
+	DEFAULT := $(ARMVxL)
 endif
 ifeq ($(MACH),x86_64)
-	DEFAULT := verimain.$(MACH)
+	DEFAULT := $(COMMON) verimain.$(MACH)
 endif
 
 VFILES := \
@@ -51,6 +54,12 @@ OFILES := \
 
 default: $(DEFAULT)
 
+bgrep.$(MACH): bgrep.c
+	cc -O2 -o bgrep.$(MACH) bgrep.c
+
+last16k.$(MACH): last16k.c
+	cc -O2 -o last16k.$(MACH) last16k.c
+
 verimain.$(MACH): $(OFILES) verilated.$(MACH).o vbackplane.$(MACH)/Vbackplane__ALL.a
 	$(GPP) -g -o verimain.$(MACH) $(OFILES) verilated.$(MACH).o vbackplane.$(MACH)/Vbackplane__ALL.a /home/mrieker/nfs/tcl8.6.17/install/lib/libtcl8.6.so -lreadline
 
@@ -74,6 +83,9 @@ testlib.$(MACH).o: testlib.cc testlib.h testerdefs.h i2cmaster.h
 
 i2cmaster.$(MACH).o: i2cmaster.cc i2cmaster.h
 	$(GPP) -g -fPIC -c -o i2cmaster.$(MACH).o i2cmaster.cc
+
+testerdefs.h: ../kicads/tester/tester.kicad_pcb
+	cd ../kicads ; ./testerdefs.sh > $(CURDIR)/testerdefs.h
 
 assemble.$(MACH).o: assemble.cc
 	$(GPP) -g -fPIC -c -o assemble.$(MACH).o assemble.cc
@@ -130,12 +142,6 @@ veriprocalu.$(MACH)/Vprocalu.cpp veriprocalu.$(MACH)/Vprocalu.h veriprocalu.$(MA
 
 ../kicads/dmatester/dmatester.kicad_pcb: ../kicads/dmatester/dmatester.kicad_sch
 	error update dmatester.kicad_pcb
-
-testerdefs.h: ../kicads/tester/tester.kicad_pcb
-	cd ../kicads ; ./testerdefs.sh > $(CURDIR)/testerdefs.h
-
-../kicads/extarith/extarith.kicad_pcb: ../kicads/extarith/extarith.kicad_sch
-	error update extarith.kicad_pcb
 
 ../kicads/extmemory/extmemory.kicad_pcb: ../kicads/extmemory/extmemory.kicad_sch
 	error update extmemory.kicad_pcb

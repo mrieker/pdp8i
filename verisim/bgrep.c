@@ -29,9 +29,17 @@ int main (int argc, char **argv)
         fprintf (stderr, "bgrep 'string' < infile > outfile\n");
         return 1;
     }
+
     setlinebuf (stdout);
+
+    char *needle = argv[1];
+    int len = strlen (needle);
+    if ((len > 1) && (needle[len-1] == '$')) needle[len-1] = '\n';
+    char *splat = strchr (needle, '*');
+    if (splat != NULL) *(splat ++) = 0;
+
     while (fgets (linebuf, sizeof linebuf, stdin) != NULL) {
-        if (strstr (linebuf, argv[1]) != NULL) {
+        if ((strstr (linebuf, needle) != NULL) && ((splat == NULL) || (strstr (linebuf, splat) != NULL))) {
             fputs (linebuf, stdout);
         }
     }
