@@ -26,11 +26,12 @@
 #include <signal.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <unistd.h>
 
 #include "testlib.h"
 #include "Vprocalu.h"
 
-#define MAPMPIN(mp) do { vpralubits[mp_##mp] = &vpralu.mp; } while (0)
+#define MAPMPIN(mp) do { vpralubits[mp_##mp] = &vpralu.mp; vpralunames[mp_##mp] = #mp; } while (0)
 
 static int const procalu_impins[] = {
     mp__ACCLEAR, mp__ACUM_0, mp__ACUM_1, mp__ACUM_2, mp__ACUM_3, mp__ACUM_4, mp__ACUM_5, mp__ACUM_6, mp__ACUM_7, mp__ACUM_8, mp__ACUM_9,
@@ -53,14 +54,10 @@ static int const mps_aluq[] = {
     mp_aluq_3,  mp_aluq_2,  mp_aluq_1, mp_aluq_0,
     0 };
 
-static bool error;
-
-//static void dumppins (int const *pins);
-static void badpin (char const *pin, uint32_t is, uint32_t sb);
-
 struct ProcALU {
     Vprocalu vpralu;            // verilated circuit board
     CData *vpralubits[256];     // pointers to vpralu elements, indexed by mpin
+    char const *vpralunames[256];
 
     // sendables
     void acclear (bool v);
@@ -118,7 +115,7 @@ int main ()
                     ctrlcflag = false;
                     do {
                         for (int v = 0; v < 2; v ++) {
-                            printf ("J%d P%02d < %d  %s\n", j, p, v, mpnames[mp]);
+                            printf ("J%d P%02d < %d  %s\n", j, p, v, vpralunames[mp]);
                             setmpin (mp, v);
                             mcpsend ();
                             sleep (1);
@@ -130,6 +127,7 @@ int main ()
     }
 #endif
 
+#if 000
     // alua = acum
     //  _asel = 3
     //  azero = 0
@@ -141,34 +139,36 @@ int main ()
     //  qsel = 2          FF | PP2
     //  PP2 = 1 = TS3 & MSEXEC & IRTAD
 
-    procalu.acum  (01234);
-    procalu.mbuf  (04321);
-    procalu.ireg  (01000);  // TAD
-    procalu.majst (3);      // MS_EXEC
-    procalu.timst (3);      // TS3
-
-    procalu.update ();
-    procalu.printsent ();
-    procalu.printrcvd ();
-    procalu.verify ();
-
-    char temp[8];
-    fgets (temp, sizeof temp, stdin);
-
-    do {
-        printf ("\n");
-
-        procalu.genrand ();
+    while (true) {
+        procalu.acum  (01234);
+        procalu.mbuf  (04321);
+        procalu.ireg  (01000);  // TAD
+        procalu.majst (3);      // MS_EXEC
+        procalu.timst (3);      // TS3
 
         procalu.update ();
-
         procalu.printsent ();
         procalu.printrcvd ();
-
         procalu.verify ();
 
-        // stop if error
-    } while (true);//! error);
+        char temp[8];
+        if (read (0, temp, sizeof temp) <= 0) break;
+    }
+#endif
+
+    uint32_t ntest = 0;
+    while (! ctrlcflag) {
+        printf ("\nntest=%10u\n", ++ ntest);
+
+        procalu.genrand ();
+        procalu.update ();
+        procalu.printsent ();
+        procalu.printrcvd ();
+        if (! procalu.verify ()) {
+            char temp[8];
+            if (read (0, temp, sizeof temp) <= 0) break;
+        }
+    }
 
     return 0;
 }
@@ -189,13 +189,6 @@ static void dumppins (int const *pins)
 }
 ***/
 
-// print error message then set error flag
-static void badpin (char const *pin, uint32_t is, uint32_t sb)
-{
-    fprintf (stderr, "pin %s is %u, should be %u\n", pin, is, sb);
-    error = true;
-}
-
 static void sighand (int signum)
 {
     if (ctrlcflag) exit (1);
@@ -205,7 +198,11 @@ static void sighand (int signum)
 
 ProcALU::ProcALU ()
 {
-    memset (vpralubits, 0, sizeof vpralubits);
+    vpralu.VCC = 1;
+    vpralu.GND = 0;
+
+    memset (vpralubits,  0, sizeof vpralubits);
+    memset (vpralunames, 0, sizeof vpralunames);
 
     MAPMPIN (_ACCLEAR);
     MAPMPIN (_ACUM_0);
@@ -374,8 +371,10 @@ void ProcALU::update ()
     // send random bits to verilog then compute reply
     // clock it through 500nS of chips-varns.v delays
     for (int i = 0; i < 100; i ++) {
+        vpralu._READSR = vpralu._READSR_o;
         vpralu.eval ();
         vpralu.zclock = 1;
+        vpralu._READSR = vpralu._READSR_o;
         vpralu.eval ();
         vpralu.zclock = 0;
     }
@@ -445,15 +444,18 @@ bool ProcALU::verify ()
     bool error = false;
     int mp;
     for (int const *ompins = procalu_ompins; (mp = *ompins) != 0; ompins ++) {
-        CData *v = vpralubits[mp];
-        uint32_t _vis = getmpin (mp);
-        uint32_t _vsb = *v;
-        if (_vis != _vsb) {
-            badpin (mpnames[mp], _vis, _vsb);
+        CData *v = vpralubits[mp];  // get pointer to verilator struct
+        bool vsb = *v;              // get verilated pin value
+        bool vis = getmpin (mp);    // get physical pin from mcp23017
+        if (vis != vsb) {
+            int cp = mptocp[mp];    // error, get connector pin
+            int jack = (cp >> 6) + 1;
+            int jpin = cp & 63;
+            fprintf (stderr, "pin %-8s J%dP%02d is %d, should be %d\n", vpralunames[mp], jack, jpin, vis, vsb);
             error = true;
         }
     }
-    return error;
+    return ! error;
 }
 
 
@@ -569,10 +571,10 @@ void ProcALU::timst   (uint16_t v)
 }
 void ProcALU::nxtms   (uint16_t v)
 {
-    vpralu.nxtms_0 = (~ v >>  0) & 1;
-    vpralu.nxtms_1 = (~ v >>  1) & 1;
-    vpralu.nxtms_2 = (~ v >>  2) & 1;
-    vpralu.nxtms_3 = (~ v >>  3) & 1;
+    vpralu.nxtms_0 = (v >>  0) & 1;
+    vpralu.nxtms_1 = (v >>  1) & 1;
+    vpralu.nxtms_2 = (v >>  2) & 1;
+    vpralu.nxtms_3 = (v >>  3) & 1;
 }
 
 bool     ProcALU::readsr () { return ! vpralu._READSR; }

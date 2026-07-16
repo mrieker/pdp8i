@@ -148,16 +148,16 @@ uint32_t getmpins (int const *mpins)
 }
 
 // set mcp pin value ready to go to physical board via i2c bus
-void setmpin (int mpin, uint32_t val)
+void setmpin (int mpin, bool val)
 {
     int addr = (mpin >> 4) ^ 8;
     uint16_t mask = 1U << (mpin & 15);
-    if (val & 1) mcppins[addr] |= mask;
-          else mcppins[addr] &= ~ mask;
+    if (val) mcppins[addr] |= mask;
+      else mcppins[addr] &= ~ mask;
 }
 
 // get mcp pin value from physical board via i2c bus
-uint32_t getmpin (int mpin)
+bool getmpin (int mpin)
 {
     int addr = (mpin >> 4) ^ 8;
     uint16_t word = mcppins[addr];
