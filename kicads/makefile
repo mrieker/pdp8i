@@ -1,5 +1,5 @@
 
-default: Backpln.jar Layout.jar TesterDefs.jar VeriPCB.jar ZTurnPins.jar
+default: Backpln.jar Layout.jar Renum.jar TesterDefs.jar VeriPCB.jar ZTurnPins.jar
 
 Backpln.jar: Backpln.java PCB.jar
 	rm -f Backpln*.class Backpln.jar
@@ -12,6 +12,12 @@ Layout.jar: Layout.java PCB.jar
 	javac -cp PCB.jar:SCM.jar Layout.java
 	jar cf Layout.jar Layout*.class
 	rm -f Layout*.class
+
+Renum.jar: Renum.java PCB.jar
+	rm -f Renum*.class Renum.jar
+	javac -cp PCB.jar:SCM.jar Renum.java
+	jar cf Renum.jar Renum*.class
+	rm -f Renum*.class
 
 TesterDefs.jar: TesterDefs.java PCB.jar
 	rm -f TesterDefs*.class TesterDefs.jar

@@ -88,6 +88,13 @@ public class Renum {
         colwid20thin = (maxatx20thin - minatx20thin) / (numcols - 1);
         rowhit20thin = (maxaty20thin - minaty20thin) / (numrows - 1);
 
+        System.err.println ("numcols=" + numcols);
+        System.err.println ("numrows=" + numrows);
+        System.err.println ("minatx20thin=" + minatx20thin);
+        System.err.println ("minaty20thin=" + minaty20thin);
+        System.err.println ("colwid20thin=" + colwid20thin);
+        System.err.println ("rowhit20thin=" + rowhit20thin);
+
         for (int strlen = 4; strlen > 0; -- strlen) {
             for (PCB.Compon compon : iccompons) {
                 if (compon.refer.length () == strlen) {
@@ -98,11 +105,29 @@ public class Renum {
                     int origrow = (aty20thin - minaty20thin) / rowhit20thin + 1;
 
                     int rotdrow = origcol;
-                    int rotdcol = 9 - origrow;
+                    int rotdcol = numrows + 1 - origrow;
 
-                    System.out.println ("s/" + compon.refer + "/E" + Integer.toString (rotdrow * 10 + rotdcol) + "/w");
+                    System.out.println ("s/\"" + compon.refer + "\"/\"E" + Integer.toString (rotdrow * 10 + rotdcol) + "\"/w");
                 }
             }
         }
+
+        for (int strlen = 4; strlen > 0; -- strlen) {
+            for (PCB.Compon compon : pcb.compons.values ()) {
+                if (compon.refer.startsWith ("C") && (compon.refer.length () == strlen)) {
+                    int atx20thin = (int) Math.round (compon.atxin () * 20) + 3;
+                    int aty20thin = (int) Math.round (compon.atyin () * 20);
+
+                    int origcol = (atx20thin - minatx20thin) / colwid20thin + 1;
+                    int origrow = (aty20thin - minaty20thin) / rowhit20thin + 1;
+
+                    int rotdrow = origcol;
+                    int rotdcol = numrows + 1 - origrow;
+
+                    System.out.println ("s/\"" + compon.refer + "\"/\"CXZ" + Integer.toString (rotdrow * 10 + rotdcol) + "\"/w");
+                }
+            }
+        }
+        System.out.println ("s/\"CXZ/\"C/w");
     }
 }
