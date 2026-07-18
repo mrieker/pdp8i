@@ -3,7 +3,7 @@ MACH   := $(shell uname -m)
 GPP    := g++ $(CFLAGS) -std=c++11 -g -Wall
 
 COMMON := bgrep.$(MACH) last16k.$(MACH)
-ARMVxL := $(COMMON) resetmcp.$(MACH) testprocalu.$(MACH)
+ARMVxL := $(COMMON) resetmcp.$(MACH) testconsole.$(MACH) testprocalu.$(MACH)
 
 ifeq ($(MACH),armv6l)
 	DEFAULT := $(ARMVxL)
@@ -66,11 +66,17 @@ verimain.$(MACH): $(OFILES) verilated.$(MACH).o vbackplane.$(MACH)/Vbackplane__A
 verimain.$(MACH).o: verimain.cc vbackplane.$(MACH)/Vbackplane.h
 	$(GPP) -g -fPIC -c -o verimain.$(MACH).o -Ivbackplane.$(MACH) -I/usr/share/verilator/include/ verimain.cc
 
+testconsole.$(MACH): testconsole.$(MACH).o testlib.$(MACH).o i2cmaster.$(MACH).o
+	$(GPP) -g -o testconsole.$(MACH) testconsole.$(MACH).o testlib.$(MACH).o i2cmaster.$(MACH).o
+
+testconsole.$(MACH).o: testconsole.cc testlib.h testerdefs.h i2cmaster.h
+	$(GPP) -g -c -Wno-narrowing -o testconsole.$(MACH).o testconsole.cc
+
 testprocalu.$(MACH): testprocalu.$(MACH).o testlib.$(MACH).o i2cmaster.$(MACH).o verilated.$(MACH).o veriprocalu.$(MACH)/Vprocalu__ALL.a
 	$(GPP) -g -o testprocalu.$(MACH) testprocalu.$(MACH).o testlib.$(MACH).o i2cmaster.$(MACH).o verilated.$(MACH).o veriprocalu.$(MACH)/Vprocalu__ALL.a
 
 testprocalu.$(MACH).o: testprocalu.cc testlib.h testerdefs.h i2cmaster.h veriprocalu.$(MACH)/Vprocalu.h
-	$(GPP) -g -fPIC -c -o testprocalu.$(MACH).o -Iveriprocalu.$(MACH) -I/usr/share/verilator/include/ testprocalu.cc
+	$(GPP) -g -c -o testprocalu.$(MACH).o -Iveriprocalu.$(MACH) -I/usr/share/verilator/include/ testprocalu.cc
 
 resetmcp.$(MACH): resetmcp.$(MACH).o testlib.$(MACH).o i2cmaster.$(MACH).o
 	$(GPP) -g -o resetmcp.$(MACH) resetmcp.$(MACH).o testlib.$(MACH).o i2cmaster.$(MACH).o
