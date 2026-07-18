@@ -222,10 +222,8 @@ public class Layout {
             }
         }
 
-        System.out.println ("saving output file " + modname + "-new2.kicad_pcb");
-        pcb.save (new PrintStream (modname + "-new2.kicad_pcb"));
-        System.out.println ("saving output file " + modname + "-new2.swappedpads");
-        PrintStream spps = new PrintStream (modname + "-new2.swappedpads");
+        System.out.println ("saving output file " + modname + "-new.swappedpads");
+        PrintStream spps = new PrintStream (modname + "-new.swappedpads");
         for (String unum : swappedpads.keySet ()) {
             spps.print (unum + ":");
             for (int[] sp : swappedpads.get (unum)) {
