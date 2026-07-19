@@ -58,7 +58,7 @@ uint16_t boardopinmask[NMCPWORDS];  // mask of pins coming out board (going in m
 
 // fill boardipinmask or boardopinmask with list of pins
 // call this prior to mcpsetdir() so mcpsetdir() can set mcp pin directions
-void fillmaskarray (uint16_t *maskarray, int const *mpins)
+void setmpinmask (uint16_t *maskarray, int const *mpins)
 {
     for (int mpin; (mpin = *mpins) != 0; mpins ++) {
         int addr = (mpin >> 4) ^ 8;
@@ -67,8 +67,17 @@ void fillmaskarray (uint16_t *maskarray, int const *mpins)
     }
 }
 
+void clrmpinmask (uint16_t *maskarray, int const *mpins)
+{
+    for (int mpin; (mpin = *mpins) != 0; mpins ++) {
+        int addr = (mpin >> 4) ^ 8;
+        uint16_t mask = 1U << (mpin & 15);
+        maskarray[addr] &= ~ mask;
+    }
+}
+
 // set mcp device pin directions
-// assumes fillmaskarray has been called to set pin directions
+// assumes setmpinmask has been called to set pin directions
 void mcpsetdir ()
 {
     // inputs to the board are outputs from the mcps

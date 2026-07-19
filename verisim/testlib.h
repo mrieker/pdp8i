@@ -93,7 +93,8 @@ extern uint16_t mcppins[NMCPWORDS];        // current pin values
 extern uint16_t boardipinmask[NMCPWORDS];  // mask of pins going in board (coming out mcps)
 extern uint16_t boardopinmask[NMCPWORDS];  // mask of pins coming out board (going in mcps)
 
-void fillmaskarray (uint16_t *maskarray, int const *mpins);
+void setmpinmask (uint16_t *maskarray, int const *mpins);
+void clrmpinmask (uint16_t *maskarray, int const *mpins);
 void mcpsetdir ();
 void mcpsend ();
 void mcprecv ();

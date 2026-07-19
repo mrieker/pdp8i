@@ -32,6 +32,7 @@
 //    tests with random numbers
 //    uses console mcp23017 for gpio access
 //    assumes tester consck,consda jumpers in
+//    front panel connected is optional
 
 #include <signal.h>
 #include <stdint.h>
@@ -63,14 +64,19 @@ static int const console_ompins[] = {
     mp__INBUS_0, mp__INBUS_1, mp__INBUS_2, mp__INBUS_3, mp__INBUS_4, mp__INBUS_5, mp__INBUS_6, mp__INBUS_7, mp__INBUS_8, mp__INBUS_9,
     mp__INBUS_10, mp__INBUS_11, 0 };
 
+static int const dfldifldmpins[] = {
+    mp__DFLD_0, mp__DFLD_1, mp__DFLD_2, mp__IFLD_0, mp__IFLD_1, mp__IFLD_2, 0 };
+
 static volatile bool ctrlcflag;
 
 static void sighand (int signum);
 static void writerow (int row, uint16_t data);
 static uint16_t readrow (int row);
 
-static void autotest ();
 static void mantest ();
+static void autotest ();
+static void abouttopressldad ();
+static void justreleasedldad ();
 
 int main (int argc, char **argv)
 {
@@ -79,8 +85,8 @@ int main (int argc, char **argv)
     signal (SIGINT, sighand);
 
     // access tester board mcp23017s and set pin directions
-    fillmaskarray (boardipinmask, console_impins);
-    fillmaskarray (boardopinmask, console_ompins);
+    setmpinmask (boardipinmask, console_impins);
+    setmpinmask (boardopinmask, console_ompins);
     mcpsetdir ();
 
     // reset console board state
@@ -129,18 +135,18 @@ static void mantest ()
     // console MCP23017 should have power-on reset to all inputs
     // it should leave the on-board clocking enabled
 
-    int lttime  = 1 << 5;   // jumpered to div_5
-    int swtime  = 1 << 2;   // jumpered to div_2
+    int lttime  = 1 << 5;   // jumpered to div_5 => 3.3uS per light row
+    int swtime  = 1 << 2;   // jumpered to div_2 => 0.5uS per switch row
     int nclocks = 8 * (lttime + 1) + 3 * (swtime + 1) + 1;
 
     int lbnum = 0;
+    uint16_t ireg = 0;
 
     while (! ctrlcflag) {
 
         // pick next sequential light
         uint16_t acum   = 0;
         bool     ion    = 0;
-        uint16_t ireg   = 0;
         bool     link   = 0;
         uint16_t madr   = 0;
         uint16_t majst  = 0;
@@ -206,24 +212,31 @@ static void mantest ()
             case 51: sctr = 004; break;
             case 52: sctr = 002; break;
             case 53: sctr = 001; break;
-            case 54: ireg  = 1; break;
-            case 55: ireg  = 2; break;
-            case 56: ireg  = 3; break;
-            case 57: ireg  = 4; break;
-            case 58: ireg  = 5; break;
-            case 59: ireg  = 6; break;
-            case 60: ireg  = 7; break;
-            case 61: majst = 1; break;
-            case 62: majst = 3; break;
-            case 63: majst = 2; break;
-            case 64: majst = 4; break;
-            case 65: majst = 5; break;
-            case 66: majst = 6; break;
-            case 67: ion   = 1; break;
-            case 68: pause = 1; break;
-            case 69: run   = 1; break;
+            case 54: mquo = 04000; break;
+            case 55: mquo = 02000; break;
+            case 56: mquo = 01000; break;
+            case 57: mquo = 00400; break;
+            case 58: mquo = 00200; break;
+            case 59: mquo = 00100; break;
+            case 60: mquo = 00040; break;
+            case 61: mquo = 00020; break;
+            case 62: mquo = 00010; break;
+            case 63: mquo = 00004; break;
+            case 64: mquo = 00002; break;
+            case 65: mquo = 00001; break;
+            case 66: ireg = (ireg + 1) & 7; break;
+            case 67: majst = 1; break;
+            case 68: majst = 3; break;
+            case 69: majst = 2; break;
+            case 70: majst = 4; break;
+            case 71: majst = 5; break;
+            case 72: majst = 6; break;
+            case 73: ion   = 1; break;
+            case 74: pause = 1; break;
+            case 75: run   = 1; break;
+            default: abort ();
         }
-        lbnum = (lbnum + 1) % 70;
+        lbnum = (lbnum + 1) % 76;
 
         // always gate switch register to inbus
         bool readsr = true;
@@ -292,18 +305,39 @@ static void mantest ()
 
 static void autotest ()
 {
+    // console MCP23017 is connected to the front panel gpio connector
+    // it can drive or sense the data pins (gpio 4..15)
+    // it can drive the row selection pins (gpio 16..18, 20..27)
+
     // set console mcp23017 pin direction
-    //  iicsel output
-    //    data input
+    //  iicsel output (drive gpio row selection pins)
+    //    data input (sense gpio data pins)
     mcpwrite16 (1, 0, 0x00, 0x3F3F);
+
+    // we are initially set up to read the dfld,ifld bus lines as if the ldad switch was being pressed
+    mcprecv ();
+    bool lastswldad = ! getmpin (mp__SWLDAD);       // read bus _SWLDAD signal (console board ldad flipflop)
+
+    // if switch is actually released (very likely), set up tester board to drive the dfld,ifld lines
+    if (! lastswldad) {
+        setmpinmask (boardipinmask, dfldifldmpins);  // mcpsend() will send to dfld,ifld pins
+        clrmpinmask (boardopinmask, dfldifldmpins);  // mcprecv() won't read what the board is outputting
+        mcpsetdir ();
+    }
 
     while (! ctrlcflag) {
 
-        // make up random values for registers
+        // make up random values for registers to be displayed in the lights
+        // console board should ignore clock when using 23017 so make it random
+        // if ldad is released,
+        //   generate random values for the dfld,ifld lights
+        // if ldad is pressed,
+        //   dfld,ifld are being driven by the console board switch values
+        //   which get looped back around into the lights, so use their values
         uint16_t acum   = randbits (12);
         bool     clock  = randbits (1);
-        uint16_t dfld   = randbits (3);
-        uint16_t ifld   = randbits (3);
+        uint16_t dfld   = lastswldad ? getmpins (mps__DFLD) ^ 7 : randbits (3);
+        uint16_t ifld   = lastswldad ? getmpins (mps__IFLD) ^ 7 : randbits (3);
         bool     ion    = randbits (1);
         uint16_t ireg   = randbits (3);
         bool     link   = randbits (1);
@@ -318,9 +352,11 @@ static void autotest ()
         uint16_t sctr   = randbits (5);
 
         // put random values on bus to be displayed
-        // clock should be ignored when using 23017 so use random
+        // if ldad pressed, dfld,ifld ignored cuz tester is not driving those lines
         setmpins (mps__ACUM,    acum ^ 07777);
         setmpin  (mp__CLOCK,  ! clock);
+        setmpins (mps__DFLD,    dfld ^ 7);
+        setmpins (mps__IFLD,    ifld ^ 7);
         setmpin  (mp__ION,    ! ion);
         setmpins (mps__IREG,    ireg ^ 7);
         setmpin  (mp__LINK,   ! link);
@@ -336,6 +372,7 @@ static void autotest ()
         mcpsend ();
 
         // compute what the light rows should be
+        // if ldad pressed, dfld,ifld lights should show switch values
         uint16_t lbrows[8] = {
             pctr,                           // row 0
             madr,                           // row 1
@@ -451,7 +488,10 @@ static void autotest ()
                 // doing swrow 1 or 2, transition iicsel from 1001 or 1010 to 1011 won't glitch
                 // drives ldswrow<n> high
                 // so do 0x15 <= 2'b11 val<05:00>
+                if ((sr == 2) && ! lastswldad && swldad) abouttopressldad ();
                 writerow (11, swrows[sr]);
+                if ((sr == 2) && lastswldad && ! swldad) justreleasedldad ();
+                if (sr == 2) lastswldad = swldad;
 
                 // new switch values have been clocked into switch flipflops
 
@@ -496,4 +536,24 @@ static void autotest ()
             if (businbus != swreg) printf ("bus INBUS %04o != swreg %04o\n", businbus, swreg);
         }
     }
+}
+
+// we are about to press the ldad switch (set console board ldad ff),
+//  console board will start driving the dfld,ifld bus lines
+//  make sure tester board isn't driving them as well
+static void abouttopressldad ()
+{
+    clrmpinmask (boardipinmask, dfldifldmpins);  // mcpsend() won't send anything to dfld,ifld pins
+    setmpinmask (boardopinmask, dfldifldmpins);  // mcprecv() will read what the board is outputting
+    mcpsetdir ();
+}
+
+// we just released the ldad switch (cleared console board ldad ff),
+//  console board has supposedly hi-Zd the dfld,ifld bus pins
+//  enable tester mcp23017s to output dfld,ifld values for display
+static void justreleasedldad ()
+{
+    setmpinmask (boardipinmask, dfldifldmpins);  // mcpsend() will send to dfld,ifld pins
+    clrmpinmask (boardopinmask, dfldifldmpins);  // mcprecv() won't read what the board is outputting
+    mcpsetdir ();
 }

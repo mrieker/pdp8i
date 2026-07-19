@@ -324,8 +324,8 @@ ProcALU::ProcALU ()
 void ProcALU::init ()
 {
     // make masks of input and output pins so we know what words to send/receive on i2c busses
-    fillmaskarray (boardipinmask, procalu_impins);
-    fillmaskarray (boardopinmask, procalu_ompins);
+    setmpinmask (boardipinmask, procalu_impins);
+    setmpinmask (boardopinmask, procalu_ompins);
     mcpsetdir ();
 }
 
