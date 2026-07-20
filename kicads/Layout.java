@@ -61,10 +61,6 @@ public class Layout {
     public static double lowyin;
     public static Random randgen;
 
-    private static volatile boolean editcomplete;
-    private static Object editinprog = new Object ();
-    private static Object syncit = new Object ();
-
     private static TreeMap<String,EquivSubChip> equivsubchips;  // 7400 U38A is swappable with 7400 U64C etc
     private static TreeMap<String,EquivPad> equivpads;          // 7400 U12A pin 1 swappable with 7400 U12A pin 2 etc
     private static TreeMap<String,LinkedList<int[]>> swappedpads;
@@ -318,43 +314,44 @@ public class Layout {
         double oldicbx = icolb * colwid20thin / 20.0 + lowxin;
         double oldicby = irowb * rowhit20thin / 20.0 + lowyin;
 
-        synchronized (syncit) {
+        PCB.Compon ica = findChipOnGrid (irowa, icola);
+        PCB.Compon icb = findChipOnGrid (irowb, icolb);
+        if (ica == icb) return Double.NaN;
 
-            PCB.Compon ica = findChipOnGrid (irowa, icola);
-            PCB.Compon icb = findChipOnGrid (irowb, icolb);
-            if (ica == icb) return Double.NaN;
+        // don't move bus driver/receiver chips
+        if ((ica != null) && ica.value.endsWith ("540")) return Double.NaN;
+        if ((icb != null) && icb.value.endsWith ("540")) return Double.NaN;
 
-            // try swapping chip locations
-            if (ica != null) {
-                ica.atxin (oldicbx);
-                ica.atyin (oldicby);
-            }
-            if (icb != null) {
-                icb.atxin (oldicax);
-                icb.atyin (oldicay);
-            }
-
-            // see if overall trace lengths are shorter
-            // if so, use the change
-            double newtotlen = nettotallen ();
-            if (oldtotlen > newtotlen) {
-                System.out.println ("swap " +
-                        (ica == null ? "empty" : ica.refer) + "(" + icola + "," + irowa + ") " +
-                        (icb == null ? "empty" : icb.refer) + "(" + icolb + "," + irowb + ") => " + newtotlen);
-                return newtotlen;
-            }
-
-            // if same or longer, put it back
-            if (ica != null) {
-                ica.atxin (oldicax);
-                ica.atyin (oldicay);
-            }
-            if (icb != null) {
-                icb.atxin (oldicbx);
-                icb.atyin (oldicby);
-            }
-            return Double.NaN;
+        // try swapping chip locations
+        if (ica != null) {
+            ica.atxin (oldicbx);
+            ica.atyin (oldicby);
         }
+        if (icb != null) {
+            icb.atxin (oldicax);
+            icb.atyin (oldicay);
+        }
+
+        // see if overall trace lengths are shorter
+        // if so, use the change
+        double newtotlen = nettotallen ();
+        if (oldtotlen > newtotlen) {
+            System.out.println ("swap " +
+                    (ica == null ? "empty" : ica.refer) + "(" + icola + "," + irowa + ") " +
+                    (icb == null ? "empty" : icb.refer) + "(" + icolb + "," + irowb + ") => " + newtotlen);
+            return newtotlen;
+        }
+
+        // if same or longer, put it back
+        if (ica != null) {
+            ica.atxin (oldicax);
+            ica.atyin (oldicay);
+        }
+        if (icb != null) {
+            icb.atxin (oldicbx);
+            icb.atyin (oldicby);
+        }
+        return Double.NaN;
     }
 
     private static PCB.Compon findChipOnGrid (int irow, int icol)
@@ -432,14 +429,12 @@ public class Layout {
         int npinspersubchip = equiv.equivs[0].length;       // eg, 3 for 7400
         boolean firstswap = true;
         while (true) {
-            synchronized (syncit) {
-                for (int i = 0; i < npinspersubchip; i ++) {
-                    int padnuma = equiv.equivs[icsubchipa][i];
-                    int padnumb = equiv.equivs[icsubchipb][i];
-                    PCB.Pad pada = ica.compads[padnuma];
-                    PCB.Pad padb = icb.compads[padnumb];
-                    swappadnets (pada, padb);
-                }
+            for (int i = 0; i < npinspersubchip; i ++) {
+                int padnuma = equiv.equivs[icsubchipa][i];
+                int padnumb = equiv.equivs[icsubchipb][i];
+                PCB.Pad pada = ica.compads[padnuma];
+                PCB.Pad padb = icb.compads[padnumb];
+                swappadnets (pada, padb);
             }
 
             // just swapped them back after first time failed, return with stuff swapped back
@@ -598,9 +593,7 @@ public class Layout {
         PCB.Pad padb = ic.compads[ipadb];
 
         // swap the networks on the pads
-        synchronized (syncit) {
-            swappadnets (pada, padb);
-        }
+        swappadnets (pada, padb);
 
         // if new total length less than old, return with pins swapped
         double newtotlen = nettotallen ();
@@ -617,9 +610,7 @@ public class Layout {
         }
 
         // swap failed, swap them back where they were
-        synchronized (syncit) {
-            swappadnets (pada, padb);
-        }
+        swappadnets (pada, padb);
         return Double.NaN;
     }
 
