@@ -1387,6 +1387,41 @@ module X74AC244 (input zclock, zreset,
 
 endmodule
 
+module X74AHC244 (input zclock, zreset,
+          input  p1
+        , input  p2
+        , input  p3i
+        , output p3o
+        , input  p4
+        , input  p5i
+        , output p5o
+        , input  p6
+        , input  p7i
+        , output p7o
+        , input  p8
+        , input  p9i
+        , output p9o
+        , input  p10
+        , input  p11
+        , input  p12i
+        , output p12o
+        , input  p13
+        , input  p14i
+        , output p14o
+        , input  p15
+        , input  p16i
+        , output p16o
+        , input  p17
+        , input  p18i
+        , output p18o
+        , input  p19
+        , input  p20
+);
+
+    X74HC244 hc (zclock, zreset, p1, p2, p3i, p3o, p4, p5i, p5o, p6, p7i, p7o, p8, p9i, p9o, p10, p11, p12i, p12o, p13, p14i, p14o, p15, p16i, p16o, p17, p18i, p18o, p19, p20);
+
+endmodule
+
 module X74HC283 (input zclock, zreset,
           output reg p1
         , input  p2
