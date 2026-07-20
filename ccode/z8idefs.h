@@ -176,22 +176,32 @@
 #define PR_FULL 0x40000000
 
 // pdp8ishad.v registers
-#define sh1_frzonerr  (1U << 31)
-#define sh1_clearit   (1U << 30)
-#define sh1_maknown   (1U << 29)
-#define sh1_pcknown   (1U << 28)
-#define sh1_err       (0xFFFFFFFU)
-#define sh2_majst     (15U << 28)
-#define sh2_timestate (15U << 24)
-#define sh2_ireg      (07777U << 12)
-#define sh2_pctr      (07777U <<  0)
-#define sh3_mred      (07777U << 12)
-#define sh3_madr      (07777U <<  0)
-#define sh4_mwbk      (07777U << 13)
-#define sh4_link      (1U     << 12)
-#define sh4_acum      (07777U <<  0)
-#define sh5_sctr      (037U   << 12)
-#define sh5_mquo      (07777U <<  0)
+#define sh1_frzonerr  (1U   << 31)
+#define sh1_clearit   (1U   << 30)
+#define sh1_err       (0x1FFFFFFFU)
+
+#define sh2_majst     (15U     << 28)
+#define sh2_timestate (15U     << 24)
+#define sh2_ireg      (07777U  << 12)
+#define sh2_pctr      (07777U  <<  0)
+
+#define sh3_intendly  (1U      << 31)
+#define sh3_intenabd  (1U      << 30)
+#define sh3_intinhuj  (1U      << 29)
+#define sh3_mred      (07777U  << 12)
+#define sh3_madr      (07777U  <<  0)
+
+#define sh4_mwbk      (07777U  << 13)
+#define sh4_link      (1U      << 12)
+#define sh4_acum      (07777U  <<  0)
+
+#define sh5_dfld      (7U      << 29)
+#define sh5_ifaj      (7U      << 26)
+#define sh5_ifld      (7U      << 23)
+#define sh5_saveddfld (7U      << 20)
+#define sh5_savedifld (7U      << 17)
+#define sh5_sctr      (037U    << 12)
+#define sh5_mquo      (07777U  <<  0)
 
 // pdp8ixmem.v registers
 #define XM_OS8ZAP (1U <<  0)

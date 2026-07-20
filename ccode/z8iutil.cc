@@ -247,11 +247,11 @@ char *formatshadow (uint32_t const *shat)
     int rc = asprintf (&buf,
         "foe=%o "
         "clr=%o "
-        "err=%07X "
+        "err=%08X "
         "ms=%s "
         "ts=%u "
         "ir=%04o "
-        "pc=%04o "
+        "pc=%o%04o "
         "ma=%04o "
         "l.ac=%o.%04o "
         "sc=%02o "
@@ -263,6 +263,7 @@ char *formatshadow (uint32_t const *shat)
         msstr[EXT(sh2,sh2_majst)],
         EXT (sh2, sh2_timestate),
         EXT (sh2, sh2_ireg),
+        EXT (sh5, sh5_ifld),
         EXT (sh2, sh2_pctr),
         EXT (sh3, sh3_madr),
         EXT (sh4, sh4_link),

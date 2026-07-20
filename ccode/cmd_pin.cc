@@ -180,8 +180,6 @@ static PinDef const pindefs[] = {
 
     { "sh_frzonerr",     DEV_SH,  1, sh1_frzonerr,         true  },
     { "sh_clearit",      DEV_SH,  1, sh1_clearit,          true  },
-    { "sh_maknown",      DEV_SH,  1, sh1_maknown,          false },
-    { "sh_pcknown",      DEV_SH,  1, sh1_pcknown,          false },
     { "sh_err",          DEV_SH,  1, sh1_err,              true  },
     { "sh_majst",        DEV_SH,  2, sh2_majst,            false },
     { "sh_timestate",    DEV_SH,  2, sh2_timestate,        false },
@@ -192,6 +190,11 @@ static PinDef const pindefs[] = {
     { "sh_mwbk",         DEV_SH,  4, sh4_mwbk,             false },
     { "sh_link",         DEV_SH,  4, sh4_link,             false },
     { "sh_acum",         DEV_SH,  4, sh4_acum,             false },
+    { "sh_dfld",         DEV_SH,  5, sh5_dfld,             false },
+    { "sh_ifaj",         DEV_SH,  5, sh5_ifaj,             false },
+    { "sh_ifld",         DEV_SH,  5, sh5_ifld,             false },
+    { "sh_saveddfld",    DEV_SH,  5, sh5_saveddfld,        false },
+    { "sh_savedifld",    DEV_SH,  5, sh5_savedifld,        false },
     { "sh_sctr",         DEV_SH,  5, sh5_sctr,             false },
     { "sh_mquo",         DEV_SH,  5, sh5_mquo,             false },
 

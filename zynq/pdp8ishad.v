@@ -20,6 +20,13 @@
 
 // Verify the PDP-8/I operation, memory cycle by cycle
 
+// test that pdp8ishad works by running verisim/simtest.sh script
+
+// normally the shadower is running checking the processor state
+// it keeps running until it finds an error, setting a bit in 'err' register
+// a shadow error will freeze the processor only if 'frzonerr' enabled by the arm
+// reset the shadower by setting then clearing the 'clearit' bit from the arm
+
 module pdp8ishad (
     input CLOCK, RESET,  // fpga 100MHz clock and reset
 
@@ -28,7 +35,7 @@ module pdp8ishad (
     input[31:00] armwdata,
     output[31:00] armrdata,
 
-    // all signals coming in from the bus
+    // all signals coming into fpga from the external bus
     input[11:00]    oACUM,
     input           oBRKCYC,
     input           oBRKGNTI,
@@ -51,20 +58,20 @@ module pdp8ishad (
     input           oTS3,
     input           oTS4,
 
-    // fpga outputs these signals conditionally
-    // otherwise we do not know their state on the bus
-    input        dmagntd,  // enable the dma cycle inputs
+    // fpga outputs these signals to the external bus conditionally
+    // otherwise we do not know their state on the external bus
+    input        dmagntd,  // enable dma cycle signals onto the external bus
     input        iBRKWRM,  // [dmagntd]
     input        iCAINC,   // [dmagntd]
     input        iCYCLE3,  // [dmagntd]
     input[2:0]   iDMAFLD,  // [dmagntd]
 
-    input        ioenabd,  // my io cycle | dma granted & TS4 | dma granted & BRKCYC & TS2 | memdis & TS1
+    input        ioenabd,  // enable io signals onto the external bus
     input        iACCLEAR, // [ioenabd]
     input[11:00] iINBUS,   // [ioenabd]
     input        iIOSKIP,  // [ioenabd]
 
-    input        poweron,  // enable the 'always on' and 'open collector' inputs
+    input        poweron,  // enable the 'always on' and 'open collector' signals onto the external bus
     input        iCLOCK,   // [poweron]
     input        iMEMDIS,  // [poweron]
     input        iRESET,   // [poweron]
@@ -99,27 +106,33 @@ module pdp8ishad (
 
     reg maknown, pcknown, frzonerr;
     reg[11:00] acum, ireg, madr, mquo, mred, mwbk, pctr;
-    reg[26:00] err;
+    reg[28:00] err;
     reg[4:0] sctr;
     reg[3:0] majst, timestate;
-    reg[1:0] savedioskip;
-    reg clearit, link;
+    reg clearit, intendly, intenabd, intinhuj, link;
+
+    // field registers:
+    //  <3> = 0: <2:0> = not known to match processor
+    //        1: <2:0> = field value should match what processor has
+    reg[3:0] dfld, ifaj, ifld, saveddf, savedif;
+    reg[2:0] tp1fld;
 
     wire error = (err != 0);
     assign freeze = error & frzonerr;
 
     assign armrdata = (armraddr == 0) ? 32'h53482002 : // [31:16] = 'SH'; [15:12] = (log2 nreg) - 1; [11:00] = version
-                      (armraddr == 1) ? { frzonerr, clearit, maknown, pcknown, 1'b0, err } :
+                      (armraddr == 1) ? { frzonerr, clearit, 1'b0, err } :
                       (armraddr == 2) ? { majst, timestate, ireg, pctr } :
-                      (armraddr == 3) ? { 8'b0, mred, madr } :
+                      (armraddr == 3) ? { intendly, intenabd, intinhuj, 5'b0, mred, madr } :
                       (armraddr == 4) ? { 7'b0, mwbk, link, acum } :
-                      (armraddr == 5) ? { 15'b0, sctr, mquo } :
+                      (armraddr == 5) ? { dfld[2:0], ifaj[2:0], ifld[2:0], saveddf[2:0], savedif[2:0], sctr, mquo } :
                       32'hDEADBEEF;
 
     wire [11:00] eadr = { mred[07] ? madr[11:07] : 5'b0, mred[06:00] };
 
-    reg[3:0]  brkintfetmajst;
-    reg[11:00] brkintfetmadr;
+    reg[3:0]  brkintfetmajst;   // what major state follows the end-of-instruction major state (or INTAK, or BREAK)
+    reg[11:00] brkintfetmadr;   // memory address for brkintfetmajst
+    reg brkintfetmakn;          // if brkintfetmadr is valid
 
     reg saveioacclr, saveioenabd, saveioskip;
     reg[11:00] saveioinbus;
@@ -171,7 +184,7 @@ module pdp8ishad (
     // calculate accumulator and program counter for group 2 instruction
 
     // - maybe increment PC for skip
-    wire[11:00] g2pctr = pctr + { 10'b0, (
+    wire[11:00] g2pctr = pctr + { 11'b0, (
                   ((ireg[06] & acum[11]) |    // SMA
                    (ireg[05] & (acum == 0)) | // SZA
                    (ireg[04] & link)) ^       // SNL
@@ -179,6 +192,7 @@ module pdp8ishad (
         ) };
 
     // - maybe clear accumulator and/or or in switch register
+    //   we don't know sr contents so assume processor did it correctly
     wire[11:00] g2acum = (ireg[07] ? 0 : acum) | (ireg[02] ? oACUM : 0);
 
     // misc state
@@ -203,13 +217,18 @@ module pdp8ishad (
         if (RESET) begin
             clearit  <= 1;
             frzonerr <= 0;
+            dfld     <= 0;
+            ifaj     <= 0;
+            ifld     <= 0;
+            saveddf  <= 0;
+            savedif  <= 0;
         end
 
         // arm processor is writing one of the registers
         else if (armwrite) begin
             case (armwaddr)
                 1: begin
-                    err   <= armwdata[26:00];
+                    err   <= armwdata[28:00];
                     clearit  <= armwdata[30];
                     frzonerr <= armwdata[31];
                 end
@@ -221,6 +240,9 @@ module pdp8ishad (
             acum        <= oACUM;
             err         <= 0;
             eago        <= 0;
+            intendly    <= 0;
+            intenabd    <= 0;
+            intinhuj    <= 0;
             ireg        <= 0;
             lasttp1     <= 0;
             lastts1     <= 0;
@@ -228,8 +250,8 @@ module pdp8ishad (
             lastts3     <= 0;
             lastts4     <= 0;
             link        <= oLINK;
-            maknown     <= 0;
             majst       <= MS_FETCH;
+            maknown     <= 0;
             pcknown     <= 0;
             timestate   <= TS_S;
         end
@@ -251,7 +273,7 @@ module pdp8ishad (
 
             case (timestate)
 
-                // halted or shadowing just started, wait for TS1
+                // shadowing just started, wait for TS1
                 // don't jump in for DEFER,EXEC cuz we don't have ireg,pctr etc
                 TS_S: begin
                     if (oTS1) begin
@@ -264,9 +286,12 @@ module pdp8ishad (
                         end
                         if ((oMAJST == MS_DEPOS) | (oMAJST == MS_EXAM)) begin
                             madr      <= oMADR;
+                            ifld      <= 0;     // DFLD,IFLD loaded from switches
+                            dfld      <= 0;     // ...but we don't know what the switches are
+                            ifaj      <= 0;
+                            maknown   <= 1;
                             pctr      <= oMADR;
                             majst     <= oMAJST;
-                            maknown   <= 1;
                             pcknown   <= 1;
                             timestate <= TS_1;
                         end
@@ -285,6 +310,7 @@ module pdp8ishad (
                     end
                     if (oTS1) begin
 
+                        // wait for extended address bits valid
                         if (oTP1) begin
 
                             // verify major state is what we expect
@@ -293,14 +319,62 @@ module pdp8ishad (
                                 err[03] <= 1;
                             end
 
-                            // verify memory address is what we expect
-                            // ...but capture it if unknown
-                            if (~ maknown) madr <= oMADR;
-                            else if (madr != oMADR) begin
-                                $display ("pdp8ishad: 04 madr=%o oMADR=%o", madr, oMADR);
+                            // can't be acknowledging interrupt if interrupts disabled
+                            if ((majst == MS_INTAK) & (~ intenabd | intinhuj)) begin
+                                $display ("pdp8ishad: 27 intenabd=%b intinhuj=%b", intenabd, intinhuj);
+                                err[27] <= 1;
+                            end
+
+                            // verify extended memory address is what we expect
+                            // capture any unknown bits
+                            if (~ maknown) begin
+                                madr  <= oMADR;
+                                maknown <= 1;
+                            end else if (madr != oMADR) begin
+                                $display ("pdp8ishad: 04 majst=%x madr=%o oMADR=%o", majst, madr, oMADR);
                                 err[04] <= 1;
                             end
-                            maknown <= 1;
+                            case (majst)
+                                MS_FETCH, MS_DEFER, MS_DEPOS, MS_EXAM: begin
+                                    if (~ ifld[3]) begin
+                                        ifld <= { 1'b1, oMEAD };
+                                    end else if (ifld[2:0] != oMEAD) begin
+                                        $display ("pdp8ishad: 04 majst=%x ifld=%o oMEAD=%o", majst, ifld[2:0], oMEAD);
+                                        err[04] <= 1;
+                                    end
+                                end
+                                MS_EXEC: begin
+                                    if (~ ireg[11] & ireg[08]) begin
+                                        if (~ dfld[3]) begin
+                                            dfld <= { 1'b1, oMEAD };
+                                        end else if (dfld[2:0] != oMEAD) begin
+                                            $display ("pdp8ishad: 04 majst=%x dfld=%o oMEAD=%o", majst, dfld[2:0], oMEAD);
+                                            err[04] <= 1;
+                                        end
+                                    end else begin
+                                        if (~ ifld[3]) begin
+                                            ifld <= { 1'b1, oMEAD };
+                                        end else if (ifld[2:0] != oMEAD) begin
+                                            $display ("pdp8ishad: 04 majst=%x ifld=%o oMEAD=%o", majst, ifld[2:0], oMEAD);
+                                            err[04] <= 1;
+                                        end
+                                    end
+                                end
+                                MS_INTAK, MS_WRDCT, MS_CURAD: begin
+                                    if (oMEAD != 0) begin
+                                        $display ("pdp8ishad: 04 majst=%x oMEAD=%o", majst, oMEAD);
+                                        err[04] <= 1;
+                                    end
+                                end
+                                MS_BREAK: begin
+                                    if (dmagntd & (iDMAFLD != oMEAD)) begin
+                                        $display ("pdp8ishad: 04 iDMAFLD=%o oMEAD=%o", iDMAFLD, oMEAD);
+                                        err[04] <= 1;
+                                    end
+                                end
+                            endcase
+                        end else begin
+                            tp1fld <= oMEAD;    // capture field generated by processor until TP1 seen
                         end
                     end else if (oTS2) begin
 
@@ -314,8 +388,10 @@ module pdp8ishad (
                             pctr  <= oMADR + 1;
                         end
 
-                        // if fetch, save opcode in ireg
+                        // if fetch, save 12-bit opcode in ireg
+                        // also update delayed interrupt enable
                         if (majst == MS_FETCH) begin
+                            intenabd <= intendly;
                             ireg  <= oMBUF;
                         end
 
@@ -357,11 +433,19 @@ module pdp8ishad (
                     end
                     if (oTS3) begin
 
+                        // processor clocks in io signals at TP3
+                        // so save io signals during TS3 until TP3
                         if (~ oTP3) begin
                             saveioenabd <= ioenabd;
                             saveioacclr <= iACCLEAR;
                             saveioskip  <= iIOSKIP;
                             saveioinbus <= iINBUS;
+                        end
+
+                        // field and address persist from TS1 through TS3
+                        if ({ tp1fld, madr } != { oMEAD, oMADR }) begin
+                            $display ("pdp8ishad: 28 majst=%x madr sb %o.%o but is %o.%o", majst, tp1fld, madr, oMEAD, oMADR);
+                            err[28] <= 1;
                         end
 
                         // MBUF gets loaded at end of TS2 with value to be written to memory
@@ -397,14 +481,9 @@ module pdp8ishad (
                                         end
                                     end
                                     4: begin    // JMS
-                                        if (~ pcknown) begin
-                                            pcknown <= 1;
-                                            pctr <= oMBUF;
-                                        end else begin
-                                            if (oMBUF != pctr) begin
-                                                $display ("pdp8ishad: 13 oMBUF=%o pctr=%o", oMBUF, pctr);
-                                                err[13] <= 1;
-                                            end
+                                        if (pcknown & (oMBUF != pctr)) begin
+                                            $display ("pdp8ishad: 13 oMBUF=%o pctr=%o", oMBUF, pctr);
+                                            err[13] <= 1;
                                         end
                                     end
                                     7: begin    // OPR (only OPRs using EXEC should be extarith with memory operand)
@@ -439,14 +518,9 @@ module pdp8ishad (
                                 end
                             end
                             MS_INTAK: begin
-                                if (~ pcknown) begin
-                                    pcknown <= 1;
-                                    pctr <= oMBUF;
-                                end else begin
-                                    if (oMBUF != pctr) begin
-                                        $display ("pdp8ishad: 17 oMBUF=%o pctr=%o", oMBUF, pctr);
-                                        err[17] <= 1;
-                                    end
+                                if (pcknown & (oMBUF != pctr)) begin
+                                    $display ("pdp8ishad: 17 oMBUF=%o pctr=%o", oMBUF, pctr);
+                                    err[17] <= 1;
                                 end
                             end
                             MS_EXAM: begin
@@ -463,24 +537,74 @@ module pdp8ishad (
                         case (majst)
 
                             // FETCH:
-                            //  direct JMP: sets PC = effective address
+                            //  direct JMS: set up to write return address in new field
+                            //  direct JMP: sets PC = effective address in new field
                             //   (indirect JMP sets PC in DEFER cycle)
                             //  IOT: updates to AC, PC
                             //  OPR: update AC, LINK, PC from opcode
                             MS_FETCH: begin
                                 case (ireg[11:09])
-                                    5: begin    // JMP
+                                    4: begin    // JMS
+                                        intinhuj <= 0;
                                         if (~ ireg[08]) begin
+                                            ifld <= ifaj;
+                                        end
+                                    end
+                                    5: begin    // JMP
+                                        intinhuj <= 0;
+                                        if (~ ireg[08]) begin
+                                            ifld <= ifaj;
                                             pctr <= eadr;
                                         end
                                     end
                                     6: begin    // IOT
-                                        if (saveioenabd) begin
-                                            // fpga internal device, we can calculate what processor should have done
-                                            acum <= (saveioacclr ? 12'b0 : acum) | saveioinbus;
+                                        if (ireg[08:00] == 9'o001) begin                // 6001 ION
+                                            intendly <= 1;
+                                            saveioenabd <= 1;
+                                            saveioskip  <= 0;
+                                        end else if (ireg[08:00] == 9'o002) begin       // 6002 IOF
+                                            intenabd <= 0;
+                                            intendly <= 0;
+                                            saveioenabd <= 1;
+                                            saveioskip  <= 0;
+                                        end else if (ireg[08:06] == 3'o2) begin
+                                            if (ireg[00]) begin                         // 62n1 CDFn
+                                                dfld <= { 1'b1, ireg[05:03] };
+                                            end
+                                            if (ireg[01]) begin                         // 62n2 CIFn
+                                                ifaj <= { 1'b1, ireg[05:03] };
+                                                intinhuj <= 1;
+                                            end
+                                            if ((ireg[05:00] & 6'o37) == 6'o14) begin   // 6214 RDF
+                                                // if dfld known, calc what acum should be
+                                                // otherwise, get what processor is saying
+                                                acum[05:03] <= acum[05:03] | (dfld[3] ? dfld[2:0] : oACUM[05:03]);
+                                            end
+                                            if ((ireg[05:00] & 6'o37) == 6'o24) begin   // 6224 RIF
+                                                // if ifld known, calc what acum should be
+                                                // otherwise, get what processor is saying
+                                                acum[05:03] <= acum[05:03] | (ifld[3] ? ifld[2:0] : oACUM[05:03]);
+                                            end
+                                            if ((ireg[05:00] & 6'o37) == 6'o34) begin   // 6234 RIB
+                                                // if saved fields known, calc what acum should be
+                                                // otherwise, get what processor is saying
+                                                acum[05:00] <= acum[05:00] |
+                                                        (savedif[3] & saveddf[3] ? { savedif[2:0], saveddf[2:0] } : oACUM[05:00]);
+                                            end
+                                            if ((ireg[05:00] & 6'o47) == 6'o44) begin   // 6244 RIF
+                                                dfld <= saveddf;
+                                                ifaj <= savedif;
+                                            end
+                                            saveioenabd <= 1;
+                                            saveioskip  <= 0;
                                         end else begin
-                                            // external to fpga, we assume processor calculated correctly
-                                            acum <= oACUM;
+                                            if (saveioenabd) begin
+                                                // fpga internal device, we can calculate what processor should have done
+                                                acum <= (saveioacclr ? 12'b0 : acum) | saveioinbus;
+                                            end else begin
+                                                // external to fpga, we assume processor calculated correctly
+                                                acum <= oACUM;
+                                            end
                                         end
                                     end
                                     7: begin    // OPR
@@ -503,8 +627,16 @@ module pdp8ishad (
                                 endcase
                             end
 
+                            // DEFER:
+                            //  indirect JMS: pointer was read using old ifld
+                            //                set up to write return address to new ifld
+                            //  indirect JMP: pointer was read using old ifld
+                            //                jump to new ifld
                             MS_DEFER: begin
-                                if (ireg[11:09] == 5) begin
+                                if (ireg[11:10] == 2) begin // JMS,JMP
+                                    ifld <= ifaj;
+                                end
+                                if (ireg[11:09] == 5) begin // JMP
                                     pctr <= mwbk;
                                 end
                             end
@@ -512,7 +644,7 @@ module pdp8ishad (
                             // EXEC:
                             //  AND,TAD,DCA: update according to opcode
                             //  ISZ: maybe increment PC
-                            //  JMS: PC = MA + 1
+                            //  JMS: return address has been written to new field; PC = MA + 1
                             MS_EXEC: begin
                                 case (ireg[11:09])
                                     0: begin    // AND
@@ -550,6 +682,7 @@ module pdp8ishad (
                     end
                 end
 
+                // processor is doing TS4 - computing next major state and extended memory address
                 TS_4: begin
                     if (oTS2 | oTS3) begin
                         $display ("pdp8ishad: 19 oTS2=%b oTS3=%b", oTS2, oTS3);
@@ -565,17 +698,36 @@ module pdp8ishad (
                         end
 
                         // compute what next major state and memory address should be
+                        // ...assuming currently at end-of-instruction state
                         if (dmagntd) begin
-                            if (iCYCLE3) begin
-                                brkintfetmajst <= MS_WRDCT;
-                                brkintfetmadr  <= iINBUS;
-                            end else begin
-                                brkintfetmajst <= MS_BREAK;
-                                brkintfetmadr  <= iINBUS;
-                            end
+                            // something in zynq.v has been granted the dma bus so the dma signals are known
+                            brkintfetmajst <= iCYCLE3 ? MS_WRDCT : MS_BREAK;
+                            brkintfetmadr  <= iINBUS;
+                            brkintfetmakn  <= 1;
                         end else begin
-                            brkintfetmajst <= (oMAJST == MS_WRDCT) | (oMAJST == MS_BREAK) | (oMAJST == MS_INTAK) ? oMAJST : MS_FETCH;
-                            brkintfetmadr <= (oMAJST == MS_WRDCT) | (oMAJST == MS_BREAK) ? oMADR : (oMAJST == MS_INTAK) ? 0 : pctr;
+                            // something else might be granted the dma bus so the dma signals are unknown
+                            // we will assume the procesor is doing the right thing
+                            case (oMAJST)
+                                MS_INTAK: begin
+                                    brkintfetmajst <= MS_INTAK;
+                                    brkintfetmadr  <= 12'o0000;
+                                    brkintfetmakn  <= 1;
+                                end
+                                MS_WRDCT: begin
+                                    brkintfetmajst <= MS_WRDCT;
+                                    brkintfetmadr  <= oMADR;
+                                    brkintfetmakn  <= 1;
+                                end
+                                MS_BREAK: begin
+                                    brkintfetmajst <= MS_BREAK;
+                                    brkintfetmakn  <= 0;
+                                end
+                                default: begin
+                                    brkintfetmajst <= MS_FETCH;
+                                    brkintfetmadr  <= pcknown ? pctr : oMADR;
+                                    brkintfetmakn  <= 1;
+                                end
+                            endcase
                         end
                     end
 
@@ -584,33 +736,40 @@ module pdp8ishad (
 
                         // compute what next major state and memory address should be
                         case (majst)
+
+                            // just completed fetching an instruction
                             MS_FETCH: begin
                                 case (ireg[11:09])
                                     0,1,2,3,4: begin                    // AND,TAD,ISZ,DCA,JMS
-                                        madr  <= eadr;
+                                        madr  <= eadr;                  // for direct JMS, ifld already updated from ifaj at end of TS3
+                                                                        //                 ...so return address gets written to new ifld
+                                                                        // for indirect JMS, ifld still old value
+                                                                        //                 ...so pointer gets read from old ifld
                                         majst <= ireg[08] ? MS_DEFER : MS_EXEC;
                                     end
                                     5: begin                            // JMP
                                         if (ireg[08]) begin
-                                            madr  <= eadr;              // indirect JMP, DEFER cycle reads from eadr
-                                            majst <= MS_DEFER;
+                                            madr  <= eadr;              // indirect JMP, DEFER cycle reads from eadr in old ifld
+                                            majst <= MS_DEFER;          // ...still using old ifld so pointer gets read from old ifld
                                         end else begin
-                                            pctr  <= eadr;              // direct JMP, set PC to the effective address
-                                            madr  <= (brkintfetmajst == MS_FETCH) ? eadr : brkintfetmadr;
-                                            majst <= brkintfetmajst;
+                                                                        // direct JMP, PC and IF were updated at end of TS3
+                                            madr    <= (brkintfetmajst == MS_FETCH) ? eadr : brkintfetmadr;
+                                            maknown <= (brkintfetmajst == MS_FETCH) ? 1    : brkintfetmakn;
+                                            majst   <= brkintfetmajst;
                                         end
                                     end
                                     6: begin                            // IOT
                                         if (saveioenabd) begin
                                             // fpga internal device, we can calculate what processor should have done
-                                            madr <= (brkintfetmajst == MS_FETCH) ? pctr + { 11'b0, saveioskip } : brkintfetmadr;
-                                            pctr <= pctr + { 11'b0, saveioskip };
+                                            madr    <= (brkintfetmajst == MS_FETCH) ? pctr + { 11'b0, saveioskip } : brkintfetmadr;
+                                            maknown <= (brkintfetmajst == MS_FETCH) ? 1 : brkintfetmakn;
+                                            pctr    <= pctr + { 11'b0, saveioskip };
                                         end else begin
                                             // external to fpga, we assume processor calculated correctly
                                             if (brkintfetmajst == MS_FETCH) begin
                                                 // fetch is next, address should be PC (no IOSKIP) or PC+1 (with IOSKIP)
-                                                if ((oMADR != pctr) & (oMADR != pctr + 12'b1)) begin
-                                                    $display ("pdp8ishad: 21 oMADR=%o pctr=%o", oMADR, pctr);
+                                                if ((oMEAD != ifld[2:0]) | ((oMADR != pctr) & (oMADR != pctr + 12'b1))) begin
+                                                    $display ("pdp8ishad: 21 oMEAD,oMADR=%o%o ifld,pctr=%o%o", oMEAD, oMADR, ifld, pctr);
                                                     err[21] <= 1;
                                                 end
                                                 madr <= oMADR;
@@ -618,7 +777,8 @@ module pdp8ishad (
                                             end else begin
                                                 // don't know if PC was incremented or not
                                                 pcknown <= 0;
-                                                madr <= brkintfetmadr;
+                                                madr    <= brkintfetmadr;
+                                                maknown <= brkintfetmakn;
                                             end
                                         end
                                         majst <= brkintfetmajst;
@@ -633,55 +793,73 @@ module pdp8ishad (
                                         // extarith with memory operand goes to EXEC state next
                                         // otherwise go to BREAK/INTAK/FETCH next
                                         if (extarmem) begin
-                                            madr  <= pctr;
-                                            majst <= MS_EXEC;
+                                            madr    <= pctr;
+                                            majst   <= MS_EXEC;
                                         end else begin
-                                            madr  <= brkintfetmadr;
-                                            majst <= brkintfetmajst;
+                                            madr    <= brkintfetmadr;
+                                            maknown <= brkintfetmakn;
+                                            majst   <= brkintfetmajst;
                                         end
                                     end
                                 endcase
                             end
 
+                            // just completed reading the pointer (and maybe writing auto-incd pointer back)
                             MS_DEFER: begin
-                                if (ireg[11:09] == 5) pctr <= mwbk;
-                                madr  <= (ireg[11:09] == 5) ? brkintfetmadr  : mwbk;
-                                majst <= (ireg[11:09] == 5) ? brkintfetmajst : MS_EXEC;
+                                madr    <= (ireg[11:09] == 5) ? brkintfetmadr  : mwbk;
+                                maknown <= (ireg[11:09] == 5) ? brkintfetmakn  : 1;
+                                majst   <= (ireg[11:09] == 5) ? brkintfetmajst : MS_EXEC;
                             end
 
+                            // just completed executing the instruction
                             MS_EXEC: begin
-                                madr  <= brkintfetmadr;
-                                majst <= brkintfetmajst;
+                                madr    <= brkintfetmadr;
+                                maknown <= brkintfetmakn;
+                                majst   <= brkintfetmajst;
                             end
 
+                            // just completed incrementing the word count
+                            // current address is next sequential address
                             MS_WRDCT: begin
                                 madr  <= madr + 1;
                                 majst <= MS_CURAD;
                             end
 
+                            // just completed possibly incrementing the current address
                             MS_CURAD: begin
-                                madr  <= mwbk;
-                                majst <= MS_BREAK;
+                                madr    <= mwbk;
+                                maknown <= 1;
+                                majst   <= MS_BREAK;
                             end
 
+                            // just completed reading/writing memory on behalf of io device
                             MS_BREAK: begin
                                 if ((brkintfetmajst == MS_FETCH) & ~ pcknown) begin
-                                    madr <= oMADR;
-                                    pctr <= oMADR;
+                                    madr    <= oMADR;
+                                    maknown <= 1;
+                                    pctr    <= oMADR;
                                     pcknown <= 1;
                                 end else begin
-                                    madr <= brkintfetmadr;
+                                    madr    <= brkintfetmadr;
+                                    maknown <= brkintfetmakn;
                                 end
                                 majst <= brkintfetmajst;
                             end
 
+                            // just completed writing pc to 00000 and disabling interrupts etc
                             MS_INTAK: begin
-                                madr    <= (brkintfetmajst == MS_FETCH) ? 1 : brkintfetmadr;
+                                madr    <= (brkintfetmajst == MS_FETCH) ? 12'o0001 : brkintfetmadr;
+                                maknown <= (brkintfetmajst == MS_FETCH) ? 1 : brkintfetmakn;
+                                dfld    <= 8;       // DFLD,IFLD now known to be 0
+                                ifaj    <= 8;
+                                ifld    <= 8;
                                 pctr    <= 1;
                                 pcknown <= 1;
                                 majst   <= brkintfetmajst;
                             end
 
+                            // just finished accessing memory on behalf of console
+                            // processor should halt and not enter TS1 until some other button pressed
                             MS_DEPOS, MS_EXAM: begin
                                 if (oTS1) begin
                                     $display ("pdp8ishad: 24");
@@ -694,15 +872,26 @@ module pdp8ishad (
                 end
 
                 // halted with shadow context intact, wait for TS1
+                // CONT switch should resume exactly where it left off
+                // DEPOS,EXAM,LDAD switches mess the state up
                 TS_H: begin
                     if (oTS1) begin
                         if ((oMAJST == MS_DEPOS) | (oMAJST == MS_EXAM)) begin
                             madr    <= oMADR;
+                            dfld    <= 0;       // DFLD,IFLD loaded from switches
+                            ifaj    <= 0;       // ...but we don't know what the switches are
+                            ifld    <= 0;
                             pctr    <= oMADR;
+                            majst   <= oMAJST;
                             maknown <= 1;
                             pcknown <= 1;
                         end
-                        majst     <= oMAJST;
+                        // if previous depos/exam cycle, next state could be anything
+                        // so trust processor is doing the right thing
+                        else if ((majst == MS_DEPOS) | (majst == MS_EXAM)) begin
+                            majst <= oMAJST;
+                        end
+                        // in any case, start shadowing again
                         timestate <= TS_1;
                     end
                 end
