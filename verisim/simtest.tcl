@@ -595,7 +595,7 @@ proc memorycycle {state field addr rdata wdata} {
     set expaddr [expr {($field << 12) | $addr}]
     if {$memdis} {
         ;# this script is the memory, so put read data directly on the INBUS
-        bus set iINBUS $rdata
+        arm set 1 [expr {(1 << 24) | ($rdata << 10)}]   ;# [24]=arm_iMEMDIS, [21:10]=arm_iINBUS
         ;# put unrelated number in extmemory.kicad_sch chip in case it is interfering
         mem $expaddr [randbits 12]
     } else {
@@ -623,7 +623,7 @@ proc memorycycle {state field addr rdata wdata} {
 
     ;# stop dumping memory read value onto iINBUS
     if {$memdis} {
-        bus set iINBUS 0
+        arm set 1 [expr {1 << 24}]                      ;# [24]=arm_iMEMDIS, [21:10]=arm_iINBUS
     }
 
     ;# maybe put dma write data out on the inbus during TS2

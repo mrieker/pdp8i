@@ -227,9 +227,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     wire        dev_iPAUSE;
     wire        dev_iRESET;
 
-    reg[9:0] meminprog;
-
-    reg simit, lastts3, didio;
+    reg simit, fpgamemen, lastts3, didio;
     wire acclr, intrq, ioskp;
     reg[31:00] memcycctr;
 
@@ -261,6 +259,9 @@ module Zynq #(parameter BIDIRCONSDA=1) (
 
     reg arm_hizmembus, dev_hizmembus;
     wire hizmembus;
+
+    // external memory
+    reg[11:00] xminbus;
 
     // shadow interface wires
     wire shad_freeze;
@@ -415,6 +416,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
 
             regctld     <= 9;                           // default 10MHz PDP clock
             simit       <= 0;                           // assume want to access real PDP-8/I by default
+            fpgamemen   <= 0;                           // also use the memory on physical memory board
 
         end else begin
 
@@ -480,6 +482,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
 
                     10'b0000000101: begin
                         simit        <= saxi_WDATA[00];
+                        fpgamemen    <= saxi_WDATA[01];
                     end
 
                     default: begin end
@@ -612,7 +615,9 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     // any of our io devices is selected by current io instruction
     // also whenever dma granted and TS4 to output dma address over inbus
     //                           and TS2 of BREAK cycle to output write data over inbus
-    //               and during TS1 if memory chips on extmemory.kicad_sch are disabled (arm provides data on arm_iINBUS)
+    //               and during TS1 if memory chips on extmemory.kicad_sch are disabled
+    //                   (fpgamemen = 0: arm provides data on arm_iINBUS)
+    //                   (          = 1: fpga provies data from externmem array on xminbus)
     assign hdw_ioenabd_n = ~ (hdw_iIOSEL |
                             ~ hdw_dmagntd_n & hdw_oTS4 |
                             ~ hdw_dmagntd_n & hdw_oBRKCYC & hdw_oTS2 |
@@ -692,7 +697,8 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     assign regctlc[31:27] = 0;
 
     assign regctle[00]    = simit;
-    assign regctle[04:01] = 0;
+    assign regctle[01]    = fpgamemen;
+    assign regctle[04:02] = 0;
     assign regctle[16:05] = dev_oMADR;
     assign regctle[19:17] = dev_oMEAD;
     assign regctle[31:20] = dev_oMBUF;
@@ -731,23 +737,6 @@ module Zynq #(parameter BIDIRCONSDA=1) (
         lastts3 <= dev_oTS3;
     end
 
-    // see if PDP is doing stuff with the busses
-    // everything the PDP does begins with a MEMSTART pulse and lasts less than 5uS
-    // so we start a counter at 1023 at memstart and count it down to 0 (taking 10.23uS)
-    // ...restarting whenever we see memstart
-    // this is kind of like RUN, but takes into account cycles initiated by the console
-    always @(posedge CLOCK) begin
-        if (dev_iRESET) begin
-            meminprog <= 0;
-        end else begin
-            if (dev_oTS1) begin
-                meminprog <= 1023;
-            end else if (meminprog != 0) begin
-                meminprog <= meminprog - 1;
-            end
-        end
-    end
-
     // internal pio busses - wire-ored (active high) from device to processor
     assign dev_iACCLEAR = arm_iACCLEAR | ttacclr | rkacclr | vcacclr | tcacclr | pracclr | pbacclr | dcacclr | rcacclr;
     assign dev_iBRKRQST = arm_iBRKRQST | cmbrkrqst;
@@ -755,7 +744,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     assign dev_iCAINC   = arm_iCAINC   | cmbrkcainc;
     assign dev_iCYCLE3  = arm_iCYCLE3  | cmbrk3cycl;
     assign dev_iDMAFLD  = arm_iDMAFLD  | cmbrkema;
-    assign dev_iINBUS   = arm_iINBUS   | ttibus  | rkibus  | vcibus  | tcibus  | pribus  | pbibus  | dcibus  | rcibus  | cmbrkinbus;
+    assign dev_iINBUS   = arm_iINBUS   | ttibus  | rkibus  | vcibus  | tcibus  | pribus  | pbibus  | dcibus  | rcibus  | cmbrkinbus | xminbus;
     assign dev_iINTRQST = arm_iINTRQST | ttintrq | rkintrq | vcintrq | tcintrq | printrq | ppintrq | dcintrq | rcintrq;
     assign dev_iIOSEL   =                ttiosel | rkiosel | vciosel | tciosel | priosel | ppiosel | dciosel | rciosel | pbiosel;
     assign dev_iIOSKIP  = arm_iIOSKIP  | ttioskp | rkioskp | vcioskp | tcioskp | prioskp | ppioskp | dcioskp | rcioskp | pbioskp;
@@ -827,6 +816,35 @@ module Zynq #(parameter BIDIRCONSDA=1) (
         ,.swstart       (sim_swstart)
         ,.swcont        (sim_swcont)
     );
+
+    ///////////////////////
+    //  External Memory  //
+    ///////////////////////
+
+    // setting arm_iMEMDIS disables the memory chips on the extmemory.kicad_sch board
+    // so this memory fills in for it
+    // allows shadowing to check memory reads,
+    //   as zynq.v cannot read hdw_iINBUS which has the
+    //   extmemory.kicad_sch memory read data during TS1
+    // must set both arm_iMEMDIS and fpgamemen
+
+    reg[11:00] extmemdly, externmem[32767:0];
+    reg lasttp3;
+    always @(posedge CLOCK) begin
+        if (RESET_N & fpgamemen) begin
+            if (dev_oTS1) begin
+                { xminbus, extmemdly } <= { extmemdly, externmem[{dev_oMEAD,dev_oMADR}] };
+            end else begin
+                xminbus <= 0;
+            end
+            if (~ lasttp3 & dev_oTP3) begin
+                externmem[{dev_oMEAD,dev_oMADR}] <= dev_oMBUF;
+            end
+        end else begin
+            xminbus <= 0;
+        end
+        lasttp3 <= dev_oTP3;
+    end
 
     ///////////////////////
     //  DMA grant chain  //

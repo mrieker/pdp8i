@@ -92,6 +92,7 @@ static PinDef const pindefs[] = {
     { "clkratm1",        DEV_8I, Z_RD, d_clkratm1,     true  },
 
     { "simit",           DEV_8I, Z_RE, e_simit,        true  },
+    { "fpgamemen",       DEV_8I, Z_RE, e_fpgamemen,    true  },
     { "oMADR",           DEV_8I, Z_RE, e_oMADR,        false },
     { "oMEAD",           DEV_8I, Z_RE, e_oMEAD,        false },
     { "oMBUF",           DEV_8I, Z_RE, e_oMBUF,        false },
