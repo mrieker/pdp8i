@@ -266,7 +266,7 @@ char *formatshadow (uint32_t const *shat)
         EXT (sh5, sh5_ifld),
         EXT (sh2, sh2_pctr),
         EXT (sh3, sh3_madr),
-        EXT (sh4, sh4_link),
+        EXT (sh5, sh5_link),
         EXT (sh4, sh4_acum),
         EXT (sh5, sh5_sctr),
         EXT (sh5, sh5_mquo));

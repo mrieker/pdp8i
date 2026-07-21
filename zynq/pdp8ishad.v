@@ -93,7 +93,7 @@ module pdp8ishad (
     localparam MS_DEPOS =  8;       // memory cycle initiated by DEPOS key
     localparam MS_EXAM  =  9;       // memory cycle initiated by LDAD or EXAM key
 
-    localparam TS_H =  0;       // halted, shadow context valid
+    localparam TS_S =  0;       // startup, shadow context invalid
     localparam TS_1 =  1;       // read memory (EA sampled at posedge TS1)
                                 // - TP1: sample BRK_RQST; inc PC (FETCH); clear ADDR_ACCEPT
     localparam TS_2 =  2;       // compute update to memory
@@ -102,7 +102,7 @@ module pdp8ishad (
                                 // - TP3: load L,AC (AND,TAD,DCA,OPR); load PC (jumps, skips); sample INT_RQST
     localparam TS_4 =  4;       // determine next state
                                 // - TP4: set IR=4 (INTAK next); load F,D,E,WC,CA,B; load MA; load ADDR_ACCEPT (BREAK)
-    localparam TS_S =  5;       // startup, shadow context invalid
+    localparam TS_H =  5;       // halted, shadow context valid
 
     reg maknown, pcknown, frzonerr;
     reg[11:00] acum, ireg, madr, mquo, mred, mwbk, pctr;
@@ -124,8 +124,8 @@ module pdp8ishad (
                       (armraddr == 1) ? { frzonerr, clearit, 1'b0, err } :
                       (armraddr == 2) ? { majst, timestate, ireg, pctr } :
                       (armraddr == 3) ? { intendly, intenabd, intinhuj, 5'b0, mred, madr } :
-                      (armraddr == 4) ? { 7'b0, mwbk, link, acum } :
-                      (armraddr == 5) ? { dfld[2:0], ifaj[2:0], ifld[2:0], saveddf[2:0], savedif[2:0], sctr, mquo } :
+                      (armraddr == 4) ? { dfld, ifaj, mwbk, acum } :
+                      (armraddr == 5) ? { pcknown, maknown, ifld, saveddf, savedif, link, sctr, mquo } :
                       32'hDEADBEEF;
 
     wire [11:00] eadr = { mred[07] ? madr[11:07] : 5'b0, mred[06:00] };

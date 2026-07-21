@@ -49,7 +49,8 @@
 #define EOL ESC_EREOL "\n"
 #define EOP ESC_EREOP
 
-static char const *const majstatenames[] = { MS_NAMES };
+static char const *const irstrs[] = { "AND", "TAD", "ISZ", "DCA", "JMS", "JMP", "IOT", "OPR" };
+static char const *const msstrs[] = { MS_NAMES };
 
 static bool volatile exitflag;
 static char stdoutbuf[8000];
@@ -146,6 +147,13 @@ int main (int argc, char **argv)
         uint32_t timepulse = (FLD(Z_RF,f_oTP1) << 9) | (FLD(Z_RF,f_oTP2) << 6) | (FLD(Z_RF,f_oTP3) << 3) | FLD(Z_RF,f_oTP4);
         uint32_t timestate = (FLD(Z_RF,f_oTS1) << 9) | (FLD(Z_RF,f_oTS2) << 6) | (FLD(Z_RF,f_oTS3) << 3) | FLD(Z_RF,f_oTS4);
 
+        uint32_t msbin = pads.light.ms;
+        ASSERT (msbin < sizeof msstrs / sizeof msstrs[0]);
+        char const *msstr = msstrs[msbin];
+        uint32_t irbin = pads.light.ir;
+        ASSERT (irbin < sizeof irstrs / sizeof irstrs[0]);
+        char const *irstr = irstrs[irbin];
+
         // zynq.v register dump
         printf ("VERSION=%08X %c%c  %s%s", z8is[0], (char)(z8is[0] >> 24), (char)(z8is[0] >> 16), mode, eol);
 
@@ -157,8 +165,8 @@ int main (int argc, char **argv)
         printf ("  oBWCOV=%o      iCYCLE3=%o      lbPAU=%o      swLDAD=%o  %s", FLD(Z_RF,f_oBWCOV),   FLD(Z_RC,c_dev_iCYCLE3),  pads.light.pau,  pads.button.ldad,  eol);
         printf ("  oIOP=%o        iDMAFLD=%o      lbMB=%04o    swSINST=%o %s", FLD(Z_RF,f_oIOP),    FLD(Z_RC,c_dev_iDMAFLD),  pads.light.mb,   pads.togval.sinst, eol);
         printf ("  oLINK=%o       iINBUS=%04o    lbMQ=%04o    swSSTEP=%o %s", FLD(Z_RF,f_oLINK),    FLD(Z_RC,c_dev_iINBUS),   pads.light.mq,   pads.togval.sstep, eol);
-        printf ("  oMBUF=%04o    iINTRQST=%o     lbMS=%X       swSTART=%o %s", FLD(Z_RE,e_oMBUF),    FLD(Z_RC,c_dev_iINTRQST), pads.light.ms,   pads.button.start, eol);
-        printf ("  oRUN=%o        iIOSKIP=%o      lbIR=%o       swSR=%04o  %s", FLD(Z_RF,f_oRUN),   FLD(Z_RC,c_dev_iIOSKIP),  pads.light.ir,   pads.togval.sr,    eol);
+        printf ("  oMBUF=%04o    iINTRQST=%o     lbMS=%-5s   swSTART=%o %s", FLD(Z_RE,e_oMBUF),    FLD(Z_RC,c_dev_iINTRQST), msstr,           pads.button.start, eol);
+        printf ("  oRUN=%o        iIOSKIP=%o      lbIR=%s     swSR=%04o  %s", FLD(Z_RF,f_oRUN),   FLD(Z_RC,c_dev_iIOSKIP),  irstr,          pads.togval.sr,    eol);
         printf ("  oTP=%04o      iPAUSE=%o       lbRUN=%o                %s", timepulse,            FLD(Z_RC,c_dev_iPAUSE),   pads.light.run,                     eol);
         printf ("  oTS=%04o      iCLOCK=%o       lbPC=%04o               %s", timestate,            FLD(Z_RC,c_dev_iCLOCK),   pads.light.pc,                      eol);
         printf ("                iRESET=%o       lbDF=%o                 %s",                       FLD(Z_RC,c_dev_iRESET),   pads.light.dfld,                    eol);
@@ -186,7 +194,9 @@ int main (int argc, char **argv)
                     FLD(i+5,XM5_WRITEENABWID), FLD(i+5,XM5_WRITEDONEWID), eol);
             } else if (((idver >> 24) == 'S') && (((idver >> 16) & 255) == 'H')) {
                 char *shst = formatshadow (&z8is[i]);
-                printf ("%sVERSION=%08X SH %s%s", eol, idver, shst, eol);
+                char *line2 = strstr (shst, "l.ac");
+                line2[-1] = 0;
+                printf ("%sVERSION=%08X SH %s%s                    %s%s", eol, idver, shst, eol, line2, eol);
                 free (shst);
             } else {
                 if ((idver & 0xF000U) == 0x0000U) {
