@@ -95,7 +95,6 @@ private:
 
 extern Z8IPage z8ipage;
 
-char *formatshadow (uint32_t const *shat);
 uint32_t randbits (int nbits);
 
 #endif

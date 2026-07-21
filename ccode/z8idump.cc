@@ -53,7 +53,10 @@ static char const *const irstrs[] = { "AND", "TAD", "ISZ", "DCA", "JMS", "JMP", 
 static char const *const msstrs[] = { MS_NAMES };
 
 static bool volatile exitflag;
+static char const *eol = EOL;
 static char stdoutbuf[8000];
+
+static void dump_sh (uint32_t const *shat);
 
 static void siginthand (int signum)
 {
@@ -66,7 +69,6 @@ int main (int argc, char **argv)
 
     bool oncemode = false;
     bool pagemode = false;
-    char const *eol = EOL;
     int fps = 20;
     for (int i = 0; ++ i < argc;) {
         if (strcmp (argv[i], "-?") == 0) {
@@ -181,23 +183,8 @@ int main (int argc, char **argv)
                 if (oncemode) printf ("\npagelen=%d\n", pagelen);
                 break;
             }
-            if (((idver >> 24) == 'X') && (((idver >> 16) & 255) == 'M')) {
-                printf ("%sVERSION=%08X XM  enlo4k=%o  enable=%o  ifld=%o  dfld=%o  field=%o  _mwdone=%o  _mrdone=%o  os8zap=%o,step=%o%s",
-                    eol,
-                    idver, EXT (i+1,XM_ENLO4K), EXT (i+1,XM_ENABLE), EXT (i+2,XM2_IFLD), EXT (i+2,XM2_DFLD), EXT (i+2,XM2_FIELD),
-                    EXT (i+2,XM2__MWDONE), EXT (i+2,XM2__MRDONE), EXT (i+1,XM_OS8ZAP), EXT (i+3,XM3_OS8STEP), eol);
-                printf ("        mrhold,step=%o,%o  mwhold,step=%o,%o  xmstate=%2u  xmmemenab=%o  memcycctr=%08X.%08X%s",
-                    FLD(i+1,XM_MRHOLD), FLD(i+1,XM_MRSTEP), FLD(i+1,XM_MWHOLD), FLD(i+1,XM_MWSTEP), FLD(i+2,XM2_XMSTATE),
-                    FLD(i+2,XM2_XMMEMENAB), FLD(i+7,0xFFFFFFFFU), FLD(i+6,0xFFFFFFFFU), eol);
-                printf ("        addrlatchwid=%u  readstrobedel=%u  readstrobewid=%u  writeenabdel=%u  writeenabwid=%u  writedonewid=%u%s",
-                    FLD(i+4,XM4_ADDRLATCHWID), FLD(i+4,XM4_READSTROBEDEL), FLD(i+4,XM4_READSTROBEWID), FLD(i+4,XM4_WRITEENABDEL),
-                    FLD(i+5,XM5_WRITEENABWID), FLD(i+5,XM5_WRITEDONEWID), eol);
-            } else if (((idver >> 24) == 'S') && (((idver >> 16) & 255) == 'H')) {
-                char *shst = formatshadow (&z8is[i]);
-                char *line2 = strstr (shst, "l.ac");
-                line2[-1] = 0;
-                printf ("%sVERSION=%08X SH %s%s                    %s%s", eol, idver, shst, eol, line2, eol);
-                free (shst);
+            if (((idver >> 24) == 'S') && (((idver >> 16) & 255) == 'H')) {
+                dump_sh (&z8is[i]);
             } else {
                 if ((idver & 0xF000U) == 0x0000U) {
                     printf ("%sVERSION=%08X %c%c %08X%s", eol, idver, idver >> 24, idver >> 16, z8is[i+1], eol);
@@ -226,4 +213,68 @@ int main (int argc, char **argv)
     }
     printf ("\n");
     return 0;
+}
+
+static void dump_sh (uint32_t const *shat)
+{
+    static char const *const msstr[] = { "---", "FET", "DEF", "EXE", "WCT", "CAD", "BRK", "IAK",
+                                         "DEP", "EXM", "10 ", "11 ", "12 ", "13 ", "14 ", "15 " };
+
+    uint32_t sh1 = shat[1];
+    uint32_t sh2 = shat[2];
+    uint32_t sh3 = shat[3];
+    uint32_t sh4 = shat[4];
+    uint32_t sh5 = shat[5];
+
+    char mastr[8], pcstr[8];
+    sprintf (mastr, "%04o", EXT (sh3, sh3_madr));
+    sprintf (pcstr, "%04o", EXT (sh2, sh2_pctr));
+
+    printf ("%sVERSION=%08X SH "
+        "foe=%o "
+        "clr=%o "
+        "err=%08X "
+        "ms=%s "
+        "ts=%u "
+        "ir=%04o "
+        "pc=%s "
+        "ma=%s "
+        "%s",
+        eol,
+        shat[0],
+        EXT (sh1, sh1_frzonerr),
+        EXT (sh1, sh1_clearit),
+        EXT (sh1, sh1_err),
+        msstr[EXT(sh2,sh2_majst)],
+        EXT (sh2, sh2_timestate),
+        EXT (sh2, sh2_ireg),
+        EXT (sh5, sh5_pctrkn) ? pcstr : "????",
+        EXT (sh5, sh5_madrkn) ? mastr : "????",
+        eol);
+
+    printf ("                    "
+        "l.ac=%o.%04o "
+        "sc=%02o "
+        "mq=%04o "
+        "if=%c/aj=%c svif=%c "
+        "df=%c svdf=%c "
+        "%s",
+        EXT (sh5, sh5_link),
+        EXT (sh4, sh4_acum),
+        EXT (sh5, sh5_sctr),
+        EXT (sh5, sh5_mquo),
+        EXT (sh5, sh5_ifldkn)   ? '0' + EXT (sh5, sh5_ifld)   : '?',
+        EXT (sh4, sh4_ifajkn)   ? '0' + EXT (sh4, sh4_ifaj)   : '?',
+        EXT (sh5, sh5_svifldkn) ? '0' + EXT (sh5, sh5_svifld) : '?',
+        EXT (sh4, sh4_dfldkn)   ? '0' + EXT (sh4, sh4_dfld)   : '?',
+        EXT (sh5, sh5_svdfldkn) ? '0' + EXT (sh5, sh5_svdfld) : '?',
+        eol);
+
+    printf ("                    "
+        "mred=%04o "
+        "mwbk=%04o "
+        "%s",
+        EXT (sh3, sh3_mred),
+        EXT (sh4, sh4_mwbk),
+        eol);
 }

@@ -231,50 +231,6 @@ void Z8IPage::cmunlk ()
     if (pthread_mutex_unlock (&dmamtx) != 0) ABORT ();
 }
 
-// format shadow string
-char *formatshadow (uint32_t const *shat)
-{
-    static char const *const msstr[] = { "---", "FET", "DEF", "EXE", "WCT", "CAD", "BRK", "IAK",
-                                         "DEP", "EXM", "10 ", "11 ", "12 ", "13 ", "14 ", "15 " };
-
-    uint32_t sh1 = shat[1];
-    uint32_t sh2 = shat[2];
-    uint32_t sh3 = shat[3];
-    uint32_t sh4 = shat[4];
-    uint32_t sh5 = shat[5];
-
-    char *buf;
-    int rc = asprintf (&buf,
-        "foe=%o "
-        "clr=%o "
-        "err=%08X "
-        "ms=%s "
-        "ts=%u "
-        "ir=%04o "
-        "pc=%o%04o "
-        "ma=%04o "
-        "l.ac=%o.%04o "
-        "sc=%02o "
-        "mq=%04o",
-
-        EXT (sh1, sh1_frzonerr),
-        EXT (sh1, sh1_clearit),
-        EXT (sh1, sh1_err),
-        msstr[EXT(sh2,sh2_majst)],
-        EXT (sh2, sh2_timestate),
-        EXT (sh2, sh2_ireg),
-        EXT (sh5, sh5_ifld),
-        EXT (sh2, sh2_pctr),
-        EXT (sh3, sh3_madr),
-        EXT (sh5, sh5_link),
-        EXT (sh4, sh4_acum),
-        EXT (sh5, sh5_sctr),
-        EXT (sh5, sh5_mquo));
-
-    ASSERT (rc > 0);
-    return buf;
-}
-
 // generate a random number
 uint32_t randbits (int nbits)
 {
