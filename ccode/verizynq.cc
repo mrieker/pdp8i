@@ -48,6 +48,11 @@ int main (int argc, char **argv)
 {
     setlinebuf (stdout);
 
+    bool stop = false;
+    for (int i = 0; ++ i < argc;) {
+        if (strcasecmp (argv[i], "-stop") == 0) stop = true;
+    }
+
     int shmfd = shm_open (VERIZYNQ_SHMNM, O_RDWR | O_CREAT, 0666);
     if (shmfd < 0) {
         fprintf (stderr, "verizynq: error creating %s: %m\n", VERIZYNQ_SHMNM);
@@ -89,6 +94,8 @@ int main (int argc, char **argv)
         }
         ABORT ();
     }
+
+    if (stop) return 0;
 
     void *ptr = mmap (NULL, sizeof *pageptr, PROT_READ | PROT_WRITE, MAP_SHARED, shmfd, 0);
     if (ptr == MAP_FAILED) {
