@@ -693,36 +693,36 @@ static int showstatus (int argc, char **argv)
         // display it
         printf (TOP ESC_NORMV EOL);
 
-        printf (" " ESC_BOLDV " PDP-8/I " ESC_NORMV "   %s %s %s  %s %s %s   %s %s %s  %s %s %s  %s %s %s  %s %s %s  PC  " ESC_BOLDV "%o%o.%04o" ESC_NORMV "  %s  %s  %s    %s" EOL,
+        printf (" " ESC_BOLDV " PDP-8/I " ESC_NORMV "   %s %s %s  %s %s %s   %s %s %s  %s %s %s  %s %s %s  %s %s %s  PC  " ESC_BOLDV "%o%o.%04o" ESC_NORMV "  %s  %s  %s" EOL,
             REG3L (blu, pads.light.dfld), REG3L (grn, pads.light.ifld), REG12L (pads.light.pc), pads.light.dfld, pads.light.ifld, pads.light.pc,
-            STL (CYN, irand, "AND", "and"), STL (GRN, msfet, "FET", "fet"), STL (CYN, pads.light.ion, "ION", "ion"), simit);
+            STL (CYN, irand, "AND", "and"), STL (GRN, msfet, "FETCH", "fetch"), STL (CYN, pads.light.ion, " ION ", " ion "));
 
         printf ("             " ESC_CYNFG " DF " ESC_NORMV "   " ESC_GRNFG " IF " ESC_NORMV "                                             %s  %s  %s" EOL,
-            STL (CYN, irtad, "TAD", "tad"), STL (GRN, msexe, "EXE", "exe"), STL (CYN, pads.light.pau, "PAU", "pau"));
+            STL (CYN, irtad, "TAD", "tad"), STL (GRN, msexe, "EXEC ", "exec "), STL (CYN, pads.light.pau, "PAUSE", "pause"));
 
         printf ("                            %s %s %s  %s %s %s  %s %s %s  %s %s %s  MA  " ESC_BOLDV "   %04o" ESC_NORMV "  %s  %s  %s" EOL,
             REG12L (pads.light.ma), pads.light.ma,
-            STL (CYN, irisz, "ISZ", "isz"), STL (GRN, msdef, "DEF", "def"), STL (CYN, pads.light.run, "RUN", "run"));
+            STL (CYN, irisz, "ISZ", "isz"), STL (GRN, msdef, "DEFER", "defer"), STL (CYN, pads.light.run, " RUN ", " run "));
 
         printf ("                                                                     %s  %s" EOL,
-            STL (CYN, irdca, "DCA", "dca"), STL (GRN, mswct, "WCT", "wct"));
+            STL (CYN, irdca, "DCA", "dca"), STL (GRN, mswct, "WRDCT", "wrdct"));
 
-        printf ("                            %s %s %s  %s %s %s  %s %s %s  %s %s %s  MB  " ESC_BOLDV "   %04o" ESC_NORMV "  %s  %s   %6u fps" EOL,
+        printf ("                            %s %s %s  %s %s %s  %s %s %s  %s %s %s  MB  " ESC_BOLDV "   %04o" ESC_NORMV "  %s  %s" EOL,
             REG12L (pads.light.mb), pads.light.mb,
-            STL (CYN, irjms, "JMS", "jms"), STL (GRN, mscad, "CAD", "cad"), fps);
+            STL (CYN, irjms, "JMS", "jms"), STL (GRN, mscad, "CURAD", "curad"));
 
         printf ("                                                                     %s  %s" EOL,
-            STL (CYN, irjmp, "JMP", "jmp"), STL (GRN, msbrk, "BRK", "brk"));
+            STL (CYN, irjmp, "JMP", "jmp"), STL (GRN, msbrk, "BREAK", "break"));
 
         printf ("                    " ESC_GRNFG " L " ESC_NORMV " %s   %s %s %s  %s %s %s  %s %s %s  %s %s %s  AC  " ESC_BOLDV " %o.%04o" ESC_NORMV "  %s  %s" EOL,
             BOOL (grn, pads.light.link), REG12L (pads.light.ac), pads.light.link, pads.light.ac,
-            STL (CYN, iriot, "IOT", "iot"), STL (GRN, msiak, "IAK", "iak"));
+            STL (CYN, iriot, "IOT", "iot"), STL (GRN, msiak, "INTAK", "intak"));
 
         printf ("                                                                     %s  %s" EOL,
-            STL (CYN, iropr, "OPR", "opr"), STL (GRN, msdep, "DEP", "dep"));
+            STL (CYN, iropr, "OPR", "opr"), STL (GRN, msdep, "DEPOS", "depos"));
 
         printf ("          " ESC_CYNFG " SC " ESC_NORMV " %s %s  %s %s %s   %s %s %s  %s %s %s  %s %s %s  %s %s %s  MQ  " ESC_BOLDV "%02o.%04o" ESC_NORMV "       %s" EOL,
-            REG5L (pads.light.sc), REG12L (pads.light.mq), pads.light.sc, pads.light.mq, STL (GRN, msexm, "EXM", "exm"));
+            REG5L (pads.light.sc), REG12L (pads.light.mq), pads.light.sc, pads.light.mq, STL (GRN, msexm, "EXAM ", "exam "));
 
         printf (EOL);
 
@@ -735,7 +735,7 @@ static int showstatus (int argc, char **argv)
             STL (CYN, pads.button.cont, "CONT", "cont"), STL (GRN, pads.button.stop, "STOP", "stop"),
             STL (CYN, pads.togval.sstep, "SSTEP", "sstep"), STL (GRN, pads.togval.sinst, "SINST", "sinst"));
 
-        printf ("    %c\r", "\\|/-"[++twirly&3]);
+        printf ("    %c %6u fps   %s\r", "\\|/-"[++twirly&3], fps, simit);
         fflush (stdout);
     }
 }
