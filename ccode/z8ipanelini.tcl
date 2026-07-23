@@ -32,6 +32,8 @@ proc helpini {} {
     puts "  rimloader <lo|hi>       - deposit rim loader in memory"
     puts "  sendchartottykb         - send char to tty kb, don't check for echo"
     puts "  sendtottykb             - send string to tty keyboard and check echo"
+    puts "  shadowoff               - turn shadowing off"
+    puts "  shadowon                - turn shadowing on"
     puts "  simoff                  - set to real mode"
     puts "  simon                   - set to simulation mode"
     puts "  startat <addr>          - load pc and start at given address"
@@ -763,6 +765,23 @@ proc sendtottykb {str} {
             error "sendtottykb: sent char [escapechr $ex] to tty kb but echoed as [escapechr $ch]"
         }
     }
+}
+
+# turn shadowing on - pdp8ishad.v checks bus cycles to make sure processor is working
+proc shadowoff {} {
+    ;# clearit 1 - put pdp8ishad.v in reset state
+    ;# fpgamemen 0 - turn off zynq.v 32KW ram
+    ;# arm_iMEMDIS 0 - turn on extmemory.kicad_sch 32KW ram
+    pin set sh_clearit 1 fpgamemen 0 arm_iMEMDIS 0
+}
+
+proc shadowon {} {
+    ;# clearit 1 - put pdp8ishad.v in reset state
+    ;# fpgamemen 1 - turn on zynq.v 32KW ram
+    ;# arm_iMEMDIS 1 - turn off extmemory.kicad_sch 32KW ram
+    ;# sh_frzonerr 1 - stop clocking processor if shadowing error
+    ;# sh_clearit 0 - start shadowing
+    pin set sh_clearit 1 fpgamemen 1 arm_iMEMDIS 1 sh_frzonerr 1 sh_clearit 0
 }
 
 # put in real mode
