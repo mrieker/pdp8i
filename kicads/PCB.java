@@ -216,6 +216,13 @@ public class PCB {
             for (Integer idx : padhash.keySet ()) {
                 compads[idx] = padhash.get (idx);
             }
+
+            // DSB2810 shottky diodes used to transform a totem-pole output to a tri-state output
+            // we assume the tri-state output is connected to a pullup resistor somewhere
+            if (value.equals ("DSB2810")) {
+                compads[1].pintype = PinType.INPUT;     // input (cat hode)
+                compads[2].pintype = PinType.TRISTATE;  // output (anode)
+            }
         }
 
         public boolean isconnector ()

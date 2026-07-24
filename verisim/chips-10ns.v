@@ -1807,6 +1807,10 @@ module XMCP23017_SP (input zclock, zreset,
 
 endmodule
 
+module XDSB2810 (input zclock, input zreset, input p1, input p2i, output p2o);
+    assign p2o = p1;
+endmodule
+
 module X330 (input zclock, zreset, input p1, input p2);
     // dummy loop to make vivado happy
     always @(posedge zclock) begin

@@ -303,8 +303,11 @@ static int cmd_bus (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj
             { 12, OFFS (iINBUS),   true,  "iINBUS"   },   // device sending data for PIO or DMA
             {  1, OFFS (iPAUSE),   true,  "iPAUSE"   },   // pause processor clocking (stretch cycle)
 
+            {  1, OFFS (brkrqst),  false, "brkrqst"  },
+            {  1, OFFS (intrqst),  false, "intrqst"  },
             {  4, OFFS (majst),    false, "majst"    },
             {  3, OFFS (memfield), false, "memfield" },
+            {  1, OFFS (pause),    false, "pause"    },
             { 12, OFFS (mquo),     false, "mquo"     },
             { 12, OFFS (pctr),     false, "pctr"     },
             {  5, OFFS (sctr),     false, "sctr"     },

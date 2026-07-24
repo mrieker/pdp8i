@@ -35,6 +35,7 @@ set ttkbflag     0
 set ttprchar     0
 set ttprflag     0
 set ttprfull     0
+set wfitests     0
 
 set xmem_dfld                 0
 set xmem_ifld                 0
@@ -91,8 +92,9 @@ proc simtest {} {
     global testdma
     global testexar
     global testxmem
-    global ttat1 ttat2 ttkbchar ttkbflag ttprchar ttprflag ttprfull
+    global ttat1 ttat2 ttinten ttkbchar ttkbflag ttprchar ttprflag ttprfull
     global usefpi2c
+    global wfitests
     global xmem_dfld
     global xmem_ifld
     global xmem_ifldafterjump
@@ -164,7 +166,7 @@ proc simtest {} {
             ;# processor should be at beginning of TS1 in FETCH, WDCNT, BREAK or INTAK cycle
 
             set oldttintrq [ttintrq]
-            if {[randbits 6] == 0} {
+            if {($wfitests & 4) && ([randbits 6] == 0)} {
                 set r [randbits 2]
                 switch $r {
                     0 {
@@ -245,40 +247,49 @@ proc simtest {} {
 
                     switch $needmqsca {
                         0 {
-                            ;# send random opcode
-                            while true {
-                                set opcode [randbits 12]
-                                if {($opcode & 06000) != 06000} break       ;# and,tad,isz,dca,jms,jmp
-                                if {$opcode == 06001} break                 ;# ION
-                                if {$opcode == 06002} break                 ;# IOF
-                                if {$opcode == 06004} break                 ;# used to test skip/acclr
-                                if {$testxmem && ($lastopc != 06001)} {     ;# don't do memext opcodes if instruction after ION
-                                    if {($opcode & 07704) == 06200} break
-                                    if {($opcode & 07707) == 06204} break
-                                }
-                                if {($opcode & 07770) == 06030} break       ;# tty keyboard opcodes
-                                if {($opcode & 07770) == 06040} break       ;# tty printer opcodes
-                                if {($opcode & 07400) == 07000} {           ;# group 1
-                                    ##if {($opcode & 016) == 002} continue    ;# bsw
-                                    if {($opcode & 014) == 014} continue    ;# 6,7
-                                    break
-                                }
-                                if {($opcode & 07401) == 07400} {           ;# group 2
-                                    if {($opcode & 2) && (! $testcons || ([randbits 2] != 0))} {
-                                        incr opcode -2                      ;# don't do HLT
+                            if {! ($wfitests & 4) && $ttinten && ! ($acum & 1)} {
+                                set opcode 06035                                ;# maybe disable tty interrupt cuz it's almost always on
+                                                                                ;# ...so we can test WFI waiting a few cycles
+                            } else {
+                                ;# send random opcode
+                                while true {
+                                    set opcode [randbits 12]
+                                    if {($opcode & 06000) != 06000} break       ;# and,tad,isz,dca,jms,jmp
+                                    if {$opcode == 06001} break                 ;# ION
+                                    if {$opcode == 06002} break                 ;# IOF
+                                    if {$opcode == 06004} break                 ;# used to test skip/acclr
+                                    if {($opcode & 07770) == 06310} {
+                                        set opcode 06313                        ;# WFI
+                                        break
                                     }
-                                    set swregsent [swtch reg]
-                                    if {$swregsent != $swregpend} {         ;# see if processor has absorbed switches
-                                        set opcode [expr {$opcode & 07773}] ;# if not, don't do OSR
+                                    if {$testxmem && ($lastopc != 06001)} {     ;# don't do memext opcodes if instruction after ION
+                                        if {($opcode & 07704) == 06200} break
+                                        if {($opcode & 07707) == 06204} break
                                     }
-                                    break
-                                }
-                                if {$testexar && (($opcode & 07401) == 07401)} {  ;# group 3 (extended arithmetic)
-                                    ;# follow SCL,MUY,DVI,NMI,SHL,ASR,LSR with CLA MQA then CLA SCA so pdp8ishad.v can verify MQ and SC
-                                    if {$opcode & 14} {
-                                        set needmqsca 1
+                                    if {($opcode & 07770) == 06030} break       ;# tty keyboard opcodes
+                                    if {($opcode & 07770) == 06040} break       ;# tty printer opcodes
+                                    if {($opcode & 07400) == 07000} {           ;# group 1
+                                        ##if {($opcode & 016) == 002} continue    ;# bsw
+                                        if {($opcode & 014) == 014} continue    ;# 6,7
+                                        break
                                     }
-                                    break
+                                    if {($opcode & 07401) == 07400} {           ;# group 2
+                                        if {($opcode & 2) && (! $testcons || ([randbits 2] != 0))} {
+                                            incr opcode -2                      ;# don't do HLT
+                                        }
+                                        set swregsent [swtch reg]
+                                        if {$swregsent != $swregpend} {         ;# see if processor has absorbed switches
+                                            set opcode [expr {$opcode & 07773}] ;# if not, don't do OSR
+                                        }
+                                        break
+                                    }
+                                    if {$testexar && (($opcode & 07401) == 07401)} {  ;# group 3 (extended arithmetic)
+                                        ;# follow SCL,MUY,DVI,NMI,SHL,ASR,LSR with CLA MQA then CLA SCA so pdp8ishad.v can verify MQ and SC
+                                        if {$opcode & 14} {
+                                            set needmqsca 1
+                                        }
+                                        break
+                                    }
                                 }
                             }
                         }
@@ -634,17 +645,7 @@ proc memorycycle {state field addr rdata wdata} {
     ;# maybe request a dma (break) cycle
     ;# these have lower priority than cmdmarqsts
     if {! $dmarqst && ([randbits 6] == 0)} {
-        set dmarqst   1
-        set dma3cycle [randbits 1]
-        set dmacainc  [randbits 1]
-        set dmawrmem  [randbits 1]
-        set dmaaddr   [randbits 12]
-        set dmafield  [randbits 3]
-        if {$dmawrmem} {
-            set dmawdata [randbits 12]
-        }
-        bus set iBRKRQST 1
-        puts -nonewline " <<dmarqst>>"
+        startdmarequest
     }
 
     ;# MB should now have the value we wrote to the memory location or to the iINBUS
@@ -753,6 +754,23 @@ proc memorycycle {state field addr rdata wdata} {
     }
 }
 
+;# initiate a dma request
+proc startdmarequest {} {
+    global dma3cycle dmacainc dmarqst dmawrmem dmawdata dmaaddr dmafield
+
+    set dmarqst   1
+    set dma3cycle [randbits 1]
+    set dmacainc  [randbits 1]
+    set dmawrmem  [randbits 1]
+    set dmaaddr   [randbits 12]
+    set dmafield  [randbits 3]
+    if {$dmawrmem} {
+        set dmawdata [randbits 12]
+    }
+    bus set iBRKRQST 1
+    puts -nonewline " <<dmarqst>>"
+}
+
 ;# call after memorycycle to check for halt conditions
 ;# returns with processor started back up
 ;# returns with exception if resuming reset processor state, ie,
@@ -778,7 +796,7 @@ proc checkhalted {} {
             set panelhalt 0
             set addr [bus oMADR]
             set doldad 1
-            while {[randbits 1] == 0} {
+            while {! [ctrlcflag] && ([randbits 1] == 0)} {
                 set sw [expr {$doldad ? 1 : [randbits 2]}]
                 switch $sw {
                     1 {
@@ -913,7 +931,7 @@ proc checkhalted {} {
 ;# it starts 100nS into TS2 and ends at end of TS3
 ;# acum and pctr mods are clocked at posedge TP3
 proc doioinstr {opcode} {
-    global acum intdelayed intenabled linc pctr
+    global acum intdelayed intenabled intrequest linc pctr wfitests
     global xmem_dfld xmem_ifld xmem_savedifld xmem_saveddfld xmem_ifldafterjump
     global xmem_intdisableduntiljump
     global ttkbflag ttkbchar ttinten ttprflag ttprchar ttprfull ttprflag
@@ -927,9 +945,9 @@ proc doioinstr {opcode} {
     set acbits  0
 
     ;# - processor.v itself processes these io opcodes
-    if {$opcode == 06001} {
+    if {$opcode == 06001} {         ;# ION
         set intdelayed 1
-    } elseif {$opcode == 06002} {
+    } elseif {$opcode == 06002} {   ;# IOF
         set intdelayed 0
         set intenabled 0
     } elseif {$opcode == 06004} {
@@ -937,6 +955,23 @@ proc doioinstr {opcode} {
         set ioskip  [randbits 1]
         set acbits [randbits 12]
         bus set iACCLEAR $acclear iIOSKIP $ioskip iINBUS $acbits
+    } elseif {$opcode == 06313} {   ;# WFI
+        incr wfitests
+        ;# should be able to break out of WFI with interrupt request, dma requst, stop switch
+        set didsomething 0
+        for {set i 0} {! [bus intrqst] && ! [bus brkrqst] && ! [swtch sinst] && ! [swtch sstep]} {incr $didsomething} {
+            runsimstep
+            if {! $didsomething} {
+                set r [randbits 7]
+                switch $r {
+                    11 {incr didsomething ; bus set iINTRQST 1 ; set intrequest 1 ; puts -nonewline " <<intrqst>>"}
+                    22 {incr didsomething ; startdmarequest}
+                    33 {incr didsomething ; swtch set sinst 1 ; puts -nonewline " <<sinst>>"}
+                    44 {incr didsomething ; swtch set sstep 1 ; puts -nonewline " <<sstep>>"}
+                }
+            }
+            if {$i > 30000} {error "timed out doing WFI"}
+        }
     } elseif {($opcode & 07770) == 06030} {
 
         ;# - keyboard opcodes (see pdp8itty.v)
@@ -1174,10 +1209,10 @@ proc runsimstep {} {
 ;# maybe request interrupt
 ;# processor samples it at TP3
 proc requestint {state rdata} {
-    global intenabled intrequest
+    global intenabled intrequest wfitests
     global MS_FETCH
 
-    if {! $intrequest && (($state != $MS_FETCH) || (($rdata & 07403) != 07402))} {
+    if {($wfitests & 4) && ! $intrequest && (($state != $MS_FETCH) || (($rdata & 07403) != 07402))} {
         set intrequest [expr {[randbits 10] == 0}]
         if {$intrequest} {
             puts -nonewline [format "  <<intreq=1 intena=%d>> " $intenabled]

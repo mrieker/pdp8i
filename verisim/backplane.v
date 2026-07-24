@@ -57,6 +57,7 @@ module backplane (
     output[2:0] memfield,
     output[3:0] majst,
     output[4:0] sctr,
+    output pause, brkrqst, intrqst,
     output swstart, swldad, swdepos, swexam,
     output swcont, swsstep, swsinst,
     output shad_freeze
@@ -113,9 +114,12 @@ module backplane (
     assign oTS2     = ~ _busTS2;
     assign oTS3     = ~ _busTS3;
     assign oTS4     = ~ _busTS4;
+    assign brkrqst  = ~ _busBRKRQST;
+    assign intrqst  = ~ _busINTRQST;
     assign majst    = ~ _busMAJST;
     assign memfield = ~ _busMEAD;
     assign mquo     = ~ _busMQUO;
+    assign pause    = ~ _busPAUSE;
     assign pctr     = ~ _busPCTR;
     assign sctr     = ~ _busSCTR;
     assign swcont   = ~ _busSWCONT;
@@ -741,7 +745,7 @@ module backplane (
     //  PROCESSOR  //
     /////////////////
 
-    wire _cpuBRKGNTO;
+    wire _cpuBRKGNTO, _cpuPAUSE;
 
     wire[11:00] aluq;
     wire cout, memacsw, nxtms_0, nxtms_1, nxtms_2, nxtms_3;
@@ -1097,6 +1101,7 @@ module backplane (
         ._INTINH    (_busINTINH),
         ._INTRQST   (_busINTRQST),
         ._PAUSE     (_busPAUSE),
+        ._PAUSE_o   (_cpuPAUSE),
         ._RESET     (_busRESET),
         ._SWCONT    (_busSWCONT),
         ._SWDEPOS   (_busSWDEPOS),
@@ -1484,7 +1489,7 @@ module backplane (
     assign _busINTRQST = ~ iINTRQST   & (_zynpoweron | ~ zynINTRQST);
     assign _busIOSKIP  = _eaeIOSKIP   & ~ iIOSKIP  & (_zynioenabd | ~ zynIOSKIP);
     assign _busMEMDIS  =                (_zynpoweron | ~ zynMEMDIS);
-    assign _busPAUSE   = _eaePAUSE    & ~ iPAUSE   & (_zynpoweron | ~ zynPAUSE);
+    assign _busPAUSE   = _eaePAUSE    & ~ iPAUSE   & (_zynpoweron | ~ zynPAUSE) & _cpuPAUSE;
     assign _busRESET   =                (_zynpoweron | ~ zynRESET);
 
     // break grant chain

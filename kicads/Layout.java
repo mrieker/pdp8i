@@ -303,53 +303,122 @@ public class Layout {
     //  SWAP POSITIONS OF WHOLE CHIPS  //
     /////////////////////////////////////
 
+    private static boolean swap3;
+
     public static double doChipPositionSwap (double oldtotlen)
     {
-        int irowa = randgen.nextInt (numrows);
-        int irowb = randgen.nextInt (numrows);
-        int icola = randgen.nextInt (numcols);
-        int icolb = randgen.nextInt (numcols);
-        double oldicax = icola * colwid20thin / 20.0 + lowxin;
-        double oldicay = irowa * rowhit20thin / 20.0 + lowyin;
-        double oldicbx = icolb * colwid20thin / 20.0 + lowxin;
-        double oldicby = irowb * rowhit20thin / 20.0 + lowyin;
+        swap3 = ! swap3;
+        if (swap3) {
+            int irowa = randgen.nextInt (numrows);
+            int irowb = randgen.nextInt (numrows);
+            int irowc = randgen.nextInt (numrows);
+            int icola = randgen.nextInt (numcols);
+            int icolb = randgen.nextInt (numcols);
+            int icolc = randgen.nextInt (numcols);
+            double oldicax = icola * colwid20thin / 20.0 + lowxin;
+            double oldicay = irowa * rowhit20thin / 20.0 + lowyin;
+            double oldicbx = icolb * colwid20thin / 20.0 + lowxin;
+            double oldicby = irowb * rowhit20thin / 20.0 + lowyin;
+            double oldiccx = icolc * colwid20thin / 20.0 + lowxin;
+            double oldiccy = irowc * rowhit20thin / 20.0 + lowyin;
 
-        PCB.Compon ica = findChipOnGrid (irowa, icola);
-        PCB.Compon icb = findChipOnGrid (irowb, icolb);
-        if (ica == icb) return Double.NaN;
+            PCB.Compon ica = findChipOnGrid (irowa, icola);
+            PCB.Compon icb = findChipOnGrid (irowb, icolb);
+            PCB.Compon icc = findChipOnGrid (irowc, icolc);
+            if (ica == icb) return Double.NaN;
+            if (ica == icc) return Double.NaN;
+            if (icc == icb) return Double.NaN;
 
-        // don't move bus driver/receiver chips
-        if ((ica != null) && ica.value.endsWith ("540")) return Double.NaN;
-        if ((icb != null) && icb.value.endsWith ("540")) return Double.NaN;
+            // don't move bus driver/receiver chips
+            if ((ica != null) && ica.value.endsWith ("540")) return Double.NaN;
+            if ((icb != null) && icb.value.endsWith ("540")) return Double.NaN;
+            if ((icc != null) && icc.value.endsWith ("540")) return Double.NaN;
 
-        // try swapping chip locations
-        if (ica != null) {
-            ica.atxin (oldicbx);
-            ica.atyin (oldicby);
-        }
-        if (icb != null) {
-            icb.atxin (oldicax);
-            icb.atyin (oldicay);
-        }
+            // try swapping chip locations
+            if (ica != null) {
+                ica.atxin (oldicbx);
+                ica.atyin (oldicby);
+            }
+            if (icb != null) {
+                icb.atxin (oldiccx);
+                icb.atyin (oldiccy);
+            }
+            if (icc != null) {
+                icc.atxin (oldicax);
+                icc.atyin (oldicay);
+            }
 
-        // see if overall trace lengths are shorter
-        // if so, use the change
-        double newtotlen = nettotallen ();
-        if (oldtotlen > newtotlen) {
-            System.out.println ("swap " +
-                    (ica == null ? "empty" : ica.refer) + "(" + icola + "," + irowa + ") " +
-                    (icb == null ? "empty" : icb.refer) + "(" + icolb + "," + irowb + ") => " + newtotlen);
-            return newtotlen;
-        }
+            // see if overall trace lengths are shorter
+            // if so, use the change
+            double newtotlen = nettotallen ();
+            if (oldtotlen > newtotlen) {
+                System.out.println ("swap " +
+                        (ica == null ? "empty" : ica.refer) + "(" + icola + "," + irowa + ") " +
+                        (icb == null ? "empty" : icb.refer) + "(" + icolb + "," + irowb + ") " +
+                        (icc == null ? "empty" : icc.refer) + "(" + icolc + "," + irowc + ") => " + newtotlen);
+                return newtotlen;
+            }
 
-        // if same or longer, put it back
-        if (ica != null) {
-            ica.atxin (oldicax);
-            ica.atyin (oldicay);
-        }
-        if (icb != null) {
-            icb.atxin (oldicbx);
-            icb.atyin (oldicby);
+            // if same or longer, put it back
+            if (ica != null) {
+                ica.atxin (oldicax);
+                ica.atyin (oldicay);
+            }
+            if (icb != null) {
+                icb.atxin (oldicbx);
+                icb.atyin (oldicby);
+            }
+            if (icc != null) {
+                icc.atxin (oldiccx);
+                icc.atyin (oldiccy);
+            }
+        } else {
+            int irowa = randgen.nextInt (numrows);
+            int irowb = randgen.nextInt (numrows);
+            int icola = randgen.nextInt (numcols);
+            int icolb = randgen.nextInt (numcols);
+            double oldicax = icola * colwid20thin / 20.0 + lowxin;
+            double oldicay = irowa * rowhit20thin / 20.0 + lowyin;
+            double oldicbx = icolb * colwid20thin / 20.0 + lowxin;
+            double oldicby = irowb * rowhit20thin / 20.0 + lowyin;
+
+            PCB.Compon ica = findChipOnGrid (irowa, icola);
+            PCB.Compon icb = findChipOnGrid (irowb, icolb);
+            if (ica == icb) return Double.NaN;
+
+            // don't move bus driver/receiver chips
+            if ((ica != null) && ica.value.endsWith ("540")) return Double.NaN;
+            if ((icb != null) && icb.value.endsWith ("540")) return Double.NaN;
+
+            // try swapping chip locations
+            if (ica != null) {
+                ica.atxin (oldicbx);
+                ica.atyin (oldicby);
+            }
+            if (icb != null) {
+                icb.atxin (oldicax);
+                icb.atyin (oldicay);
+            }
+
+            // see if overall trace lengths are shorter
+            // if so, use the change
+            double newtotlen = nettotallen ();
+            if (oldtotlen > newtotlen) {
+                System.out.println ("swap " +
+                        (ica == null ? "empty" : ica.refer) + "(" + icola + "," + irowa + ") " +
+                        (icb == null ? "empty" : icb.refer) + "(" + icolb + "," + irowb + ") => " + newtotlen);
+                return newtotlen;
+            }
+
+            // if same or longer, put it back
+            if (ica != null) {
+                ica.atxin (oldicax);
+                ica.atyin (oldicay);
+            }
+            if (icb != null) {
+                icb.atxin (oldicbx);
+                icb.atyin (oldicby);
+            }
         }
         return Double.NaN;
     }

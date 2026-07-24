@@ -778,7 +778,7 @@ module pdp8isim (
     //  PROCESSOR  //
     /////////////////
 
-    wire _cpuBRKGNTO;
+    wire _cpuBRKGNTO, _cpuPAUSE;
 
     wire[11:00] aluq;
     wire cout, memacsw, nxtms_0, nxtms_1, nxtms_2, nxtms_3;
@@ -1136,6 +1136,7 @@ module pdp8isim (
         ._INTINH    (_busINTINH),
         ._INTRQST   (_busINTRQST),
         ._PAUSE     (_busPAUSE),
+        ._PAUSE_o   (_cpuPAUSE),
         ._RESET     (_busRESET),
         ._SWCONT    (_busSWCONT),
         ._SWDEPOS   (_busSWDEPOS),
@@ -1225,7 +1226,7 @@ module pdp8isim (
     assign _busINBUS   = _eaeINBUS    & ~ iINBUS    & _memINBUS & _conINBUS;
     assign _busINTRQST =                ~ iINTRQST;
     assign _busIOSKIP  = _eaeIOSKIP   & ~ iIOSKIP;
-    assign _busPAUSE   = _eaePAUSE    & ~ iPAUSE;
+    assign _busPAUSE   = _eaePAUSE    & ~ iPAUSE    & _cpuPAUSE;
 
     // bus outputs
     assign oACUM    = ~ _busACUM;
