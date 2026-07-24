@@ -1121,6 +1121,7 @@ module pdp8isim (
         .GND    (1'b0),
         .VCC    (1'b1),
 
+        ._wfidisab (1'b1),
         .nxtms_0 (nxtms_0),
         .nxtms_1 (nxtms_1),
         .nxtms_2 (nxtms_2),

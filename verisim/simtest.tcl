@@ -931,7 +931,7 @@ proc checkhalted {} {
 ;# it starts 100nS into TS2 and ends at end of TS3
 ;# acum and pctr mods are clocked at posedge TP3
 proc doioinstr {opcode} {
-    global acum intdelayed intenabled intrequest linc pctr wfitests
+    global acum intdelayed intenabled intrequest linc panelhalt pctr wfitests
     global xmem_dfld xmem_ifld xmem_savedifld xmem_saveddfld xmem_ifldafterjump
     global xmem_intdisableduntiljump
     global ttkbflag ttkbchar ttinten ttprflag ttprchar ttprfull ttprflag
@@ -966,8 +966,9 @@ proc doioinstr {opcode} {
                 switch $r {
                     11 {incr didsomething ; bus set iINTRQST 1 ; set intrequest 1 ; puts -nonewline " <<intrqst>>"}
                     22 {incr didsomething ; startdmarequest}
-                    33 {incr didsomething ; swtch set sinst 1 ; puts -nonewline " <<sinst>>"}
-                    44 {incr didsomething ; swtch set sstep 1 ; puts -nonewline " <<sstep>>"}
+                    33 {incr didsomething ; set panelhalt 1 ; swtch set sinst 1 ; puts -nonewline " <<sinst>>"}
+                    44 {incr didsomething ; set panelhalt 2 ; swtch set sstep 1 ; puts -nonewline " <<sstep>>"}
+                    55 {incr didsomething ; set panelhalt 3 ; swtch set stop  1 ; puts -nonewline " <<stop>>"}
                 }
             }
             if {$i > 30000} {error "timed out doing WFI"}
