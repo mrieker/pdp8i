@@ -471,7 +471,7 @@
 
   (footprint "Package_DIP:DIP-16_W7.62mm" (layer "F.Cu")
     (tstamp 02cf8e4a-7bd4-42d8-b7d5-b64d048d0b00)
-    (at 289.56 127 90)
+    (at 294.64 139.7 90)
     (descr "16-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "extardata.kicad_sch")
@@ -563,7 +563,7 @@
 
   (footprint "Package_DIP:DIP-16_W7.62mm" (layer "F.Cu")
     (tstamp 079d460c-2ba2-42df-a13e-59fb984991c3)
-    (at 54.935 14.245 90)
+    (at 157.48 200.66 90)
     (descr "16-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "extardata.kicad_sch")
@@ -655,7 +655,7 @@
 
   (footprint "Package_DIP:DIP-16_W7.62mm" (layer "F.Cu")
     (tstamp 0acea48a-5526-4119-9c4b-ac4757d6f650)
-    (at 418.465 35.23 90)
+    (at 111.76 48.26 90)
     (descr "16-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "extardata.kicad_sch")
@@ -747,7 +747,7 @@
 
   (footprint "Package_DIP:DIP-14_W7.62mm" (layer "F.Cu")
     (tstamp 0c4f0175-2130-40d7-8a31-98e28beaf933)
-    (at 333.365 78.63 90)
+    (at 340.36 109.22 90)
     (descr "14-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "extardata.kicad_sch")
@@ -835,7 +835,7 @@
 
   (footprint "Package_DIP:DIP-16_W7.62mm" (layer "F.Cu")
     (tstamp 10258982-14c6-454d-89aa-2b5c21629a63)
-    (at 190.5 177.8 90)
+    (at 203.2 200.66 90)
     (descr "16-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "extardata.kicad_sch")
@@ -927,7 +927,7 @@
 
   (footprint "Package_DIP:DIP-16_W7.62mm" (layer "F.Cu")
     (tstamp 151d6591-008d-433a-90c3-1d8f9b29c75f)
-    (at 54.935 -18.305 90)
+    (at 203.2 139.7 90)
     (descr "16-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "extardata.kicad_sch")
@@ -1019,7 +1019,7 @@
 
   (footprint "Package_DIP:DIP-14_W7.62mm" (layer "F.Cu")
     (tstamp 17ddf8ac-009c-4a72-8e42-adf618b6f934)
-    (at 81.915 45.085 90)
+    (at 111.76 17.78 90)
     (descr "14-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "extardata.kicad_sch")
@@ -1107,7 +1107,7 @@
 
   (footprint "Package_DIP:DIP-16_W7.62mm" (layer "F.Cu")
     (tstamp 1823951e-52e7-45e3-b1dd-f07e62cdfdb3)
-    (at 158.485 124.015 90)
+    (at 111.76 109.22 90)
     (descr "16-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "extardata.kicad_sch")
@@ -1199,7 +1199,7 @@
 
   (footprint "Package_DIP:DIP-16_W7.62mm" (layer "F.Cu")
     (tstamp 1afc0855-2f79-4f55-928b-f7b2da28e14b)
-    (at 418.465 13.53 90)
+    (at 66.04 17.78 90)
     (descr "16-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "extardata.kicad_sch")
@@ -1291,7 +1291,7 @@
 
   (footprint "Package_DIP:DIP-20_W7.62mm" (layer "F.Cu")
     (tstamp 29aac17b-cc4e-4f8b-b018-680441dcc6f1)
-    (at 83.82 223.52 90)
+    (at 203.2 231.14 90)
     (descr "20-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "extardata.kicad_sch")
@@ -1391,7 +1391,7 @@
 
   (footprint "Package_DIP:DIP-16_W7.62mm" (layer "F.Cu")
     (tstamp 2aaa46d3-d1a5-448f-bf0c-1b1465839c66)
-    (at 33.035 3.395 90)
+    (at 66.04 139.7 90)
     (descr "16-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "extardata.kicad_sch")
@@ -1483,7 +1483,7 @@
 
   (footprint "Package_DIP:DIP-20_W7.62mm" (layer "F.Cu")
     (tstamp 2cbce240-efd7-405b-a2bf-ce0ce46716a5)
-    (at 375.92 218.44 90)
+    (at 340.36 200.66 90)
     (descr "20-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "extardata.kicad_sch")
@@ -1583,7 +1583,7 @@
 
   (footprint "Package_DIP:DIP-16_W7.62mm" (layer "F.Cu")
     (tstamp 302fa1a4-a91a-4af6-b964-da356ece4a54)
-    (at 54.935 -29.155 90)
+    (at 340.36 170.18 90)
     (descr "16-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "extardata.kicad_sch")
@@ -1807,7 +1807,7 @@
 
   (footprint "Package_DIP:DIP-20_W7.62mm" (layer "F.Cu")
     (tstamp 3481c015-4f1d-42f7-af5e-981486efc0d6)
-    (at 190.5 220.98 90)
+    (at 294.64 231.14 90)
     (descr "20-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "extardata.kicad_sch")
@@ -1907,7 +1907,7 @@
 
   (footprint "Package_DIP:DIP-16_W7.62mm" (layer "F.Cu")
     (tstamp 35d5e45e-fd63-4f9c-87f8-c6c352a05c38)
-    (at 418.465 67.78 90)
+    (at 157.48 78.74 90)
     (descr "16-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "extardata.kicad_sch")
@@ -1999,7 +1999,7 @@
 
   (footprint "Package_DIP:DIP-14_W7.62mm" (layer "F.Cu")
     (tstamp 36cf7ed5-ce7e-404f-90ce-02cd127c8b63)
-    (at 294.565 46.08 90)
+    (at 293.37 78.74 90)
     (descr "14-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "extardata.kicad_sch")
@@ -2087,7 +2087,7 @@
 
   (footprint "Package_DIP:DIP-14_W7.62mm" (layer "F.Cu")
     (tstamp 3f08acde-5e61-41de-bc04-f97203f4a0f3)
-    (at 255.765 2.68 90)
+    (at 340.36 17.78 90)
     (descr "14-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "extardata.kicad_sch")
@@ -2175,7 +2175,7 @@
 
   (footprint "Package_DIP:DIP-16_W7.62mm" (layer "F.Cu")
     (tstamp 3f252376-991e-4bf6-93b2-b6e6f6661f3b)
-    (at 396.565 78.63 90)
+    (at 157.48 170.18 90)
     (descr "16-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "extardata.kicad_sch")
@@ -2267,7 +2267,7 @@
 
   (footprint "Package_DIP:DIP-16_W7.62mm" (layer "F.Cu")
     (tstamp 3f6eb79f-d820-46b4-a77a-08ce997709e8)
-    (at 33.035 -40.005 90)
+    (at 66.04 109.22 90)
     (descr "16-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "extardata.kicad_sch")
@@ -2359,7 +2359,7 @@
 
   (footprint "Package_DIP:DIP-14_W7.62mm" (layer "F.Cu")
     (tstamp 415d0720-45e3-4fd3-9cfb-eb9e9375f472)
-    (at 294.565 -8.17 90)
+    (at 248.92 17.78 90)
     (descr "14-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "extardata.kicad_sch")
@@ -2447,7 +2447,7 @@
 
   (footprint "Package_DIP:DIP-16_W7.62mm" (layer "F.Cu")
     (tstamp 4cda4c01-00a5-4062-af25-6f65dec98d07)
-    (at 54.935 -7.455 90)
+    (at 294.64 200.66 90)
     (descr "16-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "extardata.kicad_sch")
@@ -2539,7 +2539,7 @@
 
   (footprint "Package_DIP:DIP-16_W7.62mm" (layer "F.Cu")
     (tstamp 5b37d643-4bff-44ce-96b2-41e302af138b)
-    (at 418.465 24.38 90)
+    (at 20.32 17.78 90)
     (descr "16-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "extardata.kicad_sch")
@@ -2631,7 +2631,7 @@
 
   (footprint "Package_DIP:DIP-16_W7.62mm" (layer "F.Cu")
     (tstamp 5fea0db8-c06c-4038-807a-d4033ed8063e)
-    (at 396.565 67.78 90)
+    (at 203.2 17.78 90)
     (descr "16-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "extardata.kicad_sch")
@@ -2723,7 +2723,7 @@
 
   (footprint "Package_DIP:DIP-16_W7.62mm" (layer "F.Cu")
     (tstamp 62b77069-97f7-452b-8717-f54489ee5e09)
-    (at 33.035 14.245 90)
+    (at 20.32 200.66 90)
     (descr "16-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "extardata.kicad_sch")
@@ -2815,7 +2815,7 @@
 
   (footprint "Package_DIP:DIP-20_W7.62mm" (layer "F.Cu")
     (tstamp 68aab581-5577-49e1-9707-881fc609ba06)
-    (at 12.7 223.52 90)
+    (at 20.32 231.14 90)
     (descr "20-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "extardata.kicad_sch")
@@ -3047,7 +3047,7 @@
 
   (footprint "Package_DIP:DIP-14_W7.62mm" (layer "F.Cu")
     (tstamp 6c6b8809-7ad7-4bf5-8106-7b819cb405e1)
-    (at 95.285 113.165 90)
+    (at 66.04 78.74 90)
     (descr "14-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "extardata.kicad_sch")
@@ -3135,7 +3135,7 @@
 
   (footprint "Package_DIP:DIP-16_W7.62mm" (layer "F.Cu")
     (tstamp 6fedebcd-a273-415c-bcaf-bcf4e64c16af)
-    (at 54.935 -50.855 90)
+    (at 248.92 139.7 90)
     (descr "16-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "extardata.kicad_sch")
@@ -3227,7 +3227,7 @@
 
   (footprint "Package_DIP:DIP-16_W7.62mm" (layer "F.Cu")
     (tstamp 736608fb-0fc0-48cd-bb6e-96ab19bc0c1a)
-    (at 374.665 67.78 90)
+    (at 66.04 200.66 90)
     (descr "16-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "extardata.kicad_sch")
@@ -3319,7 +3319,7 @@
 
   (footprint "Package_DIP:DIP-16_W7.62mm" (layer "F.Cu")
     (tstamp 79fd80ca-887f-44ba-bdff-aa073c1650c9)
-    (at 418.465 78.63 90)
+    (at 203.2 48.26 90)
     (descr "16-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "extardata.kicad_sch")
@@ -3411,7 +3411,7 @@
 
   (footprint "Package_DIP:DIP-16_W7.62mm" (layer "F.Cu")
     (tstamp 7e9c66e9-e90f-4ff0-b7cd-4a5b1fb8ba15)
-    (at 396.565 89.48 90)
+    (at 111.76 170.18 90)
     (descr "16-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "extardata.kicad_sch")
@@ -3503,7 +3503,7 @@
 
   (footprint "Package_DIP:DIP-16_W7.62mm" (layer "F.Cu")
     (tstamp 7ef1840c-f2be-408c-8ca0-4ff132900d76)
-    (at 396.565 2.68 90)
+    (at 20.32 139.7 90)
     (descr "16-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "extardata.kicad_sch")
@@ -3595,7 +3595,7 @@
 
   (footprint "Package_DIP:DIP-20_W7.62mm" (layer "F.Cu")
     (tstamp 82991cdf-38c1-455a-acd6-b90c8c741666)
-    (at 231.14 220.98 90)
+    (at 340.36 231.14 90)
     (descr "20-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "extardata.kicad_sch")
@@ -3695,7 +3695,7 @@
 
   (footprint "Package_DIP:DIP-16_W7.62mm" (layer "F.Cu")
     (tstamp 835f48e1-4b3d-451d-820a-9eda1fcdac99)
-    (at 54.935 -40.005 90)
+    (at 248.92 109.22 90)
     (descr "16-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "extardata.kicad_sch")
@@ -3919,7 +3919,7 @@
 
   (footprint "Package_DIP:DIP-14_W7.62mm" (layer "F.Cu")
     (tstamp 850c67ea-8b43-4561-b74e-010fc1b56ed3)
-    (at 236.365 100.33 90)
+    (at 248.92 78.74 90)
     (descr "14-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "extardata.kicad_sch")
@@ -4007,7 +4007,7 @@
 
   (footprint "Package_DIP:DIP-20_W7.62mm" (layer "F.Cu")
     (tstamp 89bd705b-fd0f-4b4d-ba6b-e80ec7af0794)
-    (at 342.9 142.24 90)
+    (at 157.48 231.14 90)
     (descr "20-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "extardata.kicad_sch")
@@ -4107,7 +4107,7 @@
 
   (footprint "Package_DIP:DIP-16_W7.62mm" (layer "F.Cu")
     (tstamp 8ab01202-76d2-4d7a-acfb-2114da909199)
-    (at 33.035 -18.305 90)
+    (at 248.92 170.18 90)
     (descr "16-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "extardata.kicad_sch")
@@ -4199,7 +4199,7 @@
 
   (footprint "Package_DIP:DIP-16_W7.62mm" (layer "F.Cu")
     (tstamp 941923fc-f424-4516-9c54-2927559298e1)
-    (at 396.565 56.93 90)
+    (at 157.48 48.26 90)
     (descr "16-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "extardata.kicad_sch")
@@ -4291,7 +4291,7 @@
 
   (footprint "Package_DIP:DIP-14_W7.62mm" (layer "F.Cu")
     (tstamp 95a6a9b0-332b-4042-8e2d-94728ac6a4be)
-    (at 313.965 13.53 90)
+    (at 340.36 48.26 90)
     (descr "14-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "extardata.kicad_sch")
@@ -4379,7 +4379,7 @@
 
   (footprint "Package_DIP:DIP-16_W7.62mm" (layer "F.Cu")
     (tstamp 95df321d-d418-4fd0-b4b4-658e225ce3da)
-    (at 418.465 2.68 90)
+    (at 294.64 170.18 90)
     (descr "16-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "extardata.kicad_sch")
@@ -4471,7 +4471,7 @@
 
   (footprint "Package_DIP:DIP-20_W7.62mm" (layer "F.Cu")
     (tstamp 991884cf-89e0-4914-b558-ebb4288bc98a)
-    (at 299.72 223.52 90)
+    (at 66.04 231.14 90)
     (descr "20-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "extardata.kicad_sch")
@@ -4571,7 +4571,7 @@
 
   (footprint "Package_DIP:DIP-14_W7.62mm" (layer "F.Cu")
     (tstamp 9c6d04c8-f227-4970-a0e5-70fb8b948acd)
-    (at 294.565 35.23 90)
+    (at 295.91 48.26 90)
     (descr "14-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "extardata.kicad_sch")
@@ -4659,7 +4659,7 @@
 
   (footprint "Package_DIP:DIP-16_W7.62mm" (layer "F.Cu")
     (tstamp 9d4f60a0-1651-45d5-a8fc-1b163c7c9299)
-    (at 418.465 89.48 90)
+    (at 203.2 78.74 90)
     (descr "16-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "extardata.kicad_sch")
@@ -4751,7 +4751,7 @@
 
   (footprint "Package_DIP:DIP-14_W7.62mm" (layer "F.Cu")
     (tstamp ae5ed2ea-f4b1-48e9-8751-f01816051fa9)
-    (at 35.56 96.52 90)
+    (at 20.32 109.22 90)
     (descr "14-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "extardata.kicad_sch")
@@ -4839,7 +4839,7 @@
 
   (footprint "Package_DIP:DIP-16_W7.62mm" (layer "F.Cu")
     (tstamp ae68a1e9-cf5f-443b-aeee-7782287dd79c)
-    (at 33.035 -7.455 90)
+    (at 66.04 170.18 90)
     (descr "16-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "extardata.kicad_sch")
@@ -4931,7 +4931,7 @@
 
   (footprint "Package_DIP:DIP-14_W7.62mm" (layer "F.Cu")
     (tstamp b1ae8c3c-475f-4fd1-b81c-d6be8a4a2709)
-    (at 35.56 107.37 90)
+    (at 157.48 139.7 90)
     (descr "14-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "extardata.kicad_sch")
@@ -5019,7 +5019,7 @@
 
   (footprint "Package_DIP:DIP-16_W7.62mm" (layer "F.Cu")
     (tstamp b58f350c-5fd2-424e-af6a-099612c8d7dc)
-    (at 76.835 14.245 90)
+    (at 20.32 48.26 90)
     (descr "16-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "extardata.kicad_sch")
@@ -5243,7 +5243,7 @@
 
   (footprint "Package_DIP:DIP-16_W7.62mm" (layer "F.Cu")
     (tstamp bfb6b157-5c04-4854-ab78-21b772877b5f)
-    (at 396.565 46.08 90)
+    (at 157.495 17.78 90)
     (descr "16-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "extardata.kicad_sch")
@@ -5335,7 +5335,7 @@
 
   (footprint "Package_DIP:DIP-14_W7.62mm" (layer "F.Cu")
     (tstamp d3e2f36a-f59e-405d-a4c1-2698c18ccd97)
-    (at 313.965 46.08 90)
+    (at 340.36 78.74 90)
     (descr "14-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "extardata.kicad_sch")
@@ -5423,7 +5423,7 @@
 
   (footprint "Package_DIP:DIP-20_W7.62mm" (layer "F.Cu")
     (tstamp d78cbb05-2b62-4468-8166-135f182bf2a4)
-    (at 119.38 220.98 90)
+    (at 248.92 231.14 90)
     (descr "20-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "extardata.kicad_sch")
@@ -5523,7 +5523,7 @@
 
   (footprint "Package_DIP:DIP-16_W7.62mm" (layer "F.Cu")
     (tstamp d979d97d-d012-4f71-b4fb-c9168cfce6fa)
-    (at 33.035 -50.855 90)
+    (at 20.32 170.18 90)
     (descr "16-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "extardata.kicad_sch")
@@ -5615,7 +5615,7 @@
 
   (footprint "Package_DIP:DIP-16_W7.62mm" (layer "F.Cu")
     (tstamp d9d55663-cd20-48a2-88a4-1cf5b74730e0)
-    (at 396.565 13.53 90)
+    (at 66.04 48.26 90)
     (descr "16-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "extardata.kicad_sch")
@@ -5707,7 +5707,7 @@
 
   (footprint "Package_DIP:DIP-14_W7.62mm" (layer "F.Cu")
     (tstamp ddb82b3a-2fa1-4213-a747-4803a32e39a9)
-    (at 294.565 2.68 90)
+    (at 294.64 17.78 90)
     (descr "14-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "extardata.kicad_sch")
@@ -5795,7 +5795,7 @@
 
   (footprint "Package_DIP:DIP-16_W7.62mm" (layer "F.Cu")
     (tstamp defb22a5-94a2-46e7-9b83-095ecaab3e99)
-    (at 374.665 56.93 90)
+    (at 248.92 200.66 90)
     (descr "16-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "extardata.kicad_sch")
@@ -5887,7 +5887,7 @@
 
   (footprint "Package_DIP:DIP-16_W7.62mm" (layer "F.Cu")
     (tstamp e099b520-3247-4372-892e-53fa4b4cec0c)
-    (at 396.565 24.38 90)
+    (at 111.76 78.74 90)
     (descr "16-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "extardata.kicad_sch")
@@ -5979,7 +5979,7 @@
 
   (footprint "Package_DIP:DIP-16_W7.62mm" (layer "F.Cu")
     (tstamp e0d80fff-b6a3-4193-916c-0acbbfe995e7)
-    (at 233.68 175.26 90)
+    (at 203.2 170.18 90)
     (descr "16-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "extardata.kicad_sch")
@@ -6071,7 +6071,7 @@
 
   (footprint "Package_DIP:DIP-16_W7.62mm" (layer "F.Cu")
     (tstamp e5f82b93-bcf3-489f-9936-1e7aabc0253e)
-    (at 54.935 3.395 90)
+    (at 111.76 139.7 90)
     (descr "16-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "extardata.kicad_sch")
@@ -6163,7 +6163,7 @@
 
   (footprint "Package_DIP:DIP-16_W7.62mm" (layer "F.Cu")
     (tstamp e630b840-9d93-4e73-9e70-d09833da9822)
-    (at 136.585 102.315 90)
+    (at 157.48 109.22 90)
     (descr "16-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "extardata.kicad_sch")
@@ -6255,7 +6255,7 @@
 
   (footprint "Package_DIP:DIP-14_W7.62mm" (layer "F.Cu")
     (tstamp e642565c-fa57-4ffa-9e53-551618051a1d)
-    (at 294.565 89.48 90)
+    (at 294.64 109.22 90)
     (descr "14-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "extardata.kicad_sch")
@@ -6343,7 +6343,7 @@
 
   (footprint "Package_DIP:DIP-14_W7.62mm" (layer "F.Cu")
     (tstamp ea918876-885f-45cf-b383-1ce5da5f00d7)
-    (at 294.565 56.93 90)
+    (at 248.92 48.26 90)
     (descr "14-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "extardata.kicad_sch")
@@ -6431,7 +6431,7 @@
 
   (footprint "Package_DIP:DIP-16_W7.62mm" (layer "F.Cu")
     (tstamp eed1e6f1-abea-499d-8a3e-fdd9b7ab142a)
-    (at 190.5 144.78 90)
+    (at 203.2 109.22 90)
     (descr "16-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "extardata.kicad_sch")
@@ -6523,7 +6523,7 @@
 
   (footprint "Package_DIP:DIP-16_W7.62mm" (layer "F.Cu")
     (tstamp f1bc1b1d-648c-41ec-bf32-7341eb9ba952)
-    (at 33.035 -29.155 90)
+    (at 111.76 200.66 90)
     (descr "16-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "extardata.kicad_sch")
@@ -6615,7 +6615,7 @@
 
   (footprint "Package_DIP:DIP-16_W7.62mm" (layer "F.Cu")
     (tstamp f9e08ecc-9d87-401f-9202-a292210401d6)
-    (at 396.565 35.23 90)
+    (at 20.32 78.74 90)
     (descr "16-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "extardata.kicad_sch")
@@ -6707,7 +6707,7 @@
 
   (footprint "Package_DIP:DIP-20_W7.62mm" (layer "F.Cu")
     (tstamp ff5576e2-f7b3-4d59-bc77-6465c4a381be)
-    (at 48.26 223.52 90)
+    (at 111.76 231.14 90)
     (descr "20-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "extardata.kicad_sch")
@@ -6807,7 +6807,7 @@
 
   (footprint "Package_DIP:DIP-14_W7.62mm" (layer "F.Cu")
     (tstamp ff65654b-342a-438e-93d4-44f6378dcbbf)
-    (at 333.365 89.48 90)
+    (at 340.36 139.7 90)
     (descr "14-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils)")
     (tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
     (property "Sheetfile" "extardata.kicad_sch")
