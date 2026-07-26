@@ -85,8 +85,8 @@ proc simtest {} {
     global pctr
     global sctr
     global shat1
-    global swdfpend
-    global swifpend
+    global swdfldpend
+    global swifldpend
     global swregpend
     global testcons
     global testdma
@@ -147,10 +147,10 @@ proc simtest {} {
     set ttat2 [expr {$ttat0 + 2}]
 
     ;# set switches for OSR/LDAD testing
-    set swdfpend  [expr {$testxmem ? [randbits 3] : 0}]
-    set swifpend  [expr {$testxmem ? [randbits 3] : 0}]
+    set swdfldpend  [expr {$testxmem ? [randbits 3] : 0}]
+    set swifldpend  [expr {$testxmem ? [randbits 3] : 0}]
     set swregpend [randbits 12]
-    swtch set df $swdfpend if $swifpend reg $swregpend
+    swtch set dfld $swdfldpend ifld $swifldpend reg $swregpend
 
     ;# run random instructions, verifying the cycles
     set instrno 0
@@ -463,7 +463,7 @@ proc simtest {} {
         } errmsg]
 
         ;# get 0 if it worked normally
-        ;# get 47 if halted and did ldad/dep/exam
+        ;# get 47 if halted and did ldad/depos/exam
         if {($ercode != 0) && ($ercode != 47)} {
             return -code $ercode "$errmsg $::errorInfo"
         }
@@ -479,7 +479,7 @@ proc simtest {} {
         verify12  [bus mquo]  $mquo "MQ mismatch at end of instruction"
         verify12  [bus sctr]  $sctr "SC mismatch at end of instruction"
 
-        ;# if halted and did ldad/dep/exam, next cycle will be a fetch, not wrdct/break/intak
+        ;# if halted and did ldad/depos/exam, next cycle will be a fetch, not wrdct/break/intak
         set nextfetch [expr {$ercode == 47}]
     }
 
@@ -779,7 +779,7 @@ proc startdmarequest {} {
 ;# cont alone should not reset state, should pick up where it left off
 proc checkhalted {} {
     global MS_BREAK MS_DEPOS MS_EXAM MS_EXEC MS_FETCH MS_INTAK MS_WRDCT
-    global haltdelay haltwhy panelhalt pctr swdfpend swifpend swregpend testcons testxmem
+    global haltdelay haltwhy panelhalt pctr swdfldpend swifldpend swregpend testcons testxmem
     global acum linc mquo sctr xmem_intdisableduntiljump intdelayed intenabled intrequest
     global xmem_dfld xmem_ifld xmem_ifldafterjump xmem_saveddfld xmem_savedifld
     global ttinten ttkbflag ttprflag ttprfull
@@ -803,10 +803,10 @@ proc checkhalted {} {
                         ;# ldad - only if all 18 switches have soaked through console board
                         finishline
                         for {set i 0} true {incr i} {
-                            set busdf [swtch df]
-                            set busif [swtch if]
+                            set busdf [swtch dfld]
+                            set busif [swtch ifld]
                             set busda [swtch reg]
-                            if {($busdf == $swdfpend) && ($busif == $swifpend) && ($busda == $swregpend)} break
+                            if {($busdf == $swdfldpend) && ($busif == $swifldpend) && ($busda == $swregpend)} break
                             if {$i > 200000} {
                                 error "timed out waiting for switches to soak in"
                             }
@@ -814,9 +814,9 @@ proc checkhalted {} {
                         }
                         startline
                         swtchwait ldad 1            ;# press and hold ldad
-                        set xmem_dfld $swdfpend
-                        set xmem_ifld $swifpend
-                        set xmem_ifldafterjump $swifpend
+                        set xmem_dfld $swdfldpend
+                        set xmem_ifld $swifldpend
+                        set xmem_ifldafterjump $swifldpend
                         set addr $swregpend         ;# madr should be loaded with swreg contents
                         set pctr $addr              ;# circuit also sets pctr to the address
                         set rdata [randbits 12]     ;# get random value for it to examine
@@ -827,10 +827,10 @@ proc checkhalted {} {
                         set haltwhy ""
                         verifybit [bus oRUN] 0 "should be halted after LDAD"
                         set wacked 1                ;# processor no longer doing the instruction
-                        set swdfpend [expr {$testxmem ? [randbits 3] : 0}]
-                        set swifpend [expr {$testxmem ? [randbits 3] : 0}]
+                        set swdfldpend [expr {$testxmem ? [randbits 3] : 0}]
+                        set swifldpend [expr {$testxmem ? [randbits 3] : 0}]
                         set swregpend [randbits 12] ;# set up new switches for next time
-                        swtch set df $swdfpend if $swifpend reg $swregpend
+                        swtch set dfld $swdfldpend ifld $swifldpend reg $swregpend
                         set doldad 0
                     }
                     2 {

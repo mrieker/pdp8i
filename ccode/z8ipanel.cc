@@ -479,12 +479,12 @@ Switches::Switches ()
 {
     Switch swlist[] = {
         { this, "cont",  1, NULL,               &pads.button.cont  },
-        { this, "dep",   1, NULL,               &pads.button.dep   },
-        { this, "df",    3, &pads.togovr.dfld,  &pads.togval.dfld  },
+        { this, "depos", 1, NULL,               &pads.button.depos },
+        { this, "dfld",  3, &pads.togovr.dfld,  &pads.togval.dfld  },
         { this, "exam",  1, NULL,               &pads.button.exam  },
-        { this, "if",    3, &pads.togovr.ifld,  &pads.togval.ifld  },
+        { this, "ifld",  3, &pads.togovr.ifld,  &pads.togval.ifld  },
         { this, "ldad",  1, NULL,               &pads.button.ldad  },
-        { this, "sr",   12, &pads.togovr.sr,    &pads.togval.sr    },
+        { this, "reg",  12, &pads.togovr.reg,   &pads.togval.reg   },
         { this, "start", 1, NULL,               &pads.button.start },
         { this, "sinst", 1, &pads.togovr.sinst, &pads.togval.sinst },
         { this, "sstep", 1, &pads.togovr.sstep, &pads.togval.sstep },
@@ -727,9 +727,9 @@ static int showstatus (int argc, char **argv)
         printf (EOL);
 
         printf ("             %s %s %s  %s %s %s   %s %s %s  %s %s %s  %s %s %s  %s %s %s  SR  " ESC_BOLDV "%o%o.%04o" ESC_NORMV "  %s %s %s %s" EOL,
-            REG3L (blu, pads.togval.dfld), REG3L (grn, pads.togval.ifld), REG12L (pads.togval.sr), pads.togval.dfld, pads.togval.ifld, pads.togval.sr,
+            REG3L (blu, pads.togval.dfld), REG3L (grn, pads.togval.ifld), REG12L (pads.togval.reg), pads.togval.dfld, pads.togval.ifld, pads.togval.reg,
             STL (CYN, pads.button.start, "START", "start"), STL (GRN, pads.button.ldad, "LDAD", "ldad"),
-            STL (CYN, pads.button.dep, " DEP ", " dep "), STL (GRN, pads.button.exam, "EXAM", "exam"));
+            STL (CYN, pads.button.depos, "DEPOS", "depos"), STL (GRN, pads.button.exam, "EXAM", "exam"));
 
         printf ("                                                                     %s %s %s %s" EOL EOP,
             STL (CYN, pads.button.cont, "CONT", "cont"), STL (GRN, pads.button.stop, "STOP", "stop"),

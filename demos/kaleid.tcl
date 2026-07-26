@@ -16,8 +16,8 @@ set inity [expr {$nowtv / 1000 % 1000 + 2345}]
 puts "kaleid: initx=[octal $initx] inity=[octal $inity]"
 wrmem 020 $initx
 wrmem 021 $inity
-setsw sr 0
+setsw reg 0
 startat $startaddr
-relsw sr
+relsw reg
 exec -ignorestderr $Z8IHOME/z8ivc8 -killit -pms 120 -size [getenv vcsize 720] $vt
 exit

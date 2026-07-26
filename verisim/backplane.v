@@ -309,7 +309,7 @@ module backplane (
         ._INBUS_10  (_busINBUS[10]),
         ._INBUS_11  (_busINBUS[11]),
 
-        ._INBUS_0_o (_conINBUS[0]),     // SR{11:00] when READSR
+        ._INBUS_0_o (_conINBUS[0]),     // SWREG[11:00] when READSR
         ._INBUS_1_o (_conINBUS[1]),     // ...else hi-Z
         ._INBUS_2_o (_conINBUS[2]),
         ._INBUS_3_o (_conINBUS[3]),
@@ -724,7 +724,7 @@ module backplane (
         ._INBUS_10  (_busINBUS[10]),
         ._INBUS_11  (_busINBUS[11]),
 
-        ._INBUS_0_o (_memINBUS[0]),     // SR{11:00] when READSR
+        ._INBUS_0_o (_memINBUS[0]),     // SWREG[11:00] when READSR
         ._INBUS_1_o (_memINBUS[1]),     // ...else hi-Z
         ._INBUS_2_o (_memINBUS[2]),
         ._INBUS_3_o (_memINBUS[3]),

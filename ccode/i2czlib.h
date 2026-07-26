@@ -30,9 +30,9 @@
 
 // toggle switches
 struct Z8IToggles {
-    uint16_t sr;
-    uint8_t dfld;
-    uint8_t ifld;
+    uint16_t reg;   // 12 bits
+    uint8_t dfld;   // 3 bits
+    uint8_t ifld;   // 3 bits
     bool sinst;
     bool sstep;
 };
@@ -44,7 +44,7 @@ struct Z8IButtons {
     bool start;
     bool ldad;
     bool exam;
-    bool dep;
+    bool depos;
 };
 
 // light bulbs

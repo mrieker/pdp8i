@@ -146,8 +146,8 @@ int main (int argc, char **argv)
         if (! oncemode) printf (ESC_HOMEC);
 
         char const *mode = FLD(Z_RE,e_simit) ? "SIM" : "REAL";
-        uint32_t timepulse = (FLD(Z_RF,f_oTP1) << 9) | (FLD(Z_RF,f_oTP2) << 6) | (FLD(Z_RF,f_oTP3) << 3) | FLD(Z_RF,f_oTP4);
-        uint32_t timestate = (FLD(Z_RF,f_oTS1) << 9) | (FLD(Z_RF,f_oTS2) << 6) | (FLD(Z_RF,f_oTS3) << 3) | FLD(Z_RF,f_oTS4);
+        uint32_t timepulse = FLD(Z_RF,f_oTP1) * 01000 | FLD(Z_RF,f_oTP2) * 00200 | FLD(Z_RF,f_oTP3) * 00030 | FLD(Z_RF,f_oTP4) * 00004;
+        uint32_t timestate = FLD(Z_RF,f_oTS1) * 01000 | FLD(Z_RF,f_oTS2) * 00200 | FLD(Z_RF,f_oTS3) * 00030 | FLD(Z_RF,f_oTS4) * 00004;
 
         uint32_t msbin = pads.light.ms;
         ASSERT (msbin < sizeof msstrs / sizeof msstrs[0]);
@@ -155,26 +155,32 @@ int main (int argc, char **argv)
         uint32_t irbin = pads.light.ir;
         ASSERT (irbin < sizeof irstrs / sizeof irstrs[0]);
         char const *irstr = irstrs[irbin];
+        uint32_t clkratm1 = FLD(Z_RD,d_clkratm1);
+        char clkratstr[10];
+        if (clkratm1 == 0) strcpy (clkratstr, "manual");
+        else snprintf (clkratstr, sizeof clkratstr, "%u0 nS", clkratm1 + 1);
+
+        char ioenabd = FLD(Z_RC,c_dev_ioenabd) ? ' ' : '?';
+        char dmagntd = FLD(Z_RC,c_dev_dmagntd) ? ' ' : '?';
+        char poweron = FLD(Z_RC,c_dev_poweron) ? ' ' : '?';
 
         // zynq.v register dump
         printf ("VERSION=%08X %c%c  %s%s", z8is[0], (char)(z8is[0] >> 24), (char)(z8is[0] >> 16), mode, eol);
-
-        printf ("  oACUM=%04o    iACCLEAR=%o     lbAC=%04o    swCONT=%o  %s", FLD(Z_RF,f_oACUM),    FLD(Z_RC,c_dev_iACCLEAR), pads.light.ac,   pads.button.cont,  eol);
-        printf ("  oBRKCYC=%o     iBRKGNTO=%o     lbMA=%04o    swDEPOS=%o %s", FLD(Z_RF,f_oBRKCYC),  FLD(Z_RC,c_dev_iBRKGNTO), pads.light.ma,   pads.button.dep,   eol);
-        printf ("  oBRKGNTI=%o    iBRKRQST=%o     lbSC=%02o      swDFLD=%o  %s", FLD(Z_RF,f_oBRKGNTI), FLD(Z_RC,c_dev_iBRKRQST), pads.light.sc,   pads.togval.dfld,  eol);
-        printf ("  oBRKRQST=%o    iBRKWRM=%o      lbION=%o      swEXAM=%o  %s", FLD(Z_RF,f_oBRKRQST), FLD(Z_RC,c_dev_iBRKWRM),  pads.light.ion,  pads.button.exam,  eol);
-        printf ("  oBUSINI=%o     iCAINC=%o       lbLINK=%o     swIFLD=%o  %s", FLD(Z_RF,f_oBUSINI),  FLD(Z_RC,c_dev_iCAINC),   pads.light.link, pads.togval.ifld,  eol);
-        printf ("  oBWCOV=%o      iCYCLE3=%o      lbPAU=%o      swLDAD=%o  %s", FLD(Z_RF,f_oBWCOV),   FLD(Z_RC,c_dev_iCYCLE3),  pads.light.pau,  pads.button.ldad,  eol);
-        printf ("  oIOP=%o        iDMAFLD=%o      lbMB=%04o    swSINST=%o %s", FLD(Z_RF,f_oIOP),    FLD(Z_RC,c_dev_iDMAFLD),  pads.light.mb,   pads.togval.sinst, eol);
-        printf ("  oLINK=%o       iINBUS=%04o    lbMQ=%04o    swSSTEP=%o %s", FLD(Z_RF,f_oLINK),    FLD(Z_RC,c_dev_iINBUS),   pads.light.mq,   pads.togval.sstep, eol);
-        printf ("  oMBUF=%04o    iINTRQST=%o     lbMS=%-5s   swSTART=%o %s", FLD(Z_RE,e_oMBUF),    FLD(Z_RC,c_dev_iINTRQST), msstr,           pads.button.start, eol);
-        printf ("  oRUN=%o        iIOSKIP=%o      lbIR=%s     swSR=%04o  %s", FLD(Z_RF,f_oRUN),   FLD(Z_RC,c_dev_iIOSKIP),  irstr,          pads.togval.sr,    eol);
-        printf ("  oTP=%04o      iPAUSE=%o       lbRUN=%o                %s", timepulse,            FLD(Z_RC,c_dev_iPAUSE),   pads.light.run,                     eol);
-        printf ("  oTS=%04o      iCLOCK=%o       lbPC=%04o               %s", timestate,            FLD(Z_RC,c_dev_iCLOCK),   pads.light.pc,                      eol);
-        printf ("                iRESET=%o       lbDF=%o                 %s",                       FLD(Z_RC,c_dev_iRESET),   pads.light.dfld,                    eol);
-        printf ("  memcycctr=%08X           lbEA=%o                 %s", z8is[14],                                           pads.light.ema,                     eol);
-        printf ("  regctld=%08X             lbIF=%o                 %s", z8is[4],                                            pads.light.ifld,                    eol);
-        printf ("  regctlg=%08X%s", z8is[7], eol);
+        printf ("  oACUM=%04o    iACCLEAR=%o%c     lbAC=%04o    swCONT=%o  %s",      FLD(Z_RF,f_oACUM),    FLD(Z_RC,c_dev_iACCLEAR), ioenabd, pads.light.ac,   pads.button.cont,      eol);
+        printf ("  oBRKCYC=%o     iBRKGNTO=%o%c     lbMA=%04o    swDEPOS=%o %s",     FLD(Z_RF,f_oBRKCYC),  FLD(Z_RC,c_dev_iBRKGNTO), poweron, pads.light.ma,   pads.button.depos,     eol);
+        printf ("  oBRKGNTI=%o    iBRKRQST=%o%c     lbSC=%02o      swDFLD=%o  %s",   FLD(Z_RF,f_oBRKGNTI), FLD(Z_RC,c_dev_iBRKRQST), poweron, pads.light.sc,   pads.togval.dfld,      eol);
+        printf ("  oBRKRQST=%o    iBRKWRM=%o%c      lbION=%o      swEXAM=%o  %s",    FLD(Z_RF,f_oBRKRQST), FLD(Z_RC,c_dev_iBRKWRM),  dmagntd, pads.light.ion,  pads.button.exam,      eol);
+        printf ("  oBUSINI=%o     iCAINC=%o%c       lbLINK=%o     swIFLD=%o  %s",    FLD(Z_RF,f_oBUSINI),  FLD(Z_RC,c_dev_iCAINC),   dmagntd, pads.light.link, pads.togval.ifld,      eol);
+        printf ("  oBWCOV=%o      iCYCLE3=%o%c      lbPAU=%o      swLDAD=%o  %s",    FLD(Z_RF,f_oBWCOV),   FLD(Z_RC,c_dev_iCYCLE3),  dmagntd, pads.light.pau,  pads.button.ldad,      eol);
+        printf ("  oIOP=%o        iDMAFLD=%o%c      lbMB=%04o    swSINST=%o %s",     FLD(Z_RF,f_oIOP),     FLD(Z_RC,c_dev_iDMAFLD),  dmagntd, pads.light.mb,   pads.togval.sinst,     eol);
+        printf ("  oLINK=%o       iINBUS=%04o%c    lbMQ=%04o    swSSTEP=%o %s",      FLD(Z_RF,f_oLINK),    FLD(Z_RC,c_dev_iINBUS),   ioenabd, pads.light.mq,   pads.togval.sstep,     eol);
+        printf ("  oMADR=%05o   iINTRQST=%o%c     lbMS=%-5s   swSTART=%o %s",        FLD(Z_RE,e_oMADX),    FLD(Z_RC,c_dev_iINTRQST), poweron, msstr,           pads.button.start,     eol);
+        printf ("  oMBUF=%04o    iIOSKIP=%o%c      lbIR=%s     swREG=%04o %s",       FLD(Z_RE,e_oMBUF),    FLD(Z_RC,c_dev_iIOSKIP),  ioenabd, irstr,           pads.togval.reg,       eol);
+        printf ("  oRUN=%o        iPAUSE=%o%c       lbRUN=%o                %s",     FLD(Z_RF,f_oRUN),     FLD(Z_RC,c_dev_iPAUSE),   poweron, pads.light.run,                         eol);
+        printf ("  oTP=%04o      iCLOCK=%o%c       lbPC=%04o    fpgamemen=%o%s",     timepulse,            FLD(Z_RC,c_dev_iCLOCK),   poweron, pads.light.pc,   FLD(Z_RE,e_fpgamemen), eol);
+        printf ("  oTS=%04o      iRESET=%o%c       lbDF=%o       clkratm1=%-2u(%s)%s", timestate,          FLD(Z_RC,c_dev_iRESET),   poweron, pads.light.dfld, clkratm1, clkratstr,   eol);
+        printf ("  oMAJST=%X      iMEMDIS=%o%c      lbEA=%o       memcycctr=%08X%s", FLD(Z_RF,f_oMAJST),   FLD(Z_RC,c_dev_iMEMDIS),  poweron, pads.light.ema,  FLD(Z_RN,n_memcycctr), eol);
+        printf ("                                lbIF=%o       100MHzctr=%08X%s",                                                    pads.light.ifld,          FLD(Z_RH,h_100MHz),    eol);
 
         for (int i = 0; i < pagelen;) {
             uint32_t idver = z8is[i];

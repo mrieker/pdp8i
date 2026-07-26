@@ -49,8 +49,8 @@ proc helpini {} {
 
 # turn all switches off
 proc alloff {} {
-    setsw df 0
-    setsw if 0
+    setsw dfld 0
+    setsw ifld 0
     setsw ldad 0
     setsw start 0
     setsw cont 0
@@ -58,8 +58,8 @@ proc alloff {} {
     setsw sinst 0
     setsw sstep 0
     setsw exam 0
-    setsw dep 0
-    setsw sr 0
+    setsw depos 0
+    setsw reg 0
 }
 
 # assemble instruction and write to memory
@@ -175,7 +175,7 @@ proc disas {start {stop ""}} {
     }
 }
 
-# do memory cycle initiated by a switch (dep, exam, ldad)
+# do memory cycle initiated by a switch (depos, exam, ldad)
 proc domemcyc {sw} {
     set oldmc [pin memcycctr]
     flicksw $sw
@@ -216,11 +216,11 @@ proc dumpit {} {
     set run  [lindex $lbs 10]
     set sc   [lindex $lbs 11]
 
-    set sws [getsw sr df if cont dep exam ldad sinst sstep start stop]
+    set sws [getsw reg dfld ifld cont depos exam ldad sinst sstep start stop]
 
     set sw "SR=[octal [lindex $sws 0]] DF=[lindex $sws 1] IF=[lindex $sws 2]"
     if {[lindex $sws  3]} {append sw " CONT"}
-    if {[lindex $sws  4]} {append sw " DEP"}
+    if {[lindex $sws  4]} {append sw " DEPOS"}
     if {[lindex $sws  5]} {append sw " EXAM"}
     if {[lindex $sws  6]} {append sw " LDAD"}
     if {[lindex $sws  7]} {append sw " SINST"}
@@ -396,13 +396,13 @@ proc loadbin {fname} {
 
             # deposit data
             if {$addr != $nextaddr} {
-                setsw if [expr {$addr >> 12}] \
-                      df [expr {$addr >> 12}] \
-                    sr [expr {$addr & 07777}]
+                setsw ifld [expr {$addr >> 12}] \
+                      dfld [expr {$addr >> 12}] \
+                     reg [expr {$addr & 07777}]
                 domemcyc ldad
             }
-            setsw sr $data
-            domemcyc dep
+            setsw reg $data
+            domemcyc depos
 
             # set up for next byte
             set addr [expr {($addr & 070000) | (($addr + 1) & 007777)}]
@@ -479,7 +479,7 @@ proc loadbinptr {fname} {
     global Z8IHOME
 
     hardreset
-    setsw if 0 df 0
+    setsw ifld 0 dfld 0
 
     puts "loadbinptr: toggling in rim loader"
     rimloader hi
@@ -488,8 +488,8 @@ proc loadbinptr {fname} {
     exec -ignorestderr make -C $Z8IHOME binloader.rim
     set ptrpid [exec -ignorestderr $Z8IHOME/z8iptr -killit $Z8IHOME/binloader.rim &]
     after 1000
-    setsw sr 07756 ; domemcyc ldad
-    setsw sr 00000 ; domemcyc start
+    setsw reg 07756 ; domemcyc ldad
+    setsw reg 00000 ; domemcyc start
     while true {
         set exst [waitpid $ptrpid]
         if {$exst != ""} break
@@ -502,8 +502,8 @@ proc loadbinptr {fname} {
     puts "loadbinptr: reading in $fname"
     set ptrpid [exec -ignorestderr $Z8IHOME/z8iptr -killit $fname &]
     after 1000
-    setsw sr 07777 ; domemcyc ldad
-    setsw sr 00000 ; domemcyc start
+    setsw reg 07777 ; domemcyc ldad
+    setsw reg 00000 ; domemcyc start
     while {[getlb run]} {
         if {[ctrlcflag]} {error "control-C"}
         after 100
@@ -527,7 +527,7 @@ proc loadrim {fname} {
     set nextaddr -1
     set verify [dict create]
 
-    setsw if 0 df 0
+    setsw ifld 0 dfld 0
 
     puts "loadrim: loading $fname..."
 
@@ -584,13 +584,13 @@ proc loadrim {fname} {
 
         # do 'load address' if not sequential
         if {$nextaddr != $addr} {
-            setsw sr $addr
+            setsw reg $addr
             domemcyc ldad
         }
 
         # deposit the data
-        setsw sr $data
-        domemcyc dep
+        setsw reg $data
+        domemcyc depos
 
         # verify resultant lights
         set actma [getlb ma]
@@ -634,9 +634,9 @@ proc loadverify {verify} {
 # set up 5252: jmp 5252 and start it
 proc loop52 {} {
     hardreset
-    setsw sr 05252
+    setsw reg 05252
     domemcyc ldad
-    domemcyc dep
+    domemcyc depos
     domemcyc ldad
     flicksw start
 }
@@ -679,44 +679,44 @@ proc rimloader {speed} {
     hardreset
     switch $speed {
         "lo" {
-            setsw sr 07756 ; domemcyc ldad
-            setsw sr 06032 ; domemcyc dep
-            setsw sr 06031 ; domemcyc dep
-            setsw sr 05357 ; domemcyc dep
-            setsw sr 06036 ; domemcyc dep
-            setsw sr 07106 ; domemcyc dep
-            setsw sr 07006 ; domemcyc dep
-            setsw sr 07510 ; domemcyc dep
-            setsw sr 05357 ; domemcyc dep
-            setsw sr 07006 ; domemcyc dep
-            setsw sr 06031 ; domemcyc dep
-            setsw sr 05367 ; domemcyc dep
-            setsw sr 06034 ; domemcyc dep
-            setsw sr 07420 ; domemcyc dep
-            setsw sr 03776 ; domemcyc dep
-            setsw sr 03376 ; domemcyc dep
-            setsw sr 05356 ; domemcyc dep
-            setsw sr 00000 ; domemcyc dep
+            setsw reg 07756 ; domemcyc ldad
+            setsw reg 06032 ; domemcyc depos
+            setsw reg 06031 ; domemcyc depos
+            setsw reg 05357 ; domemcyc depos
+            setsw reg 06036 ; domemcyc depos
+            setsw reg 07106 ; domemcyc depos
+            setsw reg 07006 ; domemcyc depos
+            setsw reg 07510 ; domemcyc depos
+            setsw reg 05357 ; domemcyc depos
+            setsw reg 07006 ; domemcyc depos
+            setsw reg 06031 ; domemcyc depos
+            setsw reg 05367 ; domemcyc depos
+            setsw reg 06034 ; domemcyc depos
+            setsw reg 07420 ; domemcyc depos
+            setsw reg 03776 ; domemcyc depos
+            setsw reg 03376 ; domemcyc depos
+            setsw reg 05356 ; domemcyc depos
+            setsw reg 00000 ; domemcyc depos
         }
         "hi" {
-            setsw sr 07756 ; domemcyc ldad
-            setsw sr 06014 ; domemcyc dep
-            setsw sr 06011 ; domemcyc dep
-            setsw sr 05357 ; domemcyc dep
-            setsw sr 06016 ; domemcyc dep
-            setsw sr 07106 ; domemcyc dep
-            setsw sr 07006 ; domemcyc dep
-            setsw sr 07510 ; domemcyc dep
-            setsw sr 05374 ; domemcyc dep
-            setsw sr 07006 ; domemcyc dep
-            setsw sr 06011 ; domemcyc dep
-            setsw sr 05367 ; domemcyc dep
-            setsw sr 06016 ; domemcyc dep
-            setsw sr 07420 ; domemcyc dep
-            setsw sr 03776 ; domemcyc dep
-            setsw sr 03376 ; domemcyc dep
-            setsw sr 05357 ; domemcyc dep
-            setsw sr 00000 ; domemcyc dep
+            setsw reg 07756 ; domemcyc ldad
+            setsw reg 06014 ; domemcyc depos
+            setsw reg 06011 ; domemcyc depos
+            setsw reg 05357 ; domemcyc depos
+            setsw reg 06016 ; domemcyc depos
+            setsw reg 07106 ; domemcyc depos
+            setsw reg 07006 ; domemcyc depos
+            setsw reg 07510 ; domemcyc depos
+            setsw reg 05374 ; domemcyc depos
+            setsw reg 07006 ; domemcyc depos
+            setsw reg 06011 ; domemcyc depos
+            setsw reg 05367 ; domemcyc depos
+            setsw reg 06016 ; domemcyc depos
+            setsw reg 07420 ; domemcyc depos
+            setsw reg 03776 ; domemcyc depos
+            setsw reg 03376 ; domemcyc depos
+            setsw reg 05357 ; domemcyc depos
+            setsw reg 00000 ; domemcyc depos
         }
         default {
             error "bad speed $speed"
@@ -729,9 +729,9 @@ proc rimloader {speed} {
 # read memory location
 # - does loadaddress which reads the location
 proc rdmem {addr} {
-    setsw if [expr {$addr >> 12}] \
-          df [expr {$addr >> 12}] \
-        sr [expr {$addr & 07777}]
+    setsw ifld [expr {$addr >> 12}] \
+          dfld [expr {$addr >> 12}] \
+         reg [expr {$addr & 07777}]
     domemcyc ldad
     return [pin ombuf]
 }
@@ -805,12 +805,12 @@ proc simon {} {
 # load PC and start at given address
 # preserves switchregister contents
 proc startat {addr} {
-    set savesr [getsw sr]
-    setsw if [expr {$addr >> 12}] \
-          df [expr {$addr >> 12}] \
-        sr [expr {$addr & 07777}]
+    set savesr [getsw reg]
+    setsw ifld [expr {$addr >> 12}] \
+          dfld [expr {$addr >> 12}] \
+         reg [expr {$addr & 07777}]
     domemcyc ldad
-    setsw sr $savesr
+    setsw reg $savesr
     flicksw start
 }
 
@@ -881,23 +881,23 @@ proc waitforttypr {msec str} {
 # write memory location
 # - does loadaddress, then deposit to write
 proc wrmem {addr data} {
-    setsw if [expr {$addr >> 12}] \
-          df [expr {$addr >> 12}] \
-        sr [expr {$addr & 07777}]
+    setsw ifld [expr {$addr >> 12}] \
+          dfld [expr {$addr >> 12}] \
+         reg [expr {$addr & 07777}]
     domemcyc ldad
-    setsw sr $data
-    domemcyc dep
+    setsw reg $data
+    domemcyc depos
 }
 
 # zero block of memory
 # - zeromem start stop
 proc zeromem {start stop} {
-    setsw sr $start
+    setsw reg $start
     domemcyc ldad
-    setsw sr 0
+    setsw reg 0
     for {set addr $start} {$addr <= $stop} {incr addr} {
         if {$addr % 8 == 0} {puts [format "%04o" $addr]}
-        domemcyc dep
+        domemcyc depos
     }
 }
 

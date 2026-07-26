@@ -108,12 +108,12 @@ module pdp8ifpi2c (
                       (armraddr == 11) ? { 6'b0,                    //26
                                            switchrows[2][11:04],    //18 { START, LDAD, DEP, EXAM, CONT, STOP, SSTEP, SINST }
                                            switchrows[1][11:06],    //12 { DF[2:0], IF[2:0] }
-                                           switchrows[0] } :        //00 SR[11:00]
+                                           switchrows[0] } :        //00 REG[11:00]
 
                       (armraddr == 12) ? { dbncount,                //26
                                            switchovrs[2][11:04],    //18 { START, LDAD, DEP, EXAM, CONT, STOP, SSTEP, SINST }
                                            switchovrs[1][11:06],    //12 { DF[2:0], IF[2:0] }
-                                           switchovrs[0] } :        //00 SR[11:00]
+                                           switchovrs[0] } :        //00 REG[11:00]
 
                       (armraddr == 13) ? { dbnlimit,                //26
                                            ltspeed,                 //10

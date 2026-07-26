@@ -320,8 +320,8 @@ static int cmd_bus (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj
             {  1, OFFS (swexam),   false, "swexam"   },
             {  1, OFFS (swdepos),  false, "swdepos"  },
             { 12,   -1, NULL,      false, "swreg"    },
-            {  3,   -2, NULL,      false, "swdf"     },
-            {  3,   -3, NULL,      false, "swif"     },
+            {  3,   -2, NULL,      false, "swdfld"   },
+            {  3,   -3, NULL,      false, "swifld"   },
 
             { 12, OFFS (oACUM),    false, "oACUM"    },
             {  1, OFFS (oBRKGNTO), false, "oBRKGNTO" },   // break grant chain
@@ -768,7 +768,7 @@ static int cmdpintable (int pincount, Pin const *pintable, Tcl_Interp *interp, i
                             ((vcon->__PVT__swreg_0  & 1) <<  0);
                         break;
                     }
-                    case -2: {  // "swdf"
+                    case -2: {  // "swdfld"
                         Vbackplane_console *vcon = vbkpl->__PVT__backplane__DOT__conboard;
                         val =
                             ((vcon->__PVT__swdfld_2 & 1) << 2) |
@@ -776,7 +776,7 @@ static int cmdpintable (int pincount, Pin const *pintable, Tcl_Interp *interp, i
                             ((vcon->__PVT__swdfld_0 & 1) << 0);
                         break;
                     }
-                    case -3: {  // "swif"
+                    case -3: {  // "swifld"
                         Vbackplane_console *vcon = vbkpl->__PVT__backplane__DOT__conboard;
                         val =
                             ((vcon->__PVT__swifld_2 & 1) << 2) |

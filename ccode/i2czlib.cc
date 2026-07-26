@@ -120,15 +120,15 @@ void I2CZLib::readpads (Z8IPanel *pads)
     pads->button.start = EXT (fp11, fp11_swSTART);
     pads->button.ldad  = EXT (fp11, fp11_swLDAD);
     pads->button.exam  = EXT (fp11, fp11_swEXAM);
-    pads->button.dep   = EXT (fp11, fp11_swDEPOS);
+    pads->button.depos = EXT (fp11, fp11_swDEPOS);
 
-    pads->togval.sr    = EXT (fp11, fp11_swSR);
+    pads->togval.reg   = EXT (fp11, fp11_swREG);
     pads->togval.dfld  = EXT (fp11, fp11_swDFLD);
     pads->togval.ifld  = EXT (fp11, fp11_swIFLD);
     pads->togval.sinst = EXT (fp11, fp11_swSINST);
     pads->togval.sstep = EXT (fp11, fp11_swSSTEP);
 
-    pads->togovr.sr    = EXT (fp12, fp11_swSR);
+    pads->togovr.reg   = EXT (fp12, fp11_swREG);
     pads->togovr.dfld  = EXT (fp12, fp11_swDFLD);
     pads->togovr.ifld  = EXT (fp12, fp11_swIFLD);
     pads->togovr.sinst = EXT (fp12, fp11_swSINST);
@@ -150,12 +150,12 @@ void I2CZLib::writepads (Z8IPanel const *pads)
         (pads->button.start ? fp11_swSTART : 0) |
         (pads->button.ldad  ? fp11_swLDAD  : 0) |
         (pads->button.exam  ? fp11_swEXAM  : 0) |
-        (pads->button.dep   ? fp11_swDEPOS : 0) |
+        (pads->button.depos ? fp11_swDEPOS : 0) |
         (pads->togovr.sinst ? fp11_swSINST : 0) |
         (pads->togovr.sstep ? fp11_swSSTEP : 0) |
         INS (pads->togovr.dfld, fp11_swDFLD) |
         INS (pads->togovr.ifld, fp11_swIFLD) |
-        INS (pads->togovr.sr,   fp11_swSR);
+        INS (pads->togovr.reg,  fp11_swREG);
 
     // pdp8ifpi2c.v won't change any fpat[11] bits what have corresponding fpat[12] bit set
     // otherwise it will occasionally load fpat[11] bits from physical switches and ignore writes from the arm
@@ -167,12 +167,12 @@ void I2CZLib::writepads (Z8IPanel const *pads)
         (pads->button.start ? fp11_swSTART : 0) |
         (pads->button.ldad  ? fp11_swLDAD  : 0) |
         (pads->button.exam  ? fp11_swEXAM  : 0) |
-        (pads->button.dep   ? fp11_swDEPOS : 0) |
+        (pads->button.depos ? fp11_swDEPOS : 0) |
         (pads->togval.sinst ? fp11_swSINST : 0) |
         (pads->togval.sstep ? fp11_swSSTEP : 0) |
         INS (pads->togval.dfld, fp11_swDFLD) |
         INS (pads->togval.ifld, fp11_swIFLD) |
-        INS (pads->togval.sr,   fp11_swSR);
+        INS (pads->togval.reg,  fp11_swREG);
 
     // wait for them to get all clocked in
     waitpass ();

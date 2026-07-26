@@ -485,7 +485,7 @@ proc startat {addr} {
     if {($addr < 0) || ($addr > 07777)} {
         error "bad address $addr"
     }
-    puts "startat: DF=[swtch df] IF=[swtch if]"
+    puts "startat: DF=[swtch dfld] IF=[swtch ifld]"
     puts "startat: setting swreg [octal $addr]"
     swtchwait reg $addr
     puts "startat: pressing ldad"
@@ -515,23 +515,23 @@ proc swtch {args} {
     for {set i 0} {$i < $len} {incr i} {
         set sw [lindex $args $i]
         switch $sw {
-            df {
+            dfld {
                 if {$setmode} {
                     set val [lindex $args [incr i]]
                     set row [lindex $swrowpends 1]
                     lset swrowpends 1 [expr {($val << 9) | ($row & 0x1FF)}]
                 } else {
-                    lappend retval [bus swdf]
+                    lappend retval [bus swdfld]
                 }
             }
             get {set setmode 0}
-            if {
+            ifld {
                 if {$setmode} {
                     set val [lindex $args [incr i]]
                     set row [lindex $swrowpends 1]
                     lset swrowpends 1 [expr {($val << 6) | ($row & 0xE3F)}]
                 } else {
-                    lappend retval [bus swif]
+                    lappend retval [bus swifld]
                 }
             }
             reg {

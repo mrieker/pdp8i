@@ -71,7 +71,7 @@
 #define b_arm_swSINST       (1U << 10)
 #define b_arm_swSSTEP       (1U << 11)
 #define b_arm_swSTART       (1U << 12)
-#define b_arm_swSR      (07777U << 13)
+#define b_arm_swREG     (07777U << 13)
 #endif
 
 #define c_dev_iACCLEAR      (1U <<  0)
@@ -88,6 +88,9 @@
 #define c_dev_iMEMDIS       (1U << 24)
 #define c_dev_iPAUSE        (1U << 25)
 #define c_dev_iRESET        (1U << 26)
+#define c_dev_poweron       (1U << 29)
+#define c_dev_dmagntd       (1U << 30)
+#define c_dev_ioenabd       (1U << 31)
 
 #define d_clkratm1     (077U << 0)  //rw clock ratio minus 1, eg, 9 for 10MHz = 100MHz / (d_clkratm1 + 1)
 
@@ -119,23 +122,7 @@
 
 #define h_100MHz       0xFFFFFFFFU
 
-#if 000
-#define g_lbAC      (07777U <<  0)  //ro sim_...
-#define g_lbMA      (07777U << 12)
-#define g_lbSC        (037U << 24)
-#define g_lbION         (1U << 29)
-#define g_lbLINK        (1U << 30)
-#define g_lbPAU         (1U << 31)
-#define h_lbMB      (07777U <<  0)
-#define h_lbMQ      (07777U << 12)
-#define h_lbMS        (017U << 24)
-#define h_lbIR          (7U << 28)
-#define h_lbRUN         (1U << 31)
-#define i_lbPC      (07777U <<  0)
-#define i_lbDF          (7U << 12)
-#define i_lbEA          (7U << 15)
-#define i_lbIF          (7U << 18)
-#endif
+#define n_memcycctr    0xFFFFFFFFU
 
 #define q_ilaarmed     (1U << 31)
 #define q_ilaafter (07777U << 16)
@@ -328,17 +315,17 @@
 #define fp10_lbSC   (037U << 12)
 #define fp10_lbMQ (07777U <<  0)
 
-#define fp11_swSTART  (1U << 25)
-#define fp11_swLDAD   (1U << 24)
-#define fp11_swDEPOS  (1U << 23)
-#define fp11_swEXAM   (1U << 22)
-#define fp11_swCONT   (1U << 21)
-#define fp11_swSTOP   (1U << 20)
-#define fp11_swSSTEP  (1U << 19)
-#define fp11_swSINST  (1U << 18)
-#define fp11_swDFLD   (7U << 15)
-#define fp11_swIFLD   (7U << 12)
-#define fp11_swSR (07777U <<  0)
+#define fp11_swSTART   (1U << 25)
+#define fp11_swLDAD    (1U << 24)
+#define fp11_swDEPOS   (1U << 23)
+#define fp11_swEXAM    (1U << 22)
+#define fp11_swCONT    (1U << 21)
+#define fp11_swSTOP    (1U << 20)
+#define fp11_swSSTEP   (1U << 19)
+#define fp11_swSINST   (1U << 18)
+#define fp11_swDFLD    (7U << 15)
+#define fp11_swIFLD    (7U << 12)
+#define fp11_swREG (07777U <<  0)
 
 #define fp12_dbncount  (0x3FU << 26)
 

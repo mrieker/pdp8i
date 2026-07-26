@@ -1,10 +1,12 @@
 
 # run doubleroll on zynq with real or simulated PDP-8/I
+#  z8ipanel -real/-sim doubleroll.tcl
+#  z8ipanel -status
 
 exec -ignorestderr make doubleroll.bin
 hardreset
 set startaddr [loadbinptr doubleroll.bin]
-setsw sr $startaddr
+setsw reg $startaddr
 domemcyc ldad
-setsw sr 0140
+setsw reg 0140
 flicksw start

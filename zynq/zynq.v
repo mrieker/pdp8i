@@ -611,6 +611,11 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     assign hdw_iPAUSE   = simit ? 0 : dev_iPAUSE;
     assign hdw_iRESET   = simit ? 1 : dev_iRESET;
 
+    // enable 74AHC540s to drive dma signals to bus
+    // while grated use of dma bus lines
+    wire dev_dmagntd = cmdmagntd;
+    assign hdw_dmagntd_n = simit ? 1 : ~ dev_dmagntd;
+
     // enable 74AHC540s to drive io signals to bus during iop whenever
     // any of our io devices is selected by current io instruction
     // also whenever dma granted and TS4 to output dma address over inbus
@@ -618,14 +623,11 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     //               and during TS1 if memory chips on extmemory.kicad_sch are disabled
     //                   (fpgamemen = 0: arm provides data on arm_iINBUS)
     //                   (          = 1: fpga provies data from externmem array on xminbus)
-    assign hdw_ioenabd_n = ~ (hdw_iIOSEL |
-                            ~ hdw_dmagntd_n & hdw_oTS4 |
-                            ~ hdw_dmagntd_n & hdw_oBRKCYC & hdw_oTS2 |
-                              hdw_iMEMDIS & hdw_oTS1);
-
-    // enable 74AHC540s to drive dma signals to bus
-    // while grated use of dma bus lines
-    assign hdw_dmagntd_n = simit ? 1 : ~ cmdmagntd;
+    wire dev_ioenabd = dev_iIOSEL |
+                       dev_dmagntd & dev_oTS4 |
+                       dev_dmagntd & dev_oBRKCYC & dev_oTS2 |
+                       dev_iMEMDIS & dev_oTS1;
+    assign hdw_ioenabd_n = simit ? 1 : ~ dev_ioenabd;
 
     // when simulating, send signals from the simulated PDP-8/I on to the internal devices
     // when not simming, send signals from the hardware PDP-8/I on to the internal devices
@@ -694,7 +696,10 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     assign regctlc[24]    = dev_iMEMDIS;
     assign regctlc[25]    = dev_iPAUSE;
     assign regctlc[26]    = dev_iRESET;
-    assign regctlc[31:27] = 0;
+    assign regctlc[28:27] = 0;
+    assign regctlc[29]    = ~ hdw_poweron_n;
+    assign regctlc[30]    = dev_dmagntd;
+    assign regctlc[31]    = dev_ioenabd;
 
     assign regctle[00]    = simit;
     assign regctle[01]    = fpgamemen;
