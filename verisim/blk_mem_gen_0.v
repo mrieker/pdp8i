@@ -32,6 +32,7 @@ module blk_mem_gen_0 (
       output reg[21:00] doutb
     );
 
+    reg[21:00] delay;
     reg[21:00] ram[32767:0];
 
     always @(posedge clka) begin
@@ -40,7 +41,7 @@ module blk_mem_gen_0 (
         end
     end
     always @(posedge clkb) begin
-        doutb <= enb ? ram[addrb] : 0;
+        { doutb, delay } <= enb ? { delay, ram[addrb] } : 44'b0;
     end
 
 endmodule

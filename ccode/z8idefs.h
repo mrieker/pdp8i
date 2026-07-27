@@ -37,7 +37,7 @@
 #define Z_RK 11
 #define Z_RL 12
 #define Z_RM 13
-#define Z_RN 14     // memcycctr
+#define Z_RN 14
 #define Z_RO 15
 #define Z_RP 16
 #define Z_RQ 17
@@ -120,7 +120,15 @@
 #define f_oTS4          (1U << 27)
 #define f_oMAJST      (017U << 28)
 
+#define g_extmemaddr  (077777U <<  0)
+#define g_extmemwdat   (07777U << 15)
+#define g_extmemwrite      (1U << 30)
+#define g_extmemread       (1U << 31)
+
 #define h_100MHz       0xFFFFFFFFU
+
+#define i_extmemrdat   (07777U <<  0)
+#define i_extmemread       (1U << 31)
 
 #define n_memcycctr    0xFFFFFFFFU
 

@@ -18,6 +18,7 @@ endif
 VFILES := \
 	backplane.v \
 	blk_mem_gen_0.v \
+	blk_mem_gen_1.v \
 	chips-varns.v \
 	dmatest.v \
 	mcp23017.v \

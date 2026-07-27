@@ -103,36 +103,14 @@ int main (int argc, char **argv)
         if (nodots || (i == 0) || (i == DEPTH - 1) ||
                 (thisentry != preventry) || (thisentry != nextentry)) {
 
-            printf ("%6.2f %o %o%o%o%o%o%o%o%o %o %o %o%o%o%o%o %o %o %X %o%o%o%o %o%o%o%o\n",
+            printf ("%6.2f state=%o wren=%o addr=%05o wdat=%04o rdat=%04o\n",
                 (i - DEPTH + AFTER + 1) / 100.0,        // trigger shows as 0.00uS
 
-                (unsigned) (thisentry >> 31) & 1,       // arm_iRESET
-                (unsigned) (thisentry >> 30) & 1,       // ffswstop
-                (unsigned) (thisentry >> 29) & 1,       // ffswstart
-                (unsigned) (thisentry >> 28) & 1,       // ffswsstep
-                (unsigned) (thisentry >> 27) & 1,       // ffswsinst
-                (unsigned) (thisentry >> 26) & 1,       // ffswldad
-                (unsigned) (thisentry >> 25) & 1,       // ffswexam
-                (unsigned) (thisentry >> 24) & 1,       // ffswdepos
-                (unsigned) (thisentry >> 23) & 1,       // ffswcont
-                (unsigned) (thisentry >> 22) & 1,       // _ffreset
-                (unsigned) (thisentry >> 21) & 1,       // reset
-                (unsigned) (thisentry >> 20) & 1,       // swldad
-                (unsigned) (thisentry >> 19) & 1,       // swdepos
-                (unsigned) (thisentry >> 18) & 1,       // swexam
-                (unsigned) (thisentry >> 17) & 1,       // swstart
-                (unsigned) (thisentry >> 16) & 1,       // swcont
-                (unsigned) (thisentry >> 13) & 7,       // div5
-                (unsigned) (thisentry >> 12) & 1,       // clock
-                (unsigned) (thisentry >>  8) & 15,      // majst
-                (unsigned) (thisentry >>  7) & 1,       // tp1
-                (unsigned) (thisentry >>  6) & 1,       // tp2
-                (unsigned) (thisentry >>  5) & 1,       // tp3
-                (unsigned) (thisentry >>  4) & 1,       // tp4
-                (unsigned) (thisentry >>  3) & 1,       // ts1
-                (unsigned) (thisentry >>  2) & 1,       // ts2
-                (unsigned) (thisentry >>  1) & 1,       // ts3
-                (unsigned) (thisentry >>  0) & 1        // ts4
+                (unsigned) (thisentry >> 40) & 7,       // extmemstate
+                (unsigned) (thisentry >> 39) & 1,       // extmemwren
+                (unsigned) (thisentry >> 24) & 077777,  // extmemaddr
+                (unsigned) (thisentry >> 12) & 07777,   // extmemwdat
+                (unsigned) (thisentry >>  0) & 07777    // extmemrdat
             );
             indotdotdot = false;
         } else if (! indotdotdot) {

@@ -30,13 +30,14 @@ module blk_mem_gen_1 (
       output reg[11:00] douta
     );
 
+    reg[11:00] delay;
     reg[11:00] ram[32767:0];
 
     always @(posedge clka) begin
         if (ena & wea) begin
             ram[addra] <= dina;
         end
-        douta <= ena ? ram[addra] : 0;
+        { douta, delay } <= ena ? { delay, ram[addra] } : 24'b0;
     end
 
 endmodule

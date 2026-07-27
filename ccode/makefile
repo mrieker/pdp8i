@@ -18,6 +18,7 @@ LIBOBJS := \
 
 VFILES := \
 	../verisim/blk_mem_gen_0.v \
+	../verisim/blk_mem_gen_1.v \
 	../verisim/chips-10ns.v \
 	../verisim/mcp23017.v \
 	../kicads/console/console.v \

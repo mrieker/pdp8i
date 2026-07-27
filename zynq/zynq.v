@@ -327,7 +327,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     assign saxi_RRESP = 0;  // A3.4.4/A10.3 transfer OK
 
     // our own integrated logic analyzer
-    reg[31:00] ilaarray[4095:0], ilardata;
+    reg[42:00] ilaarray[4095:0], ilardata;
     reg[11:00] ilaafter, ilaindex;
     reg ilaarmed;
 
@@ -368,8 +368,8 @@ module Zynq #(parameter BIDIRCONSDA=1) (
         (readaddr        == 10'b0000001001) ? regctli    :
         (readaddr        == 10'b0000001110) ? memcycctr  :
         (readaddr        == 10'b0000010001) ? { ilaarmed, 3'b0, ilaafter, 4'b0, ilaindex } :
-        (readaddr        == 10'b0000010010) ? { ilardata[31:00] } :
-        (readaddr        == 10'b0000010011) ? { 32'b0           } :
+        (readaddr        == 10'b0000010010) ? {        ilardata[31:00] } :
+        (readaddr        == 10'b0000010011) ? { 21'b0, ilardata[42:32] } :
         (readaddr[11:06] ==  6'b000010)     ? fpi2crdata :
         (readaddr[11:05] ==  7'b0000110)    ? rkardata   :
         (readaddr[11:05] ==  7'b0000111)    ? vcardata   :
@@ -397,6 +397,10 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     wire ppawrite   = armwrite & writeaddr[11:03] == 9'b000110001;
     wire tcawrite   = armwrite & writeaddr[11:03] == 9'b000110010;
     wire rcawrite   = armwrite & writeaddr[11:03] == 9'b000110011;
+
+    reg arm_extmemread, arm_extmemwrite;
+    reg[11:00] arm_extmemrdat, arm_extmemwdat;
+    reg[14:00] arm_extmemaddr;
 
     // A3.3.1 Read transaction dependencies
     // A3.3.1 Write transaction dependencies
@@ -727,7 +731,15 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     assign regctlf[27]    = dev_oTS4;
     assign regctlf[31:28] = dev_oMAJST;
 
-    assign regctli = 0;
+    assign regctlg[14:00] = arm_extmemaddr;
+    assign regctlg[26:15] = arm_extmemwdat;
+    assign regctlg[29:27] = 0;
+    assign regctlg[30]    = arm_extmemwrite;
+    assign regctlg[31]    = arm_extmemread;
+
+    assign regctli[11:00] = arm_extmemrdat;
+    assign regctli[30:12] = 0;
+    assign regctli[31]    = arm_extmemread;
 
     // count memory cycles
     // z8ipanelini.tcl uses it to see when exam/depos cycle completes
@@ -767,8 +779,6 @@ module Zynq #(parameter BIDIRCONSDA=1) (
 
     wire[3:0] sim_majst;
     wire sim_run, sim_swldad, sim_swdepos, sim_swexam, sim_swstart, sim_swcont;
-
-    assign regctlg = 0;
 
     pdp8isim siminst (
         .CLOCK          (CLOCK),
@@ -833,22 +843,122 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     //   extmemory.kicad_sch memory read data during TS1
     // must set both arm_iMEMDIS and fpgamemen
 
-    reg[11:00] extmemdly, externmem[32767:0];
-    reg lasttp3;
+    reg[14:00] extmemaddr;
+    reg[11:00] extmemwdat;
+    reg extmemwren;
+    wire[11:00] extmemrdat;
+    reg[2:0] extmemstate;
+
+    localparam[2:0] XMS_IDLE   = 0;
+    localparam[2:0] XMS_WRITE1 = 1;
+    localparam[2:0] XMS_WRITE2 = 2;
+    localparam[2:0] XMS_ARMRD1 = 3;
+    localparam[2:0] XMS_ARMRD2 = 4;
+    localparam[2:0] XMS_ARMRD3 = 5;
+    localparam[2:0] XMS_PDPRD1 = 6;
+
+    blk_mem_gen_1 externmem (
+      .clka(CLOCK),         // input wire clka
+      .ena(fpgamemen),      // input wire ena
+      .wea(extmemwren),     // input wire [0 : 0] wea
+      .addra(extmemaddr),   // input wire [14 : 0] addra
+      .dina(extmemwdat),    // input wire [11 : 0] dina
+      .douta(extmemrdat)    // output wire [11 : 0] douta
+    );
+
+    reg xmlasttp3;
+
     always @(posedge CLOCK) begin
         if (RESET_N & fpgamemen) begin
-            if (dev_oTS1) begin
-                { xminbus, extmemdly } <= { extmemdly, externmem[{dev_oMEAD,dev_oMADR}] };
-            end else begin
-                xminbus <= 0;
+
+            // arm writing regctlg to initiate a read or a write
+            if (armwrite & (writeaddr == 7)) begin
+                arm_extmemaddr <= saxi_WDATA[14:00];
+                arm_extmemwdat <= saxi_WDATA[26:15];
+                if (saxi_WDATA[30]) arm_extmemwrite <= 1;
+                if (saxi_WDATA[31]) arm_extmemread  <= 1;
             end
-            if (~ lasttp3 & dev_oTP3) begin
-                externmem[{dev_oMEAD,dev_oMADR}] <= dev_oMBUF;
-            end
+
+            // otherwise process based on state
+            else case (extmemstate)
+
+                // not doing anything, see what to do
+                XMS_IDLE: begin
+
+                    // pdp wants to read something
+                    if (dev_oTS1) begin
+                        extmemaddr  <= { dev_oMEAD, dev_oMADR };
+                        extmemstate <= XMS_PDPRD1;
+                        xmlasttp3   <= 0;
+                    end
+
+                    // pdp wants to write something
+                    else if (~ xmlasttp3 & dev_oTP3) begin
+                        extmemaddr  <= { dev_oMEAD, dev_oMADR };
+                        extmemwdat  <= dev_oMBUF;
+                        extmemstate <= XMS_WRITE1;
+                        xmlasttp3   <= 1;
+                    end
+
+                    // arm wants to read something
+                    else if (arm_extmemread) begin
+                        extmemaddr  <= arm_extmemaddr;
+                        extmemstate <= XMS_ARMRD1;
+                    end
+
+                    // arm wants to write something
+                    else if (arm_extmemwrite) begin
+                        arm_extmemwrite <= 0;
+                        extmemaddr  <= arm_extmemaddr;
+                        extmemwdat  <= arm_extmemwdat;
+                        extmemwren  <= 1;
+                        extmemstate <= XMS_WRITE1;
+                    end
+                end
+
+                // first and second cycles writing
+                XMS_WRITE1: begin
+                    extmemstate     <= XMS_WRITE2;
+                end
+                XMS_WRITE2: begin
+                    extmemwren      <= 0;
+                    extmemstate     <= XMS_IDLE;
+                end
+
+                // first and second cycles reading on behalf of arm
+                XMS_ARMRD1: begin
+                    extmemstate     <= XMS_ARMRD2;
+                end
+                XMS_ARMRD2: begin
+                    extmemstate     <= XMS_ARMRD3;
+                end
+                XMS_ARMRD3: begin
+                    arm_extmemread  <= 0;
+                    arm_extmemrdat  <= extmemrdat;
+                    extmemstate     <= XMS_IDLE;
+                end
+
+                // ongoing read on behalf of pdp (extended address bits may take a couple cycles to settle)
+                // processor clocks data in at posedge TP1 but we hold the data through end of TS1
+                XMS_PDPRD1: begin
+                    if (dev_oTS1) begin
+                        xminbus     <= extmemrdat;
+                        extmemaddr  <= { dev_oMEAD, dev_oMADR };
+                    end else begin
+                        xminbus     <= 0;
+                        extmemstate <= XMS_IDLE;
+                    end
+                end
+
+                default: begin end
+            endcase
         end else begin
-            xminbus <= 0;
+            xminbus         <= 0;
+            xmlasttp3       <= 0;
+            extmemstate     <= XMS_IDLE;
+            arm_extmemread  <= 0;
+            arm_extmemwrite <= 0;
         end
-        lasttp3 <= dev_oTP3;
     end
 
     ///////////////////////
@@ -1250,24 +1360,14 @@ module Zynq #(parameter BIDIRCONSDA=1) (
             end else begin
 
                 // capture signals while before trigger and for ilaafter cycles thereafter
-                if (ilaarmed | (ilaafter != 0)) begin
+                //if (ilaarmed | (ilaafter != 0)) begin
+                if (extmemstate != 0) begin
                     ilaarray[ilaindex] <= {
-                        arm_iRESET,
-                        9'b0,
-                        sim_iRESET,
-                        sim_swldad,
-                        sim_swdepos,
-                        clkdiv,
-                        sim_iCLOCK,
-                        sim_majst,
-                        sim_oTP1,
-                        sim_oTP2,
-                        sim_oTP3,
-                        sim_oTP4,
-                        sim_oTS1,
-                        sim_oTS2,
-                        sim_oTS3,
-                        sim_oTS4
+                        extmemstate,    //40
+                        extmemwren,     //39
+                        extmemaddr,     //24
+                        extmemwdat,     //12
+                        extmemrdat      //00
                     };
 
                     ilaindex <= ilaindex + 1;

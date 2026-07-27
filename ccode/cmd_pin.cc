@@ -61,19 +61,6 @@ static PinDef const pindefs[] = {
     { "arm_iPAUSE",      DEV_8I, Z_RA, a_arm_iPAUSE,   true  },
     { "arm_iRESET",      DEV_8I, Z_RA, a_arm_iRESET,   true  },
 
-#if 000
-    { "arm_swCONT",      DEV_8I, Z_RB, b_arm_swCONT,   true  },
-    { "arm_swDEPOS",     DEV_8I, Z_RB, b_arm_swDEPOS,  true  },
-    { "arm_swDFLD",      DEV_8I, Z_RB, b_arm_swDFLD,   true  },
-    { "arm_swEXAM",      DEV_8I, Z_RB, b_arm_swEXAM,   true  },
-    { "arm_swIFLD",      DEV_8I, Z_RB, b_arm_swIFLD,   true  },
-    { "arm_swLDAD",      DEV_8I, Z_RB, b_arm_swLDAD,   true  },
-    { "arm_swSINST",     DEV_8I, Z_RB, b_arm_swSINST,  true  },
-    { "arm_swSSTEP",     DEV_8I, Z_RB, b_arm_swSSTEP,  true  },
-    { "arm_swSTART",     DEV_8I, Z_RB, b_arm_swSTART,  true  },
-    { "arm_swSR",        DEV_8I, Z_RB, b_arm_swSR,     true  },
-#endif
-
     { "dev_iACCLEAR",    DEV_8I, Z_RC, c_dev_iACCLEAR, false },
     { "dev_iBRKGNTO",    DEV_8I, Z_RC, c_dev_iBRKGNTO, false },
     { "dev_iBRKRQST",    DEV_8I, Z_RC, c_dev_iBRKRQST, false },
@@ -117,6 +104,12 @@ static PinDef const pindefs[] = {
     { "oTS4",            DEV_8I, Z_RF, f_oTS4,         false },
     { "oMAJST",          DEV_8I, Z_RF, f_oMAJST,       false },
 
+    { "extmemaddr",      DEV_8I, Z_RG, g_extmemaddr,   true  },
+    { "extmemwdat",      DEV_8I, Z_RG, g_extmemwdat,   true  },
+    { "extmemwrite",     DEV_8I, Z_RG, g_extmemwrite,  true  },
+    { "extmemread",      DEV_8I, Z_RG, g_extmemread,   true  },
+    { "100mhz",          DEV_8I, Z_RH, h_100MHz,       false },
+    { "extmemrdat",      DEV_8I, Z_RI, i_extmemrdat,   false },
     { "memcycctr",       DEV_8I, Z_RN, n_memcycctr,    false },
 
     { "CM_ADDR",         DEV_CM, 1, CM_ADDR,               true  },
