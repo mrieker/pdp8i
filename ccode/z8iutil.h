@@ -62,6 +62,9 @@ struct Z8IU32 {
         return *this;
     }
 
+    // wait for interrupt from zynq
+    static void veriwfi (uint32_t mask);
+
 private:
     uint32_t dummy; // so sizeof (Z8IU32) == 4
 
@@ -82,6 +85,8 @@ struct Z8IPage {
     uint32_t dmacycle (uint32_t cm);
     void cmlock ();
     void cmunlk ();
+
+    void waitint (uint32_t mask);
 
 private:
     int mypid;

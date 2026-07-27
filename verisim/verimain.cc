@@ -820,6 +820,7 @@ static int findev (char const *ident)
 // read word from the ARM bus
 static uint32_t armread (uint32_t armaddr)
 {
+#if 000
     vbkpl->saxi_ARADDR  = armaddr << 2;
     vbkpl->saxi_ARVALID = 1;
     vbkpl->saxi_RREADY  = 1;
@@ -835,6 +836,13 @@ static uint32_t armread (uint32_t armaddr)
         }
     }
     return armdata;
+#else
+    vbkpl->saxi_ARADDR = armaddr << 2;
+    vbkpl->directread  = 1;
+    vbkpl->eval ();
+    vbkpl->directread  = 0;
+    return vbkpl->saxi_RDATA;
+#endif
 }
 
 // write word to the ARM bus

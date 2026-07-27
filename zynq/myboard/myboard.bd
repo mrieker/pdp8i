@@ -270,6 +270,21 @@
             "direction": "I",
             "type": "rst"
           },
+          "armintreq": {
+            "direction": "O",
+            "parameters": {
+              "PortWidth": {
+                "value": "1",
+                "value_src": "default_prop"
+              }
+            }
+          },
+          "directread": {
+            "direction": "I"
+          },
+          "ground": {
+            "direction": "O"
+          },
           "hdw_bCONSDA": {
             "direction": "IO"
           },
@@ -418,6 +433,11 @@
           },
           "spare3": {
             "direction": "I"
+          },
+          "zgintflags": {
+            "direction": "O",
+            "left": "31",
+            "right": "0"
           }
         },
         "reference_info": {
@@ -1993,6 +2013,18 @@
         "ports": [
           "Zynq_0/LEDoutR_N",
           "LEDoutR_N_0"
+        ]
+      },
+      "Zynq_0_armintreq": {
+        "ports": [
+          "Zynq_0/armintreq",
+          "processing_system7_0/IRQ_F2P"
+        ]
+      },
+      "Zynq_0_ground": {
+        "ports": [
+          "Zynq_0/ground",
+          "Zynq_0/directread"
         ]
       },
       "Zynq_0_hdw_dmagntd_n": {

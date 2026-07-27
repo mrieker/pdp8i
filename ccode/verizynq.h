@@ -38,6 +38,7 @@ struct VeriPage {
     int state;          // <31:29>:state; <28:00>:clientpid
     uint32_t index;     // 0..1023
     uint32_t value;
+    uint32_t armintmsk;
 };
 
 #endif

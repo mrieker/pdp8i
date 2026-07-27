@@ -25,6 +25,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/ioctl.h>
 #include <sys/mman.h>
 #include <time.h>
 #include <unistd.h>
@@ -183,6 +184,7 @@ found:;
 //     cm<CM_WCOVF> = wordcount overflow in 3-cycle
 uint32_t Z8IPage::dmacycle (uint32_t cm)
 {
+    ASSERT (h_100MHz == 0xFFFFFFFFU);
     cmlock ();
     cmemat[1] = CM_BUSY | cm;
     uint32_t started = pdpat[Z_RH];
@@ -229,6 +231,27 @@ void Z8IPage::cmunlk ()
     cmemat[3] = mypid;
     ASSERT (cmemat[3] != (uint32_t) mypid);
     if (pthread_mutex_unlock (&dmamtx) != 0) ABORT ();
+}
+
+// wait for interrupt(s) given in mask
+// checks for bit(s) set in regarmintreq
+// if not already set,
+//   enables the interrupt in regarmintena
+//   waits for interrupt
+//   clears the bits from regarmintena
+//     (unless something else waiting for them)
+// caller should do whatever to device to clear bits in regarmintreq before calling again
+void Z8IPage::waitint (uint32_t mask)
+{
+#if defined VERIZYNQ
+    Z8IU32::veriwfi (mask);
+#else
+    int rc = ioctl (zynqfd, ZGIOCTL_WFI, mask);
+    if ((rc < 0) && (errno != EINTR)) {
+        fprintf (stderr, "Z8IPage::waitint: error waiting for interrupt: %m\n");
+        ABORT ();
+    }
+#endif
 }
 
 // generate a random number

@@ -166,8 +166,8 @@ int main (int argc, char **argv)
 
         // zynq.v register dump
         printf ("VERSION=%08X %c%c  %s%s", z8is[0], (char)(z8is[0] >> 24), (char)(z8is[0] >> 16), mode, eol);
-        printf ("  oACUM=%04o    iACCLEAR=%o%c     lbAC=%04o    swCONT=%o  %s",      FLD(Z_RF,f_oACUM),    FLD(Z_RC,c_dev_iACCLEAR), ioenabd, pads.light.ac,   pads.button.cont,      eol);
-        printf ("  oBRKCYC=%o     iBRKGNTO=%o%c     lbMA=%04o    swDEPOS=%o %s",     FLD(Z_RF,f_oBRKCYC),  FLD(Z_RC,c_dev_iBRKGNTO), poweron, pads.light.ma,   pads.button.depos,     eol);
+        printf ("  oACUM=%04o    iACCLEAR=%o%c     lbAC=%04o    swCONT=%o     armintena=%08X%s",       FLD(Z_RF,f_oACUM),    FLD(Z_RC,c_dev_iACCLEAR), ioenabd, pads.light.ac,   pads.button.cont,  z8is[ZG_INTENABS], eol);
+        printf ("  oBRKCYC=%o     iBRKGNTO=%o%c     lbMA=%04o    swDEPOS=%o    armintreq=%08X%s",     FLD(Z_RF,f_oBRKCYC),  FLD(Z_RC,c_dev_iBRKGNTO), poweron, pads.light.ma,   pads.button.depos, z8is[ZG_INTFLAGS], eol);
         printf ("  oBRKGNTI=%o    iBRKRQST=%o%c     lbSC=%02o      swDFLD=%o  %s",   FLD(Z_RF,f_oBRKGNTI), FLD(Z_RC,c_dev_iBRKRQST), poweron, pads.light.sc,   pads.togval.dfld,      eol);
         printf ("  oBRKRQST=%o    iBRKWRM=%o%c      lbION=%o      swEXAM=%o  %s",    FLD(Z_RF,f_oBRKRQST), FLD(Z_RC,c_dev_iBRKWRM),  dmagntd, pads.light.ion,  pads.button.exam,      eol);
         printf ("  oBUSINI=%o     iCAINC=%o%c       lbLINK=%o     swIFLD=%o  %s",    FLD(Z_RF,f_oBUSINI),  FLD(Z_RC,c_dev_iCAINC),   dmagntd, pads.light.link, pads.togval.ifld,      eol);

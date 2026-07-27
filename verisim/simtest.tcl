@@ -88,6 +88,7 @@ proc simtest {} {
     global swdfldpend
     global swifldpend
     global swregpend
+    global syat1
     global testcons
     global testdma
     global testexar
@@ -129,6 +130,10 @@ proc simtest {} {
     set shat0 [arm find SH]
     set shat1 [expr {$shat0 + 1}]
     arm set $shat1 0x80000000   ;# sh_frzonerr : freeze clocking on error
+
+    set syat0 [arm find SY]
+    set syat1 [expr {$syat0 + 1}]
+    arm set $syat1 0x80000000   ;# sy_enable : enable interface
 
     set cmat0 [arm find CM]
     set ttat0 [arm find TT]
@@ -259,7 +264,7 @@ proc simtest {} {
                                     if {$opcode == 06002} break                 ;# IOF
                                     if {$opcode == 06004} break                 ;# used to test skip/acclr
                                     if {($opcode & 07770) == 06310} {
-                                        set opcode 06313                        ;# WFI
+                                        set opcode [expr {($opcode & 1) ? 06313 : 06310}] ;# WFI : PIOFF
                                         break
                                     }
                                     if {$testxmem && ($lastopc != 06001)} {     ;# don't do memext opcodes if instruction after ION
@@ -572,18 +577,6 @@ proc memorycycle {state field addr rdata wdata} {
     global MS_BREAK MS_CURAD MS_DEPOS MS_EXAM MS_EXEC MS_FETCH MS_INTAK MS_WRDCT
     global haltdelay haltwhy memcycno memdis panelhalt testcons
 
-    incr memcycno
-
-    ;# maybe flip memdis flag
-    ;#  memdis = 0 : extmemory.kicad_sch ram chips read data will be gated onto inbus during ts1
-    ;#           1 : the ram chip data will not be gated onto inbus
-    ;#               ...this tcl code must put read data directly on inbus during ts1
-    if {$memcycno % 1024 == 0} {
-        set memdis [randbits 1]
-        arm set 1 [expr {$memdis << 24}]    ;# arm_iMEMDIS
-        puts -nonewline " <<memdis=$memdis>>"
-    }
-
     ;# maybe flip on an halt switch if none flipped on already
     ;# takes several cycles to soak through console board
     ;# don't do for exam/depos cycles so we don't interfere with subsequent start switch
@@ -713,6 +706,17 @@ proc memorycycle {state field addr rdata wdata} {
     ;# if requesting break and it is granted, output address during all TS4s
     if {$dmarqst && [bus oBRKGNTO]} {
         bus set iINBUS $dmaaddr
+    }
+
+    ;# maybe flip memdis flag for next cycle
+    ;#  memdis = 0 : extmemory.kicad_sch ram chips read data will be gated onto inbus during ts1
+    ;#           1 : the ram chip data will not be gated onto inbus
+    ;#               ...this tcl code must put read data directly on inbus during ts1
+    incr memcycno
+    if {$memcycno % 1024 == 0} {
+        set memdis [randbits 1]
+        arm set 1 [expr {$memdis << 24}]    ;# arm_iMEMDIS
+        puts -nonewline " <<memdis=$memdis>>"
     }
 
     ;# step to end of cycle
@@ -931,7 +935,7 @@ proc checkhalted {} {
 ;# it starts 100nS into TS2 and ends at end of TS3
 ;# acum and pctr mods are clocked at posedge TP3
 proc doioinstr {opcode} {
-    global acum intdelayed intenabled intrequest linc panelhalt pctr wfitests
+    global acum intdelayed intenabled intrequest linc panelhalt pctr syat1 testcons wfitests
     global xmem_dfld xmem_ifld xmem_savedifld xmem_saveddfld xmem_ifldafterjump
     global xmem_intdisableduntiljump
     global ttkbflag ttkbchar ttinten ttprflag ttprchar ttprfull ttprflag
@@ -955,7 +959,20 @@ proc doioinstr {opcode} {
         set ioskip  [randbits 1]
         set acbits [randbits 12]
         bus set iACCLEAR $acclear iIOSKIP $ioskip iINBUS $acbits
-    } elseif {$opcode == 06313} {   ;# WFI
+    } elseif {$opcode == 06310} {   ;# PIOFF (print instructions off)
+        ;# should stay paused until syat[1] is written to turn it off
+        set sy1 [arm $syat1]
+        if {! ($sy1 & 0x8000)} {error [format "PIOFF sy1 %08X does not have pause bit set" $sy1]}
+        set howlong [randbits 12]   ;# up to 409.6uS
+        for {set i 0} {$i < $howlong} {incr i} {
+            runsimstep              ;# clock us along 100nS
+            if {! [bus oTS3]} {error "PIOFF stepped out of TS3 too early"}
+        }
+        set acclear [randbits 1]    ;# supply random values
+        set ioskip  [randbits 1]
+        set acbits [randbits 12]
+        arm set $syat1 [expr {0x80000000 | ($acclear << 12) | ($ioskip << 13) | $acbits}]
+    } elseif {$opcode == 06313} {   ;# WFI (wait for interrupt)
         incr wfitests
         ;# should be able to break out of WFI with interrupt request, dma requst, stop switch
         set didsomething 0
@@ -966,9 +983,9 @@ proc doioinstr {opcode} {
                 switch $r {
                     11 {incr didsomething ; bus set iINTRQST 1 ; set intrequest 1 ; puts -nonewline " <<intrqst>>"}
                     22 {incr didsomething ; startdmarequest}
-                    33 {incr didsomething ; set panelhalt 1 ; swtch set sinst 1 ; puts -nonewline " <<sinst>>"}
-                    44 {incr didsomething ; set panelhalt 2 ; swtch set sstep 1 ; puts -nonewline " <<sstep>>"}
-                    55 {incr didsomething ; set panelhalt 3 ; swtch set stop  1 ; puts -nonewline " <<stop>>"}
+                    33 {if $testcons {incr didsomething ; set panelhalt 1 ; swtch set sinst 1 ; puts -nonewline " <<sinst>>"}}
+                    44 {if $testcons {incr didsomething ; set panelhalt 2 ; swtch set sstep 1 ; puts -nonewline " <<sstep>>"}}
+                    55 {if $testcons {incr didsomething ; set panelhalt 3 ; swtch set stop  1 ; puts -nonewline " <<stop>>"}}
                 }
             }
             if {$i > 30000} {error "timed out doing WFI"}

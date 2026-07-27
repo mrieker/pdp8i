@@ -62,6 +62,8 @@ module backplane (
     output swcont, swsstep, swsinst,
     output shad_freeze
 
+    ,output[31:00] regarmintreq
+    ,input         directread
     ,input[11:00]  saxi_ARADDR
     ,output reg    saxi_ARREADY
     ,input         saxi_ARVALID
@@ -1181,11 +1183,15 @@ module backplane (
     assign shad_freeze = ~ _shfreez;
 
     Zynq #(.BIDIRCONSDA (0)) zynqinst (
-        .CLOCK     (yclock),
-        .RESET_N   (~ zreset),
-        .LEDoutR_N (_shfreez),
-        .LEDoutG_N (_running),
-        .LEDoutB_N (_simming),
+        .CLOCK      (yclock),
+        .RESET_N    (~ zreset),
+        .LEDoutR_N  (_shfreez),
+        .LEDoutG_N  (_running),
+        .LEDoutB_N  (_simming),
+        .armintreq  (),
+        .zgintflags (regarmintreq),
+        .directread (directread),
+        .ground     (),
 
         // io bus connections
         .hdw_oACUM    (~ _busACUM),

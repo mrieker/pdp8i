@@ -207,17 +207,15 @@ int main (int argc, char **argv)
             }
         }
 
-#if 000
         // if arm interrupt bit set, wake anything that's waiting for a set bit
         uint32_t oldirqmsk = pageptr->armintmsk;
-        uint32_t newirqmsk = vzynq->regarmintreq;
+        uint32_t newirqmsk = vzynq->zgintflags;
         pageptr->armintmsk = newirqmsk;
         if ((debug > 0) && (oldirqmsk != newirqmsk)) printf ("verizynq: armirqmsk %08X\n", newirqmsk);
         if ((newirqmsk & ~ oldirqmsk) &&
                 (futex ((int *) &pageptr->armintmsk, FUTEX_WAKE, 1000000000, NULL, NULL, 0) < 0)) {
             ABORT ();
         }
-#endif
     }
 }
 

@@ -23,6 +23,8 @@
 #ifndef _Z8IDEFS
 #define _Z8IDEFS
 
+#include "km-zynqpdp8i/zgintdefs.h"
+
 #define Z_VER 0     // zynq.v version number
 #define Z_RA 1      // contain the various bits
 #define Z_RB 2
@@ -340,5 +342,14 @@
 #define fp13_dbnlimit  (0x3FU << 26)
 #define fp13_ltspeed (0xFFFFU << 10)
 #define fp13_i2cspeed (0x3FFU <<  0)
+
+// pdp8isys.v
+#define sy1_enable       (1U << 31)
+#define sy1_counter (077777U << 16)
+#define sy1_pause        (1U << 15)
+#define sy1_intrqst      (1U << 14)
+#define sy1_ioskip       (1U << 13)
+#define sy1_acclear      (1U << 12)
+#define sy1_devtocpu  (07777U << 0)
 
 #endif

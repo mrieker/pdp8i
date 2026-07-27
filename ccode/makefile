@@ -5,6 +5,7 @@ LNKFLG := -lpthread -lreadline -lrt -l$(shell ./tcllib.sh)
 EXECUTEABLES := z8idump.$(MACH) \
 	z8iila.$(MACH) z8ipanel.$(MACH) z8ipbit.$(MACH) \
 	z8iptp.$(MACH) z8iptr.$(MACH) z8irk8je.$(MACH) \
+	z8isys.$(MACH) \
 	z8itc08.$(MACH) z8itty.$(MACH) z8ivc8.$(MACH)
 
 LIBOBJS := \
@@ -34,6 +35,7 @@ VFILES := \
 	../zynq/pdp8icmem.v \
 	../zynq/pdp8irtc.v \
 	../zynq/pdp8isim.v \
+	../zynq/pdp8isys.v \
 	../zynq/pdp8itc08.v \
 	../zynq/pdp8ifpi2c.v \
 	../zynq/pdp8iptr.v \

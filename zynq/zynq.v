@@ -121,14 +121,29 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     output reg    saxi_RVALID,
     input[31:00]  saxi_WDATA,
     output reg    saxi_WREADY,
-    input         saxi_WVALID
+    input         saxi_WVALID,
+
+    output        armintreq,
+    output[31:00] zgintflags,
+
+    input         directread,
+    output        ground
 );
 
     // [31:16] = '8I'; [15:12] = (log2 len)-1; [11:00] = version
     localparam VERSION = 32'h38494001;
 
-    reg[11:02] readaddr, writeaddr;
+    assign ground = 0;
+
+    wire[11:02] readaddr;
+    reg[11:02] latrdaddr, writeaddr;
     wire debounced, lastswLDAD, lastswSTART, simmemen;
+
+    // fpga sends interrupt request to arm
+    reg[30:00] regarmintena;    // arm enables each interrupt source separately
+    reg regarmintreq_30;        // arm can interrupt itself with bit 30 (driver init probing int vector)
+    wire[29:00] regarmintreq;   // all other sources are from fpga devices
+    assign armintreq = (regarmintena & { regarmintreq_30, regarmintreq }) != 0;
 
     // PDP-8/I module signals
 
@@ -269,22 +284,27 @@ module Zynq #(parameter BIDIRCONSDA=1) (
 
     // rtc interface wires
     wire[31:00] rcardata;
-    wire[11:00] rcibus;
+    wire[11:00] rcinbus;
     wire rcacclr, rcintrq, rciosel, rcioskp;
+
+    // syscall interface wires
+    wire[31:00] syardata;
+    wire[11:00] syinbus;
+    wire syacclr, syintrq, syiosel, sypause, syioskp;
 
     // tty interface wires
     wire[31:00] ttardata;
-    wire[11:00] ttibus;
+    wire[11:00] ttinbus;
     wire ttacclr, ttintrq, ttiosel, ttioskp;
 
     // dc02 interface wires
     wire[31:00] dcardata;
-    wire[11:00] dcibus;
+    wire[11:00] dcinbus;
     wire dcacclr, dcintrq, dciosel, dcioskp;
 
     // disk interface wires
     wire[31:00] rkardata;
-    wire[11:00] rkibus;
+    wire[11:00] rkinbus;
     wire rkacclr, rkintrq, rkiosel, rkioskp;
 
     // front panel i2c interface
@@ -299,12 +319,12 @@ module Zynq #(parameter BIDIRCONSDA=1) (
 
     // tape interface wires
     wire[31:00] tcardata;
-    wire[11:00] tcibus;
+    wire[11:00] tcinbus;
     wire tcacclr, tcintrq, tciosel, tcioskp;
 
     // paper tape reader interface wires
     wire[31:00] prardata;
-    wire[11:00] pribus;
+    wire[11:00] prinbus;
     wire pracclr, printrq, priosel, prioskp;
 
     // paper tape punch interface wires
@@ -313,12 +333,12 @@ module Zynq #(parameter BIDIRCONSDA=1) (
 
     // video interface wires
     wire[31:00] vcardata;
-    wire[11:00] vcibus;
+    wire[11:00] vcinbus;
     wire vcacclr, vcintrq, vciosel, vcioskp;
 
     // pulsebit interface wires
     wire[31:00] pbardata;
-    wire[11:00] pbibus;
+    wire[11:00] pbinbus;
     wire pbacclr, pbiosel, pbioskp;
     wire pulsebit;
 
@@ -355,6 +375,10 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     // send register being read to ARM //
     /////////////////////////////////////
 
+    assign zgintflags = { armintreq, regarmintreq_30, regarmintreq };
+
+    assign readaddr = directread ? saxi_ARADDR[11:02] : latrdaddr;
+
     assign saxi_RDATA =
         (readaddr        == 10'b0000000000) ? VERSION    :  // 00000xxxxx00
         (readaddr        == 10'b0000000001) ? regctla    :
@@ -370,6 +394,8 @@ module Zynq #(parameter BIDIRCONSDA=1) (
         (readaddr        == 10'b0000010001) ? { ilaarmed, 3'b0, ilaafter, 4'b0, ilaindex } :
         (readaddr        == 10'b0000010010) ? {        ilardata[31:00] } :
         (readaddr        == 10'b0000010011) ? { 21'b0, ilardata[42:32] } :
+        (readaddr        == 10'b0000011010) ? { 1'b0, regarmintena } : // ZG_INTENABS
+        (readaddr        == 10'b0000011011) ? zgintflags : // ZG_INTFLAGS
         (readaddr[11:06] ==  6'b000010)     ? fpi2crdata :
         (readaddr[11:05] ==  7'b0000110)    ? rkardata   :
         (readaddr[11:05] ==  7'b0000111)    ? vcardata   :
@@ -382,6 +408,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
         (readaddr[11:03] ==  9'b000110001)  ? ppardata   :
         (readaddr[11:03] ==  9'b000110010)  ? tcardata   :
         (readaddr[11:03] ==  9'b000110011)  ? rcardata   :
+        (readaddr[11:03] ==  9'b000110100)  ? syardata   :
         32'hDEADBEEF;
 
     wire armwrite   = saxi_WREADY & saxi_WVALID;    // arm is writing a register (single fpga clock cycle)
@@ -397,6 +424,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     wire ppawrite   = armwrite & writeaddr[11:03] == 9'b000110001;
     wire tcawrite   = armwrite & writeaddr[11:03] == 9'b000110010;
     wire rcawrite   = armwrite & writeaddr[11:03] == 9'b000110011;
+    wire syawrite   = armwrite & writeaddr[11:03] == 9'b000110100;
 
     reg arm_extmemread, arm_extmemwrite;
     reg[11:00] arm_extmemrdat, arm_extmemwdat;
@@ -422,6 +450,9 @@ module Zynq #(parameter BIDIRCONSDA=1) (
             simit       <= 0;                           // assume want to access real PDP-8/I by default
             fpgamemen   <= 0;                           // also use the memory on physical memory board
 
+            regarmintena    <= 0;                       // disable all interrupts to arm
+            regarmintreq_30 <= 0;                       // disable the one arm can request to itself
+
         end else begin
 
             /////////////////////
@@ -430,7 +461,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
 
             // check for PS sending us a read address
             if (saxi_ARREADY & saxi_ARVALID) begin
-                readaddr <= saxi_ARADDR[11:02];             // save address bits we care about
+                latrdaddr <= saxi_ARADDR[11:02];            // save address bits we care about
                 saxi_ARREADY <= 0;                          // we are no longer accepting a read address
                 saxi_RVALID  <= 1;                          // we are sending out the corresponding data
             end
@@ -487,6 +518,13 @@ module Zynq #(parameter BIDIRCONSDA=1) (
                     10'b0000000101: begin
                         simit        <= saxi_WDATA[00];
                         fpgamemen    <= saxi_WDATA[01];
+                    end
+
+                    10'b0000011010: begin
+                        regarmintena    <= saxi_WDATA[30:00];
+                    end
+                    10'b0000011011: begin
+                        regarmintreq_30 <= saxi_WDATA[30];
                     end
 
                     default: begin end
@@ -755,19 +793,22 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     end
 
     // internal pio busses - wire-ored (active high) from device to processor
-    assign dev_iACCLEAR = arm_iACCLEAR | ttacclr | rkacclr | vcacclr | tcacclr | pracclr | pbacclr | dcacclr | rcacclr;
+    assign dev_iACCLEAR = arm_iACCLEAR | ttacclr | rkacclr | vcacclr | tcacclr | pracclr | pbacclr | dcacclr | rcacclr | syacclr;
     assign dev_iBRKRQST = arm_iBRKRQST | cmbrkrqst;
     assign dev_iBRKWRM  = arm_iBRKWRM  | cmbrkwrite;
     assign dev_iCAINC   = arm_iCAINC   | cmbrkcainc;
     assign dev_iCYCLE3  = arm_iCYCLE3  | cmbrk3cycl;
     assign dev_iDMAFLD  = arm_iDMAFLD  | cmbrkema;
-    assign dev_iINBUS   = arm_iINBUS   | ttibus  | rkibus  | vcibus  | tcibus  | pribus  | pbibus  | dcibus  | rcibus  | cmbrkinbus | xminbus;
-    assign dev_iINTRQST = arm_iINTRQST | ttintrq | rkintrq | vcintrq | tcintrq | printrq | ppintrq | dcintrq | rcintrq;
-    assign dev_iIOSEL   =                ttiosel | rkiosel | vciosel | tciosel | priosel | ppiosel | dciosel | rciosel | pbiosel;
-    assign dev_iIOSKIP  = arm_iIOSKIP  | ttioskp | rkioskp | vcioskp | tcioskp | prioskp | ppioskp | dcioskp | rcioskp | pbioskp;
+    assign dev_iINBUS   = arm_iINBUS   | ttinbus | rkinbus | vcinbus | tcinbus | prinbus | pbinbus | dcinbus | rcinbus | syinbus | cmbrkinbus | xminbus;
+    assign dev_iINTRQST = arm_iINTRQST | ttintrq | rkintrq | vcintrq | tcintrq | printrq | ppintrq | dcintrq | rcintrq | syintrq;
+    assign dev_iIOSEL   =                ttiosel | rkiosel | vciosel | tciosel | priosel | ppiosel | dciosel | rciosel | syiosel | pbiosel;
+    assign dev_iIOSKIP  = arm_iIOSKIP  | ttioskp | rkioskp | vcioskp | tcioskp | prioskp | ppioskp | dcioskp | rcioskp | syioskp | pbioskp;
     assign dev_iMEMDIS  = arm_iMEMDIS;
-    assign dev_iPAUSE   = arm_iPAUSE;
+    assign dev_iPAUSE   = arm_iPAUSE   | sypause;
     assign dev_iRESET   = arm_iRESET   | ~ RESET_N;
+
+    // unused arm interrupt request bits
+    assign regarmintreq[29:01] = 0;
 
     ///////////////////////////////////
     //  simulated PDP-8/I processor  //
@@ -1071,11 +1112,39 @@ module Zynq #(parameter BIDIRCONSDA=1) (
         .ioopcode (dev_oMBUF),
         .cputodev (dev_oACUM),
 
-        .devtocpu (ttibus),
+        .devtocpu (ttinbus),
         .AC_CLEAR (ttacclr),
         .IO_SKIP  (ttioskp),
         .INT_RQST (ttintrq),
         .SELECTED (ttiosel)
+    );
+
+    // system call interface
+
+    assign regarmintreq[00] = sypause;  // wake up z8isys.cc whenever we are pausing processor
+
+    pdp8isys syinst (
+        .CLOCK (CLOCK),
+        .RESET (dev_iRESET),
+        .BINIT (dev_oBUSINI),
+
+        .armwrite (syawrite),
+        .armraddr (readaddr[2]),
+        .armwaddr (writeaddr[2]),
+        .armwdata (saxi_WDATA),
+        .armrdata (syardata),
+
+        .iopstart (iopstart),
+        .iopstop  (iopstop),
+        .ioopcode (dev_oMBUF),
+        .cputodev (dev_oACUM),
+
+        .devtocpu (syinbus),
+        .AC_CLEAR (syacclr),
+        .IO_SKIP  (syioskp),
+        .INT_RQST (syintrq),
+        .PAUSE    (sypause),
+        .SELECTED (syiosel)
     );
 
     // terminal multiplexor
@@ -1096,7 +1165,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
         .ioopcode (dev_oMBUF),
         .cputodev (dev_oACUM),
 
-        .devtocpu (dcibus),
+        .devtocpu (dcinbus),
         .AC_CLEAR (dcacclr),
         .IO_SKIP  (dcioskp),
         .INT_RQST (dcintrq),
@@ -1121,7 +1190,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
         .ioopcode (dev_oMBUF),
         .cputodev (dev_oACUM),
 
-        .devtocpu (rkibus),
+        .devtocpu (rkinbus),
         .AC_CLEAR (rkacclr),
         .IO_SKIP  (rkioskp),
         .INT_RQST (rkintrq),
@@ -1182,7 +1251,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
         .ioopcode (dev_oMBUF),
         .cputodev (dev_oACUM),
 
-        .devtocpu (tcibus),
+        .devtocpu (tcinbus),
         .AC_CLEAR (tcacclr),
         .IO_SKIP  (tcioskp),
         .INT_RQST (tcintrq),
@@ -1207,7 +1276,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
         .ioopcode (dev_oMBUF),
         .cputodev (dev_oACUM),
 
-        .devtocpu (vcibus),
+        .devtocpu (vcinbus),
         .AC_CLEAR (vcacclr),
         .IO_SKIP  (vcioskp),
         .INT_RQST (vcintrq),
@@ -1258,7 +1327,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
         .ioopcode (dev_oMBUF),
         .cputodev (dev_oACUM),
 
-        .devtocpu (pribus),
+        .devtocpu (prinbus),
         .AC_CLEAR (pracclr),
         .IO_SKIP  (prioskp),
         .INT_RQST (printrq),
@@ -1281,7 +1350,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
         .ioopcode (dev_oMBUF),
         .cputodev (dev_oACUM),
 
-        .devtocpu (pbibus),
+        .devtocpu (pbinbus),
         .AC_CLEAR (pbacclr),
         .IO_SKIP  (pbioskp),
         .SELECTED (pbiosel),
@@ -1329,7 +1398,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
         .ioopcode (dev_oMBUF),
         .cputodev (dev_oACUM),
 
-        .devtocpu (rcibus),
+        .devtocpu (rcinbus),
         .AC_CLEAR (rcacclr),
         .IO_SKIP  (rcioskp),
         .INT_RQST (rcintrq),

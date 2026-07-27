@@ -105,6 +105,15 @@ void Z8IU32::veriwrite (uint32_t val)
     waitfordone (VERIZYNQ_WRITE);
 }
 
+// simulates the ioctl (ZGIOCTL_WFI) call
+// - waits for (reg[ZG_INTFLAGS] & mask) != 0
+void Z8IU32::veriwfi (uint32_t mask)
+{
+    for (uint32_t armintmsk; ((armintmsk = pageptr->armintmsk) & mask) == 0;) {
+        futexwait ((int *) &pageptr->armintmsk, armintmsk);
+    }
+}
+
 // wait for the state to be IDLE
 // mark the struct in use by this client
 static void waitforidle ()
