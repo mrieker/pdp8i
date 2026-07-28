@@ -166,30 +166,28 @@ int main (int argc, char **argv)
     signal (SIGINT, siginthand);
 
     uint32_t nbytes = 0;
-    while (true) {
+    while (! ctrlcflag) {
         printf ("\r%u byte%s so far ", nbytes, ((nbytes == 1) ? "" : "s"));
         fflush (stdout);
 
-        uint32_t ptpreg;
-        do {
-            usleep (1000000 / cps);
-            if (ctrlcflag) goto done;
-        } while (! ((ptpreg = ptpat[1]) & PTP_BUSY));
+        z8ipage.waitint (ZGINT_PP);
+        uint32_t ptpreg = ptpat[1];
+        if (ptpreg & PTP_BUSY) {
 
-        uint8_t wrbyte = ptpreg & ~ mask;
-        if ((! remcr || (wrbyte != '\r')) && (! remdel || (wrbyte != 127)) && (! remnul || (wrbyte != 0))) {
-            int rc = write (filedes, &wrbyte, 1);
-            if (rc <= 0) {
-                if (rc == 0) errno = EPIPE;
-                fprintf (stderr, "error writing %s: %m\n", filename);
-                return 1;
+            uint8_t wrbyte = ptpreg & ~ mask;
+            if ((! remcr || (wrbyte != '\r')) && (! remdel || (wrbyte != 127)) && (! remnul || (wrbyte != 0))) {
+                int rc = write (filedes, &wrbyte, 1);
+                if (rc <= 0) {
+                    if (rc == 0) errno = EPIPE;
+                    fprintf (stderr, "error writing %s: %m\n", filename);
+                    return 1;
+                }
             }
-        }
 
-        ptpat[1] = PTP_FLAG | PTP_ENAB;
-        ++ nbytes;
+            ptpat[1] = PTP_FLAG | PTP_ENAB;
+            ++ nbytes;
+        }
     }
-done:;
 
     if (trailer) {
         int rc = write (filedes, nulls, sizeof nulls);

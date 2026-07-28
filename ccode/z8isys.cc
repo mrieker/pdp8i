@@ -128,9 +128,12 @@ static uint16_t sysioinstr (uint16_t opcode, uint16_t input)
                 // assume clock has been low for at least 50nS
                 uint32_t ra = pdpat[Z_RA];
                 pdpat[Z_RA] = ra |   a_arm_iCLOCK;      // drive clock high
+                ASSERT (h_100MHz == 0xFFFFFFFFU);
                 uint32_t old100 = pdpat[Z_RH];          // wait at least 50nS
-                while (pdpat[Z_RH] - old100 <= 5) { }
+                while (pdpat[Z_RH] - old100 <= (saveclkratm1 + 1) / 2) { }
                 pdpat[Z_RA] = ra & ~ a_arm_iCLOCK;      // drive clock low
+                old100 = pdpat[Z_RH];                   // wait at least 50nS
+                while (pdpat[Z_RH] - old100 <= (saveclkratm1 + 1) / 2) { }
 
                 // get flags
                 uint32_t re = pdpat[Z_RE];

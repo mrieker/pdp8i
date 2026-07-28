@@ -31,6 +31,7 @@ module pdp8iptr (
     input armraddr, armwaddr,
     input[31:00] armwdata,
     output[31:00] armrdata,
+    output armintrq,
 
     input iopstart,
     input iopstop,
@@ -49,6 +50,8 @@ module pdp8iptr (
 
     assign armrdata = ~ armraddr ? 32'h50520002 : // [31:16] = 'PR'; [15:12] = (log2 nreg) - 1; [11:00] = version
                       { rdflag, enable, rdstep, 17'b0, rdchar };
+
+    assign armintrq = rdstep;
 
     assign INT_RQST = rdflag;
 

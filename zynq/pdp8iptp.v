@@ -32,6 +32,7 @@ module pdp8iptp (
     input armraddr, armwaddr,
     input[31:00] armwdata,
     output[31:00] armrdata,
+    output armintrq,
 
     input iopstart,
     input iopstop,
@@ -48,6 +49,8 @@ module pdp8iptp (
 
     assign armrdata = ~ armraddr ? 32'h50500001 : // [31:16] = 'PP'; [15:12] = (log2 nreg) - 1; [11:00] = version
                       { wrflag, enable, wrbusy, 17'b0, wrchar };
+
+    assign armintrq = wrbusy;
 
     assign INT_RQST = wrflag;
 

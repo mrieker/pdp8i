@@ -410,7 +410,7 @@ static void *thread (void *dummy)
     bool oldgobit = false;
 
     while (! exiting) {
-        usleep (1000);
+        z8ipage.waitint (ZGINT_TC);
 
         // check for an I/O request pending
         uint32_t status = tcat[1];

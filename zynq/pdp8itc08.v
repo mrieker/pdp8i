@@ -27,6 +27,7 @@ module pdp8itc08 (
     input armraddr, armwaddr,
     input[31:00] armwdata,
     output[31:00] armrdata,
+    output armintrq,
 
     input iopstart,
     input iopstop,
@@ -45,6 +46,8 @@ module pdp8itc08 (
 
     assign armrdata = (armraddr == 0) ? 32'h54430002 : // [31:16] = 'TC'; [15:12] = (log2 nreg) - 1; [11:00] = version
                       { enable, 3'b0, status_b, iopend, 3'b0, status_a };
+
+    assign armintrq = iopend;
 
     assign INT_RQST = (status_b[11] | status_b[00]) & status_a[02]; // request interrupt if error or success
 

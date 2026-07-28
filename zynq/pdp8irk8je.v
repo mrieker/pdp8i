@@ -27,6 +27,7 @@ module pdp8irk8je (
     input[2:0] armraddr, armwaddr,
     input[31:00] armwdata,
     output[31:00] armrdata,
+    output armintrq,
 
     input iopstart,
     input iopstop,
@@ -63,6 +64,8 @@ module pdp8irk8je (
                       (armraddr == 4) ? { 20'b0, status   } :
                       (armraddr == 5) ? { 29'b0, stbusy, startio, enable } :
                        32'hDEADBEEF;
+
+    assign armintrq = startio;
 
     wire stskip = status[ST_DONE] | status[ST_XFRX] | status[ST_SKFL] | status[ST_FLNR] | status[ST_TMER] |
                   status[ST_WLER] | status[ST_CRCR] | status[ST_DRLT] | status[ST_DSER] | status[ST_CYLR];

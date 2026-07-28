@@ -328,7 +328,7 @@ void *thread (void *dummy)
     if (debug > 1) fprintf (stderr, "IODevRK8JE::thread*: thread started\r\n");
 
     while (! exiting) {
-        usleep (1000);
+        z8ipage.waitint (ZGINT_RK);
         LOCKIT;
         if (rkat[RK_FLG] & F_STRTIO) {
             rkat[RK_FLG] = F_ENABLE | F_STBUSY;

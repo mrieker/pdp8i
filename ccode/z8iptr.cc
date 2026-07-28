@@ -25,6 +25,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <signal.h>
 #include <sys/stat.h>
 #include <unistd.h>
 
@@ -34,6 +35,10 @@
 #define PTR_FLAG 0x80000000U // tells PDP char is ready to read
 #define PTR_ENAB 0x40000000U // enables pdp8iptr.v to process i/o instructions
 #define PTR_STEP 0x20000000U // tells ARM to read another char from file
+
+static bool volatile ctrlcflag;
+
+static void siginthand (int signum);
 
 int main (int argc, char **argv)
 {
@@ -124,36 +129,46 @@ int main (int argc, char **argv)
         ptrat[1] |= PTR_ENAB;   // enable pdp8iptr.v to process io instructions
     }
 
+    signal (SIGINT, siginthand);
+
     bool lastcr = false;
     uint32_t nbytes = 0;
-    while (true) {
+    while (! ctrlcflag) {
         printf ("\r%u/%u byte%s so far ", nbytes, fsize, ((nbytes == 1) ? "" : "s"));
         fflush (stdout);
 
-        do usleep (1000000 / cps);
-        while (! (ptrat[1] & PTR_STEP));
-        ptrat[1] = PTR_ENAB;
+        z8ipage.waitint (ZGINT_PR);
+        if (ptrat[1] & PTR_STEP) {
+            ptrat[1] = PTR_ENAB;
 
-        uint8_t rdbyte;
-        int rc = read (filedes, &rdbyte, 1);
-        if (rc < 0) {
-            fprintf (stderr, "error reading %s: %m\n", filename);
-            return 1;
+            uint8_t rdbyte;
+            int rc = read (filedes, &rdbyte, 1);
+            if (rc < 0) {
+                fprintf (stderr, "error reading %s: %m\n", filename);
+                return 1;
+            }
+            if (rc == 0) {
+                printf ("\nend of file reached\n");
+                return 0;
+            }
+
+            if (((rdbyte & 0177) == '\n') && inscr && ! lastcr) {
+                ptrat[1] = PTR_FLAG | PTR_ENAB | (rdbyte - '\n' + '\r') | mask;
+                do usleep (1000000 / cps);
+                while (! (ptrat[1] & PTR_STEP));
+            }
+
+            lastcr = (rdbyte & 0177) == '\r';
+
+            ptrat[1] = PTR_FLAG | PTR_ENAB | rdbyte | mask;
+            ++ nbytes;
         }
-        if (rc == 0) {
-            printf ("\nend of file reached\n");
-            return 0;
-        }
-
-        if (((rdbyte & 0177) == '\n') && inscr && ! lastcr) {
-            ptrat[1] = PTR_FLAG | PTR_ENAB | (rdbyte - '\n' + '\r') | mask;
-            do usleep (1000000 / cps);
-            while (! (ptrat[1] & PTR_STEP));
-        }
-
-        lastcr = (rdbyte & 0177) == '\r';
-
-        ptrat[1] = PTR_FLAG | PTR_ENAB | rdbyte | mask;
-        ++ nbytes;
     }
+}
+
+static void siginthand (int signum)
+{
+    if (ctrlcflag) exit (1);
+    ctrlcflag = true;
+    if (write (STDIN_FILENO, "\n", 1) < 0) { }
 }

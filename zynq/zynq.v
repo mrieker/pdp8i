@@ -808,7 +808,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     assign dev_iRESET   = arm_iRESET   | ~ RESET_N;
 
     // unused arm interrupt request bits
-    assign regarmintreq[29:01] = 0;
+    assign regarmintreq[29:05] = 0;
 
     ///////////////////////////////////
     //  simulated PDP-8/I processor  //
@@ -1121,7 +1121,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
 
     // system call interface
 
-    assign regarmintreq[00] = sypause;  // wake up z8isys.cc whenever we are pausing processor
+    assign regarmintreq[00] = sypause;  // ZGINT_SY wake up z8isys.cc whenever we are pausing processor
 
     pdp8isys syinst (
         .CLOCK (CLOCK),
@@ -1184,6 +1184,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
         .armwaddr (writeaddr[4:2]),
         .armwdata (saxi_WDATA),
         .armrdata (rkardata),
+        .armintrq (regarmintreq[03]), // ZGINT_RK
 
         .iopstart (iopstart),
         .iopstop  (iopstop),
@@ -1245,6 +1246,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
         .armwaddr (writeaddr[2]),
         .armwdata (saxi_WDATA),
         .armrdata (tcardata),
+        .armintrq (regarmintreq[04]), // ZGINT_TC
 
         .iopstart (iopstart),
         .iopstop  (iopstop),
@@ -1321,6 +1323,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
         .armwaddr (writeaddr[2]),
         .armwdata (saxi_WDATA),
         .armrdata (prardata),
+        .armintrq (regarmintreq[02]), // ZGINT_PR
 
         .iopstart (iopstart),
         .iopstop  (iopstop),
@@ -1369,6 +1372,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
         .armwaddr (writeaddr[2]),
         .armwdata (saxi_WDATA),
         .armrdata (ppardata),
+        .armintrq (regarmintreq[01]), // ZGINT_PP
 
         .iopstart (iopstart),
         .iopstop  (iopstop),

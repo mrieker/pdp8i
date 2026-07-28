@@ -25,6 +25,10 @@
 #define ZG_INTENABS 0x1A        // regarmintena in zynq.v
 #define ZG_INTFLAGS 0x1B        // regarmintreq in zynq.v
 #define ZGINT_SY  0x00000001U   // pdp8isys.v interrupt
+#define ZGINT_PP  0x00000002U   // pdp8iptp.v interrupt
+#define ZGINT_PR  0x00000004U   // pdp8iptr.v interrupt
+#define ZGINT_RK  0x00000008U   // pdp8irk8je.v interrupt
+#define ZGINT_TC  0x00000010U   // pdp8itc08.v interrupt
 #define ZGINT_ARM 0x40000000U   // arm interrupts itself (km probing)
 #define ZGINT_REQ 0x80000000U   // composite request (in ZG_INTFLAGS)
 
