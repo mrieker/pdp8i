@@ -48,7 +48,6 @@ typedef struct FoCtx {
 
 typedef struct ISRWait {
     struct ISRWait *next;
-    struct ISRWait **prev;
     struct task_struct *proc;
     uint32_t flags;
 } ISRWait;
@@ -203,13 +202,13 @@ static long zg_ioctl (struct file *filp, unsigned int cmd, unsigned long arg)
             unsigned long intena;
             spin_lock_irqsave (&isrlock, intena);
             if (! (pageknladdress[ZG_INTFLAGS] & arg)) {
+                ISRWait *isrp, **isrl;
                 ISRWait isrwait;
+                uint32_t enabs = 0;
 
                 isrwait.flags = arg;
                 isrwait.proc  = current;
                 isrwait.next  = isrwaits;
-                isrwait.prev  = &isrwaits;
-                if (isrwaits != NULL) isrwaits->prev = &isrwait.next;
                 isrwaits = &isrwait;
 
                 pageknladdress[ZG_INTENABS] |= arg;
@@ -223,9 +222,17 @@ static long zg_ioctl (struct file *filp, unsigned int cmd, unsigned long arg)
                 }
 
                 spin_lock_irqsave (&isrlock, intena);
-                *isrwait.prev = isrwait.next;
-                if (isrwait.next != NULL) isrwait.next->prev = isrwait.prev;
                 current->state = TASK_RUNNING;
+
+                for (isrl = &isrwaits; (isrp = *isrl) != NULL;) {
+                    if (isrp == &isrwait) {
+                        *isrl = isrp->next;
+                    } else {
+                        enabs |= isrp->flags;
+                        isrl = &isrp->next;
+                    }
+                }
+                pageknladdress[ZG_INTENABS] = enabs;
             }
             spin_unlock_irqrestore (&isrlock, intena);
             return 0;
