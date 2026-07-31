@@ -36,7 +36,7 @@ static void setclock (bool val);
 static void setdata (bool val);
 static bool getdata ();
 
-#define SPEED 10    // works for PI-Zero-2
+#define SPEED 12    // works for PI-Zero-2
 
 #define SDA1 0
 #define SCK1 1

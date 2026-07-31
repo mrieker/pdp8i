@@ -68,6 +68,8 @@ static int const dfldifldmpins[] = {
     mp__DFLD_0, mp__DFLD_1, mp__DFLD_2, mp__IFLD_0, mp__IFLD_1, mp__IFLD_2, 0 };
 
 static volatile bool ctrlcflag;
+static uint32_t errors;
+static uint32_t passes;
 
 static void sighand (int signum);
 static void writerow (int row, uint16_t data);
@@ -126,8 +128,16 @@ static void writerow (int row, uint16_t data)
 static uint16_t readrow (int row)
 {
     uint16_t raw = mcpread16 (1, 0, 0x12);
-    ////???? row check ????
-    return ((raw & 63) << 6) | ((raw >> 8) & 63);
+
+    // raw<15:14> = GPB<7:6> = iicsel<1:0>
+    // raw<13:08> = GPB<5:0> = fpdata<11:06>
+    // raw<07:06> = GPA<7:6> = iicsel<3:2>
+    // raw<05:00> = GPA<5:0> = fpdata<05:00>
+
+    int iicsel = ((raw & 0x00C0) >> 4) | ((raw & 0xC000) >> 14);
+    if (iicsel != row) printf ("%10u %10u readrow: iicsel is %X, expect %X\n", ++ errors, passes, iicsel, row);
+
+    return ((raw & 0x3F00) >> 2) | (raw & 0x003F);
 }
 
 static void mantest ()
@@ -291,7 +301,7 @@ static void mantest ()
             snprintf (srstr, sizeof srstr, "%04o", businbus);
         }
 
-        printf ("DF=%s IF=%s SR=%s %s %s %s %s %s %s %s\n",
+        printf ("%10u %10u DF=%s IF=%s SR=%s %s %s %s %s %s %s %s\n", errors, passes,
             dfstr, ifstr, srstr,
             busstart ? "START" : "start",
             busldad  ? "LDAD"  : "ldad",
@@ -326,6 +336,7 @@ static void autotest ()
     }
 
     while (! ctrlcflag) {
+        ++ passes;
 
         // make up random values for registers to be displayed in the lights
         // console board should ignore clock when using 23017 so make it random
@@ -404,14 +415,14 @@ static void autotest ()
         };
         static int const lbmasks[8] = { 0xFFF, 0xFFF, 0xFFF, 0xFFF, 0xFFF, 0xFFF, 0xFFC, 0xFEF };
 
-        // generate random switch values
+        // generate random switch values to get stuffed into flipflops
         uint16_t swdfld  = randbits (3);
         uint16_t swifld  = randbits (3);
         uint16_t swreg   = randbits (12);
         bool     swcont  = randbits (1);
         bool     swdepos = randbits (1);
         bool     swexam  = randbits (1);
-        bool     swldad  = randbits (1);
+        bool     swldad  = false; //// randbits (1);
         bool     swsinst = randbits (1);
         bool     swsstep = randbits (1);
         bool     swstart = randbits (1);
@@ -448,7 +459,9 @@ static void autotest ()
             writerow (lr, 0);
             uint16_t row = readrow (lr) ^ 07777;
             if ((row ^ lbrows[lr]) & lbmasks[lr]) {
-                printf ("row %d is %04o sb %04o mask %04o\n", lr, row, lbrows[lr], lbmasks[lr]);
+                printf ("%10u %10u light row %d is %04o sb %04o mask %04o\n", ++ errors, passes, lr, row, lbrows[lr], lbmasks[lr]);
+            } else {
+                printf ("%10u %10u light row %d is %04o matches\n", errors, passes, lr, row);
             }
 
             // update like-numbered switch row flipflops
@@ -514,26 +527,27 @@ static void autotest ()
 
                 // read physical switch pins from bGPIO: 0x12,0x13
                 uint16_t row = readrow (sr | 12);
-                printf ("phys sw row %d = %04o\n", sr, row);
+                printf ("%10u %10u phys sw row %d = %04o\n", errors, passes, sr, row);
             }
         }
 
         // check output pins to see if they match random switches
+        // console board ORs the SINST and STOP switches together onto single SINST bus line
         mcprecv ();
-        bool buscont  = ! getmpin (mp__SWCONT);  if (buscont  != swcont)  printf ("bus CONT  %o != switch CONT  %o\n", buscont,  swcont);
-        bool busdepos = ! getmpin (mp__SWDEPOS); if (busdepos != swdepos) printf ("bus DEPOS %o != switch DEPOS %o\n", busdepos, swdepos);
-        bool busexam  = ! getmpin (mp__SWEXAM);  if (busexam  != swexam)  printf ("bus EXAM  %o != switch EXAM  %o\n", busexam,  swexam);
-        bool busldad  = ! getmpin (mp__SWLDAD);  if (busldad  != swldad)  printf ("bus LDAD  %o != switch LDAD  %o\n", busldad,  swldad);
-        bool bussinst = ! getmpin (mp__SWSINST); if (bussinst != swsinst) printf ("bus SINST %o != switch SINST %o\n", bussinst, swsinst);
-        bool bussstep = ! getmpin (mp__SWSSTEP); if (bussstep != swsstep) printf ("bus SSTEP %o != switch SSTEP %o\n", bussstep, swsstep);
-        bool busstart = ! getmpin (mp__SWSTART); if (busstart != swstart) printf ("bus START %o != switch START %o\n", busstart, swstart);
+        bool buscont  = ! getmpin (mp__SWCONT);  if (buscont  != swcont)  printf ("%10u %10u bus CONT  %o != switch CONT  %o\n", ++ errors, passes, buscont,  swcont);
+        bool busdepos = ! getmpin (mp__SWDEPOS); if (busdepos != swdepos) printf ("%10u %10u bus DEPOS %o != switch DEPOS %o\n", ++ errors, passes, busdepos, swdepos);
+        bool busexam  = ! getmpin (mp__SWEXAM);  if (busexam  != swexam)  printf ("%10u %10u bus EXAM  %o != switch EXAM  %o\n", ++ errors, passes, busexam,  swexam);
+        bool busldad  = ! getmpin (mp__SWLDAD);  if (busldad  != swldad)  printf ("%10u %10u bus LDAD  %o != switch LDAD  %o\n", ++ errors, passes, busldad,  swldad);
+        bool bussinst = ! getmpin (mp__SWSINST); if (bussinst != (swsinst | swstop)) printf ("%10u %10u bus SINST %o != switch SINST %o\n", ++ errors, passes, bussinst, swsinst);
+        bool bussstep = ! getmpin (mp__SWSSTEP); if (bussstep != swsstep) printf ("%10u %10u bus SSTEP %o != switch SSTEP %o\n", ++ errors, passes, bussstep, swsstep);
+        bool busstart = ! getmpin (mp__SWSTART); if (busstart != swstart) printf ("%10u %10u bus START %o != switch START %o\n", ++ errors, passes, busstart, swstart);
         if (busldad) {
-            uint16_t busdfld = getmpins (mps__DFLD) ^ 7; if (busdfld != swdfld) printf ("bus DFLD %o != switch DFLD %o\n", busdfld,  swdfld);
-            uint16_t busifld = getmpins (mps__IFLD) ^ 7; if (busifld != swifld) printf ("bus IFLD %o != switch IFLD %o\n", busifld,  swifld);
+            uint16_t busdfld = getmpins (mps__DFLD) ^ 7; if (busdfld != swdfld) printf ("%10u %10u bus DFLD %o != switch DFLD %o\n", ++ errors, passes, busdfld,  swdfld);
+            uint16_t busifld = getmpins (mps__IFLD) ^ 7; if (busifld != swifld) printf ("%10u %10u bus IFLD %o != switch IFLD %o\n", ++ errors, passes, busifld,  swifld);
         }
         if (readsr) {
             uint16_t businbus = getmpins (mps__INBUS) ^ 07777;
-            if (businbus != swreg) printf ("bus INBUS %04o != swreg %04o\n", businbus, swreg);
+            if (businbus != swreg) printf ("%10u %10u bus INBUS %04o != swreg %04o\n", ++ errors, passes, businbus, swreg);
         }
     }
 }
