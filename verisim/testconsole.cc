@@ -135,7 +135,7 @@ static uint16_t readrow (int row)
     // raw<05:00> = GPA<5:0> = fpdata<05:00>
 
     int iicsel = ((raw & 0x00C0) >> 4) | ((raw & 0xC000) >> 14);
-    if (iicsel != row) printf ("%10u %10u readrow: iicsel is %X, expect %X\n", ++ errors, passes, iicsel, row);
+    if (iicsel != row) printf ("%8u %8u readrow: iicsel is %X, expect %X\n", ++ errors, passes, iicsel, row);
 
     return ((raw & 0x3F00) >> 2) | (raw & 0x003F);
 }
@@ -301,7 +301,7 @@ static void mantest ()
             snprintf (srstr, sizeof srstr, "%04o", businbus);
         }
 
-        printf ("%10u %10u DF=%s IF=%s SR=%s %s %s %s %s %s %s %s\n", errors, passes,
+        printf ("%8u %8u DF=%s IF=%s SR=%s %s %s %s %s %s %s %s\n", errors, passes,
             dfstr, ifstr, srstr,
             busstart ? "START" : "start",
             busldad  ? "LDAD"  : "ldad",
@@ -326,29 +326,27 @@ static void autotest ()
 
     // we are initially set up to read the dfld,ifld bus lines as if the ldad switch was being pressed
     mcprecv ();
-    bool lastswldad = ! getmpin (mp__SWLDAD);       // read bus _SWLDAD signal (console board ldad flipflop)
 
-    // if switch is actually released (very likely), set up tester board to drive the dfld,ifld lines
-    if (! lastswldad) {
-        setmpinmask (boardipinmask, dfldifldmpins);  // mcpsend() will send to dfld,ifld pins
-        clrmpinmask (boardopinmask, dfldifldmpins);  // mcprecv() won't read what the board is outputting
-        mcpsetdir ();
+    // confirm the switch is actually released as supposedly assured by RESET
+    if (! getmpin (mp__SWLDAD)) {
+        fprintf (stderr, "autotest: resetting did not clear LDAD switch flipflop\n");
+        ABORT ();
     }
+
+    // switch test mcp23017s to drive dlfd,ifld bus lines
+    // then dfld,ifld values on bus lines will flow through to dfld,ifld lights
+    justreleasedldad ();
 
     while (! ctrlcflag) {
         ++ passes;
 
         // make up random values for registers to be displayed in the lights
         // console board should ignore clock when using 23017 so make it random
-        // if ldad is released,
-        //   generate random values for the dfld,ifld lights
-        // if ldad is pressed,
-        //   dfld,ifld are being driven by the console board switch values
-        //   which get looped back around into the lights, so use their values
+        // always leave ldad switch released, we test it separately later
         uint16_t acum   = randbits (12);
         bool     clock  = randbits (1);
-        uint16_t dfld   = lastswldad ? getmpins (mps__DFLD) ^ 7 : randbits (3);
-        uint16_t ifld   = lastswldad ? getmpins (mps__IFLD) ^ 7 : randbits (3);
+        uint16_t dfld   = randbits (3);
+        uint16_t ifld   = randbits (3);
         bool     ion    = randbits (1);
         uint16_t ireg   = randbits (3);
         bool     link   = randbits (1);
@@ -362,8 +360,24 @@ static void autotest ()
         bool     run    = randbits (1);
         uint16_t sctr   = randbits (5);
 
+        // generate random switch values to get stuffed into flipflops
+        uint16_t swdfld  = randbits (3);
+        uint16_t swifld  = randbits (3);
+        uint16_t swreg   = randbits (12);
+        bool     swcont  = randbits (1);
+        bool     swdepos = randbits (1);
+        bool     swexam  = randbits (1);
+        bool     swsinst = randbits (1);
+        bool     swsstep = randbits (1);
+        bool     swstart = randbits (1);
+        bool     swstop  = randbits (1);
+
+        printf ("%8u %8u acum=%04o clock=%o dfld=%o ifld=%o ion=%o ireg=%o link=%o madr=%04o majst=%X mbuf=%04o mquo=%04o pause=%o pctr=%04o readsr=%o run=%o sctr=%02o "
+            "sw dfld=%o ifld=%o reg=%04o cont=%o depos=%o exam=%o sinst=%o sstep=%o start=%o stop=%o\n",
+            errors, passes, acum, clock, dfld, ifld, ion, ireg, link, madr, majst, mbuf, mquo, pause, pctr, readsr, run, sctr,
+            swdfld, swifld, swreg, swcont, swdepos, swexam, swsinst, swsstep, swstart, swstop);
+
         // put random values on bus to be displayed
-        // if ldad pressed, dfld,ifld ignored cuz tester is not driving those lines
         setmpins (mps__ACUM,    acum ^ 07777);
         setmpin  (mp__CLOCK,  ! clock);
         setmpins (mps__DFLD,    dfld ^ 7);
@@ -382,8 +396,7 @@ static void autotest ()
         setmpins (mps__SCTR,    sctr ^ 037);
         mcpsend ();
 
-        // compute what the light rows should be
-        // if ldad pressed, dfld,ifld lights should show switch values
+        // compute what the light and switch rows should be given those random numbers
         uint16_t lbrows[8] = {
             pctr,                           // row 0
             madr,                           // row 1
@@ -415,24 +428,10 @@ static void autotest ()
         };
         static int const lbmasks[8] = { 0xFFF, 0xFFF, 0xFFF, 0xFFF, 0xFFF, 0xFFF, 0xFFC, 0xFEF };
 
-        // generate random switch values to get stuffed into flipflops
-        uint16_t swdfld  = randbits (3);
-        uint16_t swifld  = randbits (3);
-        uint16_t swreg   = randbits (12);
-        bool     swcont  = randbits (1);
-        bool     swdepos = randbits (1);
-        bool     swexam  = randbits (1);
-        bool     swldad  = false; //// randbits (1);
-        bool     swsinst = randbits (1);
-        bool     swsstep = randbits (1);
-        bool     swstart = randbits (1);
-        bool     swstop  = randbits (1);
-
         uint16_t swrows[3] = {
-            swreg,
-            (swdfld << 9) | (swifld << 6),
-            (swstart ? 0x800 : 0) |
-            (swldad  ? 0x400 : 0) |
+            swreg,                          // row 0
+            (swdfld << 9) | (swifld << 6),  // row 1
+            (swstart ? 0x800 : 0) |         // row 2
             (swdepos ? 0x200 : 0) |
             (swexam  ? 0x100 : 0) |
             (swcont  ? 0x080 : 0) |
@@ -451,6 +450,7 @@ static void autotest ()
         //   GPA5 = gpio<08>         GPB5 = gpio<14> (MSB)
         //   GPA6 = iicsel<2>        GPB6 = iicsel<0>
         //   GPA7 = iicsel<3>        GPB7 = iicsel<1>
+        // also update switch flipflops with their random numbers
         for (int lr = 0; lr < 8; lr ++) {
 
             // set iicsel<3> = 0
@@ -459,12 +459,10 @@ static void autotest ()
             writerow (lr, 0);
             uint16_t row = readrow (lr) ^ 07777;
             if ((row ^ lbrows[lr]) & lbmasks[lr]) {
-                printf ("%10u %10u light row %d is %04o sb %04o mask %04o\n", ++ errors, passes, lr, row, lbrows[lr], lbmasks[lr]);
-            } else {
-                printf ("%10u %10u light row %d is %04o matches\n", errors, passes, lr, row);
+                printf ("%8u %8u light row %d is %04o sb %04o mask %04o\n", ++ errors, passes, lr, row, lbrows[lr], lbmasks[lr]);
             }
 
-            // update like-numbered switch row flipflops
+            // update like-numbered switch row flipflops with generated random numbers
             //  if just displayed light row 0, update switch row 0 then row 2 flipflops
             //  if just displayed light row 1, update switch row 1 flipflops
             if (lr <= 1) {
@@ -501,10 +499,7 @@ static void autotest ()
                 // doing swrow 1 or 2, transition iicsel from 1001 or 1010 to 1011 won't glitch
                 // drives ldswrow<n> high
                 // so do 0x15 <= 2'b11 val<05:00>
-                if ((sr == 2) && ! lastswldad && swldad) abouttopressldad ();
                 writerow (11, swrows[sr]);
-                if ((sr == 2) && lastswldad && ! swldad) justreleasedldad ();
-                if (sr == 2) lastswldad = swldad;
 
                 // new switch values have been clocked into switch flipflops
 
@@ -513,10 +508,10 @@ static void autotest ()
             }
 
             // read like-numbered physical switch row
-            //  if just displayed light row 4, sense switch row 0
-            //  if just displayed light row 5, sense switch row 1
-            //  if just displayed light row 6, sense switch row 2
-            if ((lr >= 4) && (lr <= 6)) {
+            //  if just displayed light row 4, sense physical switch row 0
+            //  if just displayed light row 5, sense physical switch row 1
+            //  if just displayed light row 6, sense physical switch row 2
+            if (false && (lr >= 4) && (lr <= 6)) {
                 int sr = lr - 4;
 
                 // at this point, ldswrow0,1,2 are all high
@@ -527,28 +522,52 @@ static void autotest ()
 
                 // read physical switch pins from bGPIO: 0x12,0x13
                 uint16_t row = readrow (sr | 12);
-                printf ("%10u %10u phys sw row %d = %04o\n", errors, passes, sr, row);
+                printf ("%8u %8u phys sw row %d = %04o\n", errors, passes, sr, row);
             }
         }
 
-        // check output pins to see if they match random switches
+        // check switch bus lines to see if they match random switches
         // console board ORs the SINST and STOP switches together onto single SINST bus line
         mcprecv ();
-        bool buscont  = ! getmpin (mp__SWCONT);  if (buscont  != swcont)  printf ("%10u %10u bus CONT  %o != switch CONT  %o\n", ++ errors, passes, buscont,  swcont);
-        bool busdepos = ! getmpin (mp__SWDEPOS); if (busdepos != swdepos) printf ("%10u %10u bus DEPOS %o != switch DEPOS %o\n", ++ errors, passes, busdepos, swdepos);
-        bool busexam  = ! getmpin (mp__SWEXAM);  if (busexam  != swexam)  printf ("%10u %10u bus EXAM  %o != switch EXAM  %o\n", ++ errors, passes, busexam,  swexam);
-        bool busldad  = ! getmpin (mp__SWLDAD);  if (busldad  != swldad)  printf ("%10u %10u bus LDAD  %o != switch LDAD  %o\n", ++ errors, passes, busldad,  swldad);
-        bool bussinst = ! getmpin (mp__SWSINST); if (bussinst != (swsinst | swstop)) printf ("%10u %10u bus SINST %o != switch SINST %o\n", ++ errors, passes, bussinst, swsinst);
-        bool bussstep = ! getmpin (mp__SWSSTEP); if (bussstep != swsstep) printf ("%10u %10u bus SSTEP %o != switch SSTEP %o\n", ++ errors, passes, bussstep, swsstep);
-        bool busstart = ! getmpin (mp__SWSTART); if (busstart != swstart) printf ("%10u %10u bus START %o != switch START %o\n", ++ errors, passes, busstart, swstart);
-        if (busldad) {
-            uint16_t busdfld = getmpins (mps__DFLD) ^ 7; if (busdfld != swdfld) printf ("%10u %10u bus DFLD %o != switch DFLD %o\n", ++ errors, passes, busdfld,  swdfld);
-            uint16_t busifld = getmpins (mps__IFLD) ^ 7; if (busifld != swifld) printf ("%10u %10u bus IFLD %o != switch IFLD %o\n", ++ errors, passes, busifld,  swifld);
-        }
+        bool buscont  = ! getmpin (mp__SWCONT);  if (buscont  != swcont)  printf ("%8u %8u bus CONT  %o != switch CONT  %o\n", ++ errors, passes, buscont,  swcont);
+        bool busdepos = ! getmpin (mp__SWDEPOS); if (busdepos != swdepos) printf ("%8u %8u bus DEPOS %o != switch DEPOS %o\n", ++ errors, passes, busdepos, swdepos);
+        bool busexam  = ! getmpin (mp__SWEXAM);  if (busexam  != swexam)  printf ("%8u %8u bus EXAM  %o != switch EXAM  %o\n", ++ errors, passes, busexam,  swexam);
+        bool busldad  = ! getmpin (mp__SWLDAD);  if (busldad  != false)   printf ("%8u %8u bus LDAD  %o != switch LDAD  %o\n", ++ errors, passes, busldad,  false);
+        bool bussinst = ! getmpin (mp__SWSINST); if (bussinst != (swsinst | swstop)) printf ("%8u %8u bus SINST %o != switch SINST %o\n", ++ errors, passes, bussinst, swsinst);
+        bool bussstep = ! getmpin (mp__SWSSTEP); if (bussstep != swsstep) printf ("%8u %8u bus SSTEP %o != switch SSTEP %o\n", ++ errors, passes, bussstep, swsstep);
+        bool busstart = ! getmpin (mp__SWSTART); if (busstart != swstart) printf ("%8u %8u bus START %o != switch START %o\n", ++ errors, passes, busstart, swstart);
         if (readsr) {
             uint16_t businbus = getmpins (mps__INBUS) ^ 07777;
-            if (businbus != swreg) printf ("%10u %10u bus INBUS %04o != swreg %04o\n", ++ errors, passes, businbus, swreg);
+            if (businbus != swreg) printf ("%8u %8u bus INBUS %04o != swreg %04o\n", ++ errors, passes, businbus, swreg);
         }
+
+        // press LDAD switch which gates SWDFLD, SWIFLD flipflops onto DFLD, IFLD bus lines
+        abouttopressldad ();                // disable tester board mcp23017s outputting to DFLD,IFLD bus lines
+        writerow  (2, 0);                   // set iicsel = 2 (was 7) so transition to 10 won't glitch any ldswrow lines
+        writerow (10, swrows[2] | 0x400);   // set ldswrow2 = 0 (was 1), all row2 switches as before + SWLDAD=1
+        mcpwrite16 (1, 0, 0x00, 0x0000);    // turn console mcp23017 data pins to outputs so they will drive switch flipflop inputs
+        writerow (11, swrows[2] | 0x400);   // set ldswrow2 = 1, clocking all that into switch flipflops
+        mcprecv ();                         // read bus lines using tester board mcp23017s
+        if (getmpin (mp__SWLDAD)) {         // LDAD switch should show up on bus (active low)
+            fprintf (stderr, "autotest: pressing LDAD did not set LDAD switch flipflop\n");
+            ABORT ();
+        }
+
+        // make sure the DFLD,IFLD bus lines match what we wrote to the the DFLD,IFLD switch flipflops
+        uint16_t busdfld = getmpins (mps__DFLD) ^ 7; if (busdfld != swdfld) printf ("%8u %8u bus DFLD %o != switch DFLD %o\n", ++ errors, passes, busdfld,  swdfld);
+        uint16_t busifld = getmpins (mps__IFLD) ^ 7; if (busifld != swifld) printf ("%8u %8u bus IFLD %o != switch IFLD %o\n", ++ errors, passes, busifld,  swifld);
+
+        // release LDAD switch by writing 0 to its flipflop.  the DFLD,IFLD bus lines will no longer be driven by console board
+        writerow (10, swrows[2]);           // set ldswrow2 = 0 (was 1), all row2 switches as before + SWLDAD=0
+        writerow (11, swrows[2]);           // set ldswrow2 = 1, clocking all that into switch flipflops
+        mcprecv ();
+        if (! getmpin (mp__SWLDAD)) {       // make sure LDAD switch is off (active low)
+            fprintf (stderr, "autotest: releasing LDAD did not clear LDAD switch flipflop\n");
+            ABORT ();
+        }
+        mcpwrite16 (1, 0, 0x00, 0x3F3F);    // turn console mcp23017 data pins to inputs so they won't jam light row drivers
+        writerow (3, 0);                    // switch to a light row without glitching any ldswrow line (11->3 doesn't glitch)
+        justreleasedldad ();                // enable tester board mcp23017s outputting to DFLD,IFLD bus lines
     }
 }
 
