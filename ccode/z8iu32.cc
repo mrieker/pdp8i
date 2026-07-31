@@ -38,11 +38,11 @@
 static int mypid, serverpid;
 static int shmfd = -1;
 static Z8IU32 *nullpage;
-static VeriPage *pageptr;
+static VeriPage volatile *pageptr;
 
 static void waitforidle ();
 static uint32_t waitfordone (int func);
-static void futexwait (int *cell, int valu);
+static void futexwait (int volatile *cell, int valu);
 
 void *Z8IU32::veriopen (int *fd_r)
 {
@@ -63,7 +63,7 @@ void *Z8IU32::veriopen (int *fd_r)
 
         void *ptr = mmap (NULL, sizeof *pageptr, PROT_READ | PROT_WRITE, MAP_SHARED, shmfd, 0);
         if (ptr == MAP_FAILED) ABORT ();
-        pageptr = (VeriPage *) ptr;
+        pageptr = (VeriPage volatile *) ptr;
 
         // make sure server process is running
         // user will have to restart it if not
@@ -107,9 +107,11 @@ void Z8IU32::veriwrite (uint32_t val)
 
 // simulates the ioctl (ZGIOCTL_WFI) call
 // - waits for (reg[ZG_INTFLAGS] & mask) != 0
+// - also returns if woken by signal
 void Z8IU32::veriwfi (uint32_t mask)
 {
-    for (uint32_t armintmsk; ((armintmsk = pageptr->armintmsk) & mask) == 0;) {
+    uint32_t armintmsk = pageptr->armintmsk;
+    if ((armintmsk & mask) == 0) {
         futexwait ((int *) &pageptr->armintmsk, armintmsk);
     }
 }
@@ -123,7 +125,7 @@ static void waitforidle ()
         if (state != VERIZYNQ_IDLE) {
             futexwait (&pageptr->state, state);
         } else {
-            if (atmcmpxchg (&pageptr->state, &state, VERIZYNQ_BUSY | mypid)) break;
+            if (atmcmpxchg (&pageptr->state, state, VERIZYNQ_BUSY | mypid)) break;
         }
     }
 }
@@ -136,7 +138,7 @@ static uint32_t waitfordone (int func)
 {
     // tell verizynq daemon that we finished filling in request
     int busy = VERIZYNQ_BUSY | mypid;
-    if (! atmcmpxchg (&pageptr->state, &busy, func | mypid)) ABORT ();
+    if (! atmcmpxchg (&pageptr->state, busy, func | mypid)) ABORT ();
     if (futex (&pageptr->state, FUTEX_WAKE, 1000000000, NULL, NULL, 0) < 0) ABORT ();
 
     // wait for verizynq daemon to complete processing the request
@@ -152,7 +154,7 @@ static uint32_t waitfordone (int func)
     uint32_t data = pageptr->value;
 
     // some other client can queue a request
-    if (! atmcmpxchg (&pageptr->state, &state, VERIZYNQ_IDLE)) ABORT ();
+    if (! atmcmpxchg (&pageptr->state, state, VERIZYNQ_IDLE)) ABORT ();
     if (futex (&pageptr->state, FUTEX_WAKE, 1000000000, NULL, NULL, 0) < 0) ABORT ();
 
     return data;
@@ -160,7 +162,7 @@ static uint32_t waitfordone (int func)
 
 // wait for the cell to be something other than valu
 // abort if server (verizynq) has exited
-static void futexwait (int *cell, int valu)
+static void futexwait (int volatile *cell, int valu)
 {
     struct timespec when;
     memset (&when, 0, sizeof when);

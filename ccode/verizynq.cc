@@ -59,7 +59,7 @@ int main (int argc, char **argv)
         ABORT ();
     }
 
-    VeriPage *pageptr;
+    VeriPage volatile *pageptr;
 
     if (ftruncate (shmfd, sizeof *pageptr) < 0) {
         fprintf (stderr, "verizynq: error truncating %s: %m\n", VERIZYNQ_SHMNM);
@@ -102,8 +102,8 @@ int main (int argc, char **argv)
         fprintf (stderr, "verizynq: error mmapping %s: %m\n", VERIZYNQ_SHMNM);
         ABORT ();
     }
-    pageptr = (VeriPage *) ptr;
-    memset (pageptr, 0, sizeof *pageptr);
+    memset (ptr, 0, sizeof *pageptr);
+    pageptr = (VeriPage volatile *) ptr;
     pageptr->serverpid = getpid ();
     fprintf (stderr, "verizynq: pid %d\n", pageptr->serverpid);
 
@@ -130,7 +130,7 @@ int main (int argc, char **argv)
             case VERIZYNQ_DONE: {
                 if (kill (state & VERIZYNQ_CPID, 0) < 0) {
                     fprintf (stderr, "verizynq: client %d died\n", state & VERIZYNQ_CPID);
-                    if (! atmcmpxchg (&pageptr->state, &state, VERIZYNQ_IDLE)) ABORT ();
+                    if (! atmcmpxchg (&pageptr->state, state, VERIZYNQ_IDLE)) ABORT ();
                     if (futex (&pageptr->state, FUTEX_WAKE, 1000000000, NULL, NULL, 0) < 0) ABORT ();
                 }
                 kerchunk ();
@@ -161,7 +161,7 @@ int main (int argc, char **argv)
 
                         if (debug > 1) printf ("verizynq:  read %03X > %08X\n", index, pageptr->value);
 
-                        if (! atmcmpxchg (&pageptr->state, &state, VERIZYNQ_DONE ^ VERIZYNQ_READ ^ state)) ABORT ();
+                        if (! atmcmpxchg (&pageptr->state, state, VERIZYNQ_DONE ^ VERIZYNQ_READ ^ state)) ABORT ();
                         if (futex (&pageptr->state, FUTEX_WAKE, 1000000000, NULL, NULL, 0) < 0) ABORT ();
                     }
                 }
@@ -183,7 +183,7 @@ int main (int argc, char **argv)
 
                 if (debug > 0) printf ("verizynq: write %03X < %08X\n", index, pageptr->value);
 
-                if (! atmcmpxchg (&pageptr->state, &state, VERIZYNQ_DONE ^ VERIZYNQ_WRITE ^ state)) ABORT ();
+                if (! atmcmpxchg (&pageptr->state, state, VERIZYNQ_DONE ^ VERIZYNQ_WRITE ^ state)) ABORT ();
                 if (futex (&pageptr->state, FUTEX_WAKE, 1000000000, NULL, NULL, 0) < 0) ABORT ();
 
                 // keep kerchunking until all 3 transfers have completed

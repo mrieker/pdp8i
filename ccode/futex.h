@@ -24,12 +24,12 @@
 #include <linux/futex.h>
 #include <syscall.h>
 
-static inline bool atmcmpxchg (int *ptr, int *oldptr, int newval)
+static inline bool atmcmpxchg (int volatile *ptr, int oldval, int newval)
 {
-    return __atomic_compare_exchange_n (ptr, oldptr, newval, false, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
+    return __atomic_compare_exchange_n ((int *) ptr, &oldval, newval, false, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
 }
 
-static inline int futex (int *uaddr, int futex_op, int val,
+static inline int futex (int volatile *uaddr, int futex_op, int val,
              const struct timespec *timeout, int *uaddr2, int val3)
 {
     return syscall (SYS_futex, uaddr, futex_op, val, timeout, uaddr2, val3);
