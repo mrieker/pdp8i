@@ -51,6 +51,8 @@ set usefpi2c 0
 proc hardreset {} {
     global usefpi2c
 
+    puts "hardreset: starting"
+
     ;# power-on reset for 10uS
     arm set 1 0x4000000                     ;# arm_iRESET = 1
     clk 100
@@ -72,11 +74,11 @@ proc hardreset {} {
             if {$i > 2000} {                ;# usually takes 914
                 error "pdp8ifpi2c startup timed out"
             }
-            clk
+            runstep
         }
-    } else {
-        error "hardreset: usefpi2c=0 mode BROKEN"
     }
+
+    puts "hardreset: finished"
 }
 
 # print help for commands defined herein
@@ -485,11 +487,12 @@ proc runstep {} {
 # start processor at the given address
 # - clock with runloop/runstep afterward
 proc startat {addr} {
-    if {($addr < 0) || ($addr > 07777)} {
+    if {($addr < 0) || ($addr > 077777)} {
         error "bad address $addr"
     }
-    puts "startat: DF=[swtch dfld] IF=[swtch ifld]"
-    puts "startat: setting swreg [octal $addr]"
+    puts [format "startat: setting swreg %05o" $addr]
+    swtchwait dfld [expr {$addr >> 12}]
+    swtchwait ifld [expr {$addr >> 12}]
     swtchwait reg $addr
     puts "startat: pressing ldad"
     swtchwait ldad 1

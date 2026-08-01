@@ -68,7 +68,7 @@ module pdp8ifpi2c (
     reg[5:0] dbncount, dbnlimit;
     wire debounced = (dbncount == dbnlimit);
 
-    assign armrdata = (armraddr ==  0) ? 32'h46503003 : // [31:16] = 'FP'; [15:12] = (log2 nreg) - 1; [11:00] = version
+    assign armrdata = (armraddr ==  0) ? 32'h46503004 : // [31:16] = 'FP'; [15:12] = (log2 nreg) - 1; [11:00] = version
                       (armraddr ==  1) ? { comand[31:00] } :
                       (armraddr ==  2) ? { comand[63:32] } :
                       (armraddr ==  3) ? { status[31:00] } :
@@ -239,7 +239,7 @@ module pdp8ifpi2c (
 
             case (mcpstate)
 
-                // send command to set all data pins to input mode
+                // send command to set all data pins to input mode so we can sense what board is sending to the lights
                 0: begin
                     if (~ manual) begin
                         // maybe increment pass number
@@ -295,8 +295,8 @@ module pdp8ifpi2c (
                 end
 
                 // let lights soak for 200uS
-                // if light row 0..2, set data pins to like-numbered switch row value
-                //              3..7, go on to next light row
+                // then if light row 0..2, set data pins to like-numbered switch row value
+                //                   3..7, go on to next light row
                 4: begin
                     mcpltime <= mcpltime + 1;
                     // wait for light row displayed for 200uS
@@ -305,14 +305,14 @@ module pdp8ifpi2c (
                         //  if just displayed light row 0, update switch row 0 then row 2 flipflops
                         //  if just displayed light row 1, update switch row 1 flipflops
                         if (mcpltrow <= 1) begin
-                            ////$display ("pdp8ifpi2c*: sending switch row %o = %o", mcpswrow, switchrows[mcpswrow]);
+                            ////$display ("pdp8ifpi2c*: sending switch row %o data %o to gpio connector", mcpswrow, switchrows[mcpswrow]);
                             // at this point, ldswrow0,1,2 are all high
-                            // set data pins value to switch row and value:
-                            //  0x14 <=    2'b10 swval<11:06>
-                            //  0x15 <= row<1:0> swval<05:00>
+                            // set data pins value to switch row and value (active low):
+                            //  0x14 <=    2'b10 ~ swval<11:06>
+                            //  0x15 <= row<1:0> ~ swval<05:00>
                             // only changes one iicsel bit (sets iicsel_3) to avoid glitching ldswrows<n>
                             // ...which smoothly drives ldswrow<n> low
-                            command  <= { WR, 8'h40, WR, 8'h14, WR, { 2'b10, switchrows[mcpswrow][05:00] }, WR, { mcpswrow, switchrows[mcpswrow][11:06] }, 24'b0 };
+                            command  <= { WR, 8'h40, WR, 8'h14, WR, { 2'b10, ~ switchrows[mcpswrow][05:00] }, WR, { mcpswrow, ~ switchrows[mcpswrow][11:06] }, 24'b0 };
                             startbit <= 1;
                             mcpstate <= 5;
                         end
@@ -365,18 +365,18 @@ module pdp8ifpi2c (
                             ////$display ("pdp8ifpi2c*: intermediate from switch row 0 to 2 (clocks data %o into swrow 0 flipflops)", switchrows[0]);
                             // doing swrow 0, transition iicsel from 1000 to 1011 might glitch
                             // so transition iicsel from 1000 to 1010 first
-                            // by doing 0x15 <= 2'b10 val<05:00>
+                            // by doing 0x15 <= 2'b10 ~ val<05:00>
                             // driving ldswrow0 high (clocking data into swrow0)
                             //  with side-effect of driving ldswrow2 low
-                            command  <= { WR, 8'h40, WR, 8'h15, WR, { 2'b10, switchrows[mcpswrow][11:06] }, 34'b0 };
+                            command  <= { WR, 8'h40, WR, 8'h15, WR, { 2'b10, ~ switchrows[mcpswrow][11:06] }, 34'b0 };
                             startbit <= 1;
                             mcpstate <= 8;
                         end else begin
                             ////$display ("pdp8ifpi2c*: clock switch %o data %o into flipflops", mcpswrow, switchrows[mcpswrow]);
                             // doing swrow 1 or 2, transitioning iicsel from 1001 or 1010 to 1011 won't glitch
-                            // drives ldswrow<n> high
-                            // so do 0x15 <= 2'b11 val<05:00>
-                            command  <= { WR, 8'h40, WR, 8'h15, WR, { 2'b11, switchrows[mcpswrow][11:06] }, 34'b0 };
+                            // drives ldswrow<n> high to clock the data into the flipflops
+                            // so do 0x15 <= 2'b11 ~ val<05:00>
+                            command  <= { WR, 8'h40, WR, 8'h15, WR, { 2'b11, ~ switchrows[mcpswrow][11:06] }, 34'b0 };
                             startbit <= 1;
                             mcpstate <= 7;
                         end
@@ -398,11 +398,11 @@ module pdp8ifpi2c (
                 // ...and is now cocked to clock into row 2 flipflops
                 8: begin
                     if (status[63:60] == 0) begin
-                        ////$display ("pdp8ifpi2c*: clock switch 2 data %o into flipflops", switchrows[2]);
+                        ////$display ("pdp8ifpi2c*: send switch 2 data %o to gpio connector", switchrows[2]);
                         // ldswrow2 is now low after driving ldswrow0 high
                         // we must clock in proper swrow2 contents before driving ldswrow2 high
                         mcpswrow <= 2;
-                        command  <= { WR, 8'h40, WR, 8'h14, WR, { 2'b10, switchrows[2][05:00] }, WR, { 2'b10, switchrows[2][11:06] }, 24'b0 };
+                        command  <= { WR, 8'h40, WR, 8'h14, WR, { 2'b10, ~ switchrows[2][05:00] }, WR, { 2'b10, ~ switchrows[2][11:06] }, 24'b0 };
                         startbit <= 1;
                         mcpstate <= 6;
                     end
