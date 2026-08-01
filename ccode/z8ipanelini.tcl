@@ -181,9 +181,11 @@ proc domemcyc {sw} {
     flicksw $sw
     ;# memcycctr increments on posedge TS3
     ;# loop until subsequent TS3 and TS4 are complete
+    set started [pin 100mhz]
     for {set i 0} {([pin memcycctr] == $oldmc) || [pin ots3] || [pin ots4]} {incr i} {
+        set elapsed [expr {([pin 100mhz] - $started) & 0xFFFFFFFF}]
+        if {$elapsed > 100000} {error "$sw cycle timed out"}
         after 1
-        if {$i > 1000} {error "$sw cycle timed out"}
     }
 }
 

@@ -74,6 +74,8 @@ proc hardreset {} {
             }
             clk
         }
+    } else {
+        error "hardreset: usefpi2c=0 mode BROKEN"
     }
 }
 
@@ -463,9 +465,10 @@ proc runstep {} {
             gpio 07777                          ;# if no switches being requested, set to ones to not interfere with lights
         } else {
             for {set r 0} {$r < 3} {incr r} {   ;# maybe it wants switch contents
-                if {~ $g & (0x1000 << $r)} {    ;# if low switch select, send the row contents
-                    set sw [lindex $swrowpends $r]
-                    gpio $sw
+                if {~ $g & (0x1000 << $r)} {    ;# if low switch select, send the row contents (active low)
+                                                ;# goes directly into console.kicad_sch flipflops (usefpi2c=0)
+                                                ;# ...or into console.kicad_sch mcp23017 (usefpi2c=1)
+                    gpio [expr {[lindex $swrowpends $r] ^ 07777}]
                 }
             }
         }

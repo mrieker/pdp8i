@@ -68,7 +68,7 @@ module pdp8ifpi2c (
     reg[5:0] dbncount, dbnlimit;
     wire debounced = (dbncount == dbnlimit);
 
-    assign armrdata = (armraddr ==  0) ? 32'h46503002 : // [31:16] = 'FP'; [15:12] = (log2 nreg) - 1; [11:00] = version
+    assign armrdata = (armraddr ==  0) ? 32'h46503003 : // [31:16] = 'FP'; [15:12] = (log2 nreg) - 1; [11:00] = version
                       (armraddr ==  1) ? { comand[31:00] } :
                       (armraddr ==  2) ? { comand[63:32] } :
                       (armraddr ==  3) ? { status[31:00] } :
@@ -137,7 +137,8 @@ module pdp8ifpi2c (
         .count (i2ccount));
 
     // status bits read from MCP23017 give 12 bits of data
-    wire[11:00] sts12 = { status[05:00], status[13:08] };
+    wire[11:00]  sts12 = { status[05:00], status[13:08] };
+    wire[11:00] _sts12 = ~ sts12;
 
     always @(posedge CLOCK) begin
         if (iRESET) begin           // processor power-on reset
@@ -256,7 +257,7 @@ module pdp8ifpi2c (
                 end
 
                 // send command to set iicsel selection pins to the light row
-                // when command completes, the lights will be on
+                // when command completes, the register (AC,PC,etc) will be gated to the lights
                 1: begin
                     mcpltime <= mcpltime + 1;
                     if (status[63:60] == 0) begin
@@ -282,13 +283,13 @@ module pdp8ifpi2c (
                     end
                 end
 
-                // capture light row bits
+                // capture light row bits (active low)
                 3: begin
                     mcpswrow <= mcpltrow[1:0];
                     mcpltime <= mcpltime + 1;
                     if (status[63:60] == 0) begin
-                        ////$display ("pdp8ifpi2c*: capture light row %o = %o", mcpltrow, ~ sts12);
-                        lightrows[mcpltrow][11:00] <= ~ sts12;
+                        ////$display ("pdp8ifpi2c*: capture light row %o = %o", mcpltrow, _sts12);
+                        lightrows[mcpltrow][11:00] <= _sts12;
                         mcpstate <= 4;
                     end
                 end
@@ -372,7 +373,7 @@ module pdp8ifpi2c (
                             mcpstate <= 8;
                         end else begin
                             ////$display ("pdp8ifpi2c*: clock switch %o data %o into flipflops", mcpswrow, switchrows[mcpswrow]);
-                            // doing swrow 1 or 2, transition iicsel from 1001 or 1010 to 1011 won't glitch
+                            // doing swrow 1 or 2, transitioning iicsel from 1001 or 1010 to 1011 won't glitch
                             // drives ldswrow<n> high
                             // so do 0x15 <= 2'b11 val<05:00>
                             command  <= { WR, 8'h40, WR, 8'h15, WR, { 2'b11, switchrows[mcpswrow][11:06] }, 34'b0 };
@@ -383,6 +384,7 @@ module pdp8ifpi2c (
                 end
 
                 // waiting for mcp to receive iicsel=4'b1011 command, which clocked data into mcpswrow flipflops
+                // also used to wait for enable input pullups command to complete
                 7: begin
                     if (status[63:60] == 0) begin
                         ////$display ("pdp8ifpi2c*: clocking complete");
@@ -398,12 +400,11 @@ module pdp8ifpi2c (
                     if (status[63:60] == 0) begin
                         ////$display ("pdp8ifpi2c*: clock switch 2 data %o into flipflops", switchrows[2]);
                         // ldswrow2 is now low after driving ldswrow0 high
-                        // we must clock in proper swrow2 contents to drive ldswrow2 high
-                        // ...as idle state of ldswrow0,1,2 is high
+                        // we must clock in proper swrow2 contents before driving ldswrow2 high
                         mcpswrow <= 2;
                         command  <= { WR, 8'h40, WR, 8'h14, WR, { 2'b10, switchrows[2][05:00] }, WR, { 2'b10, switchrows[2][11:06] }, 24'b0 };
                         startbit <= 1;
-                        mcpstate <= 5;
+                        mcpstate <= 6;
                     end
                 end
 
@@ -422,15 +423,15 @@ module pdp8ifpi2c (
                 // then go on to display next light row
                 11: begin
                     if (status[63:60] == 0) begin
-                        ////$display ("pdp8ifpi2c*: read switch row %o got data %o", mcpswrow, sts12);
+                        ////$display ("pdp8ifpi2c*: read switch row %o got data %o", mcpswrow, _sts12);
                         if (mcpswrow != 2) begin
                             switchrows[mcpswrow] <= switchovrs[mcpswrow] & switchrows[mcpswrow] |   // overridden, ignore phys switch
-                                                  ~ switchovrs[mcpswrow] & sts12;                   // else save phys switch
+                                                  ~ switchovrs[mcpswrow] & _sts12;                  // else save phys switch (active low)
                         end else begin
                             switchrows[2] <= switchovrs[2] & switchrows[2] |        // overridden, ignore phys switch
-                                           ~ switchovrs[2] & sts12 & (debounced ? 12'o7777 : ~ BUTTMASK);
-                                                                                    // else save debounced switch
-                            if ((sts12 & BUTTMASK) == 0) begin
+                                           ~ switchovrs[2] & _sts12 & (debounced ? 12'o7777 : ~ BUTTMASK);
+                                                                                    // else save debounced switch (active low)
+                            if ((_sts12 & BUTTMASK) == 0) begin
                                 dbncount <= 0;                                      // no debounceable button pushed, reset counter
                             end else if (~ debounced) begin
                                 dbncount <= dbncount + 1;                           // not reached limit, increment counter
@@ -441,10 +442,14 @@ module pdp8ifpi2c (
                 end
 
                 // startup delay 1uS after power-on reset
+                // then send out 3F3F to registers 0C,0D for pullups (100K)
                 15: begin
                     mcpltime <= mcpltime + 1;
                     if (mcpltime >= 100) begin
-                        mcpstate <= 0;
+                        // enable input pin pullups: 0x0C <= 0x3F3F
+                        command  <= { WR, 8'h40, WR, 8'h0C, WR, 8'h3F, WR, 8'h3F, 24'b0 };
+                        startbit <= 1;
+                        mcpstate <= 7;
                     end
                 end
             endcase

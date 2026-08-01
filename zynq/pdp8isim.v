@@ -169,8 +169,8 @@ module pdp8isim (
     wire lttime, swtime;
 
     wire[27:04] gpout;
-    wire[15:04] gpin = (gpout[18:16] == 7) ? 12'o7777 : // light select hi-Z value from panel (or it jams mcp23017 from sensing lights)
-                                             12'o0000;  // switches all zeroes (gpio buttons all need to be off or they jam mcp23017 buttons)
+    wire[15:04] gpin = 12'o7777;    // light select hi-Z value from panel (or it jams mcp23017 from sensing lights)
+                                    // switches all ones (gpio buttons all need to be off or they jam mcp23017 buttons)
 
     console conboard (
         .zclock (zclock),

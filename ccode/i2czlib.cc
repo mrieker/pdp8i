@@ -157,7 +157,7 @@ void I2CZLib::writepads (Z8IPanel const *pads)
         INS (pads->togovr.ifld, fp11_swIFLD) |
         INS (pads->togovr.reg,  fp11_swREG);
 
-    // pdp8ifpi2c.v won't change any fpat[11] bits what have corresponding fpat[12] bit set
+    // pdp8ifpi2c.v won't update fpat[11] bits from physical switches what have corresponding fpat[12] bit set
     // otherwise it will occasionally load fpat[11] bits from physical switches and ignore writes from the arm
 
     // set up values to be sent out
