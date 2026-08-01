@@ -140,176 +140,79 @@ static uint16_t readrow (int row)
     return ((raw & 0x3F00) >> 2) | (raw & 0x003F);
 }
 
+
+//            LR0 LR1 LR2 LR3 LR4 LR5 LR6 LR7  SR0 SR1 SR2
+// 14  GPB5   pc1 ma1 mb1 ac1 mq1 and cad df1  sw1 df1 start   [MSB]
+// 15  GPB4   pc2 ma2 mb2 ac2 mq2 tad brk df2  sw2 df2 ldaddr
+//  4  GPB3   pc3 ma3 mb3 ac3 mq3 isz ion df3  sw3 df3 dep
+//  5  GPB2    .   .   .   .   .  dca pau if1   .  if1 exam
+//  6  GPB1    .   .   .   .   .  jms run if2   .  if2 cont
+//  7  GPB0    .   .   .   .   .  jmp sc1 if3   .  if3 stop
+//  8  GPA5    .   .   .   .   .  iot sc2 lnk   .      sstep
+//  9  GPA4    .   .   .   .   .  opr sc3       .      sinst
+// 10  GPA3    .   .   .   .   .  fet sc4 ms1   .
+// 11  GPA2    .   .   .   .   .  exe sc5 ms2   .
+// 12  GPA1    .   .   .   .   .  def     ms3   .
+// 13  GPA0    .   .   .   .   .  wct     ms4   .              [LSB]
+
+static int const mps__LINK[]  = { mp__LINK,  0 };
+static int const mps__ION[]   = { mp__ION,   0 };
+static int const mps__PAUSE[] = { mp__PAUSE, 0 };
+static int const mps__RUN[]   = { mp__RUN,   0 };
+
+static void showlightrow (int ltrow, int const *mpins, uint16_t value);
+
 static void mantest ()
 {
-    // console MCP23017 should have power-on reset to all inputs
-    // it should leave the on-board clocking enabled
+    justreleasedldad ();
 
-    int lttime  = 1 << 5;   // jumpered to div_5 => 3.3uS per light row
-    int swtime  = 1 << 2;   // jumpered to div_2 => 0.5uS per switch row
-    int nclocks = 8 * (lttime + 1) + 3 * (swtime + 1) + 1;
+    // set console mcp23017 pin direction
+    //  iicsel output (drive gpio row selection pins)
+    //    data input (sense gpio data pins)
+    mcpwrite16 (1, 0, 0x00, 0x3F3F);
 
-    int lbnum = 0;
+    // turn on pullups for input pins
+    mcpwrite16 (1, 0, 0x0C, 0x3F3F);
+
     uint16_t ireg = 0;
 
     while (! ctrlcflag) {
+        for (uint16_t dfld = 8; dfld > 0; dfld /= 2) showlightrow (7, mps__DFLD, dfld / 2);
+        for (uint16_t ifld = 8; ifld > 0; ifld /= 2) showlightrow (7, mps__IFLD, ifld / 2);
+        for (uint16_t pctr = 010000; pctr > 0; pctr /= 2) showlightrow (0, mps__PCTR, pctr / 2);
+        for (uint16_t madr = 010000; madr > 0; madr /= 2) showlightrow (1, mps__MADR, madr / 2);
+        for (uint16_t mbuf = 010000; mbuf > 0; mbuf /= 2) showlightrow (2, mps__MBUF, mbuf / 2);
+        for (uint16_t link = 2;      link > 0; link /= 2) showlightrow (7, mps__LINK, link / 2);
+        for (uint16_t acum = 010000; acum > 0; acum /= 2) showlightrow (3, mps__ACUM, acum / 2);
+        for (uint16_t sctr = 000040; sctr > 0; sctr /= 2) showlightrow (6, mps__SCTR, sctr / 2);
+        for (uint16_t mquo = 010000; mquo > 0; mquo /= 2) showlightrow (4, mps__MQUO, mquo / 2);
+        showlightrow (5, mps__IREG, ireg); ireg = (ireg + 1) & 7;
+        for (uint16_t majst = 1; majst <= 7; majst ++) showlightrow (majst <= 4 ? 5 : 6, mps__MAJST, majst ^ ((majst & 6) == 2));
+        for (uint16_t ion   = 2; ion   > 0; ion   /= 2) showlightrow (6, mps__ION,   ion   / 2);
+        for (uint16_t pause = 2; pause > 0; pause /= 2) showlightrow (6, mps__PAUSE, pause / 2);
+        for (uint16_t run   = 2; run   > 0; run   /= 2) showlightrow (6, mps__RUN,   run   / 2);
 
-        // pick next sequential light
-        uint16_t acum   = 0;
-        bool     ion    = 0;
-        bool     link   = 0;
-        uint16_t madr   = 0;
-        uint16_t majst  = 0;
-        uint16_t mbuf   = 0;
-        uint16_t mquo   = 0;
-        bool     pause  = 0;
-        uint16_t pctr   = 0;
-        bool     run    = 0;
-        uint16_t sctr   = 0;
-
-        switch (lbnum) {
-            case  0: pctr = 04000; break;
-            case  1: pctr = 02000; break;
-            case  2: pctr = 01000; break;
-            case  3: pctr = 00400; break;
-            case  4: pctr = 00200; break;
-            case  5: pctr = 00100; break;
-            case  6: pctr = 00040; break;
-            case  7: pctr = 00020; break;
-            case  8: pctr = 00010; break;
-            case  9: pctr = 00004; break;
-            case 10: pctr = 00002; break;
-            case 11: pctr = 00001; break;
-            case 12: madr = 04000; break;
-            case 13: madr = 02000; break;
-            case 14: madr = 01000; break;
-            case 15: madr = 00400; break;
-            case 16: madr = 00200; break;
-            case 17: madr = 00100; break;
-            case 18: madr = 00040; break;
-            case 19: madr = 00020; break;
-            case 20: madr = 00010; break;
-            case 21: madr = 00004; break;
-            case 22: madr = 00002; break;
-            case 23: madr = 00001; break;
-            case 24: mbuf = 04000; break;
-            case 25: mbuf = 02000; break;
-            case 26: mbuf = 01000; break;
-            case 27: mbuf = 00400; break;
-            case 28: mbuf = 00200; break;
-            case 29: mbuf = 00100; break;
-            case 30: mbuf = 00040; break;
-            case 31: mbuf = 00020; break;
-            case 32: mbuf = 00010; break;
-            case 33: mbuf = 00004; break;
-            case 34: mbuf = 00002; break;
-            case 35: mbuf = 00001; break;
-            case 36: link = 1; break;
-            case 37: acum = 04000; break;
-            case 38: acum = 02000; break;
-            case 39: acum = 01000; break;
-            case 40: acum = 00400; break;
-            case 41: acum = 00200; break;
-            case 42: acum = 00100; break;
-            case 43: acum = 00040; break;
-            case 44: acum = 00020; break;
-            case 45: acum = 00010; break;
-            case 46: acum = 00004; break;
-            case 47: acum = 00002; break;
-            case 48: acum = 00001; break;
-            case 49: sctr = 020; break;
-            case 50: sctr = 010; break;
-            case 51: sctr = 004; break;
-            case 52: sctr = 002; break;
-            case 53: sctr = 001; break;
-            case 54: mquo = 04000; break;
-            case 55: mquo = 02000; break;
-            case 56: mquo = 01000; break;
-            case 57: mquo = 00400; break;
-            case 58: mquo = 00200; break;
-            case 59: mquo = 00100; break;
-            case 60: mquo = 00040; break;
-            case 61: mquo = 00020; break;
-            case 62: mquo = 00010; break;
-            case 63: mquo = 00004; break;
-            case 64: mquo = 00002; break;
-            case 65: mquo = 00001; break;
-            case 66: ireg = (ireg + 1) & 7; break;
-            case 67: majst = 1; break;
-            case 68: majst = 3; break;
-            case 69: majst = 2; break;
-            case 70: majst = 4; break;
-            case 71: majst = 5; break;
-            case 72: majst = 6; break;
-            case 73: ion   = 1; break;
-            case 74: pause = 1; break;
-            case 75: run   = 1; break;
-            default: abort ();
+        uint16_t swrows[3];
+        for (int swr = 0; swr < 3; swr ++) {
+            writerow (swr + 12, 0);
+            swrows[swr] = readrow (swr + 12) ^ 07777;
         }
-        lbnum = (lbnum + 1) % 76;
+        printf (" swrows %04o %04o %04o\n", swrows[0], swrows[1], swrows[2]);
+    }
+}
 
-        // always gate switch register to inbus
-        bool readsr = true;
-
-        // put values on bus to be displayed
-        setmpins (mps__ACUM,    acum ^ 07777);
-        setmpin  (mp__ION,    ! ion);
-        setmpins (mps__IREG,    ireg ^ 7);
-        setmpin  (mp__LINK,   ! link);
-        setmpins (mps__MADR,    madr ^ 07777);
-        setmpins (mps__MAJST,   majst ^ 017);
-        setmpins (mps__MBUF,    mbuf ^ 07777);
-        setmpins (mps__MQUO,    mquo ^ 07777);
-        setmpin  (mp__PAUSE,  ! pause);
-        setmpins (mps__PCTR,    pctr ^ 07777);
-        setmpin  (mp__READSR, ! readsr);
-        setmpin  (mp__RUN,    ! run);
-        setmpins (mps__SCTR,    sctr ^ 037);
-        mcpsend ();
-
-        // clock to display them all and update switch flipflops
-        for (int i = 0; i < nclocks; i ++) {
-            setmpin  (mp__CLOCK, 0);
-            mcpsend ();
-            setmpin  (mp__CLOCK, 1);
-            mcpsend ();
-        }
-
-        // read switches from bus and display
-        mcprecv ();
-
-        bool buscont  = ! getmpin (mp__SWCONT);
-        bool busdepos = ! getmpin (mp__SWDEPOS);
-        bool busexam  = ! getmpin (mp__SWEXAM);
-        bool busldad  = ! getmpin (mp__SWLDAD);
-        bool bussinst = ! getmpin (mp__SWSINST);
-        bool bussstep = ! getmpin (mp__SWSSTEP);
-        bool busstart = ! getmpin (mp__SWSTART);
-
-        char dfstr[2], ifstr[2], srstr[7];
-        strcpy (dfstr, "-");
-        strcpy (ifstr, "-");
-        strcpy (srstr, "----");
-        if (busldad) {
-            uint16_t busdfld = getmpins (mps__DFLD) ^ 7;
-            uint16_t busifld = getmpins (mps__IFLD) ^ 7;
-            dfstr[0] = '0' + busdfld;
-            ifstr[0] = '0' + busifld;
-        }
-        if (readsr) {
-            uint16_t businbus = getmpins (mps__INBUS) ^ 07777;
-            snprintf (srstr, sizeof srstr, "%04o", businbus);
-        }
-
-        printf ("%8u %8u DF=%s IF=%s SR=%s %s %s %s %s %s %s %s\n", errors, passes,
-            dfstr, ifstr, srstr,
-            busstart ? "START" : "start",
-            busldad  ? "LDAD"  : "ldad",
-            busdepos ? "DEPOS" : "depos",
-            busexam  ? "EXAM"  : "exam",
-            buscont  ? "CONT"  : "cont",
-            bussstep ? "SSTEP" : "sstep",
-            bussinst ? "SINST" : "sinst");
+// write value to bus pins then gate those pins to the front panel
+//  input:
+//   ltrow = which light row to gate bus pins to
+//   mpins = which bus pins to write
+//   value = value to write to the bus pins
+static void showlightrow (int ltrow, int const *mpins, uint16_t value)
+{
+    setmpins (mpins, ~ value);
+    mcpsend ();
+    writerow (ltrow, 0);
+    if (value > 0) {
+        usleep (250000);
     }
 }
 
