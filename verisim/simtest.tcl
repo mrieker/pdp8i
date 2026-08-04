@@ -642,7 +642,7 @@ proc memorycycle {state field addr rdata wdata} {
     }
 
     ;# MB should now have the value we wrote to the memory location or to the iINBUS
-    verify12 [bus oMBUF] $rdata "MB during read"
+    verify12 [bus oMBUF] $rdata "state $state MB during read"
 
     ;# maybe perform extended arithmetic
     if {(($state == $MS_FETCH) && (($opcode & 07407) == 07401)) ||

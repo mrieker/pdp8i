@@ -46,24 +46,6 @@ Z8IPage::Z8IPage ()
     mypid  = getpid ();
 
     if (pthread_mutex_init (&dmamtx, NULL) != 0) ABORT ();
-
-#ifdef VERIZYNQ
-    zynqptr = Z8IU32::veriopen (&zynqfd);
-#else
-    zynqfd = open ("/proc/zynqpdp8i", O_RDWR);
-    if (zynqfd < 0) {
-        fprintf (stderr, "Z8IPage::Z8IPage: error opening /proc/zynqpdp8i: %m\n");
-        ABORT ();
-    }
-
-    zynqptr = mmap (NULL, 4096, PROT_READ | PROT_WRITE, MAP_SHARED, zynqfd, 0);
-    if (zynqptr == MAP_FAILED) {
-        fprintf (stderr, "Z8IPage::Z8IPage: error mmapping /proc/zynqpdp8i: %m\n");
-        ABORT ();
-    }
-#endif
-
-    zynqpage = (Z8IU32 *) zynqptr;
 }
 
 Z8IPage::~Z8IPage ()
@@ -90,6 +72,25 @@ Z8IPage::~Z8IPage ()
 //   returns pointer to dev
 Z8IU32 *Z8IPage::findev (char const *id, bool (*entry) (void *param, Z8IU32 *dev), void *param, bool lockit, bool killit)
 {
+    if (zynqptr == NULL) {
+#ifdef VERIZYNQ
+        zynqptr = Z8IU32::veriopen (&zynqfd);
+#else
+        zynqfd = open ("/proc/zynqpdp8i", O_RDWR);
+        if (zynqfd < 0) {
+            fprintf (stderr, "Z8IPage::findev: error opening /proc/zynqpdp8i: %m\n");
+            ABORT ();
+        }
+
+        zynqptr = mmap (NULL, 4096, PROT_READ | PROT_WRITE, MAP_SHARED, zynqfd, 0);
+        if (zynqptr == MAP_FAILED) {
+            fprintf (stderr, "Z8IPage::findev: error mmapping /proc/zynqpdp8i: %m\n");
+            ABORT ();
+        }
+#endif
+        zynqpage = (Z8IU32 *) zynqptr;
+    }
+
     for (int idx = 0; idx < 1024;) {
         Z8IU32 *dev = &zynqpage[idx];
         int len = 2 << ((*dev >> 12) & 15);
