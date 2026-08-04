@@ -15922,7 +15922,7 @@
   (symbol (lib_id "74xx:74AHC00") (at 533.4 579.12 0) (unit 4)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 002514b8-cd69-4e3c-9e5e-3e620db78244)
-    (property "Reference" "U109" (at 533.3917 570.23 0)
+    (property "Reference" "E93" (at 533.3917 570.23 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC00" (at 533.3917 572.77 0)
@@ -15951,7 +15951,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U109") (unit 4)
+          (reference "E93") (unit 4)
         )
       )
     )
@@ -15960,7 +15960,7 @@
   (symbol (lib_id "Device:C") (at 558.8 -62.23 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 007ea35a-c350-45c0-93f4-3c2d08bf8928)
-    (property "Reference" "C15" (at 562.61 -63.5 0)
+    (property "Reference" "C72" (at 562.61 -63.5 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 562.61 -60.96 0)
@@ -15977,7 +15977,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C15") (unit 1)
+          (reference "C72") (unit 1)
         )
       )
     )
@@ -16086,7 +16086,7 @@
   (symbol (lib_id "74xx:74AC20") (at 774.7 -25.4 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 0478a727-f1a2-41a9-b6d8-2441d0e707f4)
-    (property "Reference" "U122" (at 781.05 -26.67 0)
+    (property "Reference" "E62" (at 781.05 -26.67 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AC20" (at 781.05 -24.13 0)
@@ -16113,7 +16113,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U122") (unit 3)
+          (reference "E62") (unit 3)
         )
       )
     )
@@ -16172,7 +16172,7 @@
   (symbol (lib_id "Device:C") (at 355.6 -62.23 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 05a9fd29-fafc-4dcf-8df0-03acdc3bd64d)
-    (property "Reference" "C56" (at 359.41 -63.5 0)
+    (property "Reference" "C48" (at 359.41 -63.5 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 359.41 -60.96 0)
@@ -16189,7 +16189,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C56") (unit 1)
+          (reference "C48") (unit 1)
         )
       )
     )
@@ -16198,7 +16198,7 @@
   (symbol (lib_id "74xx:74AHC174") (at 609.6 91.44 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 05d0cf94-11b6-4779-a9e3-95a1af512e2e)
-    (property "Reference" "U130" (at 611.7941 73.66 0)
+    (property "Reference" "E13" (at 611.7941 73.66 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AHC174" (at 611.7941 76.2 0)
@@ -16229,7 +16229,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U130") (unit 1)
+          (reference "E13") (unit 1)
         )
       )
     )
@@ -16263,7 +16263,7 @@
   (symbol (lib_id "74xx:74AHC00") (at 472.44 349.25 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 06d17487-f8ca-473f-bc5b-79eebc1bc697)
-    (property "Reference" "U44" (at 472.4317 340.36 0)
+    (property "Reference" "E57" (at 472.4317 340.36 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC00" (at 472.4317 342.9 0)
@@ -16292,7 +16292,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U44") (unit 3)
+          (reference "E57") (unit 3)
         )
       )
     )
@@ -16326,7 +16326,7 @@
   (symbol (lib_id "74xx:74AHC32") (at 467.36 469.9 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 075f8473-4721-4a3e-b85c-1f5581d5d295)
-    (property "Reference" "U110" (at 467.36 461.01 0)
+    (property "Reference" "E88" (at 467.36 461.01 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC32" (at 467.36 463.55 0)
@@ -16355,7 +16355,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U110") (unit 1)
+          (reference "E88") (unit 1)
         )
       )
     )
@@ -16364,7 +16364,7 @@
   (symbol (lib_id "74xx:74AHC02") (at 490.22 96.52 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 081443d4-2f2e-4093-a1bd-d250aae8165a)
-    (property "Reference" "U142" (at 490.22 87.63 0)
+    (property "Reference" "E56" (at 490.22 87.63 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC02" (at 490.22 90.17 0)
@@ -16393,7 +16393,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U142") (unit 2)
+          (reference "E56") (unit 2)
         )
       )
     )
@@ -16402,7 +16402,7 @@
   (symbol (lib_id "74xx:74AHC00") (at 749.3 -25.4 0) (unit 5)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 0839cf9b-8315-490d-9cd3-b6416a9b4bbd)
-    (property "Reference" "U113" (at 755.65 -26.67 0)
+    (property "Reference" "E58" (at 755.65 -26.67 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AHC00" (at 755.65 -24.13 0)
@@ -16431,7 +16431,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U113") (unit 5)
+          (reference "E58") (unit 5)
         )
       )
     )
@@ -16440,7 +16440,7 @@
   (symbol (lib_id "74xx:74AHC04") (at 736.6 680.72 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 0887aec9-fa6e-451c-903b-a777802f9c42)
-    (property "Reference" "U125" (at 736.6 671.83 0)
+    (property "Reference" "E95" (at 736.6 671.83 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC04" (at 736.6 674.37 0)
@@ -16469,7 +16469,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U125") (unit 2)
+          (reference "E95") (unit 2)
         )
       )
     )
@@ -16478,7 +16478,7 @@
   (symbol (lib_id "Device:C") (at 88.9 -62.23 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 097efefc-a2b6-49f5-8d75-fa04d086ef26)
-    (property "Reference" "C14" (at 92.71 -63.5 0)
+    (property "Reference" "C91" (at 92.71 -63.5 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 92.71 -60.96 0)
@@ -16495,7 +16495,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C14") (unit 1)
+          (reference "C91") (unit 1)
         )
       )
     )
@@ -16529,7 +16529,7 @@
   (symbol (lib_id "74xx:74AHC00") (at 472.44 334.01 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 0c0c54a2-78fa-4515-9df7-66decc21eb5e)
-    (property "Reference" "U44" (at 472.4317 325.12 0)
+    (property "Reference" "E57" (at 472.4317 325.12 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC00" (at 472.4317 327.66 0)
@@ -16558,7 +16558,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U44") (unit 2)
+          (reference "E57") (unit 2)
         )
       )
     )
@@ -16592,7 +16592,7 @@
   (symbol (lib_id "Device:C") (at 698.5 -62.23 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 0d2b5564-f28b-4d16-a77d-49c355ab0bf1)
-    (property "Reference" "C37" (at 702.31 -63.5 0)
+    (property "Reference" "C74" (at 702.31 -63.5 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 702.31 -60.96 0)
@@ -16609,7 +16609,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C37") (unit 1)
+          (reference "C74") (unit 1)
         )
       )
     )
@@ -16618,7 +16618,7 @@
   (symbol (lib_id "74xx:74AHC00") (at 467.36 182.88 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 0f5abef3-e132-41ad-89be-ddb3285165e8)
-    (property "Reference" "U109" (at 467.3517 173.99 0)
+    (property "Reference" "E93" (at 467.3517 173.99 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC00" (at 467.3517 176.53 0)
@@ -16647,7 +16647,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U109") (unit 3)
+          (reference "E93") (unit 3)
         )
       )
     )
@@ -16656,7 +16656,7 @@
   (symbol (lib_id "74xx:74HC42") (at 690.88 581.66 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 0f5b30a0-16e2-4402-8d57-df4274a522b6)
-    (property "Reference" "U114" (at 693.0741 563.88 0)
+    (property "Reference" "E94" (at 693.0741 563.88 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74HC42" (at 693.0741 566.42 0)
@@ -16687,7 +16687,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U114") (unit 1)
+          (reference "E94") (unit 1)
         )
       )
     )
@@ -16806,7 +16806,7 @@
   (symbol (lib_id "Device:C") (at 215.9 -62.23 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 10b7372e-85f2-4b48-aec0-fa03d00e5922)
-    (property "Reference" "C34" (at 219.71 -63.5 0)
+    (property "Reference" "C73" (at 219.71 -63.5 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 219.71 -60.96 0)
@@ -16823,7 +16823,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C34") (unit 1)
+          (reference "C73") (unit 1)
         )
       )
     )
@@ -16832,7 +16832,7 @@
   (symbol (lib_id "74xx:74AHC00") (at 706.12 383.54 0) (mirror x) (unit 2)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 1159d292-5168-4ba3-ad6b-7a8345cde197)
-    (property "Reference" "U127" (at 706.12 374.65 0)
+    (property "Reference" "E77" (at 706.12 374.65 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC00" (at 706.12 377.19 0)
@@ -16861,7 +16861,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U127") (unit 2)
+          (reference "E77") (unit 2)
         )
       )
     )
@@ -16870,7 +16870,7 @@
   (symbol (lib_id "74xx:74AC10") (at 868.68 736.6 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 124ae38b-c5d5-41db-ae0e-8cba98e5fd5d)
-    (property "Reference" "U105" (at 868.6717 727.71 0)
+    (property "Reference" "E48" (at 868.6717 727.71 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AC10" (at 868.6717 730.25 0)
@@ -16899,7 +16899,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U105") (unit 3)
+          (reference "E48") (unit 3)
         )
       )
     )
@@ -16933,7 +16933,7 @@
   (symbol (lib_id "Device:C") (at 254 -62.23 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 13931a74-58e4-4f7f-8819-caccec5db576)
-    (property "Reference" "C40" (at 257.81 -63.5 0)
+    (property "Reference" "C64" (at 257.81 -63.5 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 257.81 -60.96 0)
@@ -16950,7 +16950,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C40") (unit 1)
+          (reference "C64") (unit 1)
         )
       )
     )
@@ -16959,7 +16959,7 @@
   (symbol (lib_id "74xx:74AHC00") (at 495.3 -25.4 0) (unit 5)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 14803ce4-ff1c-4675-a460-693240535850)
-    (property "Reference" "U2" (at 501.65 -26.67 0)
+    (property "Reference" "E85" (at 501.65 -26.67 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AHC00" (at 501.65 -24.13 0)
@@ -16988,7 +16988,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U2") (unit 5)
+          (reference "E85") (unit 5)
         )
       )
     )
@@ -16997,7 +16997,7 @@
   (symbol (lib_id "74xx:74AHC08") (at 673.1 -25.4 0) (unit 5)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 14836e1a-bf72-46a1-96a2-399f120e1cbd)
-    (property "Reference" "U54" (at 679.45 -26.67 0)
+    (property "Reference" "E73" (at 679.45 -26.67 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AHC08" (at 679.45 -24.13 0)
@@ -17026,7 +17026,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U54") (unit 5)
+          (reference "E73") (unit 5)
         )
       )
     )
@@ -17060,7 +17060,7 @@
   (symbol (lib_id "74xx:74AC151") (at 381 111.76 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 15250a9a-f48f-49f3-8fc8-1ce1ec18dd25)
-    (property "Reference" "U93" (at 383.1941 88.9 0)
+    (property "Reference" "E26" (at 383.1941 88.9 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AC151" (at 383.1941 91.44 0)
@@ -17091,7 +17091,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U93") (unit 1)
+          (reference "E26") (unit 1)
         )
       )
     )
@@ -17100,7 +17100,7 @@
   (symbol (lib_id "Device:C") (at 800.1 -62.23 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 153a912e-1654-49ba-85b8-399a6f209324)
-    (property "Reference" "C53" (at 803.91 -63.5 0)
+    (property "Reference" "C58" (at 803.91 -63.5 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 803.91 -60.96 0)
@@ -17117,7 +17117,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C53") (unit 1)
+          (reference "C58") (unit 1)
         )
       )
     )
@@ -17126,7 +17126,7 @@
   (symbol (lib_id "Device:C") (at 889 -62.23 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 15449cd3-4a43-483f-88a5-375c8a995857)
-    (property "Reference" "C67" (at 892.81 -63.5 0)
+    (property "Reference" "C88" (at 892.81 -63.5 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 892.81 -60.96 0)
@@ -17143,7 +17143,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C67") (unit 1)
+          (reference "C88") (unit 1)
         )
       )
     )
@@ -17177,7 +17177,7 @@
   (symbol (lib_id "Device:C") (at 495.3 -62.23 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 1678c3a2-26bb-4d4a-86c3-97cd6470a008)
-    (property "Reference" "C5" (at 499.11 -63.5 0)
+    (property "Reference" "C62" (at 499.11 -63.5 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 499.11 -60.96 0)
@@ -17194,7 +17194,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C5") (unit 1)
+          (reference "C62") (unit 1)
         )
       )
     )
@@ -17203,7 +17203,7 @@
   (symbol (lib_id "74xx:74AHC04") (at 457.2 63.5 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 168916b9-ab54-4998-8c64-33574d0e624e)
-    (property "Reference" "U119" (at 457.2 54.61 0)
+    (property "Reference" "E83" (at 457.2 54.61 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC04" (at 457.2 57.15 0)
@@ -17232,7 +17232,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U119") (unit 1)
+          (reference "E83") (unit 1)
         )
       )
     )
@@ -17266,7 +17266,7 @@
   (symbol (lib_id "74xx:74AC11") (at 838.2 40.64 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 1bbde9cc-ed84-4769-a21e-308a9afd6363)
-    (property "Reference" "U57" (at 838.1917 31.75 0)
+    (property "Reference" "E65" (at 838.1917 31.75 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AC11" (at 838.1917 34.29 0)
@@ -17295,7 +17295,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U57") (unit 3)
+          (reference "E65") (unit 3)
         )
       )
     )
@@ -17304,7 +17304,7 @@
   (symbol (lib_id "74xx:74LS04") (at 868.68 675.64 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 1cc11f94-d28b-48b9-8400-e8c8c64bd504)
-    (property "Reference" "U141" (at 868.68 666.75 0)
+    (property "Reference" "E68" (at 868.68 666.75 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC04" (at 868.68 669.29 0)
@@ -17333,7 +17333,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U141") (unit 3)
+          (reference "E68") (unit 3)
         )
       )
     )
@@ -17342,7 +17342,7 @@
   (symbol (lib_id "Device:C") (at 571.5 -62.23 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 1ccf7733-6a28-486c-9a46-542ca021c63b)
-    (property "Reference" "C17" (at 575.31 -63.5 0)
+    (property "Reference" "C23" (at 575.31 -63.5 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 575.31 -60.96 0)
@@ -17359,7 +17359,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C17") (unit 1)
+          (reference "C23") (unit 1)
         )
       )
     )
@@ -17428,7 +17428,7 @@
   (symbol (lib_id "74xx:74AHC04") (at 736.6 665.48 0) (unit 5)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 1eb13570-b528-41bf-8016-eab6b480d40c)
-    (property "Reference" "U125" (at 736.6 656.59 0)
+    (property "Reference" "E95" (at 736.6 656.59 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC04" (at 736.6 659.13 0)
@@ -17457,7 +17457,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U125") (unit 5)
+          (reference "E95") (unit 5)
         )
       )
     )
@@ -17491,7 +17491,7 @@
   (symbol (lib_id "74xx:74AC20") (at 723.9 -25.4 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 2044452c-1707-4c15-8318-43da98c25abb)
-    (property "Reference" "U121" (at 730.25 -26.67 0)
+    (property "Reference" "E86" (at 730.25 -26.67 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AC20" (at 730.25 -24.13 0)
@@ -17518,7 +17518,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U121") (unit 3)
+          (reference "E86") (unit 3)
         )
       )
     )
@@ -17552,7 +17552,7 @@
   (symbol (lib_id "74xx:74AC20") (at 492.76 264.16 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 20e96be8-89fd-4102-ab8b-5aafe8763de3)
-    (property "Reference" "U117" (at 492.7503 255.27 0)
+    (property "Reference" "E66" (at 492.7503 255.27 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AC20" (at 492.7503 257.81 0)
@@ -17579,7 +17579,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U117") (unit 2)
+          (reference "E66") (unit 2)
         )
       )
     )
@@ -17613,7 +17613,7 @@
   (symbol (lib_id "74xx:74AHC04") (at 533.4 546.1 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 21fcd622-d653-4832-9045-14e41150b83e)
-    (property "Reference" "U119" (at 533.4 537.21 0)
+    (property "Reference" "E83" (at 533.4 537.21 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC04" (at 533.4 539.75 0)
@@ -17642,7 +17642,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U119") (unit 2)
+          (reference "E83") (unit 2)
         )
       )
     )
@@ -17651,7 +17651,7 @@
   (symbol (lib_id "74xx:74AHC08") (at 533.4 345.44 0) (mirror x) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 225f275b-cc63-4e68-b345-b5e6a33d279c)
-    (property "Reference" "U56" (at 533.4 336.55 0)
+    (property "Reference" "E54" (at 533.4 336.55 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC08" (at 533.4 339.09 0)
@@ -17680,7 +17680,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U56") (unit 1)
+          (reference "E54") (unit 1)
         )
       )
     )
@@ -17689,7 +17689,7 @@
   (symbol (lib_id "Device:C") (at 101.6 -62.23 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 22872c6c-8871-4436-a710-31044814fe87)
-    (property "Reference" "C16" (at 105.41 -63.5 0)
+    (property "Reference" "C13" (at 105.41 -63.5 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 105.41 -60.96 0)
@@ -17706,7 +17706,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C16") (unit 1)
+          (reference "C13") (unit 1)
         )
       )
     )
@@ -17715,7 +17715,7 @@
   (symbol (lib_id "74xx:74AHC32") (at 139.7 -25.4 0) (unit 5)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 2492c2cd-4be6-4a60-a93b-c216bf00badf)
-    (property "Reference" "U110" (at 146.05 -26.67 0)
+    (property "Reference" "E88" (at 146.05 -26.67 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AHC32" (at 146.05 -24.13 0)
@@ -17744,7 +17744,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U110") (unit 5)
+          (reference "E88") (unit 5)
         )
       )
     )
@@ -17753,7 +17753,7 @@
   (symbol (lib_id "Device:C") (at 901.7 -62.23 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 26362742-e607-44d2-a8b2-95e91c5aa73d)
-    (property "Reference" "C69" (at 905.51 -63.5 0)
+    (property "Reference" "C87" (at 905.51 -63.5 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 905.51 -60.96 0)
@@ -17770,7 +17770,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C69") (unit 1)
+          (reference "C87") (unit 1)
         )
       )
     )
@@ -17779,7 +17779,7 @@
   (symbol (lib_id "Device:C") (at 241.3 -62.23 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 267968c4-f4eb-41f1-ae37-8142166d485c)
-    (property "Reference" "C38" (at 245.11 -63.5 0)
+    (property "Reference" "C94" (at 245.11 -63.5 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 245.11 -60.96 0)
@@ -17796,7 +17796,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C38") (unit 1)
+          (reference "C94") (unit 1)
         )
       )
     )
@@ -17805,7 +17805,7 @@
   (symbol (lib_id "Device:C") (at 482.6 -62.23 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 2840098d-9c93-4b61-addc-c4b497bf9af6)
-    (property "Reference" "C3" (at 486.41 -63.5 0)
+    (property "Reference" "C41" (at 486.41 -63.5 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 486.41 -60.96 0)
@@ -17822,7 +17822,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C3") (unit 1)
+          (reference "C41") (unit 1)
         )
       )
     )
@@ -17831,7 +17831,7 @@
   (symbol (lib_id "Device:C") (at 381 -62.23 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 28a75f7c-3779-4fb1-b230-73961d232a4d)
-    (property "Reference" "C60" (at 384.81 -63.5 0)
+    (property "Reference" "C46" (at 384.81 -63.5 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 384.81 -60.96 0)
@@ -17848,7 +17848,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C60") (unit 1)
+          (reference "C46") (unit 1)
         )
       )
     )
@@ -17857,7 +17857,7 @@
   (symbol (lib_id "74xx:74AHC540") (at 190.5 121.92 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 28f683f4-4781-46ac-9430-f95440d4954b)
-    (property "Reference" "U35" (at 192.6941 101.6 0)
+    (property "Reference" "E61" (at 192.6941 101.6 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AHC540" (at 192.6941 104.14 0)
@@ -17892,7 +17892,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U35") (unit 1)
+          (reference "E61") (unit 1)
         )
       )
     )
@@ -17901,7 +17901,7 @@
   (symbol (lib_id "Device:C") (at 533.4 -62.23 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 2a3097a3-aa54-4c36-b0fb-c6d82b74bab3)
-    (property "Reference" "C11" (at 537.21 -63.5 0)
+    (property "Reference" "C42" (at 537.21 -63.5 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 537.21 -60.96 0)
@@ -17918,7 +17918,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C11") (unit 1)
+          (reference "C42") (unit 1)
         )
       )
     )
@@ -17927,7 +17927,7 @@
   (symbol (lib_id "74xx:74AHC00") (at 513.08 347.98 0) (mirror x) (unit 2)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 2af318f7-4b17-4c9a-8e79-9d6965b6531e)
-    (property "Reference" "U120" (at 513.08 339.09 0)
+    (property "Reference" "E55" (at 513.08 339.09 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC00" (at 513.08 341.63 0)
@@ -17956,7 +17956,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U120") (unit 2)
+          (reference "E55") (unit 2)
         )
       )
     )
@@ -17965,7 +17965,7 @@
   (symbol (lib_id "74xx:74LS74") (at 889 25.4 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 2d0bfcab-9d71-4df6-9cf1-3795b7b732d1)
-    (property "Reference" "U90" (at 891.1941 15.24 0)
+    (property "Reference" "E72" (at 891.1941 15.24 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AHC74" (at 891.1941 17.78 0)
@@ -17994,7 +17994,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U90") (unit 2)
+          (reference "E72") (unit 2)
         )
       )
     )
@@ -18028,7 +18028,7 @@
   (symbol (lib_id "74xx:74AHC00") (at 685.8 393.7 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 2e2f5955-7cd0-4bdb-b641-9b0619c187ba)
-    (property "Reference" "U127" (at 685.7917 384.81 0)
+    (property "Reference" "E77" (at 685.7917 384.81 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC00" (at 685.7917 387.35 0)
@@ -18057,7 +18057,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U127") (unit 1)
+          (reference "E77") (unit 1)
         )
       )
     )
@@ -18066,7 +18066,7 @@
   (symbol (lib_id "74xx:74HC27") (at 685.8 464.82 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 2e6b064e-08dd-42e7-9556-5311611abe6e)
-    (property "Reference" "U154" (at 685.8 455.93 0)
+    (property "Reference" "E33" (at 685.8 455.93 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74HC27" (at 685.8 458.47 0)
@@ -18095,7 +18095,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U154") (unit 2)
+          (reference "E33") (unit 2)
         )
       )
     )
@@ -18104,7 +18104,7 @@
   (symbol (lib_id "Device:C") (at 127 -62.23 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 2f956ee2-f564-4802-a471-d76c4f52f627)
-    (property "Reference" "C20" (at 130.81 -63.5 0)
+    (property "Reference" "C24" (at 130.81 -63.5 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 130.81 -60.96 0)
@@ -18121,7 +18121,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C20") (unit 1)
+          (reference "C24") (unit 1)
         )
       )
     )
@@ -18130,7 +18130,7 @@
   (symbol (lib_id "74xx:74HC30") (at 444.5 -25.4 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 316c7cb4-56bc-43e3-aca7-cb29928f8588)
-    (property "Reference" "U116" (at 450.85 -26.67 0)
+    (property "Reference" "E96" (at 450.85 -26.67 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74HC30" (at 450.85 -24.13 0)
@@ -18156,7 +18156,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U116") (unit 2)
+          (reference "E96") (unit 2)
         )
       )
     )
@@ -18165,7 +18165,7 @@
   (symbol (lib_id "74xx:74AHC00") (at 533.4 563.88 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 31e8aa29-9d41-4e36-ba68-6f6706ba23f8)
-    (property "Reference" "U2" (at 533.3917 554.99 0)
+    (property "Reference" "E85" (at 533.3917 554.99 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC00" (at 533.3917 557.53 0)
@@ -18194,7 +18194,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U2") (unit 3)
+          (reference "E85") (unit 3)
         )
       )
     )
@@ -18203,7 +18203,7 @@
   (symbol (lib_id "74xx:74LS08") (at 576.58 408.94 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 3214908e-0931-49db-a9b8-3a2688f11929)
-    (property "Reference" "U56" (at 576.5717 400.05 0)
+    (property "Reference" "E54" (at 576.5717 400.05 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC08" (at 576.5717 402.59 0)
@@ -18232,7 +18232,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U56") (unit 2)
+          (reference "E54") (unit 2)
         )
       )
     )
@@ -18241,7 +18241,7 @@
   (symbol (lib_id "74xx:74AHC540") (at 78.74 66.04 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 32705c91-e055-4c1b-b415-9d949fe5212c)
-    (property "Reference" "U1" (at 80.9341 45.72 0)
+    (property "Reference" "E11" (at 80.9341 45.72 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AHC540" (at 80.9341 48.26 0)
@@ -18276,7 +18276,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U1") (unit 1)
+          (reference "E11") (unit 1)
         )
       )
     )
@@ -18285,7 +18285,7 @@
   (symbol (lib_id "74xx:74AHC00") (at 457.2 33.02 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 32d49eb1-1ab7-4f47-bedb-e3cbf2e6db21)
-    (property "Reference" "U91" (at 457.1917 24.13 0)
+    (property "Reference" "E84" (at 457.1917 24.13 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC00" (at 457.1917 26.67 0)
@@ -18314,7 +18314,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U91") (unit 2)
+          (reference "E84") (unit 2)
         )
       )
     )
@@ -18348,7 +18348,7 @@
   (symbol (lib_id "74xx:74AC11") (at 281.94 797.56 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 34f32f0f-5278-474e-ad95-f8d45ac330ee)
-    (property "Reference" "U57" (at 281.9317 788.67 0)
+    (property "Reference" "E65" (at 281.9317 788.67 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AC11" (at 281.9317 791.21 0)
@@ -18377,7 +18377,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U57") (unit 1)
+          (reference "E65") (unit 1)
         )
       )
     )
@@ -18386,7 +18386,7 @@
   (symbol (lib_id "74xx:74AHC00") (at 492.76 436.88 0) (unit 4)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 35e05c3f-754b-4da8-abf3-6c8a2a52892d)
-    (property "Reference" "U113" (at 492.7517 427.99 0)
+    (property "Reference" "E58" (at 492.7517 427.99 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC00" (at 492.7517 430.53 0)
@@ -18415,7 +18415,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U113") (unit 4)
+          (reference "E58") (unit 4)
         )
       )
     )
@@ -18424,7 +18424,7 @@
   (symbol (lib_id "74xx:74AHC00") (at 533.4 246.38 0) (mirror x) (unit 2)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 3672d448-6666-4f5e-afe9-49b669c68b1a)
-    (property "Reference" "U82" (at 533.4 237.49 0)
+    (property "Reference" "E75" (at 533.4 237.49 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC00" (at 533.4 240.03 0)
@@ -18453,7 +18453,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U82") (unit 2)
+          (reference "E75") (unit 2)
         )
       )
     )
@@ -18462,7 +18462,7 @@
   (symbol (lib_id "74xx:74AHC00") (at 467.36 167.64 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 3708827c-66a9-49d2-84ad-8e35aa57b83b)
-    (property "Reference" "U108" (at 467.3517 158.75 0)
+    (property "Reference" "E92" (at 467.3517 158.75 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC00" (at 467.3517 161.29 0)
@@ -18491,7 +18491,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U108") (unit 1)
+          (reference "E92") (unit 1)
         )
       )
     )
@@ -18500,7 +18500,7 @@
   (symbol (lib_id "74xx:74AHC74") (at 609.6 604.52 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 3808468e-cdf7-4217-952a-a70d769ae87d)
-    (property "Reference" "U90" (at 611.7941 594.36 0)
+    (property "Reference" "E72" (at 611.7941 594.36 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AHC74" (at 611.7941 596.9 0)
@@ -18529,7 +18529,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U90") (unit 1)
+          (reference "E72") (unit 1)
         )
       )
     )
@@ -18538,7 +18538,7 @@
   (symbol (lib_id "74xx:74AC10") (at 472.44 261.62 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 38bdaff3-c844-4b72-a67b-d2adf1e931dd)
-    (property "Reference" "U111" (at 472.4317 252.73 0)
+    (property "Reference" "E76" (at 472.4317 252.73 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AC10" (at 472.4317 255.27 0)
@@ -18567,7 +18567,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U111") (unit 1)
+          (reference "E76") (unit 1)
         )
       )
     )
@@ -18626,7 +18626,7 @@
   (symbol (lib_id "Device:C") (at 469.9 -62.23 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 3a211d11-7690-4da5-b56a-d04dd980544a)
-    (property "Reference" "C1" (at 473.71 -63.5 0)
+    (property "Reference" "C21" (at 473.71 -63.5 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 473.71 -60.96 0)
@@ -18643,7 +18643,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C1") (unit 1)
+          (reference "C21") (unit 1)
         )
       )
     )
@@ -18652,7 +18652,7 @@
   (symbol (lib_id "74xx:74AHC00") (at 12.7 -25.4 0) (unit 5)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 3c2083b0-7453-405f-ac83-ffbd371a29e4)
-    (property "Reference" "U91" (at 19.05 -26.67 0)
+    (property "Reference" "E84" (at 19.05 -26.67 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AHC00" (at 19.05 -24.13 0)
@@ -18681,7 +18681,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U91") (unit 5)
+          (reference "E84") (unit 5)
         )
       )
     )
@@ -18690,7 +18690,7 @@
   (symbol (lib_id "74xx:74HC27") (at 685.8 314.96 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 3c6fbb18-4fbf-48e7-9c22-ee78efaea0c9)
-    (property "Reference" "U145" (at 685.8 306.07 0)
+    (property "Reference" "E23" (at 685.8 306.07 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74HC27" (at 685.8 308.61 0)
@@ -18719,7 +18719,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U145") (unit 1)
+          (reference "E23") (unit 1)
         )
       )
     )
@@ -18728,7 +18728,7 @@
   (symbol (lib_id "74xx:74AHC04") (at 736.6 604.52 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 3d63ec99-271c-4bf3-8adb-f81194edc169)
-    (property "Reference" "U124" (at 736.6 595.63 0)
+    (property "Reference" "E87" (at 736.6 595.63 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC04" (at 736.6 598.17 0)
@@ -18757,7 +18757,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U124") (unit 1)
+          (reference "E87") (unit 1)
         )
       )
     )
@@ -18766,7 +18766,7 @@
   (symbol (lib_id "74xx:74AHC04") (at 736.6 635 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 3da67835-660a-4f83-9678-8616f9aaf4e8)
-    (property "Reference" "U119" (at 736.6 626.11 0)
+    (property "Reference" "E83" (at 736.6 626.11 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC04" (at 736.6 628.65 0)
@@ -18795,7 +18795,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U119") (unit 3)
+          (reference "E83") (unit 3)
         )
       )
     )
@@ -18804,7 +18804,7 @@
   (symbol (lib_id "74xx:74AC10") (at 533.4 302.26 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 3e85eb57-a79f-4112-ba24-bd63d8385da1)
-    (property "Reference" "U112" (at 533.3917 293.37 0)
+    (property "Reference" "E74" (at 533.3917 293.37 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AC10" (at 533.3917 295.91 0)
@@ -18833,7 +18833,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U112") (unit 2)
+          (reference "E74") (unit 2)
         )
       )
     )
@@ -18867,7 +18867,7 @@
   (symbol (lib_id "Device:C") (at 876.3 -62.23 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 40a7a544-97cc-4f17-8dc1-7298ac0c71ab)
-    (property "Reference" "C65" (at 880.11 -63.5 0)
+    (property "Reference" "C68" (at 880.11 -63.5 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 880.11 -60.96 0)
@@ -18884,7 +18884,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C65") (unit 1)
+          (reference "C68") (unit 1)
         )
       )
     )
@@ -18893,7 +18893,7 @@
   (symbol (lib_id "74xx:74HC27") (at 685.8 480.06 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 4273713a-6797-4ba5-b698-196287c6657d)
-    (property "Reference" "U145" (at 685.8 471.17 0)
+    (property "Reference" "E23" (at 685.8 471.17 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74HC27" (at 685.8 473.71 0)
@@ -18922,7 +18922,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U145") (unit 3)
+          (reference "E23") (unit 3)
         )
       )
     )
@@ -18931,7 +18931,7 @@
   (symbol (lib_id "74xx:74HC27") (at 863.6 25.4 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 4407c19b-fd0d-4abb-a814-f303874e9647)
-    (property "Reference" "U152" (at 863.6 16.51 0)
+    (property "Reference" "E78" (at 863.6 16.51 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74HC27" (at 863.6 19.05 0)
@@ -18960,7 +18960,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U152") (unit 2)
+          (reference "E78") (unit 2)
         )
       )
     )
@@ -19019,7 +19019,7 @@
   (symbol (lib_id "74xx:74HC30") (at 317.5 -25.4 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 4454c99e-ee40-459d-a271-e618dc1a5d7e)
-    (property "Reference" "U71" (at 323.85 -26.67 0)
+    (property "Reference" "E67" (at 323.85 -26.67 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74HC30" (at 323.85 -24.13 0)
@@ -19045,7 +19045,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U71") (unit 2)
+          (reference "E67") (unit 2)
         )
       )
     )
@@ -19054,7 +19054,7 @@
   (symbol (lib_id "74xx:74AHC540") (at 78.74 121.92 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 44633cb8-2274-46c5-9bd8-45b964989310)
-    (property "Reference" "U18" (at 80.9341 101.6 0)
+    (property "Reference" "E41" (at 80.9341 101.6 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AHC540" (at 80.9341 104.14 0)
@@ -19089,7 +19089,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U18") (unit 1)
+          (reference "E41") (unit 1)
         )
       )
     )
@@ -19098,7 +19098,7 @@
   (symbol (lib_id "74xx:74AHC02") (at 868.68 751.84 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 447adc7e-ecea-41f4-932c-17712442fc35)
-    (property "Reference" "U142" (at 868.68 742.95 0)
+    (property "Reference" "E56" (at 868.68 742.95 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC02" (at 868.68 745.49 0)
@@ -19127,7 +19127,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U142") (unit 3)
+          (reference "E56") (unit 3)
         )
       )
     )
@@ -19161,7 +19161,7 @@
   (symbol (lib_id "74xx:74AHC00") (at 492.76 497.84 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 456cf882-8e2a-4eaa-9efe-cb65c67475c0)
-    (property "Reference" "U113" (at 492.7517 488.95 0)
+    (property "Reference" "E58" (at 492.7517 488.95 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC00" (at 492.7517 491.49 0)
@@ -19190,7 +19190,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U113") (unit 1)
+          (reference "E58") (unit 1)
         )
       )
     )
@@ -19224,7 +19224,7 @@
   (symbol (lib_id "Device:C") (at 152.4 -62.23 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 457c5325-0006-467e-9e82-d0a32b521b30)
-    (property "Reference" "C24" (at 156.21 -63.5 0)
+    (property "Reference" "C15" (at 156.21 -63.5 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 156.21 -60.96 0)
@@ -19241,7 +19241,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C24") (unit 1)
+          (reference "C15") (unit 1)
         )
       )
     )
@@ -19250,7 +19250,7 @@
   (symbol (lib_id "74xx:74AC151") (at 381 810.26 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 46819abd-2ece-4f51-adbe-590a81d24f7b)
-    (property "Reference" "U104" (at 383.1941 787.4 0)
+    (property "Reference" "E37" (at 383.1941 787.4 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AC151" (at 383.1941 789.94 0)
@@ -19281,7 +19281,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U104") (unit 1)
+          (reference "E37") (unit 1)
         )
       )
     )
@@ -19290,7 +19290,7 @@
   (symbol (lib_id "74xx:74AHC74") (at 63.5 -25.4 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 46c461fd-2f15-42d7-8b68-769349b1ec5f)
-    (property "Reference" "U90" (at 69.85 -26.67 0)
+    (property "Reference" "E72" (at 69.85 -26.67 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AHC74" (at 69.85 -24.13 0)
@@ -19319,7 +19319,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U90") (unit 3)
+          (reference "E72") (unit 3)
         )
       )
     )
@@ -19353,7 +19353,7 @@
   (symbol (lib_id "74xx:74AHC540") (at 190.5 66.04 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 47085daf-294d-4c51-b15b-cbdc68aadfe4)
-    (property "Reference" "U17" (at 192.6941 45.72 0)
+    (property "Reference" "E31" (at 192.6941 45.72 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AHC540" (at 192.6941 48.26 0)
@@ -19388,7 +19388,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U17") (unit 1)
+          (reference "E31") (unit 1)
         )
       )
     )
@@ -19447,7 +19447,7 @@
   (symbol (lib_id "Device:C") (at 711.2 -62.23 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 4952064b-f59f-4031-bc0b-24e61ccfca96)
-    (property "Reference" "C39" (at 715.01 -63.5 0)
+    (property "Reference" "C82" (at 715.01 -63.5 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 715.01 -60.96 0)
@@ -19464,7 +19464,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C39") (unit 1)
+          (reference "C82") (unit 1)
         )
       )
     )
@@ -19473,7 +19473,7 @@
   (symbol (lib_id "74xx:74AHC00") (at 787.4 55.88 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 4983985b-d99f-443e-aef3-a27a2a8ddcfe)
-    (property "Reference" "U109" (at 787.3917 46.99 0)
+    (property "Reference" "E93" (at 787.3917 46.99 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC00" (at 787.3917 49.53 0)
@@ -19502,7 +19502,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U109") (unit 2)
+          (reference "E93") (unit 2)
         )
       )
     )
@@ -19511,7 +19511,7 @@
   (symbol (lib_id "74xx:74AHC174") (at 609.6 396.24 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 498692c3-2e2c-40b9-b1a8-ce1b2e36327f)
-    (property "Reference" "U136" (at 611.7941 378.46 0)
+    (property "Reference" "E34" (at 611.7941 378.46 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AHC174" (at 611.7941 381 0)
@@ -19542,7 +19542,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U136") (unit 1)
+          (reference "E34") (unit 1)
         )
       )
     )
@@ -19576,7 +19576,7 @@
   (symbol (lib_id "74xx:74AHC04") (at 843.28 769.62 0) (unit 4)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 4c86ac14-9466-4b2f-8e06-cdc2a39ca504)
-    (property "Reference" "U141" (at 843.28 760.73 0)
+    (property "Reference" "E68" (at 843.28 760.73 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC04" (at 843.28 763.27 0)
@@ -19605,7 +19605,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U141") (unit 4)
+          (reference "E68") (unit 4)
         )
       )
     )
@@ -19614,7 +19614,7 @@
   (symbol (lib_id "Device:C") (at 177.8 -62.23 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 4c8b6137-de35-4a07-af6b-58f48d94ba99)
-    (property "Reference" "C28" (at 181.61 -63.5 0)
+    (property "Reference" "C53" (at 181.61 -63.5 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 181.61 -60.96 0)
@@ -19631,7 +19631,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C28") (unit 1)
+          (reference "C53") (unit 1)
         )
       )
     )
@@ -19640,7 +19640,7 @@
   (symbol (lib_id "74xx:74AC151") (at 381 492.76 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 4e62e723-8716-4f12-9d13-5444228bca4e)
-    (property "Reference" "U99" (at 383.1941 469.9 0)
+    (property "Reference" "E15" (at 383.1941 469.9 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AC151" (at 383.1941 472.44 0)
@@ -19671,7 +19671,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U99") (unit 1)
+          (reference "E15") (unit 1)
         )
       )
     )
@@ -19680,7 +19680,7 @@
   (symbol (lib_id "Device:C") (at 863.6 -62.23 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 4e6b2a5d-34d8-493d-a3d4-b0c73caa2038)
-    (property "Reference" "C63" (at 867.41 -63.5 0)
+    (property "Reference" "C67" (at 867.41 -63.5 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 867.41 -60.96 0)
@@ -19697,7 +19697,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C63") (unit 1)
+          (reference "C67") (unit 1)
         )
       )
     )
@@ -19706,7 +19706,7 @@
   (symbol (lib_id "Device:C") (at 114.3 -62.23 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 4ff9ca24-edf9-4811-b6e5-7a9c3daed6c7)
-    (property "Reference" "C18" (at 118.11 -63.5 0)
+    (property "Reference" "C33" (at 118.11 -63.5 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 118.11 -60.96 0)
@@ -19723,7 +19723,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C18") (unit 1)
+          (reference "C33") (unit 1)
         )
       )
     )
@@ -19732,7 +19732,7 @@
   (symbol (lib_id "Device:C") (at 609.6 -62.23 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 5069b42d-482d-458a-88b0-ca392f2a70b8)
-    (property "Reference" "C23" (at 613.41 -63.5 0)
+    (property "Reference" "C43" (at 613.41 -63.5 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 613.41 -60.96 0)
@@ -19749,7 +19749,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C23") (unit 1)
+          (reference "C43") (unit 1)
         )
       )
     )
@@ -19758,7 +19758,7 @@
   (symbol (lib_id "74xx:74AC151") (at 381 556.26 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 50b5c243-ab18-4855-a78f-4bd72d81693f)
-    (property "Reference" "U100" (at 383.1941 533.4 0)
+    (property "Reference" "E14" (at 383.1941 533.4 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AC151" (at 383.1941 535.94 0)
@@ -19789,7 +19789,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U100") (unit 1)
+          (reference "E14") (unit 1)
         )
       )
     )
@@ -19798,7 +19798,7 @@
   (symbol (lib_id "74xx:74HC30") (at 685.8 373.38 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 50c3fe65-986c-4a5e-9a2a-245a672a50c1)
-    (property "Reference" "U71" (at 685.7917 360.68 0)
+    (property "Reference" "E67" (at 685.7917 360.68 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74HC30" (at 685.7917 363.22 0)
@@ -19824,7 +19824,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U71") (unit 1)
+          (reference "E67") (unit 1)
         )
       )
     )
@@ -19858,7 +19858,7 @@
   (symbol (lib_id "74xx:74AHC00") (at 685.8 447.04 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 51454fff-6d05-4b3d-9af2-e79c19b2ca28)
-    (property "Reference" "U107" (at 685.7917 438.15 0)
+    (property "Reference" "E63" (at 685.7917 438.15 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC00" (at 685.7917 440.69 0)
@@ -19887,7 +19887,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U107") (unit 3)
+          (reference "E63") (unit 3)
         )
       )
     )
@@ -19896,7 +19896,7 @@
   (symbol (lib_id "Device:C") (at 825.5 -62.23 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 53ca3f67-41b1-4804-87d7-1351364f3834)
-    (property "Reference" "C57" (at 829.31 -63.5 0)
+    (property "Reference" "C38" (at 829.31 -63.5 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 829.31 -60.96 0)
@@ -19913,7 +19913,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C57") (unit 1)
+          (reference "C38") (unit 1)
         )
       )
     )
@@ -19922,7 +19922,7 @@
   (symbol (lib_id "Device:C") (at 330.2 -62.23 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 54c13837-6abb-4717-9eee-f6a29ce016be)
-    (property "Reference" "C52" (at 334.01 -63.5 0)
+    (property "Reference" "C28" (at 334.01 -63.5 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 334.01 -60.96 0)
@@ -19939,7 +19939,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C52") (unit 1)
+          (reference "C28") (unit 1)
         )
       )
     )
@@ -19948,7 +19948,7 @@
   (symbol (lib_id "74xx:74LS04") (at 655.32 368.3 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 55ea5c15-8521-48ae-9b34-30604a0d8f2d)
-    (property "Reference" "U141" (at 655.32 359.41 0)
+    (property "Reference" "E68" (at 655.32 359.41 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC04" (at 655.32 361.95 0)
@@ -19977,7 +19977,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U141") (unit 2)
+          (reference "E68") (unit 2)
         )
       )
     )
@@ -19986,7 +19986,7 @@
   (symbol (lib_id "74xx:74AHC08") (at 838.2 25.4 0) (unit 4)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 5665a1e1-b4cd-4b35-bc7b-e716f0d902fb)
-    (property "Reference" "U56" (at 838.1917 16.51 0)
+    (property "Reference" "E54" (at 838.1917 16.51 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC08" (at 838.1917 19.05 0)
@@ -20015,7 +20015,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U56") (unit 4)
+          (reference "E54") (unit 4)
         )
       )
     )
@@ -20024,7 +20024,7 @@
   (symbol (lib_id "74xx:74HC27") (at 88.9 -25.4 0) (unit 4)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 56ae8b68-e190-4438-884f-2723e8c08b52)
-    (property "Reference" "U154" (at 95.25 -26.67 0)
+    (property "Reference" "E33" (at 95.25 -26.67 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74HC27" (at 95.25 -24.13 0)
@@ -20053,7 +20053,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U154") (unit 4)
+          (reference "E33") (unit 4)
         )
       )
     )
@@ -20062,7 +20062,7 @@
   (symbol (lib_id "Device:C") (at 342.9 -62.23 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 57c349a0-8242-4814-8cac-a94423c4d96f)
-    (property "Reference" "C54" (at 346.71 -63.5 0)
+    (property "Reference" "C57" (at 346.71 -63.5 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 346.71 -60.96 0)
@@ -20079,7 +20079,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C54") (unit 1)
+          (reference "C57") (unit 1)
         )
       )
     )
@@ -20088,7 +20088,7 @@
   (symbol (lib_id "74xx:74AC10") (at 441.96 134.62 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 5842a484-c427-4b46-97de-546cab60de97)
-    (property "Reference" "U105" (at 441.9517 125.73 0)
+    (property "Reference" "E48" (at 441.9517 125.73 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AC10" (at 441.9517 128.27 0)
@@ -20117,7 +20117,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U105") (unit 1)
+          (reference "E48") (unit 1)
         )
       )
     )
@@ -20126,7 +20126,7 @@
   (symbol (lib_id "74xx:74AHC04") (at 114.3 -25.4 0) (unit 7)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 58c8e906-2248-4f68-8d54-152b1acc5bc7)
-    (property "Reference" "U106" (at 121.92 -26.67 0)
+    (property "Reference" "E47" (at 121.92 -26.67 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AHC04" (at 121.92 -24.13 0)
@@ -20155,7 +20155,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U106") (unit 7)
+          (reference "E47") (unit 7)
         )
       )
     )
@@ -20164,7 +20164,7 @@
   (symbol (lib_id "74xx:74HC21") (at 706.12 337.82 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 5a2bfa69-2970-4f53-9ac8-8a3e9b884b62)
-    (property "Reference" "U155" (at 706.1103 328.93 0)
+    (property "Reference" "E44" (at 706.1103 328.93 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74HC21" (at 706.1103 331.47 0)
@@ -20191,7 +20191,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U155") (unit 1)
+          (reference "E44") (unit 1)
         )
       )
     )
@@ -20200,7 +20200,7 @@
   (symbol (lib_id "74xx:74AC20") (at 622.3 -25.4 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 5a5ed0c3-6985-42f6-8022-19667d7c028e)
-    (property "Reference" "U117" (at 628.65 -26.67 0)
+    (property "Reference" "E66" (at 628.65 -26.67 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AC20" (at 628.65 -24.13 0)
@@ -20227,7 +20227,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U117") (unit 3)
+          (reference "E66") (unit 3)
         )
       )
     )
@@ -20236,7 +20236,7 @@
   (symbol (lib_id "74xx:74AHC04") (at 513.08 302.26 0) (unit 6)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 5a683942-bd63-4b7c-9ec8-8d2fa8c6f90f)
-    (property "Reference" "U119" (at 513.08 293.37 0)
+    (property "Reference" "E83" (at 513.08 293.37 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC04" (at 513.08 295.91 0)
@@ -20265,7 +20265,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U119") (unit 6)
+          (reference "E83") (unit 6)
         )
       )
     )
@@ -20274,7 +20274,7 @@
   (symbol (lib_id "Device:C") (at 228.6 -62.23 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 5b17be06-f188-4857-865c-3dfd56f6ae75)
-    (property "Reference" "C36" (at 232.41 -63.5 0)
+    (property "Reference" "C81" (at 232.41 -63.5 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 232.41 -60.96 0)
@@ -20291,7 +20291,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C36") (unit 1)
+          (reference "C81") (unit 1)
         )
       )
     )
@@ -20325,7 +20325,7 @@
   (symbol (lib_id "74xx:74AHC04") (at 812.8 40.64 0) (unit 6)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 5d678662-b291-4594-9034-07e34f8de85e)
-    (property "Reference" "U124" (at 812.8 31.75 0)
+    (property "Reference" "E87" (at 812.8 31.75 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC04" (at 812.8 34.29 0)
@@ -20354,7 +20354,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U124") (unit 6)
+          (reference "E87") (unit 6)
         )
       )
     )
@@ -20388,7 +20388,7 @@
   (symbol (lib_id "74xx:74AHC02") (at 868.68 642.62 0) (unit 4)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 5e7ace7b-7f7b-4741-bacd-4162f63c363b)
-    (property "Reference" "U142" (at 868.68 633.73 0)
+    (property "Reference" "E56" (at 868.68 633.73 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC02" (at 868.68 636.27 0)
@@ -20417,7 +20417,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U142") (unit 4)
+          (reference "E56") (unit 4)
         )
       )
     )
@@ -20426,7 +20426,7 @@
   (symbol (lib_id "Device:C") (at 406.4 -62.23 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 5f188b3e-e85f-4f55-8e2a-989118680c43)
-    (property "Reference" "C64" (at 410.21 -63.5 0)
+    (property "Reference" "C77" (at 410.21 -63.5 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 410.21 -60.96 0)
@@ -20443,7 +20443,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C64") (unit 1)
+          (reference "C77") (unit 1)
         )
       )
     )
@@ -20452,7 +20452,7 @@
   (symbol (lib_id "74xx:74AC151") (at 381 175.26 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 60e5d492-53cd-4aee-a194-3fdc64dd6809)
-    (property "Reference" "U94" (at 383.1941 152.4 0)
+    (property "Reference" "E18" (at 383.1941 152.4 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AC151" (at 383.1941 154.94 0)
@@ -20483,7 +20483,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U94") (unit 1)
+          (reference "E18") (unit 1)
         )
       )
     )
@@ -20492,7 +20492,7 @@
   (symbol (lib_id "74xx:74HC27") (at 215.9 -25.4 0) (unit 4)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 60f709a7-bf47-4daa-988b-2018c8a99f7d)
-    (property "Reference" "U152" (at 222.25 -26.67 0)
+    (property "Reference" "E78" (at 222.25 -26.67 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74HC27" (at 222.25 -24.13 0)
@@ -20521,7 +20521,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U152") (unit 4)
+          (reference "E78") (unit 4)
         )
       )
     )
@@ -20530,7 +20530,7 @@
   (symbol (lib_id "74xx:74HC27") (at 685.8 495.3 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 62f95f7a-dbff-44f8-9c52-736b5ae39541)
-    (property "Reference" "U154" (at 685.8 486.41 0)
+    (property "Reference" "E33" (at 685.8 486.41 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74HC27" (at 685.8 488.95 0)
@@ -20559,7 +20559,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U154") (unit 1)
+          (reference "E33") (unit 1)
         )
       )
     )
@@ -20593,7 +20593,7 @@
   (symbol (lib_id "Device:C") (at 12.7 -62.23 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 63670840-5263-4cd5-ad92-5ee0c9ed5844)
-    (property "Reference" "C2" (at 16.51 -63.5 0)
+    (property "Reference" "C12" (at 16.51 -63.5 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 16.51 -60.96 0)
@@ -20610,7 +20610,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C2") (unit 1)
+          (reference "C12") (unit 1)
         )
       )
     )
@@ -20619,7 +20619,7 @@
   (symbol (lib_id "74xx:74AC20") (at 533.4 406.4 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 63a3e926-6d11-41df-9df7-336310b8a85c)
-    (property "Reference" "U122" (at 533.3903 397.51 0)
+    (property "Reference" "E62" (at 533.3903 397.51 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AC20" (at 533.3903 400.05 0)
@@ -20646,7 +20646,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U122") (unit 1)
+          (reference "E62") (unit 1)
         )
       )
     )
@@ -20680,7 +20680,7 @@
   (symbol (lib_id "74xx:74AHC174") (at 609.6 447.04 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 66fbc174-8608-43ff-8018-061bb709e579)
-    (property "Reference" "U137" (at 611.7941 429.26 0)
+    (property "Reference" "E24" (at 611.7941 429.26 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AHC174" (at 611.7941 431.8 0)
@@ -20711,7 +20711,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U137") (unit 1)
+          (reference "E24") (unit 1)
         )
       )
     )
@@ -20745,7 +20745,7 @@
   (symbol (lib_id "74xx:74AHC32") (at 863.6 71.12 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 67b857b9-4906-410b-a31c-9d02bb9a0e86)
-    (property "Reference" "U110" (at 863.6 62.23 0)
+    (property "Reference" "E88" (at 863.6 62.23 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC32" (at 863.6 64.77 0)
@@ -20774,7 +20774,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U110") (unit 3)
+          (reference "E88") (unit 3)
         )
       )
     )
@@ -20783,7 +20783,7 @@
   (symbol (lib_id "Device:C") (at 444.5 -62.23 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 6854deb7-c716-4cb7-bec3-cc37b967169b)
-    (property "Reference" "C70" (at 448.31 -63.5 0)
+    (property "Reference" "C85" (at 448.31 -63.5 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 448.31 -60.96 0)
@@ -20800,7 +20800,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C70") (unit 1)
+          (reference "C85") (unit 1)
         )
       )
     )
@@ -20809,7 +20809,7 @@
   (symbol (lib_id "74xx:74AHC74") (at 609.6 510.54 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 6966cf5d-986c-41d2-9e32-c636a62217cd)
-    (property "Reference" "U138" (at 611.7941 500.38 0)
+    (property "Reference" "E82" (at 611.7941 500.38 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AHC74" (at 611.7941 502.92 0)
@@ -20838,7 +20838,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U138") (unit 1)
+          (reference "E82") (unit 1)
         )
       )
     )
@@ -20847,7 +20847,7 @@
   (symbol (lib_id "74xx:74AHC00") (at 685.8 429.26 0) (unit 4)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 6979eccb-6fe5-4713-9dae-5b2fa8f482fd)
-    (property "Reference" "U107" (at 685.7917 420.37 0)
+    (property "Reference" "E63" (at 685.7917 420.37 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC00" (at 685.7917 422.91 0)
@@ -20876,7 +20876,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U107") (unit 4)
+          (reference "E63") (unit 4)
         )
       )
     )
@@ -20885,7 +20885,7 @@
   (symbol (lib_id "74xx:74AHC08") (at 368.3 -25.4 0) (unit 5)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 69873889-ad75-47e8-89aa-a5c4677b1766)
-    (property "Reference" "U56" (at 374.65 -26.67 0)
+    (property "Reference" "E54" (at 374.65 -26.67 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AHC08" (at 374.65 -24.13 0)
@@ -20914,7 +20914,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U56") (unit 5)
+          (reference "E54") (unit 5)
         )
       )
     )
@@ -20923,7 +20923,7 @@
   (symbol (lib_id "74xx:74HC27") (at 868.68 767.08 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 6ea02744-33aa-47cd-b4dd-ec393eb420fc)
-    (property "Reference" "U152" (at 868.68 758.19 0)
+    (property "Reference" "E78" (at 868.68 758.19 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74HC27" (at 868.68 760.73 0)
@@ -20952,7 +20952,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U152") (unit 1)
+          (reference "E78") (unit 1)
         )
       )
     )
@@ -20961,7 +20961,7 @@
   (symbol (lib_id "74xx:74AC10") (at 472.44 246.38 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 6f98c22e-2ce3-4d0f-87d4-4ed613ac7bf4)
-    (property "Reference" "U111" (at 472.4317 237.49 0)
+    (property "Reference" "E76" (at 472.4317 237.49 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AC10" (at 472.4317 240.03 0)
@@ -20990,7 +20990,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U111") (unit 3)
+          (reference "E76") (unit 3)
         )
       )
     )
@@ -21049,7 +21049,7 @@
   (symbol (lib_id "74xx:74AC151") (at 381 746.76 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 72c19085-f343-48ae-a9dc-fc67683eb288)
-    (property "Reference" "U103" (at 383.1941 723.9 0)
+    (property "Reference" "E27" (at 383.1941 723.9 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AC151" (at 383.1941 726.44 0)
@@ -21080,7 +21080,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U103") (unit 1)
+          (reference "E27") (unit 1)
         )
       )
     )
@@ -21089,7 +21089,7 @@
   (symbol (lib_id "74xx:74AHC04") (at 469.9 -25.4 0) (unit 7)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 73108b5c-3f58-4553-859b-079329508628)
-    (property "Reference" "U119" (at 476.25 -26.67 0)
+    (property "Reference" "E83" (at 476.25 -26.67 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AHC04" (at 476.25 -24.13 0)
@@ -21118,7 +21118,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U119") (unit 7)
+          (reference "E83") (unit 7)
         )
       )
     )
@@ -21127,7 +21127,7 @@
   (symbol (lib_id "74xx:74AC151") (at 381 302.26 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 747f8e1d-30bd-46a1-8999-aee0a0311579)
-    (property "Reference" "U96" (at 383.1941 279.4 0)
+    (property "Reference" "E35" (at 383.1941 279.4 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AC151" (at 383.1941 281.94 0)
@@ -21158,7 +21158,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U96") (unit 1)
+          (reference "E35") (unit 1)
         )
       )
     )
@@ -21167,7 +21167,7 @@
   (symbol (lib_id "Device:C") (at 190.5 -62.23 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 7496b71a-1a1b-46df-9e6b-f0d0a42e4409)
-    (property "Reference" "C30" (at 194.31 -63.5 0)
+    (property "Reference" "C63" (at 194.31 -63.5 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 194.31 -60.96 0)
@@ -21184,7 +21184,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C30") (unit 1)
+          (reference "C63") (unit 1)
         )
       )
     )
@@ -21193,7 +21193,7 @@
   (symbol (lib_id "74xx:74AC161") (at 609.6 243.84 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 756e5d49-48c7-4744-a0e2-75e33eaa0575)
-    (property "Reference" "U133" (at 611.7941 223.52 0)
+    (property "Reference" "E53" (at 611.7941 223.52 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AC161" (at 611.7941 226.06 0)
@@ -21224,7 +21224,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U133") (unit 1)
+          (reference "E53") (unit 1)
         )
       )
     )
@@ -21258,7 +21258,7 @@
   (symbol (lib_id "74xx:74AC10") (at 596.9 -25.4 0) (unit 4)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 765f63b1-92ca-470d-97cf-24df2f998808)
-    (property "Reference" "U111" (at 603.25 -26.67 0)
+    (property "Reference" "E76" (at 603.25 -26.67 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AC10" (at 603.25 -24.13 0)
@@ -21287,7 +21287,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U111") (unit 4)
+          (reference "E76") (unit 4)
         )
       )
     )
@@ -21296,7 +21296,7 @@
   (symbol (lib_id "74xx:74AHC00") (at 472.44 276.86 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 767e6b36-9fd3-4f38-9afe-97d7739efe09)
-    (property "Reference" "U82" (at 472.4317 267.97 0)
+    (property "Reference" "E75" (at 472.4317 267.97 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC00" (at 472.4317 270.51 0)
@@ -21325,7 +21325,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U82") (unit 3)
+          (reference "E75") (unit 3)
         )
       )
     )
@@ -21334,7 +21334,7 @@
   (symbol (lib_id "Device:C") (at 838.2 -62.23 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 7799bb86-9a79-47d9-bac4-107db25cb947)
-    (property "Reference" "C59" (at 842.01 -63.5 0)
+    (property "Reference" "C47" (at 842.01 -63.5 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 842.01 -60.96 0)
@@ -21351,7 +21351,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C59") (unit 1)
+          (reference "C47") (unit 1)
         )
       )
     )
@@ -21360,7 +21360,7 @@
   (symbol (lib_id "74xx:74AHC08") (at 533.4 510.54 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 79052f3b-f2f1-4558-9640-c35c9a90b165)
-    (property "Reference" "U54" (at 533.4 501.65 0)
+    (property "Reference" "E73" (at 533.4 501.65 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC08" (at 533.4 504.19 0)
@@ -21389,7 +21389,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U54") (unit 3)
+          (reference "E73") (unit 3)
         )
       )
     )
@@ -21398,7 +21398,7 @@
   (symbol (lib_id "74xx:74AHC74") (at 812.8 647.7 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 794f4420-c62b-4e18-9368-e9d49abf144b)
-    (property "Reference" "U138" (at 814.9941 637.54 0)
+    (property "Reference" "E82" (at 814.9941 637.54 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AHC74" (at 814.9941 640.08 0)
@@ -21427,7 +21427,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U138") (unit 2)
+          (reference "E82") (unit 2)
         )
       )
     )
@@ -21436,7 +21436,7 @@
   (symbol (lib_id "74xx:74AHC04") (at 868.68 706.12 0) (unit 5)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 7a177e43-ba1a-4e62-8aca-88787b1ffb6e)
-    (property "Reference" "U106" (at 868.68 697.23 0)
+    (property "Reference" "E47" (at 868.68 697.23 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC04" (at 868.68 699.77 0)
@@ -21465,7 +21465,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U106") (unit 5)
+          (reference "E47") (unit 5)
         )
       )
     )
@@ -21524,7 +21524,7 @@
   (symbol (lib_id "Device:C") (at 508 -62.23 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 7c43ef75-0cc4-4999-9532-32e76efdd296)
-    (property "Reference" "C7" (at 511.81 -63.5 0)
+    (property "Reference" "C11" (at 511.81 -63.5 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 511.81 -60.96 0)
@@ -21541,7 +21541,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C7") (unit 1)
+          (reference "C11") (unit 1)
         )
       )
     )
@@ -21550,7 +21550,7 @@
   (symbol (lib_id "74xx:74AHC00") (at 553.72 571.5 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 7c832279-4dba-461c-873e-0f5ca1f90707)
-    (property "Reference" "U109" (at 553.7117 562.61 0)
+    (property "Reference" "E93" (at 553.7117 562.61 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC00" (at 553.7117 565.15 0)
@@ -21579,7 +21579,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U109") (unit 1)
+          (reference "E93") (unit 1)
         )
       )
     )
@@ -21588,7 +21588,7 @@
   (symbol (lib_id "Device:C") (at 736.6 -62.23 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 7cc1f441-073b-4450-b60e-5f80711d3dae)
-    (property "Reference" "C43" (at 740.41 -63.5 0)
+    (property "Reference" "C95" (at 740.41 -63.5 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 740.41 -60.96 0)
@@ -21605,7 +21605,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C43") (unit 1)
+          (reference "C95") (unit 1)
         )
       )
     )
@@ -21614,7 +21614,7 @@
   (symbol (lib_id "74xx:74AHC00") (at 302.26 835.66 0) (unit 4)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 7d8a0432-1473-46bc-9ad3-7aeba05a9dd3)
-    (property "Reference" "U120" (at 302.26 826.77 0)
+    (property "Reference" "E55" (at 302.26 826.77 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC00" (at 302.26 829.31 0)
@@ -21643,7 +21643,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U120") (unit 4)
+          (reference "E55") (unit 4)
         )
       )
     )
@@ -21652,7 +21652,7 @@
   (symbol (lib_id "74xx:74AHC08") (at 533.4 454.66 0) (unit 4)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 7eabfdb4-2ea6-4044-99a5-e475f5398c55)
-    (property "Reference" "U54" (at 533.3917 445.77 0)
+    (property "Reference" "E73" (at 533.3917 445.77 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC08" (at 533.3917 448.31 0)
@@ -21681,7 +21681,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U54") (unit 4)
+          (reference "E73") (unit 4)
         )
       )
     )
@@ -21715,7 +21715,7 @@
   (symbol (lib_id "Device:C") (at 596.9 -62.23 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 8021caca-e8a6-4a7a-849d-8d4733af8993)
-    (property "Reference" "C21" (at 600.71 -63.5 0)
+    (property "Reference" "C34" (at 600.71 -63.5 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 600.71 -60.96 0)
@@ -21732,7 +21732,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C21") (unit 1)
+          (reference "C34") (unit 1)
         )
       )
     )
@@ -21741,7 +21741,7 @@
   (symbol (lib_id "74xx:74AHC138") (at 868.68 576.58 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 818e2037-c9e1-4036-99db-60b33a37a0fb)
-    (property "Reference" "U140" (at 870.8741 558.8 0)
+    (property "Reference" "E46" (at 870.8741 558.8 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AHC138" (at 870.8741 561.34 0)
@@ -21772,7 +21772,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U140") (unit 1)
+          (reference "E46") (unit 1)
         )
       )
     )
@@ -21781,7 +21781,7 @@
   (symbol (lib_id "74xx:74AHC00") (at 513.08 238.76 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 81a7fd84-eb71-47ce-82ce-100df9bf519d)
-    (property "Reference" "U2" (at 513.0717 229.87 0)
+    (property "Reference" "E85" (at 513.0717 229.87 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC00" (at 513.0717 232.41 0)
@@ -21810,7 +21810,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U2") (unit 1)
+          (reference "E85") (unit 1)
         )
       )
     )
@@ -21819,7 +21819,7 @@
   (symbol (lib_id "Device:C") (at 431.8 -62.23 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 8291f332-b7d1-408a-80b9-3408b4446f7a)
-    (property "Reference" "C68" (at 435.61 -63.5 0)
+    (property "Reference" "C86" (at 435.61 -63.5 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 435.61 -60.96 0)
@@ -21836,7 +21836,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C68") (unit 1)
+          (reference "C86") (unit 1)
         )
       )
     )
@@ -21870,7 +21870,7 @@
   (symbol (lib_id "74xx:74AHC00") (at 787.4 40.64 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 83afd63c-e170-4712-b66f-35dcd826d1f7)
-    (property "Reference" "U113" (at 787.3917 31.75 0)
+    (property "Reference" "E58" (at 787.3917 31.75 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC00" (at 787.3917 34.29 0)
@@ -21899,7 +21899,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U113") (unit 3)
+          (reference "E58") (unit 3)
         )
       )
     )
@@ -21908,7 +21908,7 @@
   (symbol (lib_id "74xx:74AC10") (at 825.5 -25.4 0) (unit 4)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 83cfd1ba-a896-4ebc-bda1-5d09fb6ca7fd)
-    (property "Reference" "U112" (at 831.85 -26.67 0)
+    (property "Reference" "E74" (at 831.85 -26.67 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AC10" (at 831.85 -24.13 0)
@@ -21937,7 +21937,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U112") (unit 4)
+          (reference "E74") (unit 4)
         )
       )
     )
@@ -21946,7 +21946,7 @@
   (symbol (lib_id "74xx:74HC30") (at 708.66 497.84 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 8444e66e-e382-4f42-afac-a5bf526598da)
-    (property "Reference" "U157" (at 708.6517 485.14 0)
+    (property "Reference" "E43" (at 708.6517 485.14 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74HC30" (at 708.6517 487.68 0)
@@ -21972,7 +21972,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U157") (unit 1)
+          (reference "E43") (unit 1)
         )
       )
     )
@@ -21981,7 +21981,7 @@
   (symbol (lib_id "74xx:74AHC00") (at 784.86 637.54 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 84571190-cf65-43ee-9856-d4a32a7417de)
-    (property "Reference" "U108" (at 784.8517 628.65 0)
+    (property "Reference" "E92" (at 784.8517 628.65 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC00" (at 784.8517 631.19 0)
@@ -22010,7 +22010,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U108") (unit 2)
+          (reference "E92") (unit 2)
         )
       )
     )
@@ -22019,7 +22019,7 @@
   (symbol (lib_id "74xx:74AHC04") (at 655.32 383.54 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 84720e4f-20e6-40ac-8720-8d7d2d255e22)
-    (property "Reference" "U141" (at 655.32 374.65 0)
+    (property "Reference" "E68" (at 655.32 374.65 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC04" (at 655.32 377.19 0)
@@ -22048,7 +22048,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U141") (unit 1)
+          (reference "E68") (unit 1)
         )
       )
     )
@@ -22082,7 +22082,7 @@
   (symbol (lib_id "74xx:74AC20") (at 513.08 457.2 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 87487530-5c05-4a7f-a311-a37ae4edd324)
-    (property "Reference" "U121" (at 513.0703 448.31 0)
+    (property "Reference" "E86" (at 513.0703 448.31 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AC20" (at 513.0703 450.85 0)
@@ -22109,7 +22109,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U121") (unit 1)
+          (reference "E86") (unit 1)
         )
       )
     )
@@ -22143,7 +22143,7 @@
   (symbol (lib_id "Device:C") (at 266.7 -62.23 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 886eb661-c861-4518-9458-73065de1d93f)
-    (property "Reference" "C42" (at 270.51 -63.5 0)
+    (property "Reference" "C75" (at 270.51 -63.5 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 270.51 -60.96 0)
@@ -22160,7 +22160,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C42") (unit 1)
+          (reference "C75") (unit 1)
         )
       )
     )
@@ -22194,7 +22194,7 @@
   (symbol (lib_id "74xx:74AHC86") (at 302.26 759.46 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 8880eaa8-f9bf-41f4-930d-68175a6e39eb)
-    (property "Reference" "U89" (at 301.9552 750.57 0)
+    (property "Reference" "E64" (at 301.9552 750.57 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC86" (at 301.9552 753.11 0)
@@ -22223,7 +22223,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U89") (unit 1)
+          (reference "E64") (unit 1)
         )
       )
     )
@@ -22232,7 +22232,7 @@
   (symbol (lib_id "74xx:74AHC00") (at 510.54 62.23 0) (unit 4)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 890ec5bf-c85d-44ed-adf7-d10cf670215d)
-    (property "Reference" "U108" (at 510.54 53.34 0)
+    (property "Reference" "E92" (at 510.54 53.34 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC00" (at 510.54 55.88 0)
@@ -22261,7 +22261,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U108") (unit 4)
+          (reference "E92") (unit 4)
         )
       )
     )
@@ -22270,7 +22270,7 @@
   (symbol (lib_id "74xx:74AC161") (at 609.6 294.64 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 8938876d-8dd7-4bb0-8416-202bdc48a0fe)
-    (property "Reference" "U134" (at 611.7941 274.32 0)
+    (property "Reference" "E42" (at 611.7941 274.32 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AC161" (at 611.7941 276.86 0)
@@ -22301,7 +22301,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U134") (unit 1)
+          (reference "E42") (unit 1)
         )
       )
     )
@@ -22310,7 +22310,7 @@
   (symbol (lib_id "74xx:74AHC00") (at 513.08 254 0) (mirror x) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 893a1f2f-f364-412f-a5a2-719e5489e296)
-    (property "Reference" "U82" (at 513.08 245.11 0)
+    (property "Reference" "E75" (at 513.08 245.11 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC00" (at 513.08 247.65 0)
@@ -22339,7 +22339,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U82") (unit 1)
+          (reference "E75") (unit 1)
         )
       )
     )
@@ -22423,7 +22423,7 @@
   (symbol (lib_id "74xx:74AHC04") (at 812.8 55.88 0) (unit 4)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 8c64613e-12aa-4cb1-8b98-2ee6425df94e)
-    (property "Reference" "U125" (at 812.8 46.99 0)
+    (property "Reference" "E95" (at 812.8 46.99 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC04" (at 812.8 49.53 0)
@@ -22452,7 +22452,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U125") (unit 4)
+          (reference "E95") (unit 4)
         )
       )
     )
@@ -22461,7 +22461,7 @@
   (symbol (lib_id "74xx:74AHC00") (at 302.26 820.42 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 8d56c8c4-9c30-4551-b5fe-462987b5c725)
-    (property "Reference" "U120" (at 302.2517 811.53 0)
+    (property "Reference" "E55" (at 302.2517 811.53 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC00" (at 302.2517 814.07 0)
@@ -22490,7 +22490,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U120") (unit 3)
+          (reference "E55") (unit 3)
         )
       )
     )
@@ -22524,7 +22524,7 @@
   (symbol (lib_id "Device:C") (at 50.8 -62.23 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 8ee62a61-cfa4-4da4-903c-a075baec010d)
-    (property "Reference" "C8" (at 54.61 -63.5 0)
+    (property "Reference" "C31" (at 54.61 -63.5 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 54.61 -60.96 0)
@@ -22541,7 +22541,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C8") (unit 1)
+          (reference "C31") (unit 1)
         )
       )
     )
@@ -22550,7 +22550,7 @@
   (symbol (lib_id "74xx:74AHC04") (at 812.8 86.36 0) (unit 6)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 8f339830-b4c3-48cc-a310-705d2d5e2e7b)
-    (property "Reference" "U141" (at 812.8 77.47 0)
+    (property "Reference" "E68" (at 812.8 77.47 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC04" (at 812.8 80.01 0)
@@ -22579,7 +22579,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U141") (unit 6)
+          (reference "E68") (unit 6)
         )
       )
     )
@@ -22588,7 +22588,7 @@
   (symbol (lib_id "Device:C") (at 635 -62.23 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 8f3fba96-62fb-49f3-9ed1-734d074c6268)
-    (property "Reference" "C27" (at 638.81 -63.5 0)
+    (property "Reference" "C45" (at 638.81 -63.5 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 638.81 -60.96 0)
@@ -22605,7 +22605,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C27") (unit 1)
+          (reference "C45") (unit 1)
         )
       )
     )
@@ -22614,7 +22614,7 @@
   (symbol (lib_id "Device:C") (at 673.1 -62.23 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 91b73871-052c-4c42-acc2-3dff5ffe9c17)
-    (property "Reference" "C33" (at 676.91 -63.5 0)
+    (property "Reference" "C96" (at 676.91 -63.5 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 676.91 -60.96 0)
@@ -22631,7 +22631,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C33") (unit 1)
+          (reference "C96") (unit 1)
         )
       )
     )
@@ -22640,7 +22640,7 @@
   (symbol (lib_id "Device:C") (at 165.1 -62.23 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 929d4af8-3611-436b-9a6f-ed33ba1922fd)
-    (property "Reference" "C26" (at 168.91 -63.5 0)
+    (property "Reference" "C35" (at 168.91 -63.5 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 168.91 -60.96 0)
@@ -22657,7 +22657,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C26") (unit 1)
+          (reference "C35") (unit 1)
         )
       )
     )
@@ -22666,7 +22666,7 @@
   (symbol (lib_id "74xx:74AC10") (at 513.08 513.08 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 95a9b813-3d3d-42d8-8a4b-5c6f96e5a3e3)
-    (property "Reference" "U111" (at 513.0717 504.19 0)
+    (property "Reference" "E76" (at 513.0717 504.19 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AC10" (at 513.0717 506.73 0)
@@ -22695,7 +22695,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U111") (unit 2)
+          (reference "E76") (unit 2)
         )
       )
     )
@@ -22704,7 +22704,7 @@
   (symbol (lib_id "74xx:74AHC04") (at 812.8 71.12 0) (unit 5)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 95d369e3-9464-44d5-b49b-4bf2f5aba5e7)
-    (property "Reference" "U124" (at 812.8 62.23 0)
+    (property "Reference" "E87" (at 812.8 62.23 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC04" (at 812.8 64.77 0)
@@ -22733,7 +22733,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U124") (unit 5)
+          (reference "E87") (unit 5)
         )
       )
     )
@@ -22742,7 +22742,7 @@
   (symbol (lib_id "74xx:74AC151") (at 381 238.76 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 95e7d932-a226-465e-9cda-aca706b3034a)
-    (property "Reference" "U95" (at 383.1941 215.9 0)
+    (property "Reference" "E17" (at 383.1941 215.9 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AC151" (at 383.1941 218.44 0)
@@ -22773,7 +22773,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U95") (unit 1)
+          (reference "E17") (unit 1)
         )
       )
     )
@@ -22807,7 +22807,7 @@
   (symbol (lib_id "74xx:74AHC00") (at 492.76 513.08 0) (unit 4)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 99e85694-90b2-4ea9-badb-2fe97b7a1a79)
-    (property "Reference" "U82" (at 492.7517 504.19 0)
+    (property "Reference" "E75" (at 492.7517 504.19 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC00" (at 492.7517 506.73 0)
@@ -22836,7 +22836,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U82") (unit 4)
+          (reference "E75") (unit 4)
         )
       )
     )
@@ -22845,7 +22845,7 @@
   (symbol (lib_id "74xx:74AC10") (at 546.1 -25.4 0) (unit 4)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 9aa9fcef-624d-41a5-a95f-9883acc2a13d)
-    (property "Reference" "U105" (at 552.45 -26.67 0)
+    (property "Reference" "E48" (at 552.45 -26.67 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AC10" (at 552.45 -24.13 0)
@@ -22874,7 +22874,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U105") (unit 4)
+          (reference "E48") (unit 4)
         )
       )
     )
@@ -22908,7 +22908,7 @@
   (symbol (lib_id "74xx:74AHC00") (at 533.4 48.26 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 9b115585-42d7-416d-87f4-fd0cd72d9669)
-    (property "Reference" "U107" (at 533.3917 39.37 0)
+    (property "Reference" "E63" (at 533.3917 39.37 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC00" (at 533.3917 41.91 0)
@@ -22937,7 +22937,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U107") (unit 2)
+          (reference "E63") (unit 2)
         )
       )
     )
@@ -22946,7 +22946,7 @@
   (symbol (lib_id "74xx:74AHC00") (at 787.4 25.4 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 9db6771e-887c-4dc8-9d5e-b6780434bbe4)
-    (property "Reference" "U108" (at 787.4 16.51 0)
+    (property "Reference" "E92" (at 787.4 16.51 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC00" (at 787.3917 19.05 0)
@@ -22975,7 +22975,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U108") (unit 3)
+          (reference "E92") (unit 3)
         )
       )
     )
@@ -22984,7 +22984,7 @@
   (symbol (lib_id "74xx:74AHC32") (at 863.6 55.88 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 9db78253-c503-479f-8dc3-a3ece6ba709f)
-    (property "Reference" "U110" (at 863.6 46.99 0)
+    (property "Reference" "E88" (at 863.6 46.99 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC32" (at 863.6 49.53 0)
@@ -23013,7 +23013,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U110") (unit 2)
+          (reference "E88") (unit 2)
         )
       )
     )
@@ -23107,7 +23107,7 @@
   (symbol (lib_id "74xx:74HC30") (at 419.1 -25.4 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 9f4582bd-9a3d-4813-9b4e-70b267ef4457)
-    (property "Reference" "U157" (at 425.45 -26.67 0)
+    (property "Reference" "E43" (at 425.45 -26.67 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74HC30" (at 425.45 -24.13 0)
@@ -23133,7 +23133,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U157") (unit 2)
+          (reference "E43") (unit 2)
         )
       )
     )
@@ -23142,7 +23142,7 @@
   (symbol (lib_id "74xx:74AHC04") (at 492.76 482.6 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid a01a7d5a-e535-43fb-9bd6-420d72f4d7c5)
-    (property "Reference" "U124" (at 492.76 473.71 0)
+    (property "Reference" "E87" (at 492.76 473.71 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC04" (at 492.76 476.25 0)
@@ -23171,7 +23171,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U124") (unit 3)
+          (reference "E87") (unit 3)
         )
       )
     )
@@ -23180,7 +23180,7 @@
   (symbol (lib_id "74xx:74AHC86") (at 266.7 -25.4 0) (unit 5)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid a0568b29-52c6-456f-887a-7c3d20230aed)
-    (property "Reference" "U89" (at 274.955 -26.67 0)
+    (property "Reference" "E64" (at 274.955 -26.67 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AHC86" (at 274.955 -24.13 0)
@@ -23209,7 +23209,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U89") (unit 5)
+          (reference "E64") (unit 5)
         )
       )
     )
@@ -23243,7 +23243,7 @@
   (symbol (lib_id "Device:C") (at 203.2 -62.23 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid a09365ac-54df-41d0-b3cc-aa038924cbdc)
-    (property "Reference" "C32" (at 207.01 -63.5 0)
+    (property "Reference" "C92" (at 207.01 -63.5 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 207.01 -60.96 0)
@@ -23260,7 +23260,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C32") (unit 1)
+          (reference "C92") (unit 1)
         )
       )
     )
@@ -23269,7 +23269,7 @@
   (symbol (lib_id "74xx:74AHC00") (at 647.7 -25.4 0) (unit 5)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid a1a6193c-a295-418b-8ff0-b00d6d97c3d3)
-    (property "Reference" "U108" (at 654.05 -26.67 0)
+    (property "Reference" "E92" (at 654.05 -26.67 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AHC00" (at 654.05 -24.13 0)
@@ -23298,7 +23298,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U108") (unit 5)
+          (reference "E92") (unit 5)
         )
       )
     )
@@ -23332,7 +23332,7 @@
   (symbol (lib_id "74xx:74AC11") (at 342.9 -25.4 0) (unit 4)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid a24576af-1c65-4bb1-8ae2-826e6bc526de)
-    (property "Reference" "U57" (at 349.25 -26.67 0)
+    (property "Reference" "E65" (at 349.25 -26.67 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AC11" (at 349.25 -24.13 0)
@@ -23361,7 +23361,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U57") (unit 4)
+          (reference "E65") (unit 4)
         )
       )
     )
@@ -23370,7 +23370,7 @@
   (symbol (lib_id "Device:C") (at 279.4 -62.23 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid a5dc789f-7f9b-428b-8ee4-71a3329a7e57)
-    (property "Reference" "C44" (at 283.21 -63.5 0)
+    (property "Reference" "C83" (at 283.21 -63.5 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 283.21 -60.96 0)
@@ -23387,7 +23387,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C44") (unit 1)
+          (reference "C83") (unit 1)
         )
       )
     )
@@ -23421,7 +23421,7 @@
   (symbol (lib_id "74xx:74AHC74") (at 38.1 -25.4 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid a61a1716-a3b3-47de-a75d-c33f9b5fa320)
-    (property "Reference" "U138" (at 44.45 -26.67 0)
+    (property "Reference" "E82" (at 44.45 -26.67 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AHC74" (at 44.45 -24.13 0)
@@ -23450,7 +23450,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U138") (unit 3)
+          (reference "E82") (unit 3)
         )
       )
     )
@@ -23459,7 +23459,7 @@
   (symbol (lib_id "74xx:74AC11") (at 256.54 759.46 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid a650b3fd-eadb-461c-b6fc-2a0eb8d2c542)
-    (property "Reference" "U57" (at 256.5317 750.57 0)
+    (property "Reference" "E65" (at 256.5317 750.57 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AC11" (at 256.5317 753.11 0)
@@ -23488,7 +23488,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U57") (unit 2)
+          (reference "E65") (unit 2)
         )
       )
     )
@@ -23497,7 +23497,7 @@
   (symbol (lib_id "Device:C") (at 647.7 -62.23 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid a721fc01-b057-4f5d-ba57-20809a58188f)
-    (property "Reference" "C29" (at 651.51 -63.5 0)
+    (property "Reference" "C54" (at 651.51 -63.5 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 651.51 -60.96 0)
@@ -23514,7 +23514,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C29") (unit 1)
+          (reference "C54") (unit 1)
         )
       )
     )
@@ -23523,7 +23523,7 @@
   (symbol (lib_id "Device:C") (at 660.4 -62.23 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid a789cd80-74dd-425f-8fd8-53d09cf9c223)
-    (property "Reference" "C31" (at 664.21 -63.5 0)
+    (property "Reference" "C101" (at 664.21 -63.5 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 664.21 -60.96 0)
@@ -23540,7 +23540,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C31") (unit 1)
+          (reference "C101") (unit 1)
         )
       )
     )
@@ -23549,7 +23549,7 @@
   (symbol (lib_id "Device:C") (at 317.5 -62.23 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid a90c57e4-bb0e-4053-83b8-459bd0dd10d4)
-    (property "Reference" "C50" (at 321.31 -63.5 0)
+    (property "Reference" "C17" (at 321.31 -63.5 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 321.31 -60.96 0)
@@ -23566,7 +23566,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C50") (unit 1)
+          (reference "C17") (unit 1)
         )
       )
     )
@@ -23575,7 +23575,7 @@
   (symbol (lib_id "74xx:74AHC00") (at 492.76 467.36 0) (unit 4)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid a99a44cd-4157-44bc-9e41-2ae7c26277d9)
-    (property "Reference" "U2" (at 492.7517 458.47 0)
+    (property "Reference" "E85" (at 492.7517 458.47 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC00" (at 492.7517 461.01 0)
@@ -23604,7 +23604,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U2") (unit 4)
+          (reference "E85") (unit 4)
         )
       )
     )
@@ -23638,7 +23638,7 @@
   (symbol (lib_id "74xx:74AHC00") (at 457.2 48.26 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid ab216ad4-0cfb-47fe-bc16-bb2a01798589)
-    (property "Reference" "U91" (at 457.1917 39.37 0)
+    (property "Reference" "E84" (at 457.1917 39.37 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC00" (at 457.1917 41.91 0)
@@ -23667,7 +23667,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U91") (unit 1)
+          (reference "E84") (unit 1)
         )
       )
     )
@@ -23701,7 +23701,7 @@
   (symbol (lib_id "74xx:74AHC02") (at 520.7 -25.4 0) (unit 5)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid acd89e9b-873e-4268-8be1-df0ab5992780)
-    (property "Reference" "U142" (at 527.05 -26.67 0)
+    (property "Reference" "E56" (at 527.05 -26.67 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AHC02" (at 527.05 -24.13 0)
@@ -23730,7 +23730,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U142") (unit 5)
+          (reference "E56") (unit 5)
         )
       )
     )
@@ -23739,7 +23739,7 @@
   (symbol (lib_id "Device:C") (at 139.7 -62.23 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid ad1a6ee4-8d38-473a-8b77-f91443bdddcf)
-    (property "Reference" "C22" (at 143.51 -63.5 0)
+    (property "Reference" "C44" (at 143.51 -63.5 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 143.51 -60.96 0)
@@ -23756,7 +23756,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C22") (unit 1)
+          (reference "C44") (unit 1)
         )
       )
     )
@@ -23765,7 +23765,7 @@
   (symbol (lib_id "74xx:74AHC04") (at 868.68 627.38 0) (unit 5)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid ad954edf-7401-418a-a758-717f82640081)
-    (property "Reference" "U141" (at 868.68 618.49 0)
+    (property "Reference" "E68" (at 868.68 618.49 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC04" (at 868.68 621.03 0)
@@ -23794,7 +23794,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U141") (unit 5)
+          (reference "E68") (unit 5)
         )
       )
     )
@@ -23828,7 +23828,7 @@
   (symbol (lib_id "Device:C") (at 584.2 -62.23 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid af2c8c50-727e-4630-ace9-16d714628bfd)
-    (property "Reference" "C19" (at 588.01 -63.5 0)
+    (property "Reference" "C14" (at 588.01 -63.5 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 588.01 -60.96 0)
@@ -23845,7 +23845,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C19") (unit 1)
+          (reference "C14") (unit 1)
         )
       )
     )
@@ -23879,7 +23879,7 @@
   (symbol (lib_id "74xx:74HC30") (at 492.76 165.1 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid b1a8e37b-13df-400d-8073-60a92f3bdba9)
-    (property "Reference" "U116" (at 492.7517 152.4 0)
+    (property "Reference" "E96" (at 492.7517 152.4 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74HC30" (at 492.7517 154.94 0)
@@ -23905,7 +23905,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U116") (unit 1)
+          (reference "E96") (unit 1)
         )
       )
     )
@@ -23914,7 +23914,7 @@
   (symbol (lib_id "74xx:74AHC00") (at 784.86 614.68 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid b2372d80-254e-4170-a3c1-808d0d26ec29)
-    (property "Reference" "U44" (at 784.8517 605.79 0)
+    (property "Reference" "E57" (at 784.8517 605.79 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC00" (at 784.8517 608.33 0)
@@ -23943,7 +23943,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U44") (unit 1)
+          (reference "E57") (unit 1)
         )
       )
     )
@@ -23952,7 +23952,7 @@
   (symbol (lib_id "74xx:74AHC540") (at 134.62 177.8 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid b3661d34-30a3-4b10-84e6-8aad58092406)
-    (property "Reference" "U46" (at 136.8141 157.48 0)
+    (property "Reference" "E81" (at 136.8141 157.48 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AHC540" (at 136.8141 160.02 0)
@@ -23987,7 +23987,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U46") (unit 1)
+          (reference "E81") (unit 1)
         )
       )
     )
@@ -23996,7 +23996,7 @@
   (symbol (lib_id "74xx:74AHC00") (at 292.1 -25.4 0) (unit 5)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid b368724b-853f-4c5c-8526-3a0922588ea3)
-    (property "Reference" "U127" (at 298.45 -26.67 0)
+    (property "Reference" "E77" (at 298.45 -26.67 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AHC00" (at 298.45 -24.13 0)
@@ -24025,7 +24025,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U127") (unit 5)
+          (reference "E77") (unit 5)
         )
       )
     )
@@ -24034,7 +24034,7 @@
   (symbol (lib_id "74xx:74AHC174") (at 609.6 40.64 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid b39cbbca-9567-4468-a914-6ea6295c8a6b)
-    (property "Reference" "U129" (at 611.7941 22.86 0)
+    (property "Reference" "E52" (at 611.7941 22.86 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AHC174" (at 611.7941 25.4 0)
@@ -24065,7 +24065,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U129") (unit 1)
+          (reference "E52") (unit 1)
         )
       )
     )
@@ -24074,7 +24074,7 @@
   (symbol (lib_id "74xx:74AC151") (at 381 365.76 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid b3ae6e9c-4f42-4792-bcac-26da0e6fa5f3)
-    (property "Reference" "U97" (at 383.1941 342.9 0)
+    (property "Reference" "E25" (at 383.1941 342.9 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AC151" (at 383.1941 345.44 0)
@@ -24105,7 +24105,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U97") (unit 1)
+          (reference "E25") (unit 1)
         )
       )
     )
@@ -24139,7 +24139,7 @@
   (symbol (lib_id "Device:C") (at 76.2 -62.23 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid b43cbbe1-4dc4-494e-8a10-949dcf244607)
-    (property "Reference" "C12" (at 80.01 -63.5 0)
+    (property "Reference" "C52" (at 80.01 -63.5 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 80.01 -60.96 0)
@@ -24156,7 +24156,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C12") (unit 1)
+          (reference "C52") (unit 1)
         )
       )
     )
@@ -24165,7 +24165,7 @@
   (symbol (lib_id "Device:C") (at 774.7 -62.23 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid b481f64a-6ae1-48a9-947d-c08e402d0845)
-    (property "Reference" "C49" (at 778.51 -63.5 0)
+    (property "Reference" "C27" (at 778.51 -63.5 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 778.51 -60.96 0)
@@ -24182,7 +24182,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C49") (unit 1)
+          (reference "C27") (unit 1)
         )
       )
     )
@@ -24191,7 +24191,7 @@
   (symbol (lib_id "74xx:74AHC04") (at 850.9 -25.4 0) (unit 7)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid b6e5de65-1604-4750-a5f9-f462ea10fc07)
-    (property "Reference" "U124" (at 857.25 -26.67 0)
+    (property "Reference" "E87" (at 857.25 -26.67 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AHC04" (at 857.25 -24.13 0)
@@ -24220,7 +24220,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U124") (unit 7)
+          (reference "E87") (unit 7)
         )
       )
     )
@@ -24254,7 +24254,7 @@
   (symbol (lib_id "Device:C") (at 520.7 -62.23 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid b7bba0fd-bff7-4215-822c-fc8cf342d32a)
-    (property "Reference" "C9" (at 524.51 -63.5 0)
+    (property "Reference" "C22" (at 524.51 -63.5 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 524.51 -60.96 0)
@@ -24271,7 +24271,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C9") (unit 1)
+          (reference "C22") (unit 1)
         )
       )
     )
@@ -24280,7 +24280,7 @@
   (symbol (lib_id "74xx:74AHC04") (at 736.6 650.24 0) (unit 4)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid b7c9150e-2bb1-4333-b727-6fa7655fefd9)
-    (property "Reference" "U106" (at 736.6 641.35 0)
+    (property "Reference" "E47" (at 736.6 641.35 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC04" (at 736.6 643.89 0)
@@ -24309,7 +24309,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U106") (unit 4)
+          (reference "E47") (unit 4)
         )
       )
     )
@@ -24343,7 +24343,7 @@
   (symbol (lib_id "74xx:74AHC174") (at 609.6 193.04 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid b89ccf08-cde5-491c-86f5-75e7be424a83)
-    (property "Reference" "U132" (at 611.7941 175.26 0)
+    (property "Reference" "E12" (at 611.7941 175.26 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AHC174" (at 611.7941 177.8 0)
@@ -24374,7 +24374,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U132") (unit 1)
+          (reference "E12") (unit 1)
         )
       )
     )
@@ -24408,7 +24408,7 @@
   (symbol (lib_id "Device:C") (at 749.3 -62.23 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid ba0eedc8-e54d-48ce-8fc7-3d752a0fb286)
-    (property "Reference" "C45" (at 753.11 -63.5 0)
+    (property "Reference" "C55" (at 753.11 -63.5 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 753.11 -60.96 0)
@@ -24425,7 +24425,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C45") (unit 1)
+          (reference "C55") (unit 1)
         )
       )
     )
@@ -24459,7 +24459,7 @@
   (symbol (lib_id "74xx:74HC21") (at 838.2 71.12 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid baf0b4bc-15ff-41e3-9e18-265d51bddda2)
-    (property "Reference" "U155" (at 838.1903 62.23 0)
+    (property "Reference" "E44" (at 838.1903 62.23 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74HC21" (at 838.1903 64.77 0)
@@ -24486,7 +24486,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U155") (unit 2)
+          (reference "E44") (unit 2)
         )
       )
     )
@@ -24495,7 +24495,7 @@
   (symbol (lib_id "Device:C") (at 63.5 -62.23 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid bcd64858-0827-42ce-b232-ef4c16029020)
-    (property "Reference" "C10" (at 67.31 -63.5 0)
+    (property "Reference" "C32" (at 67.31 -63.5 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 67.31 -60.96 0)
@@ -24512,7 +24512,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C10") (unit 1)
+          (reference "C32") (unit 1)
         )
       )
     )
@@ -24521,7 +24521,7 @@
   (symbol (lib_id "74xx:74AC151") (at 381 429.26 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid be211646-12d7-46cd-8b2e-d039fa902c59)
-    (property "Reference" "U98" (at 383.1941 406.4 0)
+    (property "Reference" "E16" (at 383.1941 406.4 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AC151" (at 383.1941 408.94 0)
@@ -24552,7 +24552,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U98") (unit 1)
+          (reference "E16") (unit 1)
         )
       )
     )
@@ -24561,7 +24561,7 @@
   (symbol (lib_id "74xx:74AHC174") (at 609.6 142.24 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid bf660ea2-d382-44ac-8afd-aa31ff960da3)
-    (property "Reference" "U131" (at 611.7941 124.46 0)
+    (property "Reference" "E45" (at 611.7941 124.46 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AHC174" (at 611.7941 127 0)
@@ -24592,7 +24592,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U131") (unit 1)
+          (reference "E45") (unit 1)
         )
       )
     )
@@ -24626,7 +24626,7 @@
   (symbol (lib_id "Device:C") (at 723.9 -62.23 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid c078f516-6ff1-461d-ba34-712438b2b29c)
-    (property "Reference" "C41" (at 727.71 -63.5 0)
+    (property "Reference" "C65" (at 727.71 -63.5 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 727.71 -60.96 0)
@@ -24643,7 +24643,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C41") (unit 1)
+          (reference "C65") (unit 1)
         )
       )
     )
@@ -24652,7 +24652,7 @@
   (symbol (lib_id "74xx:74AHC00") (at 302.26 805.18 0) (mirror x) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid c19a84e0-79be-4925-bd59-861c76d45a12)
-    (property "Reference" "U120" (at 302.26 796.29 0)
+    (property "Reference" "E55" (at 302.26 796.29 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC00" (at 302.26 798.83 0)
@@ -24681,7 +24681,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U120") (unit 1)
+          (reference "E55") (unit 1)
         )
       )
     )
@@ -24690,7 +24690,7 @@
   (symbol (lib_id "Device:C") (at 419.1 -62.23 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid c2d90196-9427-4ef2-b066-7e50d5b38d89)
-    (property "Reference" "C66" (at 422.91 -63.5 0)
+    (property "Reference" "C78" (at 422.91 -63.5 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 422.91 -60.96 0)
@@ -24707,7 +24707,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C66") (unit 1)
+          (reference "C78") (unit 1)
         )
       )
     )
@@ -24716,7 +24716,7 @@
   (symbol (lib_id "74xx:74AHC02") (at 685.8 345.44 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid c34593c9-33b4-4026-8737-fc25665dd7f2)
-    (property "Reference" "U142" (at 685.8 336.55 0)
+    (property "Reference" "E56" (at 685.8 336.55 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC02" (at 685.8 339.09 0)
@@ -24745,7 +24745,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U142") (unit 1)
+          (reference "E56") (unit 1)
         )
       )
     )
@@ -24754,7 +24754,7 @@
   (symbol (lib_id "74xx:74AHC540") (at 134.62 289.56 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid c36ff798-9c1a-4cdf-a91c-dfd14da874b0)
-    (property "Reference" "U169" (at 136.8141 269.24 0)
+    (property "Reference" "E101" (at 136.8141 269.24 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AHC540" (at 136.8141 271.78 0)
@@ -24789,7 +24789,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U169") (unit 1)
+          (reference "E101") (unit 1)
         )
       )
     )
@@ -24798,7 +24798,7 @@
   (symbol (lib_id "74xx:74AHC04") (at 812.8 25.4 0) (unit 4)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid c425cc47-958d-49ca-8bff-c3eea9f572ca)
-    (property "Reference" "U124" (at 812.8 16.51 0)
+    (property "Reference" "E87" (at 812.8 16.51 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC04" (at 812.8 19.05 0)
@@ -24827,7 +24827,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U124") (unit 4)
+          (reference "E87") (unit 4)
         )
       )
     )
@@ -24836,7 +24836,7 @@
   (symbol (lib_id "74xx:74AC10") (at 728.98 474.98 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid c4e927f9-4519-4da0-801e-5c7ef4a44052)
-    (property "Reference" "U112" (at 728.9717 466.09 0)
+    (property "Reference" "E74" (at 728.9717 466.09 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AC10" (at 728.9717 468.63 0)
@@ -24865,7 +24865,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U112") (unit 1)
+          (reference "E74") (unit 1)
         )
       )
     )
@@ -24874,7 +24874,7 @@
   (symbol (lib_id "74xx:74AHC540") (at 134.62 66.04 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid c5ee240b-f390-4e1d-a3a6-a27206d11e25)
-    (property "Reference" "U11" (at 136.8141 45.72 0)
+    (property "Reference" "E21" (at 136.8141 45.72 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AHC540" (at 136.8141 48.26 0)
@@ -24909,7 +24909,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U11") (unit 1)
+          (reference "E21") (unit 1)
         )
       )
     )
@@ -24943,7 +24943,7 @@
   (symbol (lib_id "74xx:74HC27") (at 393.7 -25.4 0) (unit 4)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid c695923b-0f39-42cd-b493-77bb94c723f7)
-    (property "Reference" "U145" (at 400.05 -26.67 0)
+    (property "Reference" "E23" (at 400.05 -26.67 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74HC27" (at 400.05 -24.13 0)
@@ -24972,7 +24972,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U145") (unit 4)
+          (reference "E23") (unit 4)
         )
       )
     )
@@ -25006,7 +25006,7 @@
   (symbol (lib_id "74xx:74AHC00") (at 513.08 317.5 0) (unit 4)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid c6c29f2b-b086-459a-b3f3-bcd446874be8)
-    (property "Reference" "U91" (at 513.0717 308.61 0)
+    (property "Reference" "E84" (at 513.0717 308.61 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC00" (at 513.0717 311.15 0)
@@ -25035,7 +25035,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U91") (unit 4)
+          (reference "E84") (unit 4)
         )
       )
     )
@@ -25069,7 +25069,7 @@
   (symbol (lib_id "74xx:74AHC04") (at 787.4 581.66 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid c6fd5ff6-72ae-465f-856a-546b1108d0d3)
-    (property "Reference" "U106" (at 787.4 572.77 0)
+    (property "Reference" "E47" (at 787.4 572.77 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC04" (at 787.4 575.31 0)
@@ -25098,7 +25098,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U106") (unit 1)
+          (reference "E47") (unit 1)
         )
       )
     )
@@ -25157,7 +25157,7 @@
   (symbol (lib_id "Device:C") (at 685.8 -62.23 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid cb6f4fc0-1701-455e-9455-2b8ff5fb5a70)
-    (property "Reference" "C35" (at 689.61 -63.5 0)
+    (property "Reference" "C93" (at 689.61 -63.5 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 689.61 -60.96 0)
@@ -25174,7 +25174,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C35") (unit 1)
+          (reference "C93") (unit 1)
         )
       )
     )
@@ -25183,7 +25183,7 @@
   (symbol (lib_id "Device:C") (at 546.1 -62.23 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid cbf50fd7-8241-4653-b0b2-74f337ba8acb)
-    (property "Reference" "C13" (at 549.91 -63.5 0)
+    (property "Reference" "C71" (at 549.91 -63.5 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 549.91 -60.96 0)
@@ -25200,7 +25200,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C13") (unit 1)
+          (reference "C71") (unit 1)
         )
       )
     )
@@ -25209,7 +25209,7 @@
   (symbol (lib_id "74xx:74AHC00") (at 467.36 198.12 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid cbf595d6-9515-4109-9f5f-9525a43a6d3e)
-    (property "Reference" "U127" (at 467.3517 189.23 0)
+    (property "Reference" "E77" (at 467.3517 189.23 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC00" (at 467.3517 191.77 0)
@@ -25238,7 +25238,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U127") (unit 3)
+          (reference "E77") (unit 3)
         )
       )
     )
@@ -25247,7 +25247,7 @@
   (symbol (lib_id "74xx:74HC27") (at 685.8 330.2 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid cc34d1ca-7594-4bc7-99c0-d5e439ac6201)
-    (property "Reference" "U145" (at 685.8 321.31 0)
+    (property "Reference" "E23" (at 685.8 321.31 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74HC27" (at 685.8 323.85 0)
@@ -25276,7 +25276,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U145") (unit 2)
+          (reference "E23") (unit 2)
         )
       )
     )
@@ -25285,7 +25285,7 @@
   (symbol (lib_id "Device:C") (at 368.3 -62.23 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid cc3b42e9-529c-45f7-87f3-e0aef9b2d9bf)
-    (property "Reference" "C58" (at 372.11 -63.5 0)
+    (property "Reference" "C37" (at 372.11 -63.5 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 372.11 -60.96 0)
@@ -25302,7 +25302,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C58") (unit 1)
+          (reference "C37") (unit 1)
         )
       )
     )
@@ -25311,7 +25311,7 @@
   (symbol (lib_id "74xx:74AHC86") (at 281.94 762 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid cd7ea618-378d-411e-96ce-5774dfedaaf3)
-    (property "Reference" "U89" (at 281.94 753.11 0)
+    (property "Reference" "E64" (at 281.94 753.11 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC86" (at 281.94 755.65 0)
@@ -25340,7 +25340,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U89") (unit 2)
+          (reference "E64") (unit 2)
         )
       )
     )
@@ -25349,7 +25349,7 @@
   (symbol (lib_id "74xx:74AHC00") (at 513.08 152.4 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid cdda03a5-4ebe-454b-9771-b9fc6945898c)
-    (property "Reference" "U2" (at 513.0717 143.51 0)
+    (property "Reference" "E85" (at 513.0717 143.51 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC00" (at 513.0717 146.05 0)
@@ -25378,7 +25378,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U2") (unit 2)
+          (reference "E85") (unit 2)
         )
       )
     )
@@ -25387,7 +25387,7 @@
   (symbol (lib_id "74xx:74AHC00") (at 472.44 373.38 0) (unit 4)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid cde9a326-b01f-46e5-9cd9-ce1ae80c4a65)
-    (property "Reference" "U127" (at 472.4317 364.49 0)
+    (property "Reference" "E77" (at 472.4317 364.49 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC00" (at 472.4317 367.03 0)
@@ -25416,7 +25416,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U127") (unit 4)
+          (reference "E77") (unit 4)
         )
       )
     )
@@ -25475,7 +25475,7 @@
   (symbol (lib_id "74xx:74AHC08") (at 784.86 596.9 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid cfa21186-656a-4e47-a340-c2010e2e3570)
-    (property "Reference" "U56" (at 784.8517 588.01 0)
+    (property "Reference" "E54" (at 784.8517 588.01 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC08" (at 784.8517 590.55 0)
@@ -25504,7 +25504,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U56") (unit 3)
+          (reference "E54") (unit 3)
         )
       )
     )
@@ -25513,7 +25513,7 @@
   (symbol (lib_id "74xx:74AHC04") (at 490.22 74.93 0) (unit 4)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid d0781ebf-c604-421f-8e30-c5a315eb608b)
-    (property "Reference" "U119" (at 490.22 66.04 0)
+    (property "Reference" "E83" (at 490.22 66.04 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC04" (at 490.22 68.58 0)
@@ -25542,7 +25542,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U119") (unit 4)
+          (reference "E83") (unit 4)
         )
       )
     )
@@ -25551,7 +25551,7 @@
   (symbol (lib_id "74xx:74AHC04") (at 736.6 574.04 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid d0a16363-c568-4440-b0a6-2d7db4522554)
-    (property "Reference" "U125" (at 736.6 565.15 0)
+    (property "Reference" "E95" (at 736.6 565.15 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC04" (at 736.6 567.69 0)
@@ -25580,7 +25580,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U125") (unit 1)
+          (reference "E95") (unit 1)
         )
       )
     )
@@ -25589,7 +25589,7 @@
   (symbol (lib_id "74xx:74HC27") (at 863.6 40.64 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid d0bd453d-c676-446d-8414-7f6f91e6d26b)
-    (property "Reference" "U152" (at 863.6 31.75 0)
+    (property "Reference" "E78" (at 863.6 31.75 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74HC27" (at 863.6 34.29 0)
@@ -25618,7 +25618,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U152") (unit 3)
+          (reference "E78") (unit 3)
         )
       )
     )
@@ -25652,7 +25652,7 @@
   (symbol (lib_id "74xx:74AHC00") (at 566.42 624.84 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid d11a6fb3-ab0b-4044-a026-5578d1d76f0b)
-    (property "Reference" "U91" (at 566.4117 615.95 0)
+    (property "Reference" "E84" (at 566.4117 615.95 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC00" (at 566.4117 618.49 0)
@@ -25681,7 +25681,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U91") (unit 3)
+          (reference "E84") (unit 3)
         )
       )
     )
@@ -25690,7 +25690,7 @@
   (symbol (lib_id "Device:C") (at 812.8 -62.23 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid d20a69c4-bd70-4719-b9e0-159abd08aca4)
-    (property "Reference" "C55" (at 816.61 -63.5 0)
+    (property "Reference" "C56" (at 816.61 -63.5 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 816.61 -60.96 0)
@@ -25707,7 +25707,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C55") (unit 1)
+          (reference "C56") (unit 1)
         )
       )
     )
@@ -25716,7 +25716,7 @@
   (symbol (lib_id "74xx:74AHC00") (at 698.5 -25.4 0) (unit 5)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid d2128d61-710d-4e26-8fdb-646200484194)
-    (property "Reference" "U109" (at 704.85 -26.67 0)
+    (property "Reference" "E93" (at 704.85 -26.67 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AHC00" (at 704.85 -24.13 0)
@@ -25745,7 +25745,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U109") (unit 5)
+          (reference "E93") (unit 5)
         )
       )
     )
@@ -25754,7 +25754,7 @@
   (symbol (lib_id "74xx:74AHC08") (at 586.74 614.68 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid d272888b-7c6f-43c1-922e-95be5dc0400d)
-    (property "Reference" "U54" (at 586.74 605.79 0)
+    (property "Reference" "E73" (at 586.74 605.79 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC08" (at 586.74 608.33 0)
@@ -25783,7 +25783,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U54") (unit 2)
+          (reference "E73") (unit 2)
         )
       )
     )
@@ -25792,7 +25792,7 @@
   (symbol (lib_id "74xx:74AC161") (at 609.6 345.44 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid d2b03d8d-f859-4c1a-a299-25bed54a0aba)
-    (property "Reference" "U135" (at 611.7941 325.12 0)
+    (property "Reference" "E22" (at 611.7941 325.12 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AC161" (at 611.7941 327.66 0)
@@ -25823,7 +25823,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U135") (unit 1)
+          (reference "E22") (unit 1)
         )
       )
     )
@@ -25832,7 +25832,7 @@
   (symbol (lib_id "74xx:74AHC04") (at 736.6 589.28 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid d377c874-5d05-4de2-aa2d-5be9ae3538f4)
-    (property "Reference" "U124" (at 736.6 580.39 0)
+    (property "Reference" "E87" (at 736.6 580.39 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC04" (at 736.6 582.93 0)
@@ -25861,7 +25861,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U124") (unit 2)
+          (reference "E87") (unit 2)
         )
       )
     )
@@ -25870,7 +25870,7 @@
   (symbol (lib_id "74xx:74HC21") (at 241.3 -25.4 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid d3849d31-9731-49c4-9646-304435f5524e)
-    (property "Reference" "U155" (at 247.65 -26.67 0)
+    (property "Reference" "E44" (at 247.65 -26.67 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74HC21" (at 247.65 -24.13 0)
@@ -25897,7 +25897,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U155") (unit 3)
+          (reference "E44") (unit 3)
         )
       )
     )
@@ -25906,7 +25906,7 @@
   (symbol (lib_id "74xx:74AHC86") (at 749.3 477.52 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid d51393a4-b51c-45c5-a23a-82f2e0b81d55)
-    (property "Reference" "U89" (at 748.9952 468.63 0)
+    (property "Reference" "E64" (at 748.9952 468.63 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC86" (at 748.9952 471.17 0)
@@ -25935,7 +25935,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U89") (unit 3)
+          (reference "E64") (unit 3)
         )
       )
     )
@@ -25944,7 +25944,7 @@
   (symbol (lib_id "74xx:74AC20") (at 492.76 350.52 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid d520e6d5-280b-405e-900b-a6241ec34daa)
-    (property "Reference" "U117" (at 492.7503 341.63 0)
+    (property "Reference" "E66" (at 492.7503 341.63 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AC20" (at 492.7503 344.17 0)
@@ -25971,7 +25971,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U117") (unit 1)
+          (reference "E66") (unit 1)
         )
       )
     )
@@ -26005,7 +26005,7 @@
   (symbol (lib_id "74xx:74HC27") (at 685.8 514.35 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid d8ac2502-91aa-4cc9-9b14-1d53a63ba71e)
-    (property "Reference" "U154" (at 685.8 505.46 0)
+    (property "Reference" "E33" (at 685.8 505.46 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74HC27" (at 685.8 508 0)
@@ -26034,7 +26034,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U154") (unit 3)
+          (reference "E33") (unit 3)
         )
       )
     )
@@ -26068,7 +26068,7 @@
   (symbol (lib_id "74xx:74AHC540") (at 134.62 121.92 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid d91aaff2-bbb2-4338-b2d4-f45e6ad6b14c)
-    (property "Reference" "U19" (at 136.8141 101.6 0)
+    (property "Reference" "E51" (at 136.8141 101.6 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AHC540" (at 136.8141 104.14 0)
@@ -26103,7 +26103,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U19") (unit 1)
+          (reference "E51") (unit 1)
         )
       )
     )
@@ -26112,7 +26112,7 @@
   (symbol (lib_id "74xx:74AHC00") (at 533.4 149.86 0) (mirror x) (unit 4)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid d9800eb5-ac5b-4706-8cae-0c9f5e6a005b)
-    (property "Reference" "U44" (at 533.4 140.97 0)
+    (property "Reference" "E57" (at 533.4 140.97 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC00" (at 533.4 143.51 0)
@@ -26141,7 +26141,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U44") (unit 4)
+          (reference "E57") (unit 4)
         )
       )
     )
@@ -26251,7 +26251,7 @@
   (symbol (lib_id "74xx:74AC151") (at 381 48.26 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid db814770-656b-44c3-9a47-d9bb8388556e)
-    (property "Reference" "U92" (at 383.1941 25.4 0)
+    (property "Reference" "E36" (at 383.1941 25.4 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AC151" (at 383.1941 27.94 0)
@@ -26282,7 +26282,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U92") (unit 1)
+          (reference "E36") (unit 1)
         )
       )
     )
@@ -26291,7 +26291,7 @@
   (symbol (lib_id "Device:C") (at 38.1 -62.23 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid dbb3e2fa-38de-49d0-9390-73fe6b1fab0f)
-    (property "Reference" "C6" (at 41.91 -63.5 0)
+    (property "Reference" "C61" (at 41.91 -63.5 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 41.91 -60.96 0)
@@ -26308,7 +26308,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C6") (unit 1)
+          (reference "C61") (unit 1)
         )
       )
     )
@@ -26317,7 +26317,7 @@
   (symbol (lib_id "74xx:74AHC00") (at 467.36 137.16 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid dce98830-e046-4daa-9f02-2feaca83d6f6)
-    (property "Reference" "U113" (at 467.3517 128.27 0)
+    (property "Reference" "E58" (at 467.3517 128.27 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC00" (at 467.3517 130.81 0)
@@ -26346,7 +26346,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U113") (unit 2)
+          (reference "E58") (unit 2)
         )
       )
     )
@@ -26355,7 +26355,7 @@
   (symbol (lib_id "74xx:74AHC540") (at 78.74 177.8 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid dd63e228-2da2-48df-b1b6-4620fcc92bf3)
-    (property "Reference" "U37" (at 80.9341 157.48 0)
+    (property "Reference" "E71" (at 80.9341 157.48 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AHC540" (at 80.9341 160.02 0)
@@ -26390,7 +26390,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U37") (unit 1)
+          (reference "E71") (unit 1)
         )
       )
     )
@@ -26399,7 +26399,7 @@
   (symbol (lib_id "74xx:74AC10") (at 472.44 292.1 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid debc1b44-efa0-4fde-8ca5-13f9087bca17)
-    (property "Reference" "U105" (at 472.4317 283.21 0)
+    (property "Reference" "E48" (at 472.4317 283.21 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AC10" (at 472.4317 285.75 0)
@@ -26428,7 +26428,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U105") (unit 2)
+          (reference "E48") (unit 2)
         )
       )
     )
@@ -26437,7 +26437,7 @@
   (symbol (lib_id "74xx:74AHC00") (at 165.1 -25.4 0) (unit 5)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid dedca189-c363-4572-9ce4-86b3e513e456)
-    (property "Reference" "U82" (at 171.45 -26.67 0)
+    (property "Reference" "E75" (at 171.45 -26.67 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AHC00" (at 171.45 -24.13 0)
@@ -26466,7 +26466,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U82") (unit 5)
+          (reference "E75") (unit 5)
         )
       )
     )
@@ -26500,7 +26500,7 @@
   (symbol (lib_id "Device:C") (at 393.7 -62.23 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid df7c3e17-fe64-4fec-a97f-6c7d7b214876)
-    (property "Reference" "C62" (at 397.51 -63.5 0)
+    (property "Reference" "C66" (at 397.51 -63.5 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 397.51 -60.96 0)
@@ -26517,7 +26517,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C62") (unit 1)
+          (reference "C66") (unit 1)
         )
       )
     )
@@ -26526,7 +26526,7 @@
   (symbol (lib_id "74xx:74AHC00") (at 876.3 -25.4 0) (unit 5)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid e07690cf-53d4-4c0d-816c-c73046f6ceea)
-    (property "Reference" "U44" (at 882.65 -26.67 0)
+    (property "Reference" "E57" (at 882.65 -26.67 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AHC00" (at 882.65 -24.13 0)
@@ -26555,7 +26555,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U44") (unit 5)
+          (reference "E57") (unit 5)
         )
       )
     )
@@ -26564,7 +26564,7 @@
   (symbol (lib_id "74xx:74AC151") (at 381 683.26 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid e27a4d3c-ff7b-497b-bbb8-1598ea2119bb)
-    (property "Reference" "U102" (at 383.1941 660.4 0)
+    (property "Reference" "E28" (at 383.1941 660.4 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AC151" (at 383.1941 662.94 0)
@@ -26595,7 +26595,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U102") (unit 1)
+          (reference "E28") (unit 1)
         )
       )
     )
@@ -26604,7 +26604,7 @@
   (symbol (lib_id "74xx:74AHC00") (at 510.54 45.72 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid e2aed581-f726-428f-8b1b-1a84eed1cc12)
-    (property "Reference" "U107" (at 510.5317 36.83 0)
+    (property "Reference" "E63" (at 510.5317 36.83 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC00" (at 510.5317 39.37 0)
@@ -26633,7 +26633,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U107") (unit 1)
+          (reference "E63") (unit 1)
         )
       )
     )
@@ -26642,7 +26642,7 @@
   (symbol (lib_id "74xx:74AHC00") (at 571.5 -25.4 0) (unit 5)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid e3c52f6d-d974-4f43-8fbc-dc1a6ee774f3)
-    (property "Reference" "U107" (at 577.85 -26.67 0)
+    (property "Reference" "E63" (at 577.85 -26.67 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AHC00" (at 577.85 -24.13 0)
@@ -26671,7 +26671,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U107") (unit 5)
+          (reference "E63") (unit 5)
         )
       )
     )
@@ -26680,7 +26680,7 @@
   (symbol (lib_id "74xx:74AHC04") (at 868.68 660.4 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid e3f3a772-b0d1-4213-9be5-5f2b7dfd8ccc)
-    (property "Reference" "U106" (at 868.68 651.51 0)
+    (property "Reference" "E47" (at 868.68 651.51 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC04" (at 868.68 654.05 0)
@@ -26709,7 +26709,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U106") (unit 2)
+          (reference "E47") (unit 2)
         )
       )
     )
@@ -26718,7 +26718,7 @@
   (symbol (lib_id "74xx:74AHC04") (at 800.1 -25.4 0) (unit 7)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid e5bf3469-4d25-43b4-b273-d56fe0f0486e)
-    (property "Reference" "U125" (at 806.45 -26.67 0)
+    (property "Reference" "E95" (at 806.45 -26.67 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AHC04" (at 806.45 -24.13 0)
@@ -26747,7 +26747,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U125") (unit 7)
+          (reference "E95") (unit 7)
         )
       )
     )
@@ -26756,7 +26756,7 @@
   (symbol (lib_id "74xx:74AHC32") (at 863.6 86.36 0) (unit 4)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid e5e97e27-23ec-4758-aff5-0b71d488f827)
-    (property "Reference" "U110" (at 863.6 77.47 0)
+    (property "Reference" "E88" (at 863.6 77.47 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC32" (at 863.6 80.01 0)
@@ -26785,7 +26785,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U110") (unit 4)
+          (reference "E88") (unit 4)
         )
       )
     )
@@ -26794,7 +26794,7 @@
   (symbol (lib_id "74xx:74AHC08") (at 576.58 533.4 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid e6b14056-274f-4a0d-8ac0-76a66b1d10f5)
-    (property "Reference" "U54" (at 576.58 524.51 0)
+    (property "Reference" "E73" (at 576.58 524.51 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC08" (at 576.58 527.05 0)
@@ -26823,7 +26823,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U54") (unit 1)
+          (reference "E73") (unit 1)
         )
       )
     )
@@ -26832,7 +26832,7 @@
   (symbol (lib_id "74xx:74AHC00") (at 190.5 -25.4 0) (unit 5)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid e7ff7cf7-08e0-4acc-84ad-2796f5ac462b)
-    (property "Reference" "U120" (at 196.85 -26.67 0)
+    (property "Reference" "E55" (at 196.85 -26.67 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AHC00" (at 196.85 -24.13 0)
@@ -26861,7 +26861,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U120") (unit 5)
+          (reference "E55") (unit 5)
         )
       )
     )
@@ -26870,7 +26870,7 @@
   (symbol (lib_id "Device:C") (at 304.8 -62.23 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid e86d19b0-1912-4227-bc1d-7c476f2295ac)
-    (property "Reference" "C48" (at 308.61 -63.5 0)
+    (property "Reference" "C36" (at 308.61 -63.5 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 308.61 -60.96 0)
@@ -26887,7 +26887,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C48") (unit 1)
+          (reference "C36") (unit 1)
         )
       )
     )
@@ -26921,7 +26921,7 @@
   (symbol (lib_id "74xx:74AHC04") (at 492.76 452.12 0) (unit 6)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid ea6ee905-4626-4444-9863-c126fde485ad)
-    (property "Reference" "U125" (at 492.76 443.23 0)
+    (property "Reference" "E95" (at 492.76 443.23 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC04" (at 492.76 445.77 0)
@@ -26950,7 +26950,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U125") (unit 6)
+          (reference "E95") (unit 6)
         )
       )
     )
@@ -26984,7 +26984,7 @@
   (symbol (lib_id "Device:C") (at 850.9 -62.23 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid ec5c3871-8ad7-4b9c-b5ea-cafa04548bc3)
-    (property "Reference" "C61" (at 854.71 -63.5 0)
+    (property "Reference" "C76" (at 854.71 -63.5 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 854.71 -60.96 0)
@@ -27001,7 +27001,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C61") (unit 1)
+          (reference "C76") (unit 1)
         )
       )
     )
@@ -27035,7 +27035,7 @@
   (symbol (lib_id "Device:C") (at 292.1 -62.23 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid efef1ec8-b3b0-4773-8c9a-5324ad307a1b)
-    (property "Reference" "C46" (at 295.91 -63.5 0)
+    (property "Reference" "C16" (at 295.91 -63.5 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 295.91 -60.96 0)
@@ -27052,7 +27052,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C46") (unit 1)
+          (reference "C16") (unit 1)
         )
       )
     )
@@ -27146,7 +27146,7 @@
   (symbol (lib_id "Device:C") (at 25.4 -62.23 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid f21ece72-9bb6-49c1-b090-8f4633120aa3)
-    (property "Reference" "C4" (at 29.21 -63.5 0)
+    (property "Reference" "C51" (at 29.21 -63.5 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 29.21 -60.96 0)
@@ -27163,7 +27163,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C4") (unit 1)
+          (reference "C51") (unit 1)
         )
       )
     )
@@ -27172,7 +27172,7 @@
   (symbol (lib_id "74xx:74AHC86") (at 889 48.26 0) (unit 4)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid f25f98b6-f69a-4760-b417-a56d2c80e6a4)
-    (property "Reference" "U89" (at 888.6952 39.37 0)
+    (property "Reference" "E64" (at 888.6952 39.37 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC86" (at 888.6952 41.91 0)
@@ -27201,7 +27201,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U89") (unit 4)
+          (reference "E64") (unit 4)
         )
       )
     )
@@ -27210,7 +27210,7 @@
   (symbol (lib_id "Device:C") (at 457.2 -62.23 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid f27b3e9c-2e64-4dc3-a970-fb2e84e78569)
-    (property "Reference" "C72" (at 461.01 -63.5 0)
+    (property "Reference" "C84" (at 461.01 -63.5 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 461.01 -60.96 0)
@@ -27227,7 +27227,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C72") (unit 1)
+          (reference "C84") (unit 1)
         )
       )
     )
@@ -27236,7 +27236,7 @@
   (symbol (lib_id "74xx:74AHC04") (at 901.7 -25.4 0) (unit 7)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid f3860954-5787-41c2-ae1d-fa383d67c614)
-    (property "Reference" "U141" (at 908.05 -26.67 0)
+    (property "Reference" "E68" (at 908.05 -26.67 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AHC04" (at 908.05 -24.13 0)
@@ -27265,7 +27265,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U141") (unit 7)
+          (reference "E68") (unit 7)
         )
       )
     )
@@ -27274,7 +27274,7 @@
   (symbol (lib_id "74xx:74AC151") (at 381 619.76 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid f3e86c68-b440-45f0-8d8b-31768ccb2b55)
-    (property "Reference" "U101" (at 383.1941 596.9 0)
+    (property "Reference" "E38" (at 383.1941 596.9 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AC151" (at 383.1941 599.44 0)
@@ -27305,7 +27305,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U101") (unit 1)
+          (reference "E38") (unit 1)
         )
       )
     )
@@ -27314,7 +27314,7 @@
   (symbol (lib_id "Device:C") (at 787.4 -62.23 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid f581a85b-6622-4742-854e-8d63db8092b8)
-    (property "Reference" "C51" (at 791.21 -63.5 0)
+    (property "Reference" "C18" (at 791.21 -63.5 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 791.21 -60.96 0)
@@ -27331,7 +27331,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C51") (unit 1)
+          (reference "C18") (unit 1)
         )
       )
     )
@@ -27340,7 +27340,7 @@
   (symbol (lib_id "74xx:74AC20") (at 838.2 55.88 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid f6cd8b50-cee4-4bec-b437-54f2d6bbc3de)
-    (property "Reference" "U121" (at 838.1903 46.99 0)
+    (property "Reference" "E86" (at 838.1903 46.99 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AC20" (at 838.1903 49.53 0)
@@ -27367,7 +27367,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U121") (unit 2)
+          (reference "E86") (unit 2)
         )
       )
     )
@@ -27376,7 +27376,7 @@
   (symbol (lib_id "74xx:74AHC540") (at 78.74 233.68 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid f8271789-6816-4312-892e-8aa838dc636b)
-    (property "Reference" "U50" (at 80.9341 213.36 0)
+    (property "Reference" "E91" (at 80.9341 213.36 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AHC540" (at 80.9341 215.9 0)
@@ -27411,7 +27411,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U50") (unit 1)
+          (reference "E91") (unit 1)
         )
       )
     )
@@ -27445,7 +27445,7 @@
   (symbol (lib_id "74xx:74AHC04") (at 467.36 99.06 0) (unit 5)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid f89990bc-5254-4a05-9a7e-4bb0a8c835b7)
-    (property "Reference" "U119" (at 467.36 90.17 0)
+    (property "Reference" "E83" (at 467.36 90.17 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC04" (at 467.36 92.71 0)
@@ -27474,7 +27474,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U119") (unit 5)
+          (reference "E83") (unit 5)
         )
       )
     )
@@ -27483,7 +27483,7 @@
   (symbol (lib_id "74xx:74AHC04") (at 736.6 619.76 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid f941d93b-b8c7-48ae-9333-561dac3a0c96)
-    (property "Reference" "U125" (at 736.6 610.87 0)
+    (property "Reference" "E95" (at 736.6 610.87 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC04" (at 736.6 613.41 0)
@@ -27512,7 +27512,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U125") (unit 3)
+          (reference "E95") (unit 3)
         )
       )
     )
@@ -27521,7 +27521,7 @@
   (symbol (lib_id "74xx:74AC20") (at 533.4 530.86 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid fa07fa4a-8ded-43f9-9df7-ec5591d65afa)
-    (property "Reference" "U122" (at 533.3903 521.97 0)
+    (property "Reference" "E62" (at 533.3903 521.97 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AC20" (at 533.3903 524.51 0)
@@ -27548,7 +27548,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U122") (unit 2)
+          (reference "E62") (unit 2)
         )
       )
     )
@@ -27557,7 +27557,7 @@
   (symbol (lib_id "74xx:74AHC04") (at 868.68 690.88 0) (unit 6)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid fd1b1173-9e67-48b2-9e0f-69715db09c6f)
-    (property "Reference" "U106" (at 868.68 681.99 0)
+    (property "Reference" "E47" (at 868.68 681.99 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC04" (at 868.68 684.53 0)
@@ -27586,7 +27586,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U106") (unit 6)
+          (reference "E47") (unit 6)
         )
       )
     )
@@ -27595,7 +27595,7 @@
   (symbol (lib_id "Device:C") (at 762 -62.23 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid fde3fb4f-0f10-46d0-9fb0-604eb8878d31)
-    (property "Reference" "C47" (at 765.81 -63.5 0)
+    (property "Reference" "C26" (at 765.81 -63.5 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 765.81 -60.96 0)
@@ -27612,7 +27612,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C47") (unit 1)
+          (reference "C26") (unit 1)
         )
       )
     )
@@ -27621,7 +27621,7 @@
   (symbol (lib_id "74xx:74AHC04") (at 513.08 137.16 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid fe0253fa-a5e4-4473-82ca-385f374f525f)
-    (property "Reference" "U106" (at 513.08 128.27 0)
+    (property "Reference" "E47" (at 513.08 128.27 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC04" (at 513.08 130.81 0)
@@ -27650,7 +27650,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U106") (unit 3)
+          (reference "E47") (unit 3)
         )
       )
     )
@@ -27684,7 +27684,7 @@
   (symbol (lib_id "74xx:74AC175") (at 812.8 576.58 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid fe857601-cd09-44f6-ad48-506147120103)
-    (property "Reference" "U139" (at 814.9941 558.8 0)
+    (property "Reference" "E32" (at 814.9941 558.8 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AC175" (at 814.9941 561.34 0)
@@ -27715,7 +27715,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U139") (unit 1)
+          (reference "E32") (unit 1)
         )
       )
     )
@@ -27749,7 +27749,7 @@
   (symbol (lib_id "74xx:74AC10") (at 477.52 48.26 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid ff9598c3-4f0b-4473-b90d-109ea410d9b5)
-    (property "Reference" "U112" (at 477.52 39.37 0)
+    (property "Reference" "E74" (at 477.52 39.37 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AC10" (at 477.52 41.91 0)
@@ -27778,7 +27778,7 @@
     (instances
       (project "procreg"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U112") (unit 3)
+          (reference "E74") (unit 3)
         )
       )
     )

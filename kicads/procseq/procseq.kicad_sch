@@ -13078,7 +13078,7 @@
   (symbol (lib_id "74xx:74AHC00") (at 165.1 -71.12 0) (unit 5)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 003ee114-bf1f-4a05-9b06-f235f1729ad3)
-    (property "Reference" "U24" (at 171.45 -72.39 0)
+    (property "Reference" "E84" (at 171.45 -72.39 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AHC00" (at 171.45 -69.85 0)
@@ -13107,7 +13107,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U24") (unit 5)
+          (reference "E84") (unit 5)
         )
       )
     )
@@ -13141,7 +13141,7 @@
   (symbol (lib_id "74xx:74AHC74") (at 368.3 -71.12 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 03a615ac-6aaa-44a6-9dc8-d8872d76e7fd)
-    (property "Reference" "U10" (at 374.65 -72.39 0)
+    (property "Reference" "E77" (at 374.65 -72.39 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AHC74" (at 374.65 -69.85 0)
@@ -13170,7 +13170,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U10") (unit 3)
+          (reference "E77") (unit 3)
         )
       )
     )
@@ -13179,7 +13179,7 @@
   (symbol (lib_id "74xx:74AC11") (at 241.3 -71.12 0) (unit 4)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 04641932-fc53-4bfe-ba2e-fdef3b19e12b)
-    (property "Reference" "U47" (at 247.65 -72.39 0)
+    (property "Reference" "E57" (at 247.65 -72.39 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AC11" (at 247.65 -69.85 0)
@@ -13208,7 +13208,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U47") (unit 4)
+          (reference "E57") (unit 4)
         )
       )
     )
@@ -13242,7 +13242,7 @@
   (symbol (lib_id "74xx:74HC27") (at 12.7 -71.12 0) (unit 4)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 07071ea5-0335-4a1d-9bec-599fe94d73e9)
-    (property "Reference" "U12" (at 19.05 -72.39 0)
+    (property "Reference" "E31" (at 19.05 -72.39 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74HC27" (at 19.05 -69.85 0)
@@ -13271,7 +13271,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U12") (unit 4)
+          (reference "E31") (unit 4)
         )
       )
     )
@@ -13280,7 +13280,7 @@
   (symbol (lib_id "74xx:74AHC02") (at 139.7 -71.12 0) (unit 5)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 07288c2a-a9db-4217-8276-dc5bcd8c9dcd)
-    (property "Reference" "U27" (at 147.32 -72.39 0)
+    (property "Reference" "E85" (at 147.32 -72.39 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AHC02" (at 147.32 -69.85 0)
@@ -13309,7 +13309,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U27") (unit 5)
+          (reference "E85") (unit 5)
         )
       )
     )
@@ -13318,7 +13318,7 @@
   (symbol (lib_id "74xx:74AHC00") (at 838.2 165.1 0) (unit 4)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 08b616c8-4784-4e00-98c8-82e518cefabc)
-    (property "Reference" "U23" (at 838.1917 156.21 0)
+    (property "Reference" "E43" (at 838.1917 156.21 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC00" (at 838.1917 158.75 0)
@@ -13347,7 +13347,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U23") (unit 4)
+          (reference "E43") (unit 4)
         )
       )
     )
@@ -13356,7 +13356,7 @@
   (symbol (lib_id "74xx:74AHC04") (at 299.72 355.6 0) (unit 6)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 09bd81f7-3c73-4d74-a2eb-5cc58df61662)
-    (property "Reference" "U20" (at 299.72 346.71 0)
+    (property "Reference" "E23" (at 299.72 346.71 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC04" (at 299.72 349.25 0)
@@ -13385,7 +13385,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U20") (unit 6)
+          (reference "E23") (unit 6)
         )
       )
     )
@@ -13394,7 +13394,7 @@
   (symbol (lib_id "74xx:74LS74") (at 185.42 309.88 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 0a23f6fa-ea93-4ae9-90f0-3b0319fcee99)
-    (property "Reference" "U7" (at 187.6141 299.72 0)
+    (property "Reference" "E65" (at 187.6141 299.72 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AHC74" (at 187.6141 302.26 0)
@@ -13423,7 +13423,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U7") (unit 1)
+          (reference "E65") (unit 1)
         )
       )
     )
@@ -13457,7 +13457,7 @@
   (symbol (lib_id "74xx:74AHC02") (at 551.18 180.34 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 0a6baf4d-2d89-4b13-878c-b358bc855b53)
-    (property "Reference" "U27" (at 551.18 171.45 0)
+    (property "Reference" "E85" (at 551.18 171.45 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC02" (at 551.18 173.99 0)
@@ -13486,7 +13486,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U27") (unit 1)
+          (reference "E85") (unit 1)
         )
       )
     )
@@ -13495,7 +13495,7 @@
   (symbol (lib_id "74xx:74AHC00") (at 551.18 91.44 0) (unit 4)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 0a754095-0d46-4ce8-bce3-ef5c27bb8eb2)
-    (property "Reference" "U24" (at 551.1717 82.55 0)
+    (property "Reference" "E84" (at 551.1717 82.55 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC00" (at 551.1717 85.09 0)
@@ -13524,7 +13524,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U24") (unit 4)
+          (reference "E84") (unit 4)
         )
       )
     )
@@ -13583,7 +13583,7 @@
   (symbol (lib_id "74xx:74AHC00") (at 551.18 73.66 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 0c25ef8e-8793-4766-94f6-02d8e5d5431f)
-    (property "Reference" "U24" (at 551.1717 64.77 0)
+    (property "Reference" "E84" (at 551.1717 64.77 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC00" (at 551.1717 67.31 0)
@@ -13612,7 +13612,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U24") (unit 3)
+          (reference "E84") (unit 3)
         )
       )
     )
@@ -13621,7 +13621,7 @@
   (symbol (lib_id "74xx:74HC30") (at 342.9 -25.4 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 0ce0929d-ea14-4656-9edb-39c14c2cee64)
-    (property "Reference" "U38" (at 350.52 -26.67 0)
+    (property "Reference" "E24" (at 350.52 -26.67 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74HC30" (at 350.52 -24.13 0)
@@ -13647,7 +13647,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U38") (unit 2)
+          (reference "E24") (unit 2)
         )
       )
     )
@@ -13656,7 +13656,7 @@
   (symbol (lib_id "74xx:74AC109") (at 396.24 175.26 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 0e2fe4ee-efe3-4c73-9815-27eda3a61623)
-    (property "Reference" "U36" (at 398.4341 165.1 0)
+    (property "Reference" "E76" (at 398.4341 165.1 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AC109" (at 398.4341 167.64 0)
@@ -13687,7 +13687,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U36") (unit 1)
+          (reference "E76") (unit 1)
         )
       )
     )
@@ -13696,7 +13696,7 @@
   (symbol (lib_id "74xx:74AC10") (at 510.54 104.14 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 0f044872-d25b-4ff2-bb6b-1feccddc5d28)
-    (property "Reference" "U34" (at 510.5317 95.25 0)
+    (property "Reference" "E66" (at 510.5317 95.25 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AC10" (at 510.5317 97.79 0)
@@ -13725,7 +13725,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U34") (unit 2)
+          (reference "E66") (unit 2)
         )
       )
     )
@@ -13819,7 +13819,7 @@
   (symbol (lib_id "74xx:74LS74") (at 185.42 340.36 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 10386525-f03d-47f9-be14-995eb83bb71f)
-    (property "Reference" "U7" (at 187.6141 330.2 0)
+    (property "Reference" "E65" (at 187.6141 330.2 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AHC74" (at 187.6141 332.74 0)
@@ -13848,7 +13848,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U7") (unit 2)
+          (reference "E65") (unit 2)
         )
       )
     )
@@ -13882,7 +13882,7 @@
   (symbol (lib_id "74xx:74AHC00") (at 617.22 121.92 0) (mirror x) (unit 2)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 12902dd3-f5b2-4f18-a5a9-50d8f619a342)
-    (property "Reference" "U33" (at 617.22 113.03 0)
+    (property "Reference" "E22" (at 617.22 113.03 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC00" (at 617.22 115.57 0)
@@ -13911,7 +13911,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U33") (unit 2)
+          (reference "E22") (unit 2)
         )
       )
     )
@@ -13920,7 +13920,7 @@
   (symbol (lib_id "74xx:74AHC08") (at 317.5 -25.4 0) (unit 5)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 14836e1a-bf72-46a1-96a2-399f120e1cbd)
-    (property "Reference" "U54" (at 323.85 -26.67 0)
+    (property "Reference" "E74" (at 323.85 -26.67 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AHC08" (at 323.85 -24.13 0)
@@ -13949,7 +13949,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U54") (unit 5)
+          (reference "E74") (unit 5)
         )
       )
     )
@@ -13958,7 +13958,7 @@
   (symbol (lib_id "74xx:74HC30") (at 317.5 241.3 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 153b4f06-806b-4e23-ab32-0908f014b0cd)
-    (property "Reference" "U38" (at 317.4917 228.6 0)
+    (property "Reference" "E24" (at 317.4917 228.6 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74HC30" (at 317.4917 231.14 0)
@@ -13984,7 +13984,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U38") (unit 1)
+          (reference "E24") (unit 1)
         )
       )
     )
@@ -13993,7 +13993,7 @@
   (symbol (lib_id "74xx:74AHC04") (at 591.82 259.08 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 168916b9-ab54-4998-8c64-33574d0e624e)
-    (property "Reference" "U106" (at 591.82 250.19 0)
+    (property "Reference" "E27" (at 591.82 250.19 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC04" (at 591.82 252.73 0)
@@ -14022,7 +14022,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U106") (unit 3)
+          (reference "E27") (unit 3)
         )
       )
     )
@@ -14031,7 +14031,7 @@
   (symbol (lib_id "74xx:74AHC04") (at 845.82 419.1 0) (unit 4)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 18776a57-d298-4aa6-8ed0-d3d5cb4554ea)
-    (property "Reference" "U8" (at 845.82 410.21 0)
+    (property "Reference" "E44" (at 845.82 410.21 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC04" (at 845.82 412.75 0)
@@ -14060,7 +14060,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U8") (unit 4)
+          (reference "E44") (unit 4)
         )
       )
     )
@@ -14069,7 +14069,7 @@
   (symbol (lib_id "Device:C") (at 317.5 -107.95 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 19fcea0e-e364-471e-9bc7-be6457891c93)
-    (property "Reference" "C50" (at 321.31 -109.22 0)
+    (property "Reference" "C81" (at 321.31 -109.22 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 321.31 -106.68 0)
@@ -14086,7 +14086,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C50") (unit 1)
+          (reference "C81") (unit 1)
         )
       )
     )
@@ -14095,7 +14095,7 @@
   (symbol (lib_id "74xx:74AHC74") (at 896.62 165.1 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 1a47e4bf-223d-4d69-9e12-8911072fa5ad)
-    (property "Reference" "U41" (at 898.8141 154.94 0)
+    (property "Reference" "E34" (at 898.8141 154.94 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AHC74" (at 898.8141 157.48 0)
@@ -14124,7 +14124,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U41") (unit 2)
+          (reference "E34") (unit 2)
         )
       )
     )
@@ -14158,7 +14158,7 @@
   (symbol (lib_id "74xx:74AHC08") (at 551.18 106.68 0) (mirror x) (unit 2)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 1c68b1c2-5c96-4865-a298-827db349f55a)
-    (property "Reference" "U54" (at 551.18 97.79 0)
+    (property "Reference" "E74" (at 551.18 97.79 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC08" (at 551.18 100.33 0)
@@ -14187,7 +14187,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U54") (unit 2)
+          (reference "E74") (unit 2)
         )
       )
     )
@@ -14221,7 +14221,7 @@
   (symbol (lib_id "Device:C") (at 254 -107.95 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 1df96e79-8231-4678-b99f-451f6f28a9de)
-    (property "Reference" "C40" (at 257.81 -109.22 0)
+    (property "Reference" "C65" (at 257.81 -109.22 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 257.81 -106.68 0)
@@ -14238,7 +14238,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C40") (unit 1)
+          (reference "C65") (unit 1)
         )
       )
     )
@@ -14307,7 +14307,7 @@
   (symbol (lib_id "74xx:74AHC00") (at 292.1 -71.12 0) (unit 5)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 1ec82949-fee7-43ee-96a0-5136aa96d35e)
-    (property "Reference" "U23" (at 298.45 -72.39 0)
+    (property "Reference" "E43" (at 298.45 -72.39 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AHC00" (at 298.45 -69.85 0)
@@ -14336,7 +14336,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U23") (unit 5)
+          (reference "E43") (unit 5)
         )
       )
     )
@@ -14370,7 +14370,7 @@
   (symbol (lib_id "74xx:74AHC04") (at 299.72 391.16 0) (unit 5)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 2232d39e-6db6-4b7f-8e5c-05fed231e346)
-    (property "Reference" "U8" (at 299.72 382.27 0)
+    (property "Reference" "E44" (at 299.72 382.27 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC04" (at 299.72 384.81 0)
@@ -14399,7 +14399,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U8") (unit 5)
+          (reference "E44") (unit 5)
         )
       )
     )
@@ -14408,7 +14408,7 @@
   (symbol (lib_id "74xx:74LS30") (at 716.28 320.04 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 22e9c31f-ac40-4e21-a34f-57ec2c5ac375)
-    (property "Reference" "U14" (at 716.2717 307.34 0)
+    (property "Reference" "E17" (at 716.2717 307.34 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74HC30" (at 716.2717 309.88 0)
@@ -14434,7 +14434,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U14") (unit 1)
+          (reference "E17") (unit 1)
         )
       )
     )
@@ -14443,7 +14443,7 @@
   (symbol (lib_id "74xx:74AHC02") (at 358.14 327.66 0) (unit 4)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 23337c4c-d1fd-4fe6-8a4d-6bd9c368b83f)
-    (property "Reference" "U51" (at 358.14 318.77 0)
+    (property "Reference" "E14" (at 358.14 318.77 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC02" (at 358.14 321.31 0)
@@ -14472,7 +14472,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U51") (unit 4)
+          (reference "E14") (unit 4)
         )
       )
     )
@@ -14481,7 +14481,7 @@
   (symbol (lib_id "74xx:74AHC08") (at 375.92 215.9 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 24060740-1123-44c4-8fa9-ec7b22b6089f)
-    (property "Reference" "U54" (at 375.92 207.01 0)
+    (property "Reference" "E74" (at 375.92 207.01 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC08" (at 375.92 209.55 0)
@@ -14510,7 +14510,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U54") (unit 3)
+          (reference "E74") (unit 3)
         )
       )
     )
@@ -14519,7 +14519,7 @@
   (symbol (lib_id "74xx:74AC10") (at 63.5 -71.12 0) (unit 4)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 290dc34e-004d-48eb-8b23-7076f03ed7d6)
-    (property "Reference" "U34" (at 69.85 -72.39 0)
+    (property "Reference" "E66" (at 69.85 -72.39 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AC10" (at 69.85 -69.85 0)
@@ -14548,7 +14548,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U34") (unit 4)
+          (reference "E66") (unit 4)
         )
       )
     )
@@ -14583,7 +14583,7 @@
   (symbol (lib_id "74xx:74LS30") (at 444.5 -71.12 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 29c9782b-a0bc-48cf-aec5-b231e4d7a40f)
-    (property "Reference" "U14" (at 450.85 -72.39 0)
+    (property "Reference" "E17" (at 450.85 -72.39 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74HC30" (at 450.85 -69.85 0)
@@ -14609,7 +14609,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U14") (unit 2)
+          (reference "E17") (unit 2)
         )
       )
     )
@@ -14618,7 +14618,7 @@
   (symbol (lib_id "74xx:74AHC02") (at 736.6 332.74 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 2ad5aeee-e157-4f49-9ebd-4698d9db53a6)
-    (property "Reference" "U51" (at 736.6 323.85 0)
+    (property "Reference" "E14" (at 736.6 323.85 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC02" (at 736.6 326.39 0)
@@ -14647,7 +14647,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U51") (unit 2)
+          (reference "E14") (unit 2)
         )
       )
     )
@@ -14656,7 +14656,7 @@
   (symbol (lib_id "74xx:74AHC04") (at 317.5 262.89 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 2af12fec-44de-4527-a305-6838af761903)
-    (property "Reference" "U106" (at 317.5 254 0)
+    (property "Reference" "E27" (at 317.5 254 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC04" (at 317.5 256.54 0)
@@ -14685,7 +14685,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U106") (unit 1)
+          (reference "E27") (unit 1)
         )
       )
     )
@@ -14694,7 +14694,7 @@
   (symbol (lib_id "Device:C") (at 152.4 -135.89 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 2f34a350-2f3c-4ee3-a12a-2de9a1857639)
-    (property "Reference" "C23" (at 156.21 -137.16 0)
+    (property "Reference" "C42" (at 156.21 -137.16 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 156.21 -134.62 0)
@@ -14711,7 +14711,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C23") (unit 1)
+          (reference "C42") (unit 1)
         )
       )
     )
@@ -14720,7 +14720,7 @@
   (symbol (lib_id "Device:C") (at 266.7 -107.95 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 306f9b0f-d058-426a-b3fc-cc6a4b2dfdc6)
-    (property "Reference" "C42" (at 270.51 -109.22 0)
+    (property "Reference" "C67" (at 270.51 -109.22 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 270.51 -106.68 0)
@@ -14737,7 +14737,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C42") (unit 1)
+          (reference "C67") (unit 1)
         )
       )
     )
@@ -14746,7 +14746,7 @@
   (symbol (lib_id "74xx:74AHC02") (at 157.48 121.92 0) (unit 4)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 30890ef8-976d-4c3b-8ab9-4f636c4588f1)
-    (property "Reference" "U27" (at 157.48 113.03 0)
+    (property "Reference" "E85" (at 157.48 113.03 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC02" (at 157.48 115.57 0)
@@ -14775,7 +14775,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U27") (unit 4)
+          (reference "E85") (unit 4)
         )
       )
     )
@@ -14784,7 +14784,7 @@
   (symbol (lib_id "74xx:74LS175") (at 584.2 345.44 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 30d16bb9-f509-48a7-b5ca-b8cee288320e)
-    (property "Reference" "U11" (at 586.3941 327.66 0)
+    (property "Reference" "E52" (at 586.3941 327.66 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AC175" (at 586.3941 330.2 0)
@@ -14815,7 +14815,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U11") (unit 1)
+          (reference "E52") (unit 1)
         )
       )
     )
@@ -14824,7 +14824,7 @@
   (symbol (lib_id "74xx:74AHC540") (at 71.12 78.74 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 32705c91-e055-4c1b-b415-9d949fe5212c)
-    (property "Reference" "U1" (at 73.3141 58.42 0)
+    (property "Reference" "E21" (at 73.3141 58.42 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AHC540" (at 73.3141 60.96 0)
@@ -14859,7 +14859,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U1") (unit 1)
+          (reference "E21") (unit 1)
         )
       )
     )
@@ -14868,7 +14868,7 @@
   (symbol (lib_id "Device:C") (at 114.3 -135.89 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 34ba48ab-700c-4f09-bcc6-380ae2a5775a)
-    (property "Reference" "C17" (at 118.11 -137.16 0)
+    (property "Reference" "C33" (at 118.11 -137.16 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 118.11 -134.62 0)
@@ -14885,7 +14885,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C17") (unit 1)
+          (reference "C33") (unit 1)
         )
       )
     )
@@ -14919,7 +14919,7 @@
   (symbol (lib_id "74xx:74AHC32") (at 886.46 388.62 0) (unit 4)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 37b59c1a-7754-4e03-b19f-54f259259440)
-    (property "Reference" "U52" (at 886.46 379.73 0)
+    (property "Reference" "E45" (at 886.46 379.73 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC32" (at 886.46 382.27 0)
@@ -14948,7 +14948,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U52") (unit 4)
+          (reference "E45") (unit 4)
         )
       )
     )
@@ -14957,7 +14957,7 @@
   (symbol (lib_id "Device:C") (at 292.1 -107.95 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 37c32874-8b91-451d-bdc9-21ba8e2dd11c)
-    (property "Reference" "C46" (at 295.91 -109.22 0)
+    (property "Reference" "C74" (at 295.91 -109.22 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 295.91 -106.68 0)
@@ -14974,7 +14974,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C46") (unit 1)
+          (reference "C74") (unit 1)
         )
       )
     )
@@ -14983,7 +14983,7 @@
   (symbol (lib_id "Device:C") (at 76.2 -107.95 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 37cf835f-defc-4355-9ff3-898b04a5c7bf)
-    (property "Reference" "C12" (at 80.01 -109.22 0)
+    (property "Reference" "C25" (at 80.01 -109.22 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 80.01 -106.68 0)
@@ -15000,7 +15000,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C12") (unit 1)
+          (reference "C25") (unit 1)
         )
       )
     )
@@ -15009,7 +15009,7 @@
   (symbol (lib_id "74xx:74AHC00") (at 132.08 243.84 0) (unit 4)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 380cdb5d-75ad-41c4-8454-429211aee711)
-    (property "Reference" "U43" (at 132.0717 234.95 0)
+    (property "Reference" "E36" (at 132.0717 234.95 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC00" (at 132.0717 237.49 0)
@@ -15038,7 +15038,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U43") (unit 4)
+          (reference "E36") (unit 4)
         )
       )
     )
@@ -15047,7 +15047,7 @@
   (symbol (lib_id "74xx:74AHC04") (at 439.42 149.86 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 3ba345f1-c18d-4ffe-9476-94ff45e052be)
-    (property "Reference" "U8" (at 439.42 140.97 0)
+    (property "Reference" "E44" (at 439.42 140.97 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC04" (at 439.42 143.51 0)
@@ -15076,7 +15076,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U8") (unit 3)
+          (reference "E44") (unit 3)
         )
       )
     )
@@ -15085,7 +15085,7 @@
   (symbol (lib_id "74xx:74HC27") (at 317.5 147.32 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 3c08facc-4253-4418-b840-42e86a09452e)
-    (property "Reference" "U12" (at 317.5 138.43 0)
+    (property "Reference" "E31" (at 317.5 138.43 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74HC27" (at 317.5 140.97 0)
@@ -15114,7 +15114,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U12") (unit 3)
+          (reference "E31") (unit 3)
         )
       )
     )
@@ -15123,7 +15123,7 @@
   (symbol (lib_id "Device:C") (at 101.6 -107.95 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 3c6edc54-9264-4a99-a035-0b08908bd0b9)
-    (property "Reference" "C16" (at 105.41 -109.22 0)
+    (property "Reference" "C32" (at 105.41 -109.22 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 105.41 -106.68 0)
@@ -15140,7 +15140,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C16") (unit 1)
+          (reference "C32") (unit 1)
         )
       )
     )
@@ -15149,7 +15149,7 @@
   (symbol (lib_id "74xx:74AHC00") (at 688.34 66.04 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 3d2043e5-aa10-4ba5-96a1-96b3d568b90b)
-    (property "Reference" "U23" (at 688.3317 57.15 0)
+    (property "Reference" "E43" (at 688.3317 57.15 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC00" (at 688.3317 59.69 0)
@@ -15178,7 +15178,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U23") (unit 3)
+          (reference "E43") (unit 3)
         )
       )
     )
@@ -15187,7 +15187,7 @@
   (symbol (lib_id "74xx:74LS04") (at 675.64 358.14 0) (unit 6)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 3d45aad0-d8a6-4606-b215-f27efa86aaa8)
-    (property "Reference" "U35" (at 675.64 349.25 0)
+    (property "Reference" "E12" (at 675.64 349.25 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC04" (at 675.64 351.79 0)
@@ -15216,7 +15216,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U35") (unit 6)
+          (reference "E12") (unit 6)
         )
       )
     )
@@ -15225,7 +15225,7 @@
   (symbol (lib_id "74xx:74AHC02") (at 688.34 187.96 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 3e05512a-f96a-4e65-9895-961d70b84351)
-    (property "Reference" "U48" (at 688.34 179.07 0)
+    (property "Reference" "E62" (at 688.34 179.07 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC02" (at 688.34 181.61 0)
@@ -15254,7 +15254,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U48") (unit 2)
+          (reference "E62") (unit 2)
         )
       )
     )
@@ -15288,7 +15288,7 @@
   (symbol (lib_id "74xx:74AHC32") (at 886.46 403.86 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 3ef18e6f-8f7b-43f5-9d4c-6c0d0e4a1ceb)
-    (property "Reference" "U52" (at 886.46 394.97 0)
+    (property "Reference" "E45" (at 886.46 394.97 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC32" (at 886.46 397.51 0)
@@ -15317,7 +15317,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U52") (unit 2)
+          (reference "E45") (unit 2)
         )
       )
     )
@@ -15326,7 +15326,7 @@
   (symbol (lib_id "74xx:74AC109") (at 185.42 248.92 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 41a1b3e7-e101-4697-9ad3-6ab95692db6f)
-    (property "Reference" "U4" (at 187.6141 238.76 0)
+    (property "Reference" "E53" (at 187.6141 238.76 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AC109" (at 187.6141 241.3 0)
@@ -15357,7 +15357,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U4") (unit 1)
+          (reference "E53") (unit 1)
         )
       )
     )
@@ -15366,7 +15366,7 @@
   (symbol (lib_id "Device:C") (at 114.3 -107.95 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 41aa11bf-c049-4f08-8336-39b9338743da)
-    (property "Reference" "C18" (at 118.11 -109.22 0)
+    (property "Reference" "C34" (at 118.11 -109.22 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 118.11 -106.68 0)
@@ -15383,7 +15383,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C18") (unit 1)
+          (reference "C34") (unit 1)
         )
       )
     )
@@ -15392,7 +15392,7 @@
   (symbol (lib_id "Device:C") (at 266.7 -135.89 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 4227f104-3b93-4080-9913-dcb059fd3254)
-    (property "Reference" "C41" (at 270.51 -137.16 0)
+    (property "Reference" "C66" (at 270.51 -137.16 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 270.51 -134.62 0)
@@ -15409,7 +15409,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C41") (unit 1)
+          (reference "C66") (unit 1)
         )
       )
     )
@@ -15468,7 +15468,7 @@
   (symbol (lib_id "74xx:74AC109") (at 414.02 312.42 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 43dc7918-9e94-4856-9200-851a1e1b1a2c)
-    (property "Reference" "U6" (at 416.2141 302.26 0)
+    (property "Reference" "E67" (at 416.2141 302.26 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AC109" (at 416.2141 304.8 0)
@@ -15499,7 +15499,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U6") (unit 1)
+          (reference "E67") (unit 1)
         )
       )
     )
@@ -15558,7 +15558,7 @@
   (symbol (lib_id "74xx:74AHC04") (at 508 238.76 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 453f38b9-7a2b-43ef-8345-5a30c61e6f09)
-    (property "Reference" "U35" (at 508 229.87 0)
+    (property "Reference" "E12" (at 508 229.87 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC04" (at 508 232.41 0)
@@ -15587,7 +15587,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U35") (unit 3)
+          (reference "E12") (unit 3)
         )
       )
     )
@@ -15596,7 +15596,7 @@
   (symbol (lib_id "74xx:74AC151") (at 728.98 137.16 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 46679c01-43c5-496d-81f6-6b09e31b5691)
-    (property "Reference" "U28" (at 731.1741 114.3 0)
+    (property "Reference" "E32" (at 731.1741 114.3 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AC151" (at 731.1741 116.84 0)
@@ -15627,7 +15627,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U28") (unit 1)
+          (reference "E32") (unit 1)
         )
       )
     )
@@ -15661,7 +15661,7 @@
   (symbol (lib_id "74xx:74AHC540") (at 71.12 134.62 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 47085daf-294d-4c51-b15b-cbdc68aadfe4)
-    (property "Reference" "U17" (at 73.3141 114.3 0)
+    (property "Reference" "E41" (at 73.3141 114.3 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AHC540" (at 73.3141 116.84 0)
@@ -15696,7 +15696,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U17") (unit 1)
+          (reference "E41") (unit 1)
         )
       )
     )
@@ -15705,7 +15705,7 @@
   (symbol (lib_id "74xx:74AHC74") (at 317.5 109.22 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 477ebcb7-3e59-4dfe-ac9d-97c0b61d2651)
-    (property "Reference" "U72" (at 319.6941 99.06 0)
+    (property "Reference" "E75" (at 319.6941 99.06 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AHC74" (at 319.6941 101.6 0)
@@ -15734,7 +15734,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U72") (unit 1)
+          (reference "E75") (unit 1)
         )
       )
     )
@@ -15743,7 +15743,7 @@
   (symbol (lib_id "74xx:74AC109") (at 185.42 157.48 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 485417c1-86ef-4293-a5ef-972e04e2873d)
-    (property "Reference" "U2" (at 187.6141 147.32 0)
+    (property "Reference" "E63" (at 187.6141 147.32 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AC109" (at 187.6141 149.86 0)
@@ -15774,7 +15774,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U2") (unit 2)
+          (reference "E63") (unit 2)
         )
       )
     )
@@ -15783,7 +15783,7 @@
   (symbol (lib_id "Device:C") (at 342.9 -107.95 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 491859f3-41b1-41ac-ae99-917139f4f135)
-    (property "Reference" "C54" (at 346.71 -109.22 0)
+    (property "Reference" "C85" (at 346.71 -109.22 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 346.71 -106.68 0)
@@ -15800,7 +15800,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C54") (unit 1)
+          (reference "C85") (unit 1)
         )
       )
     )
@@ -15834,7 +15834,7 @@
   (symbol (lib_id "Device:C") (at 241.3 -107.95 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 497a4fe0-1e1a-42a6-bdd5-219e752439d8)
-    (property "Reference" "C38" (at 245.11 -109.22 0)
+    (property "Reference" "C63" (at 245.11 -109.22 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 245.11 -106.68 0)
@@ -15851,7 +15851,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C38") (unit 1)
+          (reference "C63") (unit 1)
         )
       )
     )
@@ -15860,7 +15860,7 @@
   (symbol (lib_id "Device:C") (at 304.8 -135.89 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 4aa1a188-3b73-45f9-b292-2c20ba4cfbf0)
-    (property "Reference" "C47" (at 308.61 -137.16 0)
+    (property "Reference" "C75" (at 308.61 -137.16 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 308.61 -134.62 0)
@@ -15877,7 +15877,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C47") (unit 1)
+          (reference "C75") (unit 1)
         )
       )
     )
@@ -15886,7 +15886,7 @@
   (symbol (lib_id "74xx:74AC109") (at 360.68 175.26 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 4ac11bc1-af69-4c1e-8bdb-073f185b3e94)
-    (property "Reference" "U36" (at 362.8741 165.1 0)
+    (property "Reference" "E76" (at 362.8741 165.1 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AC109" (at 362.8741 167.64 0)
@@ -15917,7 +15917,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U36") (unit 2)
+          (reference "E76") (unit 2)
         )
       )
     )
@@ -15926,7 +15926,7 @@
   (symbol (lib_id "74xx:74AHC00") (at 317.5 278.13 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 4b64aee0-bde9-4ce4-a923-b98803dd3e97)
-    (property "Reference" "U33" (at 317.4917 269.24 0)
+    (property "Reference" "E22" (at 317.4917 269.24 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC00" (at 317.4917 271.78 0)
@@ -15955,7 +15955,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U33") (unit 3)
+          (reference "E22") (unit 3)
         )
       )
     )
@@ -15989,7 +15989,7 @@
   (symbol (lib_id "Device:C") (at 254 -135.89 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 50e96a0f-88d9-4f94-a1ac-78a39bcb7532)
-    (property "Reference" "C39" (at 257.81 -137.16 0)
+    (property "Reference" "C64" (at 257.81 -137.16 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 257.81 -134.62 0)
@@ -16006,7 +16006,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C39") (unit 1)
+          (reference "C64") (unit 1)
         )
       )
     )
@@ -16040,7 +16040,7 @@
   (symbol (lib_id "74xx:74AHC00") (at 490.22 104.14 0) (unit 4)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 512dd5e4-d7b4-4a56-afb1-5e075d476a2e)
-    (property "Reference" "U33" (at 490.2117 95.25 0)
+    (property "Reference" "E22" (at 490.2117 95.25 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC00" (at 490.2117 97.79 0)
@@ -16069,7 +16069,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U33") (unit 4)
+          (reference "E22") (unit 4)
         )
       )
     )
@@ -16103,7 +16103,7 @@
   (symbol (lib_id "74xx:74AC11") (at 340.36 175.26 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 529c41ea-7147-443a-8538-031e88524976)
-    (property "Reference" "U167" (at 340.36 166.37 0)
+    (property "Reference" "E35" (at 340.36 166.37 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AC11" (at 340.36 168.91 0)
@@ -16132,7 +16132,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U167") (unit 3)
+          (reference "E35") (unit 3)
         )
       )
     )
@@ -16141,7 +16141,7 @@
   (symbol (lib_id "74xx:74AHC08") (at 297.18 86.36 0) (unit 4)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 536a48ee-4aa1-475d-a595-154186d1a17e)
-    (property "Reference" "U54" (at 297.18 77.47 0)
+    (property "Reference" "E74" (at 297.18 77.47 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC08" (at 297.18 80.01 0)
@@ -16170,7 +16170,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U54") (unit 4)
+          (reference "E74") (unit 4)
         )
       )
     )
@@ -16204,7 +16204,7 @@
   (symbol (lib_id "74xx:74AC11") (at 388.62 355.6 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 54f8e5be-d8f9-45ef-8529-7aad3b562af5)
-    (property "Reference" "U47" (at 388.6117 346.71 0)
+    (property "Reference" "E57" (at 388.6117 346.71 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AC11" (at 388.6117 349.25 0)
@@ -16233,7 +16233,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U47") (unit 3)
+          (reference "E57") (unit 3)
         )
       )
     )
@@ -16267,7 +16267,7 @@
   (symbol (lib_id "74xx:74AHC04") (at 591.82 243.84 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 55dde6fc-4bf5-4b03-9346-7029f178b5eb)
-    (property "Reference" "U106" (at 591.82 234.95 0)
+    (property "Reference" "E27" (at 591.82 234.95 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC04" (at 591.82 237.49 0)
@@ -16296,7 +16296,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U106") (unit 2)
+          (reference "E27") (unit 2)
         )
       )
     )
@@ -16305,7 +16305,7 @@
   (symbol (lib_id "Device:C") (at 50.8 -135.89 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 560970ea-bfd3-431b-bd9b-c626706cf5aa)
-    (property "Reference" "C7" (at 54.61 -137.16 0)
+    (property "Reference" "C17" (at 54.61 -137.16 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 54.61 -134.62 0)
@@ -16322,7 +16322,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C7") (unit 1)
+          (reference "C17") (unit 1)
         )
       )
     )
@@ -16331,7 +16331,7 @@
   (symbol (lib_id "Device:C") (at 304.8 -107.95 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 56c589c2-85af-417e-a2b6-08be038977d9)
-    (property "Reference" "C48" (at 308.61 -109.22 0)
+    (property "Reference" "C76" (at 308.61 -109.22 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 308.61 -106.68 0)
@@ -16348,7 +16348,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C48") (unit 1)
+          (reference "C76") (unit 1)
         )
       )
     )
@@ -16357,7 +16357,7 @@
   (symbol (lib_id "74xx:74LS04") (at 845.82 388.62 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 56c770ac-6e77-4141-af76-0a0b2c86fb7b)
-    (property "Reference" "U35" (at 845.82 379.73 0)
+    (property "Reference" "E12" (at 845.82 379.73 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC04" (at 845.82 382.27 0)
@@ -16386,7 +16386,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U35") (unit 1)
+          (reference "E12") (unit 1)
         )
       )
     )
@@ -16421,7 +16421,7 @@
   (symbol (lib_id "74xx:74AHC00") (at 325.12 393.7 0) (mirror x) (unit 4)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 5763ec09-98ea-4567-92b0-9a6384b628ae)
-    (property "Reference" "U16" (at 325.12 384.81 0)
+    (property "Reference" "E46" (at 325.12 384.81 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC00" (at 325.12 387.35 0)
@@ -16450,7 +16450,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U16") (unit 4)
+          (reference "E46") (unit 4)
         )
       )
     )
@@ -16459,7 +16459,7 @@
   (symbol (lib_id "Device:C") (at 215.9 -107.95 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 582f0d2e-8d53-4eed-8441-cdf59a924dbb)
-    (property "Reference" "C34" (at 219.71 -109.22 0)
+    (property "Reference" "C56" (at 219.71 -109.22 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 219.71 -106.68 0)
@@ -16476,7 +16476,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C34") (unit 1)
+          (reference "C56") (unit 1)
         )
       )
     )
@@ -16485,7 +16485,7 @@
   (symbol (lib_id "74xx:74AHC04") (at 114.3 -25.4 0) (unit 7)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 58c8e906-2248-4f68-8d54-152b1acc5bc7)
-    (property "Reference" "U106" (at 121.92 -26.67 0)
+    (property "Reference" "E27" (at 121.92 -26.67 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AHC04" (at 121.92 -24.13 0)
@@ -16514,7 +16514,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U106") (unit 7)
+          (reference "E27") (unit 7)
         )
       )
     )
@@ -16548,7 +16548,7 @@
   (symbol (lib_id "74xx:74LS04") (at 675.64 342.9 0) (unit 6)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 58fd8ae0-e40c-46be-85f5-fa320163cd1e)
-    (property "Reference" "U106" (at 675.64 334.01 0)
+    (property "Reference" "E27" (at 675.64 334.01 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC04" (at 675.64 336.55 0)
@@ -16577,7 +16577,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U106") (unit 6)
+          (reference "E27") (unit 6)
         )
       )
     )
@@ -16586,7 +16586,7 @@
   (symbol (lib_id "74xx:74AHC04") (at 822.96 96.52 0) (unit 6)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 5a683942-bd63-4b7c-9ec8-8d2fa8c6f90f)
-    (property "Reference" "U8" (at 822.96 87.63 0)
+    (property "Reference" "E44" (at 822.96 87.63 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC04" (at 822.96 90.17 0)
@@ -16615,7 +16615,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U8") (unit 6)
+          (reference "E44") (unit 6)
         )
       )
     )
@@ -16624,7 +16624,7 @@
   (symbol (lib_id "74xx:74AHC04") (at 12.7 -25.4 0) (unit 7)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 5aa20c85-17b4-4bf5-88e4-569ada34fc47)
-    (property "Reference" "U5" (at 19.05 -26.67 0)
+    (property "Reference" "E64" (at 19.05 -26.67 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AHC04" (at 19.05 -24.13 0)
@@ -16653,7 +16653,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U5") (unit 7)
+          (reference "E64") (unit 7)
         )
       )
     )
@@ -16687,7 +16687,7 @@
   (symbol (lib_id "Device:C") (at 101.6 -135.89 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 5cbbc488-96f4-4864-918d-055d8d22fcf9)
-    (property "Reference" "C15" (at 105.41 -137.16 0)
+    (property "Reference" "C31" (at 105.41 -137.16 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 105.41 -134.62 0)
@@ -16704,7 +16704,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C15") (unit 1)
+          (reference "C31") (unit 1)
         )
       )
     )
@@ -16713,7 +16713,7 @@
   (symbol (lib_id "74xx:74LS04") (at 675.64 373.38 0) (unit 5)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 5cc95f75-e110-48a6-b582-bc7ced85097b)
-    (property "Reference" "U35" (at 675.64 364.49 0)
+    (property "Reference" "E12" (at 675.64 364.49 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC04" (at 675.64 367.03 0)
@@ -16742,7 +16742,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U35") (unit 5)
+          (reference "E12") (unit 5)
         )
       )
     )
@@ -16751,7 +16751,7 @@
   (symbol (lib_id "74xx:74AC153") (at 652.78 91.44 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 5d46dcbc-095b-446b-9324-4fa6102593d2)
-    (property "Reference" "U31" (at 654.9741 66.04 0)
+    (property "Reference" "E83" (at 654.9741 66.04 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AC153" (at 654.9741 68.58 0)
@@ -16782,7 +16782,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U31") (unit 1)
+          (reference "E83") (unit 1)
         )
       )
     )
@@ -16841,7 +16841,7 @@
   (symbol (lib_id "74xx:74AC20") (at 866.14 419.1 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 623769c1-de2c-457d-b21f-25e24de48efd)
-    (property "Reference" "U45" (at 866.1303 410.21 0)
+    (property "Reference" "E16" (at 866.1303 410.21 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AC20" (at 866.1303 412.75 0)
@@ -16868,7 +16868,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U45") (unit 1)
+          (reference "E16") (unit 1)
         )
       )
     )
@@ -16902,7 +16902,7 @@
   (symbol (lib_id "74xx:74HC30") (at 337.82 325.12 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 62b90577-784a-4640-bed6-a6c8b2518c4f)
-    (property "Reference" "U22" (at 337.8117 312.42 0)
+    (property "Reference" "E15" (at 337.8117 312.42 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74HC30" (at 337.8117 314.96 0)
@@ -16928,7 +16928,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U22") (unit 1)
+          (reference "E15") (unit 1)
         )
       )
     )
@@ -16937,7 +16937,7 @@
   (symbol (lib_id "74xx:74AC109") (at 414.02 358.14 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 62bd3e02-0c85-43a1-b0cd-f93c927df389)
-    (property "Reference" "U6" (at 416.2141 347.98 0)
+    (property "Reference" "E67" (at 416.2141 347.98 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AC109" (at 416.2141 350.52 0)
@@ -16968,7 +16968,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U6") (unit 2)
+          (reference "E67") (unit 2)
         )
       )
     )
@@ -16977,7 +16977,7 @@
   (symbol (lib_id "Device:C") (at 63.5 -135.89 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 6422ace9-df9b-4f12-b86a-a2b3aa252b04)
-    (property "Reference" "C9" (at 67.31 -137.16 0)
+    (property "Reference" "C22" (at 67.31 -137.16 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 67.31 -134.62 0)
@@ -16994,7 +16994,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C9") (unit 1)
+          (reference "C22") (unit 1)
         )
       )
     )
@@ -17003,7 +17003,7 @@
   (symbol (lib_id "Device:C") (at 215.9 -135.89 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 646049cd-508d-4d77-9e46-b61ec02966cb)
-    (property "Reference" "C33" (at 219.71 -137.16 0)
+    (property "Reference" "C55" (at 219.71 -137.16 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 219.71 -134.62 0)
@@ -17020,7 +17020,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C33") (unit 1)
+          (reference "C55") (unit 1)
         )
       )
     )
@@ -17029,7 +17029,7 @@
   (symbol (lib_id "74xx:74AHC04") (at 508 269.24 0) (unit 4)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 64ae5160-d54e-424f-973f-a75a3b5ff05e)
-    (property "Reference" "U35" (at 508 260.35 0)
+    (property "Reference" "E12" (at 508 260.35 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC04" (at 508 262.89 0)
@@ -17058,7 +17058,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U35") (unit 4)
+          (reference "E12") (unit 4)
         )
       )
     )
@@ -17067,7 +17067,7 @@
   (symbol (lib_id "74xx:74AHC74") (at 896.62 114.3 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 64d76cbb-e3d8-45cf-afcb-49bdd5e54893)
-    (property "Reference" "U40" (at 898.8141 104.14 0)
+    (property "Reference" "E25" (at 898.8141 104.14 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AHC74" (at 898.8141 106.68 0)
@@ -17096,7 +17096,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U40") (unit 2)
+          (reference "E25") (unit 2)
         )
       )
     )
@@ -17155,7 +17155,7 @@
   (symbol (lib_id "74xx:74AC109") (at 190.5 -25.4 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 66ee0479-3526-4ebe-9dec-579b99beabec)
-    (property "Reference" "U4" (at 198.12 -26.67 0)
+    (property "Reference" "E53" (at 198.12 -26.67 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AC109" (at 198.12 -24.13 0)
@@ -17186,7 +17186,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U4") (unit 3)
+          (reference "E53") (unit 3)
         )
       )
     )
@@ -17195,7 +17195,7 @@
   (symbol (lib_id "74xx:74AC20") (at 88.9 -25.4 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 66ef06f6-3bd0-444f-b22d-714e8129e773)
-    (property "Reference" "U45" (at 95.25 -26.67 0)
+    (property "Reference" "E16" (at 95.25 -26.67 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AC20" (at 95.25 -24.13 0)
@@ -17222,7 +17222,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U45") (unit 3)
+          (reference "E16") (unit 3)
         )
       )
     )
@@ -17231,7 +17231,7 @@
   (symbol (lib_id "74xx:74AHC02") (at 132.08 152.4 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 686605a2-5baf-453e-9f40-07003bc17a19)
-    (property "Reference" "U48" (at 132.08 143.51 0)
+    (property "Reference" "E62" (at 132.08 143.51 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC02" (at 132.08 146.05 0)
@@ -17260,7 +17260,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U48") (unit 3)
+          (reference "E62") (unit 3)
         )
       )
     )
@@ -17269,7 +17269,7 @@
   (symbol (lib_id "Device:C") (at 330.2 -135.89 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 6885849b-65a0-4909-8071-0659513af9bb)
-    (property "Reference" "C51" (at 334.01 -137.16 0)
+    (property "Reference" "C82" (at 334.01 -137.16 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 334.01 -134.62 0)
@@ -17286,7 +17286,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C51") (unit 1)
+          (reference "C82") (unit 1)
         )
       )
     )
@@ -17295,7 +17295,7 @@
   (symbol (lib_id "Device:C") (at 76.2 -135.89 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 68f4f70a-f3a1-464c-8563-7bedc5864873)
-    (property "Reference" "C11" (at 80.01 -137.16 0)
+    (property "Reference" "C24" (at 80.01 -137.16 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 80.01 -134.62 0)
@@ -17312,7 +17312,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C11") (unit 1)
+          (reference "C24") (unit 1)
         )
       )
     )
@@ -17321,7 +17321,7 @@
   (symbol (lib_id "74xx:74AHC02") (at 157.48 149.86 0) (mirror x) (unit 4)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 6ad17222-6a49-40d4-a4e9-8d6254257a97)
-    (property "Reference" "U48" (at 157.48 140.97 0)
+    (property "Reference" "E62" (at 157.48 140.97 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC02" (at 157.48 143.51 0)
@@ -17350,7 +17350,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U48") (unit 4)
+          (reference "E62") (unit 4)
         )
       )
     )
@@ -17359,7 +17359,7 @@
   (symbol (lib_id "74xx:74AHC02") (at 241.3 -25.4 0) (unit 5)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 6b0614d3-88bd-4623-abca-8440e7c3a971)
-    (property "Reference" "U15" (at 248.92 -26.67 0)
+    (property "Reference" "E37" (at 248.92 -26.67 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AHC02" (at 248.92 -24.13 0)
@@ -17388,7 +17388,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U15") (unit 5)
+          (reference "E37") (unit 5)
         )
       )
     )
@@ -17397,7 +17397,7 @@
   (symbol (lib_id "74xx:74AC109") (at 185.42 218.44 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 6b956410-4187-4f87-b3a6-0223dd107862)
-    (property "Reference" "U3" (at 187.6141 208.28 0)
+    (property "Reference" "E56" (at 187.6141 208.28 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AC109" (at 187.6141 210.82 0)
@@ -17428,7 +17428,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U3") (unit 2)
+          (reference "E56") (unit 2)
         )
       )
     )
@@ -17462,7 +17462,7 @@
   (symbol (lib_id "74xx:74AHC04") (at 439.42 134.62 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 6c624693-0fc7-4dd0-a614-e80d460130d5)
-    (property "Reference" "U5" (at 439.42 125.73 0)
+    (property "Reference" "E64" (at 439.42 125.73 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC04" (at 439.42 128.27 0)
@@ -17491,7 +17491,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U5") (unit 3)
+          (reference "E64") (unit 3)
         )
       )
     )
@@ -17525,7 +17525,7 @@
   (symbol (lib_id "74xx:74AHC74") (at 906.78 381 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 6e0e706b-b0e3-48e7-9a9e-648520c92cfa)
-    (property "Reference" "U10" (at 908.9741 370.84 0)
+    (property "Reference" "E77" (at 908.9741 370.84 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AHC74" (at 908.9741 373.38 0)
@@ -17554,7 +17554,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U10") (unit 2)
+          (reference "E77") (unit 2)
         )
       )
     )
@@ -17588,7 +17588,7 @@
   (symbol (lib_id "74xx:74AHC00") (at 419.1 -71.12 0) (unit 5)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 6e73c832-fcc9-4385-a957-b6aa646edf45)
-    (property "Reference" "U43" (at 425.45 -72.39 0)
+    (property "Reference" "E36" (at 425.45 -72.39 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AHC00" (at 425.45 -69.85 0)
@@ -17617,7 +17617,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U43") (unit 5)
+          (reference "E36") (unit 5)
         )
       )
     )
@@ -17626,7 +17626,7 @@
   (symbol (lib_id "74xx:74AHC540") (at 71.12 190.5 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 6f427c71-cecc-4c93-bb2b-ce55e1e05ff6)
-    (property "Reference" "U49" (at 73.3141 170.18 0)
+    (property "Reference" "E51" (at 73.3141 170.18 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AHC540" (at 73.3141 172.72 0)
@@ -17661,7 +17661,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U49") (unit 1)
+          (reference "E51") (unit 1)
         )
       )
     )
@@ -17695,7 +17695,7 @@
   (symbol (lib_id "74xx:74AHC04") (at 299.72 294.64 0) (unit 5)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 713abc02-e94c-40ac-a7bd-5d628e3a1fae)
-    (property "Reference" "U20" (at 299.72 285.75 0)
+    (property "Reference" "E23" (at 299.72 285.75 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC04" (at 299.72 288.29 0)
@@ -17724,7 +17724,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U20") (unit 5)
+          (reference "E23") (unit 5)
         )
       )
     )
@@ -17733,7 +17733,7 @@
   (symbol (lib_id "74xx:74AHC32") (at 416.56 104.14 0) (mirror x) (unit 3)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 72038399-ac4f-481d-8bd7-c257784200e5)
-    (property "Reference" "U52" (at 416.56 95.25 0)
+    (property "Reference" "E45" (at 416.56 95.25 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC32" (at 416.56 97.79 0)
@@ -17762,7 +17762,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U52") (unit 3)
+          (reference "E45") (unit 3)
         )
       )
     )
@@ -17771,7 +17771,7 @@
   (symbol (lib_id "74xx:74AHC04") (at 299.72 370.84 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 72fa9bef-7cf6-47b6-94e7-36311161a00e)
-    (property "Reference" "U20" (at 299.72 361.95 0)
+    (property "Reference" "E23" (at 299.72 361.95 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC04" (at 299.72 364.49 0)
@@ -17800,7 +17800,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U20") (unit 2)
+          (reference "E23") (unit 2)
         )
       )
     )
@@ -17809,7 +17809,7 @@
   (symbol (lib_id "74xx:74AHC04") (at 266.7 -71.12 0) (unit 7)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 735eb0fd-4bf0-4cec-9c0d-67e004b8604b)
-    (property "Reference" "U20" (at 273.05 -72.39 0)
+    (property "Reference" "E23" (at 273.05 -72.39 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AHC04" (at 273.05 -69.85 0)
@@ -17838,7 +17838,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U20") (unit 7)
+          (reference "E23") (unit 7)
         )
       )
     )
@@ -17872,7 +17872,7 @@
   (symbol (lib_id "Device:C") (at 317.5 -135.89 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 782bcbb2-cd5e-450d-8270-0fc17237d217)
-    (property "Reference" "C49" (at 321.31 -137.16 0)
+    (property "Reference" "C77" (at 321.31 -137.16 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 321.31 -134.62 0)
@@ -17889,7 +17889,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C49") (unit 1)
+          (reference "C77") (unit 1)
         )
       )
     )
@@ -17923,7 +17923,7 @@
   (symbol (lib_id "74xx:74AHC00") (at 317.5 200.66 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 7a5246a0-f0c1-41c0-8234-da6a8c3893c7)
-    (property "Reference" "U43" (at 317.4917 191.77 0)
+    (property "Reference" "E36" (at 317.4917 191.77 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC00" (at 317.4917 194.31 0)
@@ -17952,7 +17952,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U43") (unit 2)
+          (reference "E36") (unit 2)
         )
       )
     )
@@ -17961,7 +17961,7 @@
   (symbol (lib_id "74xx:74AHC00") (at 266.7 -25.4 0) (unit 5)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 7a906542-703e-4236-abb7-f731ae588fb8)
-    (property "Reference" "U16" (at 273.05 -26.67 0)
+    (property "Reference" "E46" (at 273.05 -26.67 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AHC00" (at 273.05 -24.13 0)
@@ -17990,7 +17990,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U16") (unit 5)
+          (reference "E46") (unit 5)
         )
       )
     )
@@ -17999,7 +17999,7 @@
   (symbol (lib_id "74xx:74AHC04") (at 107.95 15.24 0) (unit 5)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 7b28afb7-eac6-4f6d-8bae-f23f714fc2bc)
-    (property "Reference" "U5" (at 107.95 6.35 0)
+    (property "Reference" "E64" (at 107.95 6.35 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC04" (at 107.95 8.89 0)
@@ -18028,7 +18028,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U5") (unit 5)
+          (reference "E64") (unit 5)
         )
       )
     )
@@ -18037,7 +18037,7 @@
   (symbol (lib_id "74xx:74AHC02") (at 551.18 142.24 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 7c806036-f42c-4a9c-8c7a-cb7ea5b1ba04)
-    (property "Reference" "U27" (at 551.18 133.35 0)
+    (property "Reference" "E85" (at 551.18 133.35 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC02" (at 551.18 135.89 0)
@@ -18066,7 +18066,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U27") (unit 2)
+          (reference "E85") (unit 2)
         )
       )
     )
@@ -18075,7 +18075,7 @@
   (symbol (lib_id "Device:C") (at 139.7 -135.89 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 7cd8e9f8-3268-4df8-a027-d33b4e9461e9)
-    (property "Reference" "C21" (at 143.51 -137.16 0)
+    (property "Reference" "C37" (at 143.51 -137.16 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 143.51 -134.62 0)
@@ -18092,7 +18092,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C21") (unit 1)
+          (reference "C37") (unit 1)
         )
       )
     )
@@ -18101,7 +18101,7 @@
   (symbol (lib_id "74xx:74HC138") (at 561.34 251.46 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 7d3538e0-a2ab-4fe9-94e8-498dad6e738b)
-    (property "Reference" "U30" (at 563.5341 233.68 0)
+    (property "Reference" "E26" (at 563.5341 233.68 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AHC138" (at 563.5341 236.22 0)
@@ -18132,7 +18132,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U30") (unit 1)
+          (reference "E26") (unit 1)
         )
       )
     )
@@ -18141,7 +18141,7 @@
   (symbol (lib_id "Device:C") (at 63.5 -107.95 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 7d5e4eaf-05cf-41f7-a594-bbeb441eb370)
-    (property "Reference" "C10" (at 67.31 -109.22 0)
+    (property "Reference" "C23" (at 67.31 -109.22 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 67.31 -106.68 0)
@@ -18158,7 +18158,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C10") (unit 1)
+          (reference "C23") (unit 1)
         )
       )
     )
@@ -18192,7 +18192,7 @@
   (symbol (lib_id "74xx:74AC109") (at 190.5 -71.12 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 7e7f29ff-1b77-4c8f-bb9b-7baab042af17)
-    (property "Reference" "U36" (at 198.12 -72.39 0)
+    (property "Reference" "E76" (at 198.12 -72.39 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AC109" (at 198.12 -69.85 0)
@@ -18223,7 +18223,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U36") (unit 3)
+          (reference "E76") (unit 3)
         )
       )
     )
@@ -18257,7 +18257,7 @@
   (symbol (lib_id "74xx:74AHC00") (at 317.5 177.8 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 7ec84aff-3167-46b4-b031-f2b2544f1e37)
-    (property "Reference" "U43" (at 317.4917 168.91 0)
+    (property "Reference" "E36" (at 317.4917 168.91 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC00" (at 317.4917 171.45 0)
@@ -18286,7 +18286,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U43") (unit 1)
+          (reference "E36") (unit 1)
         )
       )
     )
@@ -18295,7 +18295,7 @@
   (symbol (lib_id "Device:C") (at 203.2 -107.95 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 7eddeeed-2957-476e-aacb-0828e2bf7c7d)
-    (property "Reference" "C32" (at 207.01 -109.22 0)
+    (property "Reference" "C54" (at 207.01 -109.22 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 207.01 -106.68 0)
@@ -18312,7 +18312,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C32") (unit 1)
+          (reference "C54") (unit 1)
         )
       )
     )
@@ -18321,7 +18321,7 @@
   (symbol (lib_id "Device:C") (at 38.1 -107.95 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 7eed3751-166b-48a3-bb9b-a420c1c056f2)
-    (property "Reference" "C6" (at 41.91 -109.22 0)
+    (property "Reference" "C16" (at 41.91 -109.22 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 41.91 -106.68 0)
@@ -18338,7 +18338,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C6") (unit 1)
+          (reference "C16") (unit 1)
         )
       )
     )
@@ -18347,7 +18347,7 @@
   (symbol (lib_id "74xx:74AHC02") (at 165.1 -25.4 0) (unit 5)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 7fe1a0cf-45ad-4538-b9ca-852fae26e455)
-    (property "Reference" "U48" (at 171.45 -26.67 0)
+    (property "Reference" "E62" (at 171.45 -26.67 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AHC02" (at 171.45 -24.13 0)
@@ -18376,7 +18376,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U48") (unit 5)
+          (reference "E62") (unit 5)
         )
       )
     )
@@ -18410,7 +18410,7 @@
   (symbol (lib_id "74xx:74AHC04") (at 591.82 274.32 0) (unit 4)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 84720e4f-20e6-40ac-8720-8d7d2d255e22)
-    (property "Reference" "U106" (at 591.82 265.43 0)
+    (property "Reference" "E27" (at 591.82 265.43 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC04" (at 591.82 267.97 0)
@@ -18439,7 +18439,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U106") (unit 4)
+          (reference "E27") (unit 4)
         )
       )
     )
@@ -18448,7 +18448,7 @@
   (symbol (lib_id "Device:C") (at 25.4 -135.89 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 851f59fa-0d12-4160-89a0-cd92787d6525)
-    (property "Reference" "C3" (at 29.21 -137.16 0)
+    (property "Reference" "C13" (at 29.21 -137.16 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 29.21 -134.62 0)
@@ -18465,7 +18465,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C3") (unit 1)
+          (reference "C13") (unit 1)
         )
       )
     )
@@ -18474,7 +18474,7 @@
   (symbol (lib_id "74xx:74HC138") (at 477.52 251.46 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 853657cd-a0ec-4062-8414-dc41ded7c8fa)
-    (property "Reference" "U21" (at 479.7141 233.68 0)
+    (property "Reference" "E11" (at 479.7141 233.68 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AHC138" (at 479.7141 236.22 0)
@@ -18505,7 +18505,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U21") (unit 1)
+          (reference "E11") (unit 1)
         )
       )
     )
@@ -18514,7 +18514,7 @@
   (symbol (lib_id "Device:C") (at 203.2 -135.89 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 85bfa8c0-f83e-45f7-9d6d-3e8c4cfe51f3)
-    (property "Reference" "C31" (at 207.01 -137.16 0)
+    (property "Reference" "C53" (at 207.01 -137.16 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 207.01 -134.62 0)
@@ -18531,7 +18531,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C31") (unit 1)
+          (reference "C53") (unit 1)
         )
       )
     )
@@ -18540,7 +18540,7 @@
   (symbol (lib_id "74xx:74AHC00") (at 863.6 175.26 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 85dccc10-b0f8-4730-88c6-b024d2e8530e)
-    (property "Reference" "U23" (at 863.5917 166.37 0)
+    (property "Reference" "E43" (at 863.5917 166.37 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC00" (at 863.5917 168.91 0)
@@ -18569,7 +18569,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U23") (unit 2)
+          (reference "E43") (unit 2)
         )
       )
     )
@@ -18654,7 +18654,7 @@
   (symbol (lib_id "Device:C") (at 88.9 -135.89 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 881f689c-28a3-40e1-aa8d-075727a53ae5)
-    (property "Reference" "C13" (at 92.71 -137.16 0)
+    (property "Reference" "C26" (at 92.71 -137.16 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 92.71 -134.62 0)
@@ -18671,7 +18671,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C13") (unit 1)
+          (reference "C26") (unit 1)
         )
       )
     )
@@ -18705,7 +18705,7 @@
   (symbol (lib_id "74xx:74AHC32") (at 838.2 144.78 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 88e85139-f008-4f77-9e55-83e827506d50)
-    (property "Reference" "U52" (at 838.2 135.89 0)
+    (property "Reference" "E45" (at 838.2 135.89 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC32" (at 838.2 138.43 0)
@@ -18734,7 +18734,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U52") (unit 1)
+          (reference "E45") (unit 1)
         )
       )
     )
@@ -18768,7 +18768,7 @@
   (symbol (lib_id "74xx:74LS30") (at 716.28 365.76 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 896b3d91-4e74-4724-9075-8452bd15ce1f)
-    (property "Reference" "U19" (at 716.2717 353.06 0)
+    (property "Reference" "E13" (at 716.2717 353.06 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74HC30" (at 716.2717 355.6 0)
@@ -18794,7 +18794,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U19") (unit 1)
+          (reference "E13") (unit 1)
         )
       )
     )
@@ -18803,7 +18803,7 @@
   (symbol (lib_id "74xx:74AC151") (at 728.98 198.12 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 8a37df08-6cfc-46f4-acac-d1e84b238669)
-    (property "Reference" "U29" (at 731.1741 175.26 0)
+    (property "Reference" "E61" (at 731.1741 175.26 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AC151" (at 731.1741 177.8 0)
@@ -18834,7 +18834,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U29") (unit 1)
+          (reference "E61") (unit 1)
         )
       )
     )
@@ -18918,7 +18918,7 @@
   (symbol (lib_id "74xx:74AC109") (at 185.42 187.96 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 8d9be166-ccf1-4b51-beef-cf53828b17c6)
-    (property "Reference" "U3" (at 187.6141 177.8 0)
+    (property "Reference" "E56" (at 187.6141 177.8 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AC109" (at 187.6141 180.34 0)
@@ -18949,7 +18949,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U3") (unit 1)
+          (reference "E56") (unit 1)
         )
       )
     )
@@ -19008,7 +19008,7 @@
   (symbol (lib_id "74xx:74AHC04") (at 375.92 86.36 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 8e371990-d8df-451d-9a7b-d558cc7e0a21)
-    (property "Reference" "U5" (at 375.92 77.47 0)
+    (property "Reference" "E64" (at 375.92 77.47 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC04" (at 375.92 80.01 0)
@@ -19037,7 +19037,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U5") (unit 1)
+          (reference "E64") (unit 1)
         )
       )
     )
@@ -19046,7 +19046,7 @@
   (symbol (lib_id "74xx:74AHC04") (at 317.5 162.56 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 92c24043-412a-41ad-beb6-946e575d18c8)
-    (property "Reference" "U8" (at 317.5 153.67 0)
+    (property "Reference" "E44" (at 317.5 153.67 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC04" (at 317.5 156.21 0)
@@ -19075,7 +19075,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U8") (unit 1)
+          (reference "E44") (unit 1)
         )
       )
     )
@@ -19084,7 +19084,7 @@
   (symbol (lib_id "74xx:74AC109") (at 185.42 127 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 933b0582-6699-43c2-8d1e-2ed3fd3a35ae)
-    (property "Reference" "U2" (at 187.6141 116.84 0)
+    (property "Reference" "E63" (at 187.6141 116.84 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AC109" (at 187.6141 119.38 0)
@@ -19115,7 +19115,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U2") (unit 1)
+          (reference "E63") (unit 1)
         )
       )
     )
@@ -19150,7 +19150,7 @@
   (symbol (lib_id "Device:C") (at 190.5 -107.95 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 960ac40e-7b23-41c2-af36-2c6972c7e85e)
-    (property "Reference" "C30" (at 194.31 -109.22 0)
+    (property "Reference" "C52" (at 194.31 -109.22 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 194.31 -106.68 0)
@@ -19167,7 +19167,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C30") (unit 1)
+          (reference "C52") (unit 1)
         )
       )
     )
@@ -19176,7 +19176,7 @@
   (symbol (lib_id "Device:C") (at 152.4 -107.95 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 9639fa36-f2f8-4ee7-ab9d-360ba3c64d71)
-    (property "Reference" "C24" (at 156.21 -109.22 0)
+    (property "Reference" "C43" (at 156.21 -109.22 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 156.21 -106.68 0)
@@ -19193,7 +19193,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C24") (unit 1)
+          (reference "C43") (unit 1)
         )
       )
     )
@@ -19227,7 +19227,7 @@
   (symbol (lib_id "74xx:74AHC04") (at 508 254 0) (unit 4)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 96fd46a9-2432-43bb-8616-7b0fcf925f5f)
-    (property "Reference" "U20" (at 508 245.11 0)
+    (property "Reference" "E23" (at 508 245.11 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC04" (at 508 247.65 0)
@@ -19256,7 +19256,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U20") (unit 4)
+          (reference "E23") (unit 4)
         )
       )
     )
@@ -19265,7 +19265,7 @@
   (symbol (lib_id "Device:C") (at 190.5 -135.89 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 988729a9-dd21-4f95-bd4f-8a2ac38a9222)
-    (property "Reference" "C29" (at 194.31 -137.16 0)
+    (property "Reference" "C51" (at 194.31 -137.16 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 194.31 -134.62 0)
@@ -19282,7 +19282,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C29") (unit 1)
+          (reference "C51") (unit 1)
         )
       )
     )
@@ -19291,7 +19291,7 @@
   (symbol (lib_id "74xx:74AHC00") (at 276.86 83.82 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 99197d66-b582-4287-8eb3-f7f87be5abb5)
-    (property "Reference" "U16" (at 276.8517 74.93 0)
+    (property "Reference" "E46" (at 276.8517 74.93 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC00" (at 276.8517 77.47 0)
@@ -19320,7 +19320,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U16") (unit 3)
+          (reference "E46") (unit 3)
         )
       )
     )
@@ -19329,7 +19329,7 @@
   (symbol (lib_id "Device:C") (at 38.1 -135.89 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 9a7ab25f-6afb-49d7-84d0-f91e689793e3)
-    (property "Reference" "C5" (at 41.91 -137.16 0)
+    (property "Reference" "C15" (at 41.91 -137.16 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 41.91 -134.62 0)
@@ -19346,7 +19346,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C5") (unit 1)
+          (reference "C15") (unit 1)
         )
       )
     )
@@ -19355,7 +19355,7 @@
   (symbol (lib_id "74xx:74AC153") (at 652.78 193.04 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 9bac4d6e-c1ab-4c4f-9cc9-277c3e999450)
-    (property "Reference" "U32" (at 654.9741 167.64 0)
+    (property "Reference" "E73" (at 654.9741 167.64 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AC153" (at 654.9741 170.18 0)
@@ -19386,7 +19386,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U32") (unit 1)
+          (reference "E73") (unit 1)
         )
       )
     )
@@ -19395,7 +19395,7 @@
   (symbol (lib_id "74xx:74AHC00") (at 416.56 88.9 0) (mirror x) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 9bedee3d-d387-4aac-93cc-0f69611ef1ca)
-    (property "Reference" "U16" (at 416.56 80.01 0)
+    (property "Reference" "E46" (at 416.56 80.01 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC00" (at 416.56 82.55 0)
@@ -19424,7 +19424,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U16") (unit 1)
+          (reference "E46") (unit 1)
         )
       )
     )
@@ -19433,7 +19433,7 @@
   (symbol (lib_id "74xx:74AHC74") (at 896.62 139.7 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 9d588645-bda8-4caa-82ce-a7fd7cbb6aca)
-    (property "Reference" "U41" (at 898.8141 129.54 0)
+    (property "Reference" "E34" (at 898.8141 129.54 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AHC74" (at 898.8141 132.08 0)
@@ -19462,7 +19462,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U41") (unit 1)
+          (reference "E34") (unit 1)
         )
       )
     )
@@ -19531,7 +19531,7 @@
   (symbol (lib_id "74xx:74AHC00") (at 368.3 -25.4 0) (unit 5)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 9fc26f73-1d24-4aa7-8b75-c6f0c4ff525e)
-    (property "Reference" "U33" (at 375.92 -26.67 0)
+    (property "Reference" "E22" (at 375.92 -26.67 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AHC00" (at 375.92 -24.13 0)
@@ -19560,7 +19560,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U33") (unit 5)
+          (reference "E22") (unit 5)
         )
       )
     )
@@ -19569,7 +19569,7 @@
   (symbol (lib_id "74xx:74AC11") (at 340.36 190.5 0) (mirror x) (unit 2)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid a0fb7d79-cbdf-4b9f-b48b-1ac17be227fc)
-    (property "Reference" "U47" (at 340.36 181.61 0)
+    (property "Reference" "E57" (at 340.36 181.61 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AC11" (at 340.36 184.15 0)
@@ -19598,7 +19598,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U47") (unit 2)
+          (reference "E57") (unit 2)
         )
       )
     )
@@ -19607,7 +19607,7 @@
   (symbol (lib_id "74xx:74LS30") (at 444.5 -25.4 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid a19bd93b-6212-4e31-8591-e7b7662e0371)
-    (property "Reference" "U19" (at 450.85 -26.67 0)
+    (property "Reference" "E13" (at 450.85 -26.67 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74HC30" (at 450.85 -24.13 0)
@@ -19633,7 +19633,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U19") (unit 2)
+          (reference "E13") (unit 2)
         )
       )
     )
@@ -19642,7 +19642,7 @@
   (symbol (lib_id "74xx:74AHC04") (at 375.92 104.14 0) (unit 6)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid a27f334b-b308-4d99-a41d-46d20904d04a)
-    (property "Reference" "U5" (at 375.92 95.25 0)
+    (property "Reference" "E64" (at 375.92 95.25 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC04" (at 375.92 97.79 0)
@@ -19671,7 +19671,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U5") (unit 6)
+          (reference "E64") (unit 6)
         )
       )
     )
@@ -19680,7 +19680,7 @@
   (symbol (lib_id "74xx:74AHC02") (at 419.1 -25.4 0) (unit 5)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid a316c23f-6d75-46e1-8f83-3c5622522bd4)
-    (property "Reference" "U51" (at 425.45 -26.67 0)
+    (property "Reference" "E14" (at 425.45 -26.67 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AHC02" (at 425.45 -24.13 0)
@@ -19709,7 +19709,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U51") (unit 5)
+          (reference "E14") (unit 5)
         )
       )
     )
@@ -19718,7 +19718,7 @@
   (symbol (lib_id "74xx:74LS74") (at 185.42 370.84 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid a40dcc4c-be40-4d63-94fc-1d9418cd035d)
-    (property "Reference" "U9" (at 187.6141 360.68 0)
+    (property "Reference" "E54" (at 187.6141 360.68 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AHC74" (at 187.6141 363.22 0)
@@ -19747,7 +19747,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U9") (unit 1)
+          (reference "E54") (unit 1)
         )
       )
     )
@@ -19756,7 +19756,7 @@
   (symbol (lib_id "74xx:74AC109") (at 63.5 -25.4 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid a46eb044-87a0-44d5-9169-2fdd71df24c4)
-    (property "Reference" "U2" (at 71.12 -26.67 0)
+    (property "Reference" "E63" (at 71.12 -26.67 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AC109" (at 71.12 -24.13 0)
@@ -19787,7 +19787,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U2") (unit 3)
+          (reference "E63") (unit 3)
         )
       )
     )
@@ -19796,7 +19796,7 @@
   (symbol (lib_id "74xx:74LS04") (at 469.9 -25.4 0) (unit 7)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid a486a181-23e3-496e-a162-931f4cdf4b97)
-    (property "Reference" "U35" (at 476.25 -26.67 0)
+    (property "Reference" "E12" (at 476.25 -26.67 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AHC04" (at 476.25 -24.13 0)
@@ -19825,7 +19825,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U35") (unit 7)
+          (reference "E12") (unit 7)
         )
       )
     )
@@ -19834,7 +19834,7 @@
   (symbol (lib_id "Device:C") (at 165.1 -135.89 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid a5116435-cf2d-4f88-a652-e039855a6ae3)
-    (property "Reference" "C25" (at 168.91 -137.16 0)
+    (property "Reference" "C44" (at 168.91 -137.16 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 168.91 -134.62 0)
@@ -19851,7 +19851,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C25") (unit 1)
+          (reference "C44") (unit 1)
         )
       )
     )
@@ -19860,7 +19860,7 @@
   (symbol (lib_id "74xx:74AC11") (at 863.6 154.94 0) (mirror x) (unit 2)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid a53989fc-d8a5-42f0-ac87-0ec594be58b3)
-    (property "Reference" "U167" (at 863.6 146.05 0)
+    (property "Reference" "E35" (at 863.6 146.05 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AC11" (at 863.6 148.59 0)
@@ -19889,7 +19889,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U167") (unit 2)
+          (reference "E35") (unit 2)
         )
       )
     )
@@ -19898,7 +19898,7 @@
   (symbol (lib_id "Device:C") (at 12.7 -135.89 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid a5cf89bc-de7c-433a-8f0a-4036e3f66795)
-    (property "Reference" "C1" (at 16.51 -137.16 0)
+    (property "Reference" "C86" (at 16.51 -137.16 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 16.51 -134.62 0)
@@ -19915,7 +19915,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C1") (unit 1)
+          (reference "C86") (unit 1)
         )
       )
     )
@@ -19949,7 +19949,7 @@
   (symbol (lib_id "Device:C") (at 241.3 -135.89 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid a73803f3-4986-4b45-80b2-6fef94283e1f)
-    (property "Reference" "C37" (at 245.11 -137.16 0)
+    (property "Reference" "C62" (at 245.11 -137.16 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 245.11 -134.62 0)
@@ -19966,7 +19966,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C37") (unit 1)
+          (reference "C62") (unit 1)
         )
       )
     )
@@ -19975,7 +19975,7 @@
   (symbol (lib_id "Device:C") (at 228.6 -135.89 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid a7d1aed2-dec5-4758-84dd-78d966119d9d)
-    (property "Reference" "C35" (at 232.41 -137.16 0)
+    (property "Reference" "C57" (at 232.41 -137.16 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 232.41 -134.62 0)
@@ -19992,7 +19992,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C35") (unit 1)
+          (reference "C57") (unit 1)
         )
       )
     )
@@ -20027,7 +20027,7 @@
   (symbol (lib_id "74xx:74AHC00") (at 551.18 162.56 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid ab076100-5faf-4aef-95b9-791317006483)
-    (property "Reference" "U24" (at 551.1717 153.67 0)
+    (property "Reference" "E84" (at 551.1717 153.67 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC00" (at 551.1717 156.21 0)
@@ -20056,7 +20056,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U24") (unit 2)
+          (reference "E84") (unit 2)
         )
       )
     )
@@ -20065,7 +20065,7 @@
   (symbol (lib_id "74xx:74AC11") (at 157.48 337.82 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid ace4ba46-e62a-44ca-a46d-5e8ccb94f190)
-    (property "Reference" "U47" (at 157.4717 328.93 0)
+    (property "Reference" "E57" (at 157.4717 328.93 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AC11" (at 157.4717 331.47 0)
@@ -20094,7 +20094,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U47") (unit 1)
+          (reference "E57") (unit 1)
         )
       )
     )
@@ -20103,7 +20103,7 @@
   (symbol (lib_id "74xx:74AHC00") (at 439.42 91.44 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid ae1176cb-7f50-4c6f-958e-9054ea1dcc4b)
-    (property "Reference" "U16" (at 439.42 82.55 0)
+    (property "Reference" "E46" (at 439.42 82.55 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC00" (at 439.42 85.09 0)
@@ -20132,7 +20132,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U16") (unit 2)
+          (reference "E46") (unit 2)
         )
       )
     )
@@ -20141,7 +20141,7 @@
   (symbol (lib_id "74xx:74AC151") (at 728.98 76.2 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid ae452e6c-a24f-4dd0-b442-f30d63210d29)
-    (property "Reference" "U26" (at 731.1741 53.34 0)
+    (property "Reference" "E82" (at 731.1741 53.34 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AC151" (at 731.1741 55.88 0)
@@ -20172,7 +20172,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U26") (unit 1)
+          (reference "E82") (unit 1)
         )
       )
     )
@@ -20181,7 +20181,7 @@
   (symbol (lib_id "74xx:74AC109") (at 139.7 -25.4 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid afeec3f9-555f-4747-ad13-bc5cb49b0831)
-    (property "Reference" "U3" (at 147.32 -26.67 0)
+    (property "Reference" "E56" (at 147.32 -26.67 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AC109" (at 147.32 -24.13 0)
@@ -20212,7 +20212,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U3") (unit 3)
+          (reference "E56") (unit 3)
         )
       )
     )
@@ -20221,7 +20221,7 @@
   (symbol (lib_id "74xx:74HC27") (at 886.46 373.38 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid b0e29354-5fb7-4ed4-b602-b8a1b5583663)
-    (property "Reference" "U12" (at 886.46 364.49 0)
+    (property "Reference" "E31" (at 886.46 364.49 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74HC27" (at 886.46 367.03 0)
@@ -20250,7 +20250,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U12") (unit 2)
+          (reference "E31") (unit 2)
         )
       )
     )
@@ -20259,7 +20259,7 @@
   (symbol (lib_id "Device:C") (at 279.4 -107.95 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid b2a4f19b-6d77-4351-9e07-d79dc9ba435c)
-    (property "Reference" "C44" (at 283.21 -109.22 0)
+    (property "Reference" "C72" (at 283.21 -109.22 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 283.21 -106.68 0)
@@ -20276,7 +20276,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C44") (unit 1)
+          (reference "C72") (unit 1)
         )
       )
     )
@@ -20285,7 +20285,7 @@
   (symbol (lib_id "Device:C") (at 12.7 -107.95 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid b34ee79f-a26b-41b7-a98f-d5c446b7e533)
-    (property "Reference" "C2" (at 16.51 -109.22 0)
+    (property "Reference" "C12" (at 16.51 -109.22 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 16.51 -106.68 0)
@@ -20302,7 +20302,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C2") (unit 1)
+          (reference "C12") (unit 1)
         )
       )
     )
@@ -20361,7 +20361,7 @@
   (symbol (lib_id "Device:C") (at 342.9 -135.89 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid b48b2ed4-ce06-4618-8fa0-af638116a2ba)
-    (property "Reference" "C53" (at 346.71 -137.16 0)
+    (property "Reference" "C84" (at 346.71 -137.16 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 346.71 -134.62 0)
@@ -20378,7 +20378,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C53") (unit 1)
+          (reference "C84") (unit 1)
         )
       )
     )
@@ -20387,7 +20387,7 @@
   (symbol (lib_id "Device:C") (at 139.7 -107.95 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid b4c86a95-0ecf-47ed-9357-1d78c4da0cb8)
-    (property "Reference" "C22" (at 143.51 -109.22 0)
+    (property "Reference" "C41" (at 143.51 -109.22 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 143.51 -106.68 0)
@@ -20404,7 +20404,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C22") (unit 1)
+          (reference "C41") (unit 1)
         )
       )
     )
@@ -20438,7 +20438,7 @@
   (symbol (lib_id "74xx:74LS04") (at 675.64 327.66 0) (unit 5)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid b54d203e-fd9a-4c99-8869-15bbf5888b94)
-    (property "Reference" "U106" (at 675.64 318.77 0)
+    (property "Reference" "E27" (at 675.64 318.77 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC04" (at 675.64 321.31 0)
@@ -20467,7 +20467,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U106") (unit 5)
+          (reference "E27") (unit 5)
         )
       )
     )
@@ -20476,7 +20476,7 @@
   (symbol (lib_id "74xx:74AHC02") (at 817.88 147.32 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid b668bcae-7b42-4eaa-a66a-bcc79c380471)
-    (property "Reference" "U48" (at 817.88 138.43 0)
+    (property "Reference" "E62" (at 817.88 138.43 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC02" (at 817.88 140.97 0)
@@ -20505,7 +20505,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U48") (unit 1)
+          (reference "E62") (unit 1)
         )
       )
     )
@@ -20514,7 +20514,7 @@
   (symbol (lib_id "74xx:74AHC74") (at 317.5 73.66 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid b670f920-a50e-4da1-942f-c60a9673a62c)
-    (property "Reference" "U72" (at 319.6941 63.5 0)
+    (property "Reference" "E75" (at 319.6941 63.5 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AHC74" (at 319.6941 66.04 0)
@@ -20543,7 +20543,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U72") (unit 2)
+          (reference "E75") (unit 2)
         )
       )
     )
@@ -20577,7 +20577,7 @@
   (symbol (lib_id "Device:C") (at 228.6 -107.95 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid b7025e95-f366-4dc9-a047-278e1f414b57)
-    (property "Reference" "C36" (at 232.41 -109.22 0)
+    (property "Reference" "C61" (at 232.41 -109.22 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 232.41 -106.68 0)
@@ -20594,7 +20594,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C36") (unit 1)
+          (reference "C61") (unit 1)
         )
       )
     )
@@ -20628,7 +20628,7 @@
   (symbol (lib_id "74xx:74AHC00") (at 617.22 139.7 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid bad8db16-4e58-4f00-b8b0-c3e5fa492106)
-    (property "Reference" "U33" (at 617.2117 130.81 0)
+    (property "Reference" "E22" (at 617.2117 130.81 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC00" (at 617.2117 133.35 0)
@@ -20657,7 +20657,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U33") (unit 1)
+          (reference "E22") (unit 1)
         )
       )
     )
@@ -20666,7 +20666,7 @@
   (symbol (lib_id "74xx:74AHC04") (at 148.59 15.24 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid bb20775c-ecbb-4526-ab4a-18f23bfb6ff4)
-    (property "Reference" "U5" (at 148.59 6.35 0)
+    (property "Reference" "E64" (at 148.59 6.35 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC04" (at 148.59 8.89 0)
@@ -20695,7 +20695,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U5") (unit 2)
+          (reference "E64") (unit 2)
         )
       )
     )
@@ -20704,7 +20704,7 @@
   (symbol (lib_id "74xx:74AHC08") (at 157.48 307.34 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid bba2fbc2-3663-46d9-bb8c-2e44071df466)
-    (property "Reference" "U13" (at 157.4717 298.45 0)
+    (property "Reference" "E55" (at 157.4717 298.45 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC08" (at 157.4717 300.99 0)
@@ -20733,7 +20733,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U13") (unit 3)
+          (reference "E55") (unit 3)
         )
       )
     )
@@ -20767,7 +20767,7 @@
   (symbol (lib_id "74xx:74AHC74") (at 896.62 88.9 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid bd4eeff5-b047-453a-82cd-713bea718884)
-    (property "Reference" "U40" (at 898.8141 78.74 0)
+    (property "Reference" "E25" (at 898.8141 78.74 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AHC74" (at 898.8141 81.28 0)
@@ -20796,7 +20796,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U40") (unit 1)
+          (reference "E25") (unit 1)
         )
       )
     )
@@ -20805,7 +20805,7 @@
   (symbol (lib_id "74xx:74AHC00") (at 439.42 106.68 0) (mirror x) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid be16750d-e5d0-4927-9ae4-cf7c8a744388)
-    (property "Reference" "U24" (at 439.42 97.79 0)
+    (property "Reference" "E84" (at 439.42 97.79 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC00" (at 439.42 100.33 0)
@@ -20834,7 +20834,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U24") (unit 1)
+          (reference "E84") (unit 1)
         )
       )
     )
@@ -20843,7 +20843,7 @@
   (symbol (lib_id "74xx:74AHC02") (at 551.18 335.28 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid c0046fc9-58a6-44fc-b3f0-f1bc62017899)
-    (property "Reference" "U27" (at 551.18 326.39 0)
+    (property "Reference" "E85" (at 551.18 326.39 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC02" (at 551.18 328.93 0)
@@ -20872,7 +20872,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U27") (unit 3)
+          (reference "E85") (unit 3)
         )
       )
     )
@@ -20881,7 +20881,7 @@
   (symbol (lib_id "74xx:74AHC02") (at 157.48 241.3 0) (mirror x) (unit 2)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid c0e26202-4d41-46a5-8566-9466bf64073d)
-    (property "Reference" "U15" (at 157.48 232.41 0)
+    (property "Reference" "E37" (at 157.48 232.41 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC02" (at 157.48 234.95 0)
@@ -20910,7 +20910,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U15") (unit 2)
+          (reference "E37") (unit 2)
         )
       )
     )
@@ -20919,7 +20919,7 @@
   (symbol (lib_id "74xx:74AC11") (at 866.14 403.86 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid c208d2cf-15c6-405e-a03b-0e02643f1eae)
-    (property "Reference" "U167" (at 866.1317 394.97 0)
+    (property "Reference" "E35" (at 866.1317 394.97 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AC11" (at 866.1317 397.51 0)
@@ -20948,7 +20948,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U167") (unit 1)
+          (reference "E35") (unit 1)
         )
       )
     )
@@ -20982,7 +20982,7 @@
   (symbol (lib_id "74xx:74AHC540") (at 71.12 358.14 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid c36ff798-9c1a-4cdf-a91c-dfd14da874b0)
-    (property "Reference" "U169" (at 73.3141 337.82 0)
+    (property "Reference" "E81" (at 73.3141 337.82 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AHC540" (at 73.3141 340.36 0)
@@ -21017,7 +21017,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U169") (unit 1)
+          (reference "E81") (unit 1)
         )
       )
     )
@@ -21026,7 +21026,7 @@
   (symbol (lib_id "74xx:74LS74") (at 185.42 401.32 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid c4130e29-ab18-4e37-8f44-f3ad5bb57259)
-    (property "Reference" "U9" (at 187.6141 391.16 0)
+    (property "Reference" "E54" (at 187.6141 391.16 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AHC74" (at 187.6141 393.7 0)
@@ -21055,7 +21055,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U9") (unit 2)
+          (reference "E54") (unit 2)
         )
       )
     )
@@ -21064,7 +21064,7 @@
   (symbol (lib_id "74xx:74AC109") (at 185.42 279.4 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid c4856087-7fb0-4f6c-a237-ecbe3202ca6c)
-    (property "Reference" "U4" (at 187.6141 269.24 0)
+    (property "Reference" "E53" (at 187.6141 269.24 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AC109" (at 187.6141 271.78 0)
@@ -21095,7 +21095,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U4") (unit 2)
+          (reference "E53") (unit 2)
         )
       )
     )
@@ -21104,7 +21104,7 @@
   (symbol (lib_id "74xx:74AHC74") (at 143.51 68.58 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid c5449056-04da-4ef4-8fe9-4e0c6078aaaf)
-    (property "Reference" "U10" (at 145.7041 58.42 0)
+    (property "Reference" "E77" (at 145.7041 58.42 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AHC74" (at 145.7041 60.96 0)
@@ -21133,7 +21133,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U10") (unit 1)
+          (reference "E77") (unit 1)
         )
       )
     )
@@ -21142,7 +21142,7 @@
   (symbol (lib_id "Device:C") (at 292.1 -135.89 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid c6c64dfe-a280-4d98-b3d1-6ac405258739)
-    (property "Reference" "C45" (at 295.91 -137.16 0)
+    (property "Reference" "C73" (at 295.91 -137.16 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 295.91 -134.62 0)
@@ -21159,7 +21159,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C45") (unit 1)
+          (reference "C73") (unit 1)
         )
       )
     )
@@ -21194,7 +21194,7 @@
   (symbol (lib_id "74xx:74AHC04") (at 355.6 393.7 0) (unit 4)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid c9503ac7-8130-4a9d-8c99-03bf33a050a7)
-    (property "Reference" "U5" (at 355.6 384.81 0)
+    (property "Reference" "E64" (at 355.6 384.81 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC04" (at 355.6 387.35 0)
@@ -21223,7 +21223,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U5") (unit 4)
+          (reference "E64") (unit 4)
         )
       )
     )
@@ -21282,7 +21282,7 @@
   (symbol (lib_id "Device:C") (at 25.4 -107.95 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid cb7931e4-2faa-4d7c-b6d2-ad73981f3069)
-    (property "Reference" "C4" (at 29.21 -109.22 0)
+    (property "Reference" "C14" (at 29.21 -109.22 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 29.21 -106.68 0)
@@ -21299,7 +21299,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C4") (unit 1)
+          (reference "C14") (unit 1)
         )
       )
     )
@@ -21308,7 +21308,7 @@
   (symbol (lib_id "74xx:74LS175") (at 515.62 345.44 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid cb90e8b5-0df6-4436-a2b3-df50460a4903)
-    (property "Reference" "U18" (at 517.8141 327.66 0)
+    (property "Reference" "E86" (at 517.8141 327.66 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AC175" (at 517.8141 330.2 0)
@@ -21339,7 +21339,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U18") (unit 1)
+          (reference "E86") (unit 1)
         )
       )
     )
@@ -21348,7 +21348,7 @@
   (symbol (lib_id "74xx:74AC151") (at 728.98 259.08 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid cbdb76fe-7b46-4b93-b4ed-fdd03052d02c)
-    (property "Reference" "U39" (at 731.1741 236.22 0)
+    (property "Reference" "E33" (at 731.1741 236.22 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AC151" (at 731.1741 238.76 0)
@@ -21379,7 +21379,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U39") (unit 1)
+          (reference "E33") (unit 1)
         )
       )
     )
@@ -21413,7 +21413,7 @@
   (symbol (lib_id "74xx:74AHC08") (at 871.22 124.46 0) (mirror x) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid cfa21186-656a-4e47-a340-c2010e2e3570)
-    (property "Reference" "U13" (at 871.22 115.57 0)
+    (property "Reference" "E55" (at 871.22 115.57 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC08" (at 871.22 118.11 0)
@@ -21442,7 +21442,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U13") (unit 1)
+          (reference "E55") (unit 1)
         )
       )
     )
@@ -21451,7 +21451,7 @@
   (symbol (lib_id "74xx:74AHC04") (at 845.82 403.86 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid d02d06c2-1693-4370-93a8-ccfa1359002f)
-    (property "Reference" "U35" (at 845.82 394.97 0)
+    (property "Reference" "E12" (at 845.82 394.97 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC04" (at 845.82 397.51 0)
@@ -21480,7 +21480,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U35") (unit 2)
+          (reference "E12") (unit 2)
         )
       )
     )
@@ -21489,7 +21489,7 @@
   (symbol (lib_id "74xx:74AHC74") (at 393.7 -25.4 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid d09ef3d8-08f2-47e3-9b2f-8fba2468c12f)
-    (property "Reference" "U41" (at 401.32 -26.67 0)
+    (property "Reference" "E34" (at 401.32 -26.67 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AHC74" (at 401.32 -24.13 0)
@@ -21518,7 +21518,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U41") (unit 3)
+          (reference "E34") (unit 3)
         )
       )
     )
@@ -21577,7 +21577,7 @@
   (symbol (lib_id "Device:C") (at 330.2 -107.95 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid d2ef417f-9d9b-44d4-b7b4-f64f5c622952)
-    (property "Reference" "C52" (at 334.01 -109.22 0)
+    (property "Reference" "C83" (at 334.01 -109.22 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 334.01 -106.68 0)
@@ -21594,7 +21594,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C52") (unit 1)
+          (reference "C83") (unit 1)
         )
       )
     )
@@ -21603,7 +21603,7 @@
   (symbol (lib_id "74xx:74AHC157") (at 779.78 76.2 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid d3f83d9d-b316-4cb4-bd7d-d1035a4bb0c5)
-    (property "Reference" "U25" (at 781.9741 53.34 0)
+    (property "Reference" "E42" (at 781.9741 53.34 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AHC157" (at 781.9741 55.88 0)
@@ -21634,7 +21634,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U25") (unit 1)
+          (reference "E42") (unit 1)
         )
       )
     )
@@ -21693,7 +21693,7 @@
   (symbol (lib_id "74xx:74HC30") (at 114.3 -71.12 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid d8fe43c5-4703-4906-9d53-50b0cca1f040)
-    (property "Reference" "U22" (at 120.65 -72.39 0)
+    (property "Reference" "E15" (at 120.65 -72.39 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74HC30" (at 120.65 -69.85 0)
@@ -21719,7 +21719,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U22") (unit 2)
+          (reference "E15") (unit 2)
         )
       )
     )
@@ -21728,7 +21728,7 @@
   (symbol (lib_id "74xx:74AHC32") (at 88.9 -71.12 0) (unit 5)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid d95fd176-4ff8-4cf3-923f-15196b9b1c7b)
-    (property "Reference" "U52" (at 95.25 -72.39 0)
+    (property "Reference" "E45" (at 95.25 -72.39 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AHC32" (at 95.25 -69.85 0)
@@ -21757,7 +21757,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U52") (unit 5)
+          (reference "E45") (unit 5)
         )
       )
     )
@@ -21766,7 +21766,7 @@
   (symbol (lib_id "Device:C") (at 127 -107.95 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid d9697b8b-c201-48f2-ba9b-f26875e47a6c)
-    (property "Reference" "C20" (at 130.81 -109.22 0)
+    (property "Reference" "C36" (at 130.81 -109.22 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 130.81 -106.68 0)
@@ -21783,7 +21783,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C20") (unit 1)
+          (reference "C36") (unit 1)
         )
       )
     )
@@ -21792,7 +21792,7 @@
   (symbol (lib_id "74xx:74AHC04") (at 299.72 325.12 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid da7c08c9-ba35-4920-a992-2bfedf18c2e6)
-    (property "Reference" "U20" (at 299.72 316.23 0)
+    (property "Reference" "E23" (at 299.72 316.23 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC04" (at 299.72 318.77 0)
@@ -21821,7 +21821,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U20") (unit 3)
+          (reference "E23") (unit 3)
         )
       )
     )
@@ -21830,7 +21830,7 @@
   (symbol (lib_id "74xx:74LS74") (at 292.1 -25.4 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid dbb9d1ea-f916-4e55-8f2a-c1d2980f86d6)
-    (property "Reference" "U9" (at 298.45 -26.67 0)
+    (property "Reference" "E54" (at 298.45 -26.67 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AHC74" (at 298.45 -24.13 0)
@@ -21859,7 +21859,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U9") (unit 3)
+          (reference "E54") (unit 3)
         )
       )
     )
@@ -21868,7 +21868,7 @@
   (symbol (lib_id "Device:C") (at 177.8 -135.89 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid dc6a9358-dbf2-42a6-98bf-bf0d7d94e5f7)
-    (property "Reference" "C27" (at 181.61 -137.16 0)
+    (property "Reference" "C46" (at 181.61 -137.16 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 181.61 -134.62 0)
@@ -21885,7 +21885,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C27") (unit 1)
+          (reference "C46") (unit 1)
         )
       )
     )
@@ -21919,7 +21919,7 @@
   (symbol (lib_id "74xx:74AHC02") (at 843.28 99.06 0) (mirror x) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid dd7606d6-20a3-4744-b9f4-f7736fa62031)
-    (property "Reference" "U15" (at 843.28 90.17 0)
+    (property "Reference" "E37" (at 843.28 90.17 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC02" (at 843.28 92.71 0)
@@ -21948,7 +21948,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U15") (unit 1)
+          (reference "E37") (unit 1)
         )
       )
     )
@@ -21957,7 +21957,7 @@
   (symbol (lib_id "74xx:74AHC08") (at 157.48 368.3 0) (unit 4)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid de0f0157-ec98-4f8e-bda9-012bfaac91ce)
-    (property "Reference" "U13" (at 157.4717 359.41 0)
+    (property "Reference" "E55" (at 157.4717 359.41 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC08" (at 157.4717 361.95 0)
@@ -21986,7 +21986,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U13") (unit 4)
+          (reference "E55") (unit 4)
         )
       )
     )
@@ -21995,7 +21995,7 @@
   (symbol (lib_id "74xx:74AHC04") (at 485.14 378.46 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid e1b086cf-39f5-4842-8f32-0126e9be36f0)
-    (property "Reference" "U8" (at 485.14 369.57 0)
+    (property "Reference" "E44" (at 485.14 369.57 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC04" (at 485.14 372.11 0)
@@ -22024,7 +22024,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U8") (unit 2)
+          (reference "E44") (unit 2)
         )
       )
     )
@@ -22033,7 +22033,7 @@
   (symbol (lib_id "Device:C") (at 50.8 -107.95 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid e54c8a91-cd84-4dd4-88b8-4bc6c06984b8)
-    (property "Reference" "C8" (at 54.61 -109.22 0)
+    (property "Reference" "C21" (at 54.61 -109.22 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 54.61 -106.68 0)
@@ -22050,7 +22050,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C8") (unit 1)
+          (reference "C21") (unit 1)
         )
       )
     )
@@ -22084,7 +22084,7 @@
   (symbol (lib_id "74xx:74AHC08") (at 866.14 373.38 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid e6b14056-274f-4a0d-8ac0-76a66b1d10f5)
-    (property "Reference" "U54" (at 866.1317 364.49 0)
+    (property "Reference" "E74" (at 866.1317 364.49 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC08" (at 866.1317 367.03 0)
@@ -22113,7 +22113,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U54") (unit 1)
+          (reference "E74") (unit 1)
         )
       )
     )
@@ -22172,7 +22172,7 @@
   (symbol (lib_id "74xx:74AHC00") (at 845.82 373.38 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid e7394aa0-cc3c-4a3f-8e28-0239cf30ca2c)
-    (property "Reference" "U43" (at 845.8117 364.49 0)
+    (property "Reference" "E36" (at 845.8117 364.49 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC00" (at 845.8117 367.03 0)
@@ -22201,7 +22201,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U43") (unit 3)
+          (reference "E36") (unit 3)
         )
       )
     )
@@ -22210,7 +22210,7 @@
   (symbol (lib_id "Device:C") (at 355.6 -135.89 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid e75ce416-f723-4c69-9c0e-cea818a1e669)
-    (property "Reference" "C55" (at 359.41 -137.16 0)
+    (property "Reference" "C11" (at 359.41 -137.16 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 359.41 -134.62 0)
@@ -22227,7 +22227,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C55") (unit 1)
+          (reference "C11") (unit 1)
         )
       )
     )
@@ -22236,7 +22236,7 @@
   (symbol (lib_id "74xx:74AHC74") (at 393.7 -71.12 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid e8d95479-8483-4b46-950b-9d52b918f226)
-    (property "Reference" "U40" (at 400.05 -72.39 0)
+    (property "Reference" "E25" (at 400.05 -72.39 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AHC74" (at 400.05 -69.85 0)
@@ -22265,7 +22265,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U40") (unit 3)
+          (reference "E25") (unit 3)
         )
       )
     )
@@ -22299,7 +22299,7 @@
   (symbol (lib_id "74xx:74AHC08") (at 317.5 -71.12 0) (unit 5)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid ec5925c9-b854-43ac-80ad-c7565a59b831)
-    (property "Reference" "U13" (at 323.85 -72.39 0)
+    (property "Reference" "E55" (at 323.85 -72.39 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AHC08" (at 323.85 -69.85 0)
@@ -22328,7 +22328,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U13") (unit 5)
+          (reference "E55") (unit 5)
         )
       )
     )
@@ -22387,7 +22387,7 @@
   (symbol (lib_id "74xx:74AC10") (at 396.24 109.22 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid ee626c83-bc86-400d-8135-c3e8412e4be9)
-    (property "Reference" "U34" (at 396.2317 100.33 0)
+    (property "Reference" "E66" (at 396.2317 100.33 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AC10" (at 396.2317 102.87 0)
@@ -22416,7 +22416,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U34") (unit 1)
+          (reference "E66") (unit 1)
         )
       )
     )
@@ -22425,7 +22425,7 @@
   (symbol (lib_id "74xx:74AHC02") (at 220.98 127 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid ee9cb120-754b-455c-b90e-8da3024d75b9)
-    (property "Reference" "U15" (at 220.98 118.11 0)
+    (property "Reference" "E37" (at 220.98 118.11 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC02" (at 220.98 120.65 0)
@@ -22454,7 +22454,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U15") (unit 3)
+          (reference "E37") (unit 3)
         )
       )
     )
@@ -22463,7 +22463,7 @@
   (symbol (lib_id "74xx:74AC20") (at 355.6 226.06 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid eeb9f562-45e6-42f5-a7da-b0cc8b6cbc09)
-    (property "Reference" "U45" (at 355.5903 217.17 0)
+    (property "Reference" "E16" (at 355.5903 217.17 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AC20" (at 355.5903 219.71 0)
@@ -22490,7 +22490,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U45") (unit 2)
+          (reference "E16") (unit 2)
         )
       )
     )
@@ -22499,7 +22499,7 @@
   (symbol (lib_id "74xx:74AC161") (at 203.2 78.74 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid ef08f059-9344-4f76-a0ad-5f58a8e99c7c)
-    (property "Reference" "U175" (at 205.3941 58.42 0)
+    (property "Reference" "E47" (at 205.3941 58.42 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AC161" (at 205.3941 60.96 0)
@@ -22530,7 +22530,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U175") (unit 1)
+          (reference "E47") (unit 1)
         )
       )
     )
@@ -22564,7 +22564,7 @@
   (symbol (lib_id "74xx:74AHC02") (at 299.72 309.88 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid ef536861-f436-4599-ab0f-a0bd494134de)
-    (property "Reference" "U51" (at 299.72 300.99 0)
+    (property "Reference" "E14" (at 299.72 300.99 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC02" (at 299.72 303.53 0)
@@ -22593,7 +22593,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U51") (unit 1)
+          (reference "E14") (unit 1)
         )
       )
     )
@@ -22662,7 +22662,7 @@
   (symbol (lib_id "74xx:74AHC02") (at 358.14 309.88 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid f1cb3ad8-43c7-482e-8ed8-429441b68053)
-    (property "Reference" "U51" (at 358.14 300.99 0)
+    (property "Reference" "E14" (at 358.14 300.99 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC02" (at 358.14 303.53 0)
@@ -22691,7 +22691,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U51") (unit 3)
+          (reference "E14") (unit 3)
         )
       )
     )
@@ -22700,7 +22700,7 @@
   (symbol (lib_id "74xx:74HC27") (at 299.72 340.36 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid f1f914ee-f6d5-498d-a762-d518d54c6d1a)
-    (property "Reference" "U12" (at 299.72 331.47 0)
+    (property "Reference" "E31" (at 299.72 331.47 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74HC27" (at 299.72 334.01 0)
@@ -22729,7 +22729,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U12") (unit 1)
+          (reference "E31") (unit 1)
         )
       )
     )
@@ -22738,7 +22738,7 @@
   (symbol (lib_id "74xx:74LS04") (at 675.64 312.42 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid f2bc323b-42dd-419c-9757-1b07ba36eddb)
-    (property "Reference" "U20" (at 675.64 303.53 0)
+    (property "Reference" "E23" (at 675.64 303.53 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC04" (at 675.64 306.07 0)
@@ -22767,7 +22767,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U20") (unit 1)
+          (reference "E23") (unit 1)
         )
       )
     )
@@ -22801,7 +22801,7 @@
   (symbol (lib_id "74xx:74AC11") (at 342.9 -71.12 0) (unit 4)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid f43f9aa6-41c7-4ba1-a285-af389f29bd6f)
-    (property "Reference" "U167" (at 349.25 -72.39 0)
+    (property "Reference" "E35" (at 349.25 -72.39 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AC11" (at 349.25 -69.85 0)
@@ -22830,7 +22830,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U167") (unit 4)
+          (reference "E35") (unit 4)
         )
       )
     )
@@ -22839,7 +22839,7 @@
   (symbol (lib_id "Device:C") (at 165.1 -107.95 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid f4da745f-e9d9-4673-a541-58a87afe2a76)
-    (property "Reference" "C26" (at 168.91 -109.22 0)
+    (property "Reference" "C45" (at 168.91 -109.22 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 168.91 -106.68 0)
@@ -22856,7 +22856,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C26") (unit 1)
+          (reference "C45") (unit 1)
         )
       )
     )
@@ -22865,7 +22865,7 @@
   (symbol (lib_id "Device:C") (at 177.8 -107.95 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid f4f83fc2-34e2-4a12-84bd-99a9da4fc06a)
-    (property "Reference" "C28" (at 181.61 -109.22 0)
+    (property "Reference" "C47" (at 181.61 -109.22 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 181.61 -106.68 0)
@@ -22882,7 +22882,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C28") (unit 1)
+          (reference "C47") (unit 1)
         )
       )
     )
@@ -22891,7 +22891,7 @@
   (symbol (lib_id "74xx:74AHC02") (at 388.62 325.12 0) (mirror x) (unit 4)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid f605a831-1940-4a9a-bff0-6c4fec326e2c)
-    (property "Reference" "U15" (at 388.62 316.23 0)
+    (property "Reference" "E37" (at 388.62 316.23 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC02" (at 388.62 318.77 0)
@@ -22920,7 +22920,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U15") (unit 4)
+          (reference "E37") (unit 4)
         )
       )
     )
@@ -22954,7 +22954,7 @@
   (symbol (lib_id "74xx:74AHC00") (at 688.34 127 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid f7512e69-9ee7-42a6-ac25-85ce187f9895)
-    (property "Reference" "U23" (at 688.3317 118.11 0)
+    (property "Reference" "E43" (at 688.3317 118.11 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC00" (at 688.3317 120.65 0)
@@ -22983,7 +22983,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U23") (unit 1)
+          (reference "E43") (unit 1)
         )
       )
     )
@@ -22992,7 +22992,7 @@
   (symbol (lib_id "74xx:74AHC540") (at 71.12 246.38 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid f8271789-6816-4312-892e-8aa838dc636b)
-    (property "Reference" "U50" (at 73.3141 226.06 0)
+    (property "Reference" "E72" (at 73.3141 226.06 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AHC540" (at 73.3141 228.6 0)
@@ -23027,7 +23027,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U50") (unit 1)
+          (reference "E72") (unit 1)
         )
       )
     )
@@ -23036,7 +23036,7 @@
   (symbol (lib_id "Device:C") (at 279.4 -135.89 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid f8294854-1c87-49a6-afd1-f8d57bd2f41d)
-    (property "Reference" "C43" (at 283.21 -137.16 0)
+    (property "Reference" "C71" (at 283.21 -137.16 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 283.21 -134.62 0)
@@ -23053,7 +23053,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C43") (unit 1)
+          (reference "C71") (unit 1)
         )
       )
     )
@@ -23062,7 +23062,7 @@
   (symbol (lib_id "74xx:74LS74") (at 215.9 -71.12 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid f9123c45-21c3-4891-9676-bc2c846e87e0)
-    (property "Reference" "U7" (at 222.25 -72.39 0)
+    (property "Reference" "E65" (at 222.25 -72.39 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AHC74" (at 222.25 -69.85 0)
@@ -23091,7 +23091,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U7") (unit 3)
+          (reference "E65") (unit 3)
         )
       )
     )
@@ -23100,7 +23100,7 @@
   (symbol (lib_id "74xx:74AC109") (at 215.9 -25.4 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid f93c2f2e-7ec1-47a9-b657-78a934bb1778)
-    (property "Reference" "U6" (at 223.52 -26.67 0)
+    (property "Reference" "E67" (at 223.52 -26.67 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AC109" (at 223.52 -24.13 0)
@@ -23131,7 +23131,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U6") (unit 3)
+          (reference "E67") (unit 3)
         )
       )
     )
@@ -23140,7 +23140,7 @@
   (symbol (lib_id "74xx:74AHC08") (at 157.48 398.78 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid f96b2400-6149-47ee-9e86-0cbe6e0f6932)
-    (property "Reference" "U13" (at 157.4717 389.89 0)
+    (property "Reference" "E55" (at 157.4717 389.89 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC08" (at 157.4717 392.43 0)
@@ -23169,7 +23169,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U13") (unit 2)
+          (reference "E55") (unit 2)
         )
       )
     )
@@ -23203,7 +23203,7 @@
   (symbol (lib_id "74xx:74AHC04") (at 38.1 -71.12 0) (unit 7)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid fa15cdb2-9f96-4d87-9961-4542ab17bb13)
-    (property "Reference" "U8" (at 44.45 -72.39 0)
+    (property "Reference" "E44" (at 44.45 -72.39 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AHC04" (at 44.45 -69.85 0)
@@ -23232,7 +23232,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U8") (unit 7)
+          (reference "E44") (unit 7)
         )
       )
     )
@@ -23241,7 +23241,7 @@
   (symbol (lib_id "74xx:74AHC540") (at 71.12 302.26 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid fa3a8ad8-4652-4b27-bd34-51c5f32f972d)
-    (property "Reference" "U163" (at 73.3141 281.94 0)
+    (property "Reference" "E71" (at 73.3141 281.94 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AHC540" (at 73.3141 284.48 0)
@@ -23276,7 +23276,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U163") (unit 1)
+          (reference "E71") (unit 1)
         )
       )
     )
@@ -23335,7 +23335,7 @@
   (symbol (lib_id "74xx:74AC10") (at 866.14 388.62 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid fd942340-18ff-4fbe-a953-9420648be7fe)
-    (property "Reference" "U34" (at 866.1317 379.73 0)
+    (property "Reference" "E66" (at 866.1317 379.73 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AC10" (at 866.1317 382.27 0)
@@ -23364,7 +23364,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U34") (unit 3)
+          (reference "E66") (unit 3)
         )
       )
     )
@@ -23373,7 +23373,7 @@
   (symbol (lib_id "74xx:74AHC74") (at 38.1 -25.4 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid ff0009cd-5150-40d2-9d32-b3f909272d71)
-    (property "Reference" "U72" (at 44.45 -26.67 0)
+    (property "Reference" "E75" (at 44.45 -26.67 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74AHC74" (at 44.45 -24.13 0)
@@ -23402,7 +23402,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U72") (unit 3)
+          (reference "E75") (unit 3)
         )
       )
     )
@@ -23411,7 +23411,7 @@
   (symbol (lib_id "Device:C") (at 127 -135.89 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid ffcdd08f-a8cf-4a26-a4b7-cb611969a0ee)
-    (property "Reference" "C19" (at 130.81 -137.16 0)
+    (property "Reference" "C35" (at 130.81 -137.16 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 130.81 -134.62 0)
@@ -23428,7 +23428,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C19") (unit 1)
+          (reference "C35") (unit 1)
         )
       )
     )
@@ -23437,7 +23437,7 @@
   (symbol (lib_id "Device:C") (at 88.9 -107.95 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid fff33e56-d2df-42c5-8f72-b98f72b05609)
-    (property "Reference" "C14" (at 92.71 -109.22 0)
+    (property "Reference" "C27" (at 92.71 -109.22 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "C" (at 92.71 -106.68 0)
@@ -23454,7 +23454,7 @@
     (instances
       (project "procseq"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "C14") (unit 1)
+          (reference "C27") (unit 1)
         )
       )
     )
