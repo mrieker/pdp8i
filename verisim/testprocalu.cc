@@ -28,6 +28,7 @@
 #include <stdio.h>
 #include <unistd.h>
 
+#include "randbits.h"
 #include "testlib.h"
 #include "Vprocalu.h"
 

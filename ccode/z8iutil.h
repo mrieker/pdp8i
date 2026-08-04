@@ -26,8 +26,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#ifndef ABORT
 #define ABORT() do { fprintf (stderr, "abort() %s:%d\n", __FILE__, __LINE__); abort (); } while (0)
+#endif
+#ifndef ASSERT
 #define ASSERT(cond) do { if (__builtin_constant_p (cond)) { if (!(cond)) asm volatile ("assert failure line %c0" :: "i"(__LINE__)); } else { if (!(cond)) ABORT (); } } while (0)
+#endif
 
 #ifdef VERIZYNQ
 // running on a PC - access the Verilated Zynq register page via function calls

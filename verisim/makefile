@@ -3,7 +3,7 @@ MACH   := $(shell uname -m)
 GPP    := g++ $(CFLAGS) -std=c++11 -g -Wall
 
 COMMON := bgrep.$(MACH) last16k.$(MACH)
-ARMVxL := $(COMMON) resetmcp.$(MACH) testcon1.$(MACH) testcon1.$(MACH) testconsole.$(MACH) testprocalu.$(MACH)
+ARMVxL := $(COMMON) resetmcp.$(MACH) testcon1.$(MACH) testcon1.$(MACH) testconsole.$(MACH) testprocalu.$(MACH) testzturn.$(MACH)
 
 ifeq ($(MACH),armv6l)
 	DEFAULT := $(ARMVxL)
@@ -74,17 +74,23 @@ testcon1.$(MACH): testcon1.$(MACH).o testlib.$(MACH).o i2cmaster.$(MACH).o
 testcon1.$(MACH).o: testcon1.cc testlib.h testerdefs.h i2cmaster.h
 	$(GPP) -g -c -Wno-narrowing -o testcon1.$(MACH).o testcon1.cc
 
-testconsole.$(MACH): testconsole.$(MACH).o testlib.$(MACH).o i2cmaster.$(MACH).o
-	$(GPP) -g -o testconsole.$(MACH) testconsole.$(MACH).o testlib.$(MACH).o i2cmaster.$(MACH).o
+testconsole.$(MACH): testconsole.$(MACH).o testlib.$(MACH).o i2cmaster.$(MACH).o randbits.$(MACH).o
+	$(GPP) -g -o testconsole.$(MACH) testconsole.$(MACH).o testlib.$(MACH).o i2cmaster.$(MACH).o randbits.$(MACH).o
 
 testconsole.$(MACH).o: testconsole.cc testlib.h testerdefs.h i2cmaster.h
 	$(GPP) -g -c -Wno-narrowing -o testconsole.$(MACH).o testconsole.cc
 
-testprocalu.$(MACH): testprocalu.$(MACH).o testlib.$(MACH).o i2cmaster.$(MACH).o verilated.$(MACH).o veriprocalu.$(MACH)/Vprocalu__ALL.a
-	$(GPP) -g -o testprocalu.$(MACH) testprocalu.$(MACH).o testlib.$(MACH).o i2cmaster.$(MACH).o verilated.$(MACH).o veriprocalu.$(MACH)/Vprocalu__ALL.a
+testprocalu.$(MACH): testprocalu.$(MACH).o testlib.$(MACH).o i2cmaster.$(MACH).o randbits.$(MACH).o verilated.$(MACH).o veriprocalu.$(MACH)/Vprocalu__ALL.a
+	$(GPP) -g -o testprocalu.$(MACH) testprocalu.$(MACH).o testlib.$(MACH).o i2cmaster.$(MACH).o randbits.$(MACH).o verilated.$(MACH).o veriprocalu.$(MACH)/Vprocalu__ALL.a
 
 testprocalu.$(MACH).o: testprocalu.cc testlib.h testerdefs.h i2cmaster.h veriprocalu.$(MACH)/Vprocalu.h
 	$(GPP) -g -c -o testprocalu.$(MACH).o -Iveriprocalu.$(MACH) -I/usr/share/verilator/include/ testprocalu.cc
+
+testzturn.$(MACH): testzturn.$(MACH).o testlib.$(MACH).o i2cmaster.$(MACH).o ../ccode/z8iutil.$(MACH).o
+	$(GPP) -g -o testzturn.$(MACH) testzturn.$(MACH).o testlib.$(MACH).o i2cmaster.$(MACH).o ../ccode/z8iutil.$(MACH).o
+
+testzturn.$(MACH).o: testzturn.cc testlib.h testerdefs.h i2cmaster.h ../ccode/z8idefs.h ../ccode/z8iutil.h
+	$(GPP) -g -c -o testzturn.$(MACH).o testzturn.cc
 
 resetmcp.$(MACH): resetmcp.$(MACH).o testlib.$(MACH).o i2cmaster.$(MACH).o
 	$(GPP) -g -o resetmcp.$(MACH) resetmcp.$(MACH).o testlib.$(MACH).o i2cmaster.$(MACH).o
@@ -97,6 +103,9 @@ testlib.$(MACH).o: testlib.cc testlib.h testerdefs.h i2cmaster.h
 
 i2cmaster.$(MACH).o: i2cmaster.cc i2cmaster.h
 	$(GPP) -g -fPIC -c -o i2cmaster.$(MACH).o i2cmaster.cc
+
+randbits.$(MACH).o: randbits.cc randbits.h
+	$(GPP) -g -fPIC -c -o randbits.$(MACH).o randbits.cc
 
 testerdefs.h: ../kicads/tester/tester.kicad_pcb
 	cd ../kicads ; ./testerdefs.sh > $(CURDIR)/testerdefs.h
@@ -159,9 +168,6 @@ veriprocalu.$(MACH)/Vprocalu.cpp veriprocalu.$(MACH)/Vprocalu.h veriprocalu.$(MA
 
 ../kicads/extmemory/extmemory.kicad_pcb: ../kicads/extmemory/extmemory.kicad_sch
 	error update extmemory.kicad_pcb
-
-../kicads/processor/processor.kicad_pcb: ../kicads/processor/processor.kicad_sch
-	error update processor.kicad_pcb
 
 ../kicads/tester/tester.kicad_pcb: ../kicads/tester/tester.kicad_sch
 	error update tester.kicad_pcb

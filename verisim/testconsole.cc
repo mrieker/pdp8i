@@ -41,6 +41,7 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "randbits.h"
 #include "testlib.h"
 
 static int const console_impins[] = {

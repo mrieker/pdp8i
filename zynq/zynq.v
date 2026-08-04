@@ -243,6 +243,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     wire        dev_iRESET;
 
     reg simit, fpgamemen, lastts3, didio;
+    reg arm_dmagntd, arm_ioenabd;
     wire acclr, intrq, ioskp;
     reg[31:00] memcycctr;
 
@@ -275,7 +276,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     reg arm_hizmembus, dev_hizmembus;
     wire hizmembus;
 
-    // external memory
+    // data read from zynq.v 32KW memory
     reg[11:00] xminbus;
 
     // shadow interface wires
@@ -449,6 +450,8 @@ module Zynq #(parameter BIDIRCONSDA=1) (
             regctld     <= 9;                           // default 10MHz PDP clock
             simit       <= 0;                           // assume want to access real PDP-8/I by default
             fpgamemen   <= 0;                           // also use the memory on physical memory board
+            arm_dmagntd <= 0;
+            arm_ioenabd <= 0;
 
             regarmintena    <= 0;                       // disable all interrupts to arm
             regarmintreq_30 <= 0;                       // disable the one arm can request to itself
@@ -516,8 +519,11 @@ module Zynq #(parameter BIDIRCONSDA=1) (
                     end
 
                     10'b0000000101: begin
-                        simit        <= saxi_WDATA[00];
-                        fpgamemen    <= saxi_WDATA[01];
+                        simit        <= saxi_WDATA[00];     // 0=use real PDP boards; 1=use pdp8isim.v simulator
+                        fpgamemen    <= saxi_WDATA[01];     // enable zynq.v 32KW memory
+                                                            // (use arm_iMEMDIS to disable extmemory.kicad_sch 32KW memory)
+                        arm_dmagntd  <= saxi_WDATA[02];     // testzturn.cc force dma drivers on
+                        arm_ioenabd  <= saxi_WDATA[03];     // testzturn.cc force pio drivers on
                     end
 
                     10'b0000011010: begin
@@ -655,17 +661,18 @@ module Zynq #(parameter BIDIRCONSDA=1) (
 
     // enable 74AHC540s to drive dma signals to bus
     // while grated use of dma bus lines
-    wire dev_dmagntd = cmdmagntd;
+    wire dev_dmagntd = arm_dmagntd | cmdmagntd;
     assign hdw_dmagntd_n = simit ? 1 : ~ dev_dmagntd;
 
     // enable 74AHC540s to drive io signals to bus during iop whenever
     // any of our io devices is selected by current io instruction
     // also whenever dma granted and TS4 to output dma address over inbus
     //                           and TS2 of BREAK cycle to output write data over inbus
-    //               and during TS1 if memory chips on extmemory.kicad_sch are disabled
+    //               and during TS1 if memory chips on extmemory.kicad_sch are disabled (arm_iMEMDIS = 1)
     //                   (fpgamemen = 0: arm provides data on arm_iINBUS)
     //                   (          = 1: fpga provies data from externmem array on xminbus)
-    wire dev_ioenabd = dev_iIOSEL |
+    wire dev_ioenabd = arm_ioenabd |
+                       dev_iIOSEL  |
                        dev_dmagntd & dev_oTS4 |
                        dev_dmagntd & dev_oBRKCYC & dev_oTS2 |
                        dev_iMEMDIS & dev_oTS1;
@@ -745,7 +752,9 @@ module Zynq #(parameter BIDIRCONSDA=1) (
 
     assign regctle[00]    = simit;
     assign regctle[01]    = fpgamemen;
-    assign regctle[04:02] = 0;
+    assign regctle[02]    = arm_dmagntd;
+    assign regctle[03]    = arm_ioenabd;
+    assign regctle[04]    = 0;
     assign regctle[16:05] = dev_oMADR;
     assign regctle[19:17] = dev_oMEAD;
     assign regctle[31:20] = dev_oMBUF;
@@ -1007,7 +1016,9 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     ///////////////////////
 
     assign cmbrkgnti = dev_oBRKGNTI;    // pass grant from inner devs to cmem
-    assign dev_iBRKGNTO = cmbrkgnto;    // pass grant from cmem to outer devs
+    assign dev_iBRKGNTO = cmbrkgnto | arm_iBRKGNTO;
+                                        // pass grant from cmem to outer devs
+                                        // testzturn.cc uses arm_iBRKGNTO to test the line
 
     ////////////////////////////////
     //  shadow PDP-8/I processor  //

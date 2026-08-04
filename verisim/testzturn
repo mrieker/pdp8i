@@ -1,0 +1,4 @@
+#!/bin/bash
+d=`dirname $0`
+$d/../ccode/loadmod.sh
+exec $0.`uname -m` "$@"

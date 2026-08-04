@@ -26,7 +26,9 @@
 
 #include <stdint.h>
 
-#define ABORT() do { fprintf (stderr, "ABORT %s %d\n", __FILE__, __LINE__); abort (); } while (0)
+#ifndef ABORT
+#define ABORT() do { fprintf (stderr, "abort() %s %d\n", __FILE__, __LINE__); abort (); } while (0)
+#endif
 
 #define MCPI2CBA 0x20  // I2C address of MCP23017 chip 0
 
@@ -104,6 +106,5 @@ void setmpin (int mpin, bool val);
 bool getmpin (int mpin);
 void mcpwrite16 (int i2cfd, uint8_t chip, uint8_t regno, uint16_t data);
 uint16_t mcpread16 (int i2cfd, uint8_t chip, uint8_t regno);
-uint32_t randbits (int nbits);
 
 #endif

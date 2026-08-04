@@ -221,22 +221,3 @@ uint16_t mcpread16 (int bus, uint8_t chip, uint8_t regno)
     }
     return ((readdata >> 8) & 0xFF) | ((readdata & 0xFF) << 8);
 }
-
-// get some pseudo-random bits
-uint32_t randbits (int nbits)
-{
-    static uint64_t seed = 0x123456789ABCDEF0ULL;
-
-    uint32_t randval = 0;
-
-    while (-- nbits >= 0) {
-
-        // https://www.xilinx.com/support/documentation/application_notes/xapp052.pdf
-        uint64_t xnor = ~ ((seed >> 63) ^ (seed >> 62) ^ (seed >> 60) ^ (seed >> 59));
-        seed = (seed << 1) | (xnor & 1);
-
-        randval += randval + (seed & 1);
-    }
-
-    return randval;
-}
