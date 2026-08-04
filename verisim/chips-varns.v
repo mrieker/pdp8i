@@ -2068,6 +2068,47 @@ module X74AHC540 (input zclock, zreset,
     end
 endmodule
 
+module X74AHCT540 (input zclock, zreset,
+          input  p1
+        , input  p2
+        , input  p3
+        , input  p4
+        , input  p5
+        , input  p6
+        , input  p7
+        , input  p8
+        , input  p9
+        , input  p10
+        , input  p11i
+        , output reg p11o
+        , input  p12i
+        , output reg p12o
+        , input  p13i
+        , output reg p13o
+        , input  p14i
+        , output reg p14o
+        , input  p15i
+        , output reg p15o
+        , input  p16i
+        , output reg p16o
+        , input  p17i
+        , output reg p17o
+        , input  p18i
+        , output reg p18o
+        , input  p19
+        , input  p20
+);
+
+    reg[7:0] delay;
+
+    wire oe = ~ p1 & ~ p19;
+    wire[7:0] din = { p9, p8, p7, p6, p5, p4, p3, p2 };
+
+    always @(posedge zclock) begin
+        { p11o, p12o, p13o, p14o, p15o, p16o, p17o, p18o, delay } <= { delay, oe ? ~ din : 8'hFF };
+    end
+endmodule
+
 module X74AC540 (input zclock, zreset,
           input  p1
         , input  p2
@@ -2396,7 +2437,16 @@ endmodule
 module X330 (input zclock, input zreset, input p1, input p2);
 endmodule
 
+module X2_2K (input zclock, input zreset, input p1, input p2);
+endmodule
+
+module X33K (input zclock, input zreset, input p1, input p2);
+endmodule
+
 module X47K (input zclock, input zreset, input p1, input p2);
+endmodule
+
+module X68K (input zclock, input zreset, input p1, input p2);
 endmodule
 
 module XC (input zclock, input zreset, input p1, input p2);

@@ -22,6 +22,7 @@ VFILES := \
 	chips-varns.v \
 	dmatest.v \
 	mcp23017.v \
+	zturnbundle.v \
 	../kicads/console/console.v \
 	../kicads/dmatester/dmatester.v \
 	../kicads/extarctrl/extarctrl.v \
@@ -30,6 +31,7 @@ VFILES := \
 	../kicads/procalu/procalu.v \
 	../kicads/procreg/procreg.v \
 	../kicads/procseq/procseq.v \
+	../kicads/zturn/zturn.v \
 	../zynq/zynq.v \
 	../zynq/pdp8idc02.v \
 	../zynq/pdp8irk8je.v \
@@ -159,6 +161,9 @@ veriprocalu.$(MACH)/Vprocalu.cpp veriprocalu.$(MACH)/Vprocalu.h veriprocalu.$(MA
 
 ../kicads/procseq/procseq.v: ../kicads/procseq/procseq.kicad_pcb
 	cd ../kicads/procseq ; ../veripcb.sh procseq
+
+../kicads/zturn/zturn.v: ../kicads/zturn/zturn.kicad_pcb
+	cd ../kicads/zturn ; ../veripcb.sh zturn
 
 ../kicads/console/console.kicad_pcb: ../kicads/console/console.kicad_sch
 	error update console.kicad_pcb

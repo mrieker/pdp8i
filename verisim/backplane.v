@@ -94,7 +94,7 @@ module backplane (
     wire[11:00] _busACUM, _busMADR, _busMBUF, _busMQUO, _busPCTR, _busINBUS;
     wire[11:09] _busIREG;
 
-    wire zynCONSCK, zynCONSDA, conCONSDA;
+    wire ztnCONSCK, ztnCONSDA, conCONSDA;
 
     // output some bus signals to simulator
     assign oACUM    = ~ _busACUM;
@@ -153,8 +153,8 @@ module backplane (
         .div_4  (),         // 1.6uS
         .div_2  (swtime),   // 0.4uS
 
-        .CONSCK   (zynCONSCK),
-        .CONSDA   (zynCONSDA),
+        .CONSCK   (ztnCONSCK),
+        .CONSDA   (ztnCONSDA),
         .CONSDA_o (conCONSDA),
 
         .bGPIO_4    (gpin[04] & gpout[04]),
@@ -1174,78 +1174,148 @@ module backplane (
     //  Zynq board has I/O devices  //
     //////////////////////////////////
 
-    wire zynACCLEAR, zynBRKGNTI, zynBRKGNTO, zynBRKRQST, zynBRKWRM, zynCAINC;
-    wire zynCLOCK, zynCYCLE3, zynINTRQST, zynIOSKIP, zynMEMDIS, zynPAUSE, zynRESET;
-    wire _zyndmagntd, _zynioenabd, _zynpoweron;
-    wire[2:0] zynDMAFLD;
-    wire[11:00] zynINBUS;
-    wire _running, _shfreez, _simming;
-    assign shad_freeze = ~ _shfreez;
+    wire _ztnACCLEAR, _ztnBRKGNTO, _ztnBRKRQST, _ztnBRKWRM, _ztnCAINC, _ztnCLOCK, _ztnCYCLE3;
+    wire _ztnINTRQST, _ztnIOSKIP, _ztnMEMDIS, _ztnPAUSE, _ztnRESET, _ztnBRKGNTI, _ztnBRKGNTO;
+    wire[11:00] _ztnINBUS;
+    wire[2:0] _ztnDMAFLD;
 
-    Zynq #(.BIDIRCONSDA (0)) zynqinst (
-        .CLOCK      (yclock),
-        .RESET_N    (~ zreset),
-        .LEDoutR_N  (_shfreez),
-        .LEDoutG_N  (_running),
-        .LEDoutB_N  (_simming),
-        .armintreq  (),
-        .zgintflags (regarmintreq),
-        .directread (directread),
-        .ground     (),
+    wire _running, _shadfrz, _simming;
+    assign shad_freeze = ~ _shadfrz;
 
-        // io bus connections
-        .hdw_oACUM    (~ _busACUM),
-        .hdw_oBRKCYC  (~ _busBRKCYC),
-        .hdw_oBRKGNTI (   zynBRKGNTI),
-        .hdw_oBRKRQST (~ _busBRKRQST),
-        .hdw_oBUSINI  (~ _busBUSINI),
-        .hdw_oBWCOV   (~ _busBWCOV),
-        .hdw_oIOP     (~ _busIOP),
-        .hdw_oLINK    (~ _busLINK),
-        .hdw_oMADR    (~ _busMADR),
-        .hdw_oMBUF    (~ _busMBUF),
-        .hdw_oMEAD    (~ _busMEAD),
-        .hdw_oMAJST   (~ _busMAJST),
-        .hdw_oRUN     (~ _busRUN),
-        .hdw_oTP1     (~ _busTP1),
-        .hdw_oTP2     (~ _busTP2),
-        .hdw_oTP3     (~ _busTP3),
-        .hdw_oTP4     (~ _busTP4),
-        .hdw_oTS1     (~ _busTS1),
-        .hdw_oTS2     (~ _busTS2),
-        .hdw_oTS3     (~ _busTS3),
-        .hdw_oTS4     (~ _busTS4),
+    zturnbundle zturnboard (
+        .yclock       (yclock),
+        .zclock       (zclock),
+        .zreset       (zreset),
+        ._running     (_running),
+        ._shadfrz     (_shadfrz),
+        ._simming     (_simming),
+        .regarmintreq (regarmintreq),
+        .directread   (directread),
 
-        .hdw_iACCLEAR (zynACCLEAR),
-        .hdw_iBRKGNTO (zynBRKGNTO),
-        .hdw_iBRKRQST (zynBRKRQST),
-        .hdw_iBRKWRM  (zynBRKWRM),
-        .hdw_iCAINC   (zynCAINC),
-        .hdw_iCLOCK   (zynCLOCK),       // zynq.v generates 10MHz clock
-        .hdw_iCYCLE3  (zynCYCLE3),
-        .hdw_iDMAFLD  (zynDMAFLD),
-        .hdw_iINBUS   (zynINBUS),
-        .hdw_iINTRQST (zynINTRQST),
-        .hdw_iIOSKIP  (zynIOSKIP),
-        .hdw_iMEMDIS  (zynMEMDIS),
-        .hdw_iPAUSE   (zynPAUSE),
-        .hdw_iRESET   (zynRESET),       // zreset + arm regctle<fpgareset>
+        ._ACUM_0      (_busACUM[0]),
+        ._ACUM_1      (_busACUM[1]),
+        ._ACUM_2      (_busACUM[2]),
+        ._ACUM_3      (_busACUM[3]),
+        ._ACUM_4      (_busACUM[4]),
+        ._ACUM_5      (_busACUM[5]),
+        ._ACUM_6      (_busACUM[6]),
+        ._ACUM_7      (_busACUM[7]),
+        ._ACUM_8      (_busACUM[8]),
+        ._ACUM_9      (_busACUM[9]),
+        ._ACUM_10     (_busACUM[10]),
+        ._ACUM_11     (_busACUM[11]),
 
-        // output driver enables
-        .hdw_dmagntd_n (_zyndmagntd),
-        .hdw_ioenabd_n (_zynioenabd),
-        .hdw_poweron_n (_zynpoweron),
+        ._BRKCYC      (_busBRKCYC),
+        ._BRKGNTI     (_ztnBRKGNTI),
+        ._BUSINI      (_busBUSINI),
+        ._BWCOV       (_busBWCOV),
+        ._IOP         (_busIOP),
+        ._LINK        (_busLINK),
+
+        ._MADR_0      (_busMADR[0]),
+        ._MADR_1      (_busMADR[1]),
+        ._MADR_2      (_busMADR[2]),
+        ._MADR_3      (_busMADR[3]),
+        ._MADR_4      (_busMADR[4]),
+        ._MADR_5      (_busMADR[5]),
+        ._MADR_6      (_busMADR[6]),
+        ._MADR_7      (_busMADR[7]),
+        ._MADR_8      (_busMADR[8]),
+        ._MADR_9      (_busMADR[9]),
+        ._MADR_10     (_busMADR[10]),
+        ._MADR_11     (_busMADR[11]),
+
+        ._MAJST_0     (_busMAJST[0]),
+        ._MAJST_1     (_busMAJST[1]),
+        ._MAJST_2     (_busMAJST[2]),
+        ._MAJST_3     (_busMAJST[3]),
+
+        ._MBUF_0      (_busMBUF[0]),
+        ._MBUF_1      (_busMBUF[1]),
+        ._MBUF_2      (_busMBUF[2]),
+        ._MBUF_3      (_busMBUF[3]),
+        ._MBUF_4      (_busMBUF[4]),
+        ._MBUF_5      (_busMBUF[5]),
+        ._MBUF_6      (_busMBUF[6]),
+        ._MBUF_7      (_busMBUF[7]),
+        ._MBUF_8      (_busMBUF[8]),
+        ._MBUF_9      (_busMBUF[9]),
+        ._MBUF_10     (_busMBUF[10]),
+        ._MBUF_11     (_busMBUF[11]),
+
+        ._MEAD_0      (_busMEAD[0]),
+        ._MEAD_1      (_busMEAD[1]),
+        ._MEAD_2      (_busMEAD[2]),
+        ._RUN         (_busRUN),
+        ._TP1         (_busTP1),
+        ._TP2         (_busTP2),
+        ._TP3         (_busTP3),
+        ._TP4         (_busTP4),
+        ._TS1         (_busTS1),
+        ._TS2         (_busTS2),
+        ._TS3         (_busTS3),
+        ._TS4         (_busTS4),
+
+        ._ACCLEAR     (_busACCLEAR),
+        ._BRKGNTO     (_ztnBRKGNTO),
+        ._BRKRQST     (_busBRKRQST),
+        ._BRKWRM      (_busBRKWRM),
+        ._CAINC       (_busCAINC),
+        ._CLOCK       (_busCLOCK),
+        ._CYCLE3      (_busCYCLE3),
+        ._DMAFLD_0    (_busDMAFLD[0]),
+        ._DMAFLD_1    (_busDMAFLD[1]),
+        ._DMAFLD_2    (_busDMAFLD[2]),
+        ._INBUS_0     (_busINBUS[0]),
+        ._INBUS_1     (_busINBUS[1]),
+        ._INBUS_10    (_busINBUS[10]),
+        ._INBUS_11    (_busINBUS[11]),
+        ._INBUS_2     (_busINBUS[2]),
+        ._INBUS_3     (_busINBUS[3]),
+        ._INBUS_4     (_busINBUS[4]),
+        ._INBUS_5     (_busINBUS[5]),
+        ._INBUS_6     (_busINBUS[6]),
+        ._INBUS_7     (_busINBUS[7]),
+        ._INBUS_8     (_busINBUS[8]),
+        ._INBUS_9     (_busINBUS[9]),
+        ._INTRQST     (_busINTRQST),
+        ._IOSKIP      (_busIOSKIP),
+        ._MEMDIS      (_busMEMDIS),
+        ._PAUSE       (_busPAUSE),
+        ._RESET       (_busRESET),
+
+        ._ACCLEAR_o   (_ztnACCLEAR),
+        ._BRKGNTO_o   (_ztnBRKGNTO),
+        ._BRKRQST_o   (_ztnBRKRQST),
+        ._BRKWRM_o    (_ztnBRKWRM),
+        ._CAINC_o     (_ztnCAINC),
+        ._CLOCK_o     (_ztnCLOCK),
+        ._CYCLE3_o    (_ztnCYCLE3),
+        ._DMAFLD_0_o  (_ztnDMAFLD[0]),
+        ._DMAFLD_1_o  (_ztnDMAFLD[1]),
+        ._DMAFLD_2_o  (_ztnDMAFLD[2]),
+        ._INBUS_0_o   (_ztnINBUS[0]),
+        ._INBUS_1_o   (_ztnINBUS[1]),
+        ._INBUS_10_o  (_ztnINBUS[10]),
+        ._INBUS_11_o  (_ztnINBUS[11]),
+        ._INBUS_2_o   (_ztnINBUS[2]),
+        ._INBUS_3_o   (_ztnINBUS[3]),
+        ._INBUS_4_o   (_ztnINBUS[4]),
+        ._INBUS_5_o   (_ztnINBUS[5]),
+        ._INBUS_6_o   (_ztnINBUS[6]),
+        ._INBUS_7_o   (_ztnINBUS[7]),
+        ._INBUS_8_o   (_ztnINBUS[8]),
+        ._INBUS_9_o   (_ztnINBUS[9]),
+        ._INTRQST_o   (_ztnINTRQST),
+        ._IOSKIP_o    (_ztnIOSKIP),
+        ._MEMDIS_o    (_ztnMEMDIS),
+        ._PAUSE_o     (_ztnPAUSE),
+        ._RESET_o     (_ztnRESET),
 
         // i2c interface to hardware front panel
-        .hdw_iCONSCK  (zynCONSCK),
-        .hdw_bCONSDA  (),
-        .hdw_iCONSDA  (zynCONSDA),
+        .hdw_iCONSCK  (ztnCONSCK),
+        .hdw_iCONSDA  (ztnCONSDA),
         .hdw_oCONSDA  (conCONSDA),
-
-        // spares
-        .spare1 (1'b0),
-        .spare2 (1'b0),
-        .spare3 (1'b0),
 
         // arm processor memory bus interface (AXI)
         // we are a slave for accessing the control registers (read and write)
@@ -1483,24 +1553,24 @@ module backplane (
     /////////////////////////////
 
     // active low signals getting wire-anded on the backplane
-    assign _busACCLEAR = _eaeACCLEAR  & ~ iACCLEAR   & (_zynioenabd | ~ zynACCLEAR);
-    assign _busBRKRQST =   ~ iBRKRQST & (_zynpoweron | ~ zynBRKRQST);
-    assign _busBRKWRM  =   ~ iBRKWRM  & (_zyndmagntd | ~ zynBRKWRM);
-    assign _busCAINC   =  ~ iCAINC    & (_zyndmagntd | ~ zynCAINC);
-    assign _busCLOCK   =                (_zynpoweron | ~ zynCLOCK);
-    assign _busCYCLE3  =  ~ iCYCLE3   & (_zyndmagntd | ~ zynCYCLE3);
+    assign _busACCLEAR = _eaeACCLEAR  & ~ iACCLEAR   & _ztnACCLEAR;
+    assign _busBRKRQST =   ~ iBRKRQST & _ztnBRKRQST;
+    assign _busBRKWRM  =   ~ iBRKWRM  & _ztnBRKWRM;
+    assign _busCAINC   =  ~ iCAINC    & _ztnCAINC;
+    assign _busCLOCK   =                _ztnCLOCK;
+    assign _busCYCLE3  =  ~ iCYCLE3   & _ztnCYCLE3;
     assign _busDFLD    = _conDFLD     &  _memDFLD;
-    assign _busDMAFLD  =  ~ iDMAFLD   & (_zyndmagntd ? 3'o7 : ~ zynDMAFLD);
+    assign _busDMAFLD  =  ~ iDMAFLD   & _ztnDMAFLD;
     assign _busIFLD    = _conIFLD     &  _memIFLD;
-    assign _busINBUS   = _conINBUS    &  _eaeINBUS & ~ iINBUS & _memINBUS & (_zynioenabd ? 12'o7777 : ~ zynINBUS);
-    assign _busINTRQST = ~ iINTRQST   & (_zynpoweron | ~ zynINTRQST);
-    assign _busIOSKIP  = _eaeIOSKIP   & ~ iIOSKIP  & (_zynioenabd | ~ zynIOSKIP);
-    assign _busMEMDIS  =                (_zynpoweron | ~ zynMEMDIS);
-    assign _busPAUSE   = _eaePAUSE    & ~ iPAUSE   & (_zynpoweron | ~ zynPAUSE) & _cpuPAUSE;
-    assign _busRESET   =                (_zynpoweron | ~ zynRESET);
+    assign _busINBUS   = _conINBUS    &  _eaeINBUS & ~ iINBUS & _memINBUS & _ztnINBUS;
+    assign _busINTRQST = ~ iINTRQST   & _ztnINTRQST;
+    assign _busIOSKIP  = _eaeIOSKIP   & ~ iIOSKIP  & _ztnIOSKIP;
+    assign _busMEMDIS  =                _ztnMEMDIS;
+    assign _busPAUSE   = _eaePAUSE    & ~ iPAUSE   & _ztnPAUSE & _cpuPAUSE;
+    assign _busRESET   =                _ztnRESET;
 
     // break grant chain
-    assign zynBRKGNTI = ~ _cpuBRKGNTO;
-    assign   oBRKGNTO = ~ _zynpoweron & zynBRKGNTO;
+    assign _ztnBRKGNTI =   _cpuBRKGNTO;
+    assign    oBRKGNTO = ~ _ztnBRKGNTO;
 
 endmodule
