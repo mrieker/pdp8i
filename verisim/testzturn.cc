@@ -75,6 +75,7 @@ int main (int argc, char **argv)
     setlinebuf (stdout);
 
     signal (SIGINT, sighand);
+    signal (SIGTERM, sighand);
 
     if (argc == 2) {
         if (strcasecmp (argv[1], "-server") == 0) server ();
@@ -121,6 +122,8 @@ static void sighand (int signum)
 }
 
 // running on raspi
+//  receives mcppins from client then sends to tester mcp23017s
+//  then reads tester mcp23017s pins and sends them back to client
 static void server ()
 {
     // access tester board mcp23017s and set pin directions
@@ -191,6 +194,13 @@ static char qq (uint16_t x, uint16_t fb_x)
 }
 
 // runs on the zturn
+//  loop forever:
+//   generate random bits for all pins
+//   write zturn output pin values to zturn
+//   transmit bus output pin values to server mcp23017s
+//   receive bus input pin values from server mcp23017s
+//   read zturn input pin values from zturn
+//   see if the read/received values match the transmitted/written values
 static void client (char const *server)
 {
     // connect to the server on raspi plugged into tester board
@@ -245,18 +255,18 @@ static void client (char const *server)
         bool     ioskip  = randbits (1);
         bool     memdis  = randbits (1);
         bool     pause   = randbits (1);
-        bool     reset   = 0; //////// randbits (1);
+        bool     reset   = (randbits (5) == 0);
         uint16_t dmafld  = randbits (3);
         uint16_t inbus   = randbits (12);
 
-        // - values input by zturn from bus
+        // - values input by zturn from bus (output by tester mcp23017s)
         uint16_t acum    = randbits (12);
         bool     brkcyc  = randbits (1);
         bool     brkgnti = randbits (1);
 //      bool     brkrqst = randbits (1);
         bool     busini  = randbits (1);
         bool     bwcov   = randbits (1);
-        bool     iop     = 0; //////// randbits (1);  //???? no I/O cycles
+        bool     iop     = (randbits (5) == 0);
         bool     link    = randbits (1);
         uint16_t madr    = randbits (12);
         uint16_t mbuf    = randbits (12);
@@ -272,7 +282,7 @@ static void client (char const *server)
         bool     ts3     = randbits (1);
         bool     ts4     = randbits (1);
 
-        ///////if (iop) mbuf = 0;  // block i/o cycle from actually triggering zynq internal i/o devices
+        if (iop) mbuf = 0;  // block i/o cycle from actually triggering zynq internal i/o devices
 
         // send bits out the zturn pins to the bus
         //  arm_iACCLEAR = regctla[00]
@@ -322,6 +332,27 @@ static void client (char const *server)
             fprintf (stderr, "error sending to server: %m\n");
             break;
         }
+
+        // as long as arm_iRESET is asserted, zynq.v will keep all
+        // these negated regardless of what we wrote to Z_RA
+        if (reset) {
+            acclear = 0;
+            brkgnto = 0;
+//          brkrqst = 0;
+            brkwrm  = 0;
+            cainc   = 0;
+            cycle3  = 0;
+            dmafld  = 0;
+            inbus   = 0;
+            intrqst = 0;
+            ioskip  = 0;
+            memdis  = 0;
+            pause   = 0;
+        }
+
+        // account for pdp8icmem.v forwarding cmbrkgnti -> cmbrkgnto
+        // it jams the brkgnto signal, regardless of reset
+        brkgnto |= brkgnti;
 
         // receive bus bits from tester pins
         if (readpipe (confd, mcppins, sizeof mcppins) < 0) {
