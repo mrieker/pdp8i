@@ -55,6 +55,7 @@ int const mps__PCTR[]   = { mp__PCTR_11,  mp__PCTR_10,  mp__PCTR_9,  mp__PCTR_8,
 uint16_t mcppins[NMCPWORDS];        // [0]=U10; [1]=U11; ...; [9]=U21; ...
 uint16_t boardipinmask[NMCPWORDS];  // mask of pins going in board (coming out mcps)
 uint16_t boardopinmask[NMCPWORDS];  // mask of pins coming out board (going in mcps)
+uint16_t boardpulpmask[NMCPWORDS];  // mask of pins to get pullup resistor (100K) usually subset of opin
 
 // fill boardipinmask or boardopinmask with list of pins
 // call this prior to mcpsetdir() so mcpsetdir() can set mcp pin directions
@@ -77,14 +78,16 @@ void clrmpinmask (uint16_t *maskarray, int const *mpins)
 }
 
 // set mcp device pin directions
-// assumes setmpinmask has been called to set pin directions
+// assumes setmpinmask has been called to set pin directions and enable pullups
 void mcpsetdir ()
 {
     // inputs to the board are outputs from the mcps
     // set output mode for inputs to board, all else are inputs to mcp
+    // also enable pullups
     for (int bus = 0; bus < 2; bus ++) {
         for (int chip = bus; chip < bus + 5; chip ++) {
             mcpwrite16 (bus, chip, 0x00, ~ boardipinmask[bus*8+chip]);
+            mcpwrite16 (bus, chip, 0x0C,   boardpulpmask[bus*8+chip]);
         }
     }
 /***

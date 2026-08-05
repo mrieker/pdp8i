@@ -94,6 +94,7 @@ extern int i2cfds[2];
 extern uint16_t mcppins[NMCPWORDS];        // current pin values
 extern uint16_t boardipinmask[NMCPWORDS];  // mask of pins going in board (coming out mcps)
 extern uint16_t boardopinmask[NMCPWORDS];  // mask of pins coming out board (going in mcps)
+extern uint16_t boardpulpmask[NMCPWORDS];
 
 void setmpinmask (uint16_t *maskarray, int const *mpins);
 void clrmpinmask (uint16_t *maskarray, int const *mpins);
