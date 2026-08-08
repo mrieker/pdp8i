@@ -69,6 +69,7 @@ static uint32_t errors, passes;
 static int readpipe (int fd, void *buff, int len);
 static int writepipe (int fd, void *buff, int len);
 static void sighand (int signum);
+static void hwloop ();
 static void server ();
 static void client (char const *server);
 
@@ -80,7 +81,8 @@ int main (int argc, char **argv)
     signal (SIGTERM, sighand);
 
     if (argc == 2) {
-        if (strcasecmp (argv[1], "-server") == 0) server ();
+        if (strcasecmp (argv[1], "-hwloop") == 0) hwloop ();
+        else if (strcasecmp (argv[1], "-server") == 0) server ();
         else client (argv[1]);
     }
     return 0;
@@ -121,6 +123,194 @@ static void sighand (int signum)
     if (ctrlcflag) exit (1);
     ctrlcflag = true;
     write (0, "\n", 1);
+}
+
+// macro to print sent value, compare to feedback, feedback value
+
+#define Q(x) x,qq(x,fb_##x),fb_##x
+
+static char qq (uint16_t x, uint16_t fb_x)
+{
+    bool ok = (x == fb_x);
+    if (! ok) errors ++;
+    return ok ? '=' : '#';
+}
+
+// runs on the zturn
+//  loop forever:
+//   generate random bits for zturn output pins
+//   write zturn output pin values to zturn
+//   read zturn input pin values from zturn
+//   see if the read values match the written values
+
+// assumes the zturn pins are jumpered as follows to feed output signals back to input signals:
+//      INBUS   => MBUF
+//      DMAFLD  => MEAD
+//      ACCLEAR => BUSINI
+//      MEMDIS  => BWCOV
+//      RESET   => IOP
+//      CLOCK   => LINK
+//      BRKWRM  => RUN
+//      CAINC   => TS1
+//      CYCLE3  => MAJST_0
+//      PAUSE   => MAJST_1
+//      INTRQST => MAJST_2
+//      IOSKIP  => MAJST_3
+//      BRKGNTO => TP4
+
+// make connectors to jumper pins as follows:
+//    J1 P01   *VCC                 J2 P01   *VCC                 J3 P01   *VCC                 J4 P01   *VCC
+//    J1 P02 I */_ACUM_11           J2 P02 I */_MADR_6            J3 P02 I */_MBUF_1     <+     J4 P02    /_SWCONT
+//    J1 P03 I */_MADR_11           J2 P03 I */_MBUF_6     <+     J3 P03 O */_INBUS_1    >+     J4 P03    /_SWSTART
+//    J1 P04 I */_MBUF_11    <+     J2 P04 O */_INBUS_6    >+     J3 P04    /_MQUO_1            J4 P04    /_SWSSTEP
+//    J1 P05 O */_INBUS_11   >+     J2 P05    /_MQUO_6            J3 P05    /_PCTR_1            J4 P05    /_SWSINST
+//    J1 P06    /_MQUO_11           J2 P06    /_PCTR_6            J3 P06    /_SCTR_1            J4 P06 O */_CLOCK      >>>+
+//    J1 P07    /_PCTR_11           J2 P07 I */_ACUM_5            J3 P07 I */_ACUM_0            J4 P07 O */_RESET      >+ |
+//    J1 P08    /_IREG_11           J2 P08 I */_MADR_5            J3 P08 I */_MADR_0            J4 P08 I */_IOP        <+ |
+//    J1 P09 I */_ACUM_10           J2 P09 I */_MBUF_5     <+     J3 P09 I */_MBUF_0     <+     J4 P09 I */_LINK       <<<+
+//    J1 P10 I */_MADR_10           J2 P10 O */_INBUS_5    >+     J3 P10 O */_INBUS_0    >+     J4 P10 I */_RUN        <+
+//    J1 P11 I */_MBUF_10    <+     J2 P11    /_MQUO_5            J3 P11    /_MQUO_0            J4 P11 O */_BRKWRM     >+
+//    J1 P12 O */_INBUS_10   >+     J2 P12    /_PCTR_5            J3 P12    /_PCTR_0            J4 P12 O */_CAINC      >>>>>>>>>+
+//    J1 P13    /_MQUO_10           J2 P13 I */_ACUM_4            J3 P13    /_SCTR_0            J4 P13 O */_CYCLE3     >>>>>>>+ |
+//    J1 P14    /_PCTR_10           J2 P14 I */_MADR_4            J3 P14    /_DFLD_2            J4 P14 O */_PAUSE      >>>>>+ | |
+//    J1 P15    /_IREG_10           J2 P15 I */_MBUF_4     <+     J3 P15 O */_DMAFLD_2   >+     J4 P15    /_INTINH          | | |
+//    J1 P16 I */_ACUM_9            J2 P16 O */_INBUS_4    >+     J3 P16    /_IFLD_2      |     J4 P16 O */_INTRQST    >>>+ | | |
+//    J1 P17 I */_MADR_9            J2 P17    /_MQUO_4            J3 P17 I */_MEAD_2     <+     J4 P17 O */_IOSKIP     >+ | | | |
+//    J1 P18 I */_MBUF_9     <+     J2 P18    /_PCTR_4            J3 P18    /_DFLD_1            J4 P18    /_LNKTOG      | | | | |
+//    J1 P19 O */_INBUS_9    >+     J2 P19    /_SCTR_4            J3 P19 O */_DMAFLD_1   >+     J4 P19 I */_MAJST_3    <+ | | | |
+//    J1 P20    /_MQUO_9            J2 P20 I */_ACUM_3            J3 P20    /_IFLD_1      |     J4 P20 I */_MAJST_2    <<<+ | | |
+//    J1 P21    /_PCTR_9            J2 P21 I */_MADR_3            J3 P21 I */_MEAD_1     <+     J4 P21 I */_MAJST_1    <<<<<+ | |
+//    J1 P22    /_IREG_9            J2 P22 I */_MBUF_3     <+     J3 P22    /_DFLD_0            J4 P22 I */_MAJST_0    <<<<<<<+ |
+//    J1 P23 I */_ACUM_8            J2 P23 O */_INBUS_3    >+     J3 P23 O */_DMAFLD_0   >+     J4 P23 I */_TS1        <<<<<<<<<+
+//    J1 P24 I */_MADR_8            J2 P24    /_MQUO_3            J3 P24    /_IFLD_0      |     J4 P24 I */_TS2
+//    J1 P25 I */_MBUF_8     <+     J2 P25    /_PCTR_3            J3 P25 I */_MEAD_0     <+     J4 P25 I */_TS3
+//    J1 P26 O */_INBUS_8    >+     J2 P26    /_SCTR_3            J3 P26 O */_MEMDIS     >>>+   J4 P26 I */_TS4
+//    J1 P27    /_MQUO_8            J2 P27 I */_ACUM_2            J3 P27    /_READSR        |   J4 P27 I */_TP1
+//    J1 P28    /_PCTR_8            J2 P28 I */_MADR_2            J3 P28 O */_ACCLEAR    >+ |   J4 P28 I */_TP2
+//    J1 P29 I */_ACUM_7            J2 P29 I */_MBUF_2     <+     J3 P29 X */_BRKRQST     | |   J4 P29 I */_TP3
+//    J1 P30 I */_MADR_7            J2 P30 O */_INBUS_2    >+     J3 P30    /_ION         | |   J4 P30 I */_TP4        <+
+//    J1 P31 I */_MBUF_7     <+     J2 P31    /_MQUO_2            J3 P31 I */_BUSINI     <+ |   J4 P31 O */_BRKGNTO    >+
+//    J1 P32 O */_INBUS_7    >+     J2 P32    /_PCTR_2            J3 P32 I */_BWCOV      <<<+   J4 P32 I */_BRKGNTI    <-VCC
+//    J1 P33    /_MQUO_7            J2 P33    /_SCTR_2            J3 P33    /_SWLDAD            J4 P33 I */_BRKCYC
+//    J1 P34    /_PCTR_7            J2 P34 I */_ACUM_1            J3 P34    /_SWEXAM            J4 P34   */hdw_bCONSDA
+//    J1 P35 I */_ACUM_6            J2 P35 I */_MADR_1            J3 P35    /_SWDEPOS           J4 P35   */hdw_iCONSCK
+//    J1 P36   *GND                 J2 P36   *GND                 J3 P36   *GND                 J4 P36   *GND
+
+static void hwloop ()
+{
+    // access the zturn 4K register page
+    Z8IU32 *pdpat = z8ipage.findev ("8I", NULL, NULL, false);
+    pdpat[Z_RE] = e_arm_ioenabd | e_arm_dmagntd; // e_simit = 0, so the Z_RA signals go out to the bus
+    pdpat[Z_RD] = 0; // d_clkratm1 = 0, ie, manual clocking so we can manipulate bus clock signal directly
+
+    uint32_t nprints = 0;
+
+    while (! ctrlcflag) {
+
+        // make up random values
+
+        // - values output by zturn to bus
+        bool     acclear = randbits (1);
+        bool     brkgnto = randbits (1);
+        bool     zbrkrqs = randbits (1);    // break request coming from ztrun
+        bool     brkwrm  = randbits (1);
+        bool     cainc   = randbits (1);
+        bool     clock   = randbits (1);
+        bool     cycle3  = randbits (1);
+        bool     intrqst = randbits (1);
+        bool     ioskip  = randbits (1);
+        bool     memdis  = randbits (1);
+        bool     pause   = randbits (1);
+        bool     reset   = (randbits (5) == 0);
+        uint16_t dmafld  = randbits (3);
+        uint16_t inbus   = reset ? 0 : randbits (12);
+
+        // send bits out the zturn pins to the bus
+        //  arm_iACCLEAR = regctla[00]
+        //  dev_iACCLEAR = arm_iACCLEAR | ...
+        //  hdw_iACCLEAR = simit ? 0 : dev_iACCLEAR
+        //  _busACCLEAR  = ioenabd ? ~ hdw_iACCLEAR : hi-Z  // 74AHCT540
+        uint32_t ra =
+            (acclear ? a_arm_iACCLEAR : 0) |
+            (brkgnto ? a_arm_iBRKGNTO : 0) |
+            (zbrkrqs ? a_arm_iBRKRQST : 0) |
+            (brkwrm  ? a_arm_iBRKWRM  : 0) |
+            (cainc   ? a_arm_iCAINC   : 0) |
+            (clock   ? a_arm_iCLOCK   : 0) |
+            (cycle3  ? a_arm_iCYCLE3  : 0) |
+            (intrqst ? a_arm_iINTRQST : 0) |
+            (ioskip  ? a_arm_iIOSKIP  : 0) |
+            (memdis  ? a_arm_iMEMDIS  : 0) |
+            (pause   ? a_arm_iPAUSE   : 0) |
+            (reset   ? a_arm_iRESET   : 0) |
+            INS (dmafld, a_arm_iDMAFLD) |
+            INS (inbus,  a_arm_iINBUS);
+        pdpat[Z_RA] = ra;
+
+        uint32_t s100 = pdpat[Z_RH];
+
+        // as long as arm_iRESET is asserted, zynq.v will keep all
+        // these negated regardless of what we wrote to Z_RA
+        if (reset) {
+            acclear = 0;
+            brkgnto = 0;
+            zbrkrqs = 0;
+            brkwrm  = 0;
+            cainc   = 0;
+            cycle3  = 0;
+            dmafld  = 0;
+            inbus   = 0;
+            intrqst = 0;
+            ioskip  = 0;
+            memdis  = 0;
+            pause   = 0;
+        }
+
+        // give it 200nS to soak in good
+        int n = 0;
+        while (pdpat[Z_RH] - s100 < 20) n ++;
+
+        // read loopback signals
+        //  _busBUSINI   = _busACCLEAR   // _BUSINI pin jumpered to _ACCLEAR pin
+        //  hdw_oBUSINI  = ~ _busBUSINI  // 74AHC540
+        //  hsy_oBUSINI  = hdw_oBUSINI   // sync to zclock
+        //  dev_oBUSINI  = simit ? sim_oBUSINI : hsy_oBUSINI
+        //  regctlf[15]  = dev_oBUSINI
+        uint32_t re = pdpat[Z_RE];
+        uint32_t rf = pdpat[Z_RF];
+
+        bool     fb_acclear =  EXT (rf, f_oBUSINI);
+        bool     fb_brkgnto =  EXT (rf, f_oTP4);
+        bool     fb_zbrkrqs =  EXT (rf, f_oBRKRQST);
+        bool     fb_brkwrm  =  EXT (rf, f_oRUN);
+        bool     fb_cainc   =  EXT (rf, f_oTS1);
+        bool     fb_clock   =  EXT (rf, f_oLINK);
+        bool     fb_cycle3  = (EXT (rf, f_oMAJST) >> 0) & 1;
+        bool     fb_intrqst = (EXT (rf, f_oMAJST) >> 2) & 1;
+        bool     fb_ioskip  = (EXT (rf, f_oMAJST) >> 3) & 1;
+        bool     fb_memdis  =  EXT (rf, f_oBWCOV);
+        bool     fb_pause   = (EXT (rf, f_oMAJST) >> 1) & 1;
+        bool     fb_reset   =  EXT (rf, f_oIOP);
+        uint16_t fb_dmafld  =  EXT (re, e_oMEAD);
+        uint16_t fb_inbus   =  EXT (re, e_oMBUF);
+
+        uint32_t olderrors = errors;
+        char printbuf[256];
+        snprintf (printbuf, sizeof printbuf,
+            "%o%c%o     %o%c%o     %o%c%o    %o%c%o    %o%c%o   %o%c%o   %o%c%o     %o%c%o    %o%c%o    %o%c%o    %o%c%o   %o%c%o   %o%c%o   %04o%c%04o %6d",
+            Q(acclear),Q(brkgnto),Q(zbrkrqs),Q(brkwrm),Q(cainc),Q(clock),Q(cycle3),Q(intrqst),Q(ioskip),Q(memdis),Q(pause),Q(reset),Q(dmafld),Q(inbus),  n);
+
+        if ((++ passes % 10000 == 0) || (olderrors != errors)) {
+            if (nprints % 32 == 0) {
+                printf ("                    acclear brkgnto zbrkrqs brkwrm cainc clock cycle3 intrqst ioskip memdis pause reset dmafld   inbus\n");
+            }
+            printf ("%8u  %8u    %s\n", errors, passes, printbuf);
+            ++ nprints;
+        }
+    }
+
+    printf ("resetting\n");
+    pdpat[Z_RE] = 0; // e_arm_ioenabd=0 e_arm_dmagntd=0 e_simit=0
 }
 
 // running on raspi
@@ -189,13 +379,6 @@ static void server ()
     }
 }
 
-static char qq (uint16_t x, uint16_t fb_x)
-{
-    bool ok = (x == fb_x);
-    if (! ok) errors ++;
-    return ok ? '=' : '#';
-}
-
 // runs on the zturn
 //  loop forever:
 //   generate random bits for all pins
@@ -404,7 +587,6 @@ static void client (char const *server)
         bool     fb_ts3     = EXT (rf, f_oTS3);
         bool     fb_ts4     = EXT (rf, f_oTS4);
 
-#define Q(x) x,qq(x,fb_##x),fb_##x
         uint32_t olderrors = errors;
         char printbuf[256];
         snprintf (printbuf, sizeof printbuf,
