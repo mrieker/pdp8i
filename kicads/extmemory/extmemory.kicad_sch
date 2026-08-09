@@ -12272,10 +12272,10 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC00") (at 345.44 289.56 0) (unit 4)
+  (symbol (lib_id "74xx:74AHC00") (at 345.44 289.56 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 076306bb-bc43-47d4-aee4-b35683ac52aa)
-    (property "Reference" "U147" (at 345.4317 280.67 0)
+    (property "Reference" "U161" (at 345.4317 280.67 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC00" (at 345.4317 283.21 0)
@@ -12304,7 +12304,7 @@
     (instances
       (project "extmemory"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U147") (unit 4)
+          (reference "U161") (unit 3)
         )
       )
     )
@@ -12361,7 +12361,7 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC04") (at 238.76 243.84 0) (unit 6)
+  (symbol (lib_id "74xx:74AHC04") (at 238.76 243.84 0) (unit 5)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 0887aec9-fa6e-451c-903b-a777802f9c42)
     (property "Reference" "U124" (at 238.76 234.95 0)
@@ -12393,7 +12393,7 @@
     (instances
       (project "extmemory"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U124") (unit 6)
+          (reference "U124") (unit 5)
         )
       )
     )
@@ -13070,7 +13070,7 @@
     )
   )
 
-  (symbol (lib_id "74xx:74HC27") (at 1023.62 124.46 0) (mirror y) (unit 3)
+  (symbol (lib_id "74xx:74HC27") (at 1023.62 124.46 0) (mirror y) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 1c7c9b3f-d5f1-4564-9496-3a4e059d7566)
     (property "Reference" "U3" (at 1023.62 115.57 0)
@@ -13102,16 +13102,16 @@
     (instances
       (project "extmemory"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U3") (unit 3)
+          (reference "U3") (unit 1)
         )
       )
     )
   )
 
-  (symbol (lib_id "74xx:74AHC04") (at 868.68 330.2 0) (unit 1)
+  (symbol (lib_id "74xx:74AHC04") (at 868.68 330.2 0) (unit 4)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 1c7f903d-e3ca-4855-ab64-245518b65f99)
-    (property "Reference" "U124" (at 868.68 321.31 0)
+    (property "Reference" "U141" (at 868.68 321.31 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC04" (at 868.68 323.85 0)
@@ -13140,7 +13140,7 @@
     (instances
       (project "extmemory"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U124") (unit 1)
+          (reference "U141") (unit 4)
         )
       )
     )
@@ -13314,10 +13314,10 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC04") (at 238.76 182.88 0) (unit 5)
+  (symbol (lib_id "74xx:74AHC04") (at 238.76 182.88 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 1eb13570-b528-41bf-8016-eab6b480d40c)
-    (property "Reference" "U124" (at 238.76 173.99 0)
+    (property "Reference" "U125" (at 238.76 173.99 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC04" (at 238.76 176.53 0)
@@ -13346,7 +13346,7 @@
     (instances
       (project "extmemory"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U124") (unit 5)
+          (reference "U125") (unit 3)
         )
       )
     )
@@ -13417,7 +13417,7 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC04") (at 238.76 106.68 0) (unit 6)
+  (symbol (lib_id "74xx:74AHC04") (at 238.76 106.68 0) (unit 5)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 21fcd622-d653-4832-9045-14e41150b83e)
     (property "Reference" "U125" (at 238.76 97.79 0)
@@ -13449,7 +13449,7 @@
     (instances
       (project "extmemory"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U125") (unit 6)
+          (reference "U125") (unit 5)
         )
       )
     )
@@ -13524,10 +13524,10 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC04") (at 322.58 195.58 0) (unit 6)
+  (symbol (lib_id "74xx:74AHC04") (at 322.58 195.58 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 2439250c-6efa-48fb-9db8-687f8ffce38f)
-    (property "Reference" "U141" (at 322.58 186.69 0)
+    (property "Reference" "U124" (at 322.58 186.69 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC04" (at 322.58 189.23 0)
@@ -13556,7 +13556,7 @@
     (instances
       (project "extmemory"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U141") (unit 6)
+          (reference "U124") (unit 2)
         )
       )
     )
@@ -13683,10 +13683,10 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC00") (at 345.44 228.6 0) (unit 3)
+  (symbol (lib_id "74xx:74AHC00") (at 345.44 228.6 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 2a6d050e-d9ec-479e-916a-6ba1bc6050e2)
-    (property "Reference" "U161" (at 345.4317 219.71 0)
+    (property "Reference" "U147" (at 345.4317 219.71 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC00" (at 345.4317 222.25 0)
@@ -13715,7 +13715,7 @@
     (instances
       (project "extmemory"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U161") (unit 3)
+          (reference "U147") (unit 2)
         )
       )
     )
@@ -13891,7 +13891,7 @@
     )
   )
 
-  (symbol (lib_id "74xx:74HC21") (at 541.02 243.84 0) (unit 2)
+  (symbol (lib_id "74xx:74HC21") (at 541.02 243.84 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 31581c7a-cbbb-4d9e-a896-f37991a29101)
     (property "Reference" "U155" (at 541.0103 234.95 0)
@@ -13921,7 +13921,7 @@
     (instances
       (project "extmemory"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U155") (unit 2)
+          (reference "U155") (unit 1)
         )
       )
     )
@@ -14097,10 +14097,10 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC00") (at 515.62 335.28 0) (unit 2)
+  (symbol (lib_id "74xx:74AHC00") (at 515.62 335.28 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 3b402864-9cc9-4ea5-8435-da99c8f27f0d)
-    (property "Reference" "U147" (at 515.6117 326.39 0)
+    (property "Reference" "U158" (at 515.6117 326.39 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC00" (at 515.6117 328.93 0)
@@ -14129,16 +14129,16 @@
     (instances
       (project "extmemory"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U147") (unit 2)
+          (reference "U158") (unit 3)
         )
       )
     )
   )
 
-  (symbol (lib_id "74xx:74AHC04") (at 1023.62 139.7 0) (mirror y) (unit 3)
+  (symbol (lib_id "74xx:74AHC04") (at 1023.62 139.7 0) (mirror y) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 3ba345f1-c18d-4ffe-9476-94ff45e052be)
-    (property "Reference" "U20" (at 1023.62 130.81 0)
+    (property "Reference" "U124" (at 1023.62 130.81 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC04" (at 1023.62 133.35 0)
@@ -14167,7 +14167,7 @@
     (instances
       (project "extmemory"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U20") (unit 3)
+          (reference "U124") (unit 1)
         )
       )
     )
@@ -14198,7 +14198,7 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AC10") (at 520.7 119.38 0) (unit 2)
+  (symbol (lib_id "74xx:74AC10") (at 520.7 119.38 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 3d6de7bd-8e71-4be6-aedd-5cafd4acbe15)
     (property "Reference" "U149" (at 520.6917 110.49 0)
@@ -14230,7 +14230,7 @@
     (instances
       (project "extmemory"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U149") (unit 2)
+          (reference "U149") (unit 1)
         )
       )
     )
@@ -14261,10 +14261,10 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC00") (at 472.44 63.5 0) (unit 2)
+  (symbol (lib_id "74xx:74AHC00") (at 472.44 63.5 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 3dbf127e-84dc-41bd-ab88-61c8c7517986)
-    (property "Reference" "U158" (at 472.4317 54.61 0)
+    (property "Reference" "U147" (at 472.4317 54.61 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC00" (at 472.4317 57.15 0)
@@ -14293,7 +14293,7 @@
     (instances
       (project "extmemory"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U158") (unit 2)
+          (reference "U147") (unit 3)
         )
       )
     )
@@ -14478,7 +14478,7 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AC20") (at 889 295.91 0) (unit 2)
+  (symbol (lib_id "74xx:74AC20") (at 889 295.91 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 42dd5acc-97dd-4d13-b37a-078aa4030529)
     (property "Reference" "U2" (at 888.9903 287.02 0)
@@ -14508,13 +14508,13 @@
     (instances
       (project "extmemory"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U2") (unit 2)
+          (reference "U2") (unit 1)
         )
       )
     )
   )
 
-  (symbol (lib_id "74xx:74AHC04") (at 116.84 332.74 0) (mirror y) (unit 4)
+  (symbol (lib_id "74xx:74AHC04") (at 116.84 332.74 0) (mirror y) (unit 3)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 42f2b35d-4a89-4aa1-805b-4a815634ec41)
     (property "Reference" "U124" (at 116.84 323.85 0)
@@ -14546,13 +14546,13 @@
     (instances
       (project "extmemory"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U124") (unit 4)
+          (reference "U124") (unit 3)
         )
       )
     )
   )
 
-  (symbol (lib_id "74xx:74AHC04") (at 515.62 274.32 0) (unit 2)
+  (symbol (lib_id "74xx:74AHC04") (at 515.62 274.32 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 453f38b9-7a2b-43ef-8345-5a30c61e6f09)
     (property "Reference" "U20" (at 515.62 265.43 0)
@@ -14584,7 +14584,7 @@
     (instances
       (project "extmemory"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U20") (unit 2)
+          (reference "U20") (unit 1)
         )
       )
     )
@@ -14818,7 +14818,7 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC04") (at 238.76 91.44 0) (unit 5)
+  (symbol (lib_id "74xx:74AHC04") (at 238.76 91.44 0) (unit 6)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 4c86ac14-9466-4b2f-8e06-cdc2a39ca504)
     (property "Reference" "U125" (at 238.76 82.55 0)
@@ -14850,16 +14850,16 @@
     (instances
       (project "extmemory"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U125") (unit 5)
+          (reference "U125") (unit 6)
         )
       )
     )
   )
 
-  (symbol (lib_id "74xx:74AHC00") (at 345.44 198.12 0) (mirror x) (unit 2)
+  (symbol (lib_id "74xx:74AHC00") (at 345.44 198.12 0) (mirror x) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 4d85b623-06b4-4796-9518-66ce1ab9db1f)
-    (property "Reference" "U161" (at 345.44 187.96 0)
+    (property "Reference" "U147" (at 345.44 187.96 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC00" (at 345.44 190.5 0)
@@ -14888,16 +14888,16 @@
     (instances
       (project "extmemory"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U161") (unit 2)
+          (reference "U147") (unit 1)
         )
       )
     )
   )
 
-  (symbol (lib_id "74xx:74AHC00") (at 96.52 322.58 0) (mirror y) (unit 3)
+  (symbol (lib_id "74xx:74AHC00") (at 96.52 322.58 0) (mirror y) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 4e15f3e9-8bf3-4282-a4c6-e64ab66cc484)
-    (property "Reference" "U147" (at 96.5283 313.69 0)
+    (property "Reference" "U158" (at 96.5283 313.69 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC00" (at 96.5283 316.23 0)
@@ -14926,7 +14926,7 @@
     (instances
       (project "extmemory"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U147") (unit 3)
+          (reference "U158") (unit 1)
         )
       )
     )
@@ -15270,7 +15270,7 @@
     )
   )
 
-  (symbol (lib_id "74xx:74HC21") (at 668.02 104.14 0) (unit 1)
+  (symbol (lib_id "74xx:74HC21") (at 668.02 104.14 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 5a2bfa69-2970-4f53-9ac8-8a3e9b884b62)
     (property "Reference" "U155" (at 668.0103 95.25 0)
@@ -15300,7 +15300,7 @@
     (instances
       (project "extmemory"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U155") (unit 1)
+          (reference "U155") (unit 2)
         )
       )
     )
@@ -15383,7 +15383,7 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC08") (at 541.02 289.56 0) (unit 2)
+  (symbol (lib_id "74xx:74AHC08") (at 541.02 289.56 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 5bb10f0a-1dfe-45b1-ad0d-352a247fe445)
     (property "Reference" "U54" (at 541.0117 280.67 0)
@@ -15415,7 +15415,7 @@
     (instances
       (project "extmemory"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U54") (unit 2)
+          (reference "U54") (unit 1)
         )
       )
     )
@@ -15512,7 +15512,7 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC04") (at 238.76 76.2 0) (unit 4)
+  (symbol (lib_id "74xx:74AHC04") (at 238.76 76.2 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 5d678662-b291-4594-9034-07e34f8de85e)
     (property "Reference" "U125" (at 238.76 67.31 0)
@@ -15544,7 +15544,7 @@
     (instances
       (project "extmemory"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U125") (unit 4)
+          (reference "U125") (unit 2)
         )
       )
     )
@@ -15962,7 +15962,7 @@
   (symbol (lib_id "74xx:74AHC04") (at 238.76 198.12 0) (unit 4)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 6c624693-0fc7-4dd0-a614-e80d460130d5)
-    (property "Reference" "U20" (at 238.76 189.23 0)
+    (property "Reference" "U125" (at 238.76 189.23 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC04" (at 238.76 191.77 0)
@@ -15991,7 +15991,7 @@
     (instances
       (project "extmemory"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U20") (unit 4)
+          (reference "U125") (unit 4)
         )
       )
     )
@@ -16150,7 +16150,7 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AC11") (at 515.62 365.76 0) (unit 1)
+  (symbol (lib_id "74xx:74AC11") (at 515.62 365.76 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 6fd790b0-e2ad-42bc-b78a-b542ad64dd0c)
     (property "Reference" "U167" (at 515.6117 356.87 0)
@@ -16182,13 +16182,13 @@
     (instances
       (project "extmemory"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U167") (unit 1)
+          (reference "U167") (unit 2)
         )
       )
     )
   )
 
-  (symbol (lib_id "74xx:74AHC04") (at 515.62 289.56 0) (unit 3)
+  (symbol (lib_id "74xx:74AHC04") (at 515.62 289.56 0) (unit 6)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 70bc1d91-bf9b-4181-955f-7619fcd8bd09)
     (property "Reference" "U124" (at 515.62 280.67 0)
@@ -16220,7 +16220,7 @@
     (instances
       (project "extmemory"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U124") (unit 3)
+          (reference "U124") (unit 6)
         )
       )
     )
@@ -16549,7 +16549,7 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC04") (at 515.62 304.8 0) (unit 5)
+  (symbol (lib_id "74xx:74AHC04") (at 515.62 304.8 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 7a177e43-ba1a-4e62-8aca-88787b1ffb6e)
     (property "Reference" "U141" (at 515.62 295.91 0)
@@ -16581,7 +16581,7 @@
     (instances
       (project "extmemory"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U141") (unit 5)
+          (reference "U141") (unit 3)
         )
       )
     )
@@ -16797,7 +16797,7 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AC20") (at 515.62 320.04 0) (unit 1)
+  (symbol (lib_id "74xx:74AC20") (at 515.62 320.04 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 82c76baa-cdda-4ab7-abe8-25b79a222ed9)
     (property "Reference" "U2" (at 515.6103 311.15 0)
@@ -16827,7 +16827,7 @@
     (instances
       (project "extmemory"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U2") (unit 1)
+          (reference "U2") (unit 2)
         )
       )
     )
@@ -16928,7 +16928,7 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC00") (at 497.84 152.4 0) (unit 1)
+  (symbol (lib_id "74xx:74AHC00") (at 497.84 152.4 0) (unit 4)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 8697cf54-3adf-4667-81a9-2a7486b91e02)
     (property "Reference" "U158" (at 497.8317 143.51 0)
@@ -16960,7 +16960,7 @@
     (instances
       (project "extmemory"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U158") (unit 1)
+          (reference "U158") (unit 4)
         )
       )
     )
@@ -17145,7 +17145,7 @@
     )
   )
 
-  (symbol (lib_id "74xx:74HC27") (at 868.68 287.02 0) (unit 1)
+  (symbol (lib_id "74xx:74HC27") (at 868.68 287.02 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 8d59f461-7ee2-45ba-a3ba-35b56cff92e5)
     (property "Reference" "U3" (at 868.68 278.13 0)
@@ -17177,7 +17177,7 @@
     (instances
       (project "extmemory"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U3") (unit 1)
+          (reference "U3") (unit 3)
         )
       )
     )
@@ -17312,10 +17312,10 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC00") (at 452.12 66.04 0) (unit 3)
+  (symbol (lib_id "74xx:74AHC00") (at 452.12 66.04 0) (unit 4)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 917aee03-543c-47a0-a5c9-6d2d7b86f681)
-    (property "Reference" "U158" (at 452.1117 57.15 0)
+    (property "Reference" "U147" (at 452.1117 57.15 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC00" (at 452.1117 59.69 0)
@@ -17344,7 +17344,7 @@
     (instances
       (project "extmemory"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U158") (unit 3)
+          (reference "U147") (unit 4)
         )
       )
     )
@@ -17420,7 +17420,7 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC04") (at 1023.62 106.68 0) (mirror y) (unit 1)
+  (symbol (lib_id "74xx:74AHC04") (at 1023.62 106.68 0) (mirror y) (unit 3)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 96fd46a9-2432-43bb-8616-7b0fcf925f5f)
     (property "Reference" "U20" (at 1023.62 97.79 0)
@@ -17452,7 +17452,7 @@
     (instances
       (project "extmemory"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U20") (unit 1)
+          (reference "U20") (unit 3)
         )
       )
     )
@@ -17677,7 +17677,7 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC08") (at 668.02 58.42 0) (unit 1)
+  (symbol (lib_id "74xx:74AHC08") (at 668.02 58.42 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid a0613a82-1b5f-4d8f-a851-280c4df88e43)
     (property "Reference" "U54" (at 668.0117 49.53 0)
@@ -17709,7 +17709,7 @@
     (instances
       (project "extmemory"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U54") (unit 1)
+          (reference "U54") (unit 3)
         )
       )
     )
@@ -17835,7 +17835,7 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AC11") (at 238.76 213.36 0) (unit 3)
+  (symbol (lib_id "74xx:74AC11") (at 238.76 213.36 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid a0fb7d79-cbdf-4b9f-b48b-1ac17be227fc)
     (property "Reference" "U167" (at 238.7517 204.47 0)
@@ -17867,7 +17867,7 @@
     (instances
       (project "extmemory"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U167") (unit 3)
+          (reference "U167") (unit 1)
         )
       )
     )
@@ -18668,7 +18668,7 @@
   (symbol (lib_id "74xx:74AHC04") (at 868.68 314.96 0) (unit 5)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid bfcee9b0-a657-4510-b3ec-522225625ac4)
-    (property "Reference" "U20" (at 868.68 306.07 0)
+    (property "Reference" "U141" (at 868.68 306.07 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC04" (at 868.68 308.61 0)
@@ -18697,7 +18697,7 @@
     (instances
       (project "extmemory"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U20") (unit 5)
+          (reference "U141") (unit 5)
         )
       )
     )
@@ -18767,7 +18767,7 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AC11") (at 238.76 228.6 0) (unit 2)
+  (symbol (lib_id "74xx:74AC11") (at 238.76 228.6 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid c208d2cf-15c6-405e-a03b-0e02643f1eae)
     (property "Reference" "U167" (at 238.7517 219.71 0)
@@ -18799,7 +18799,7 @@
     (instances
       (project "extmemory"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U167") (unit 2)
+          (reference "U167") (unit 3)
         )
       )
     )
@@ -18907,10 +18907,10 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC04") (at 541.02 259.08 0) (unit 2)
+  (symbol (lib_id "74xx:74AHC04") (at 541.02 259.08 0) (unit 4)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid c4532f28-252a-4aa0-8d8e-ed6d71348194)
-    (property "Reference" "U124" (at 541.02 250.19 0)
+    (property "Reference" "U20" (at 541.02 250.19 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC04" (at 541.02 252.73 0)
@@ -18939,7 +18939,7 @@
     (instances
       (project "extmemory"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U124") (unit 2)
+          (reference "U20") (unit 4)
         )
       )
     )
@@ -19209,10 +19209,10 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC04") (at 515.62 259.08 0) (unit 2)
+  (symbol (lib_id "74xx:74AHC04") (at 515.62 259.08 0) (unit 5)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid d0781ebf-c604-421f-8e30-c5a315eb608b)
-    (property "Reference" "U125" (at 515.62 250.19 0)
+    (property "Reference" "U20" (at 515.62 250.19 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC04" (at 515.62 252.73 0)
@@ -19241,16 +19241,16 @@
     (instances
       (project "extmemory"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U125") (unit 2)
+          (reference "U20") (unit 5)
         )
       )
     )
   )
 
-  (symbol (lib_id "74xx:74AHC00") (at 322.58 292.1 0) (unit 1)
+  (symbol (lib_id "74xx:74AHC00") (at 322.58 292.1 0) (unit 4)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid d1d5e30c-88f0-4cab-a043-0249403a081b)
-    (property "Reference" "U147" (at 322.5717 283.21 0)
+    (property "Reference" "U161" (at 322.5717 283.21 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC00" (at 322.5717 285.75 0)
@@ -19279,7 +19279,7 @@
     (instances
       (project "extmemory"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U147") (unit 1)
+          (reference "U161") (unit 4)
         )
       )
     )
@@ -19429,7 +19429,7 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AC10") (at 668.02 231.14 0) (unit 1)
+  (symbol (lib_id "74xx:74AC10") (at 668.02 231.14 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid d6d8d73b-12ef-4cee-9045-e2e8258b785a)
     (property "Reference" "U149" (at 668.0117 222.25 0)
@@ -19461,7 +19461,7 @@
     (instances
       (project "extmemory"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U149") (unit 1)
+          (reference "U149") (unit 2)
         )
       )
     )
@@ -19528,7 +19528,7 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC00") (at 322.58 231.14 0) (unit 4)
+  (symbol (lib_id "74xx:74AHC00") (at 322.58 231.14 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid da7375a2-a7fc-4e13-93ca-35c47c64bd2c)
     (property "Reference" "U161" (at 322.5717 222.25 0)
@@ -19560,7 +19560,7 @@
     (instances
       (project "extmemory"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U161") (unit 4)
+          (reference "U161") (unit 2)
         )
       )
     )
@@ -19860,7 +19860,7 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC04") (at 238.76 137.16 0) (unit 2)
+  (symbol (lib_id "74xx:74AHC04") (at 238.76 137.16 0) (unit 6)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid e3f3a772-b0d1-4213-9be5-5f2b7dfd8ccc)
     (property "Reference" "U141" (at 238.76 128.27 0)
@@ -19892,7 +19892,7 @@
     (instances
       (project "extmemory"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U141") (unit 2)
+          (reference "U141") (unit 6)
         )
       )
     )
@@ -19938,7 +19938,7 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC08") (at 541.02 304.8 0) (unit 3)
+  (symbol (lib_id "74xx:74AHC08") (at 541.02 304.8 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid e57dfcef-9af4-4123-90dc-2480999dc200)
     (property "Reference" "U54" (at 541.0117 295.91 0)
@@ -19970,7 +19970,7 @@
     (instances
       (project "extmemory"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U54") (unit 3)
+          (reference "U54") (unit 2)
         )
       )
     )
@@ -20151,10 +20151,10 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC04") (at 515.62 243.84 0) (unit 1)
+  (symbol (lib_id "74xx:74AHC04") (at 515.62 243.84 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid eac114ae-4045-47f8-bf15-d6bb30f5f8cc)
-    (property "Reference" "U125" (at 515.62 234.95 0)
+    (property "Reference" "U20" (at 515.62 234.95 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC04" (at 515.62 237.49 0)
@@ -20183,7 +20183,7 @@
     (instances
       (project "extmemory"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U125") (unit 1)
+          (reference "U20") (unit 2)
         )
       )
     )
@@ -20402,7 +20402,7 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC00") (at 520.7 55.88 0) (unit 4)
+  (symbol (lib_id "74xx:74AHC00") (at 520.7 55.88 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid f95b04fc-966c-4672-9739-29e6a439d946)
     (property "Reference" "U158" (at 520.6917 46.99 0)
@@ -20434,7 +20434,7 @@
     (instances
       (project "extmemory"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U158") (unit 4)
+          (reference "U158") (unit 2)
         )
       )
     )
@@ -20562,7 +20562,7 @@
   (symbol (lib_id "74xx:74AHC04") (at 238.76 167.64 0) (unit 4)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid fd1b1173-9e67-48b2-9e0f-69715db09c6f)
-    (property "Reference" "U141" (at 238.76 158.75 0)
+    (property "Reference" "U124" (at 238.76 158.75 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74AHC04" (at 238.76 161.29 0)
@@ -20591,13 +20591,13 @@
     (instances
       (project "extmemory"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U141") (unit 4)
+          (reference "U124") (unit 4)
         )
       )
     )
   )
 
-  (symbol (lib_id "74xx:74AHC04") (at 238.76 152.4 0) (unit 3)
+  (symbol (lib_id "74xx:74AHC04") (at 238.76 152.4 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid fe0253fa-a5e4-4473-82ca-385f374f525f)
     (property "Reference" "U141" (at 238.76 143.51 0)
@@ -20629,7 +20629,7 @@
     (instances
       (project "extmemory"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U141") (unit 3)
+          (reference "U141") (unit 2)
         )
       )
     )
@@ -20675,7 +20675,7 @@
     )
   )
 
-  (symbol (lib_id "74xx:74AHC04") (at 238.76 60.96 0) (unit 3)
+  (symbol (lib_id "74xx:74AHC04") (at 238.76 60.96 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid ff85795a-064d-4810-85f0-5feeb5dbe8c4)
     (property "Reference" "U125" (at 238.76 52.07 0)
@@ -20707,7 +20707,7 @@
     (instances
       (project "extmemory"
         (path "/f58cb949-2ebd-45a4-91d8-a1d19d9f7023"
-          (reference "U125") (unit 3)
+          (reference "U125") (unit 1)
         )
       )
     )

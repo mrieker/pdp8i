@@ -330,9 +330,11 @@ public class Layout {
             if (icc == icb) return Double.NaN;
 
             // don't move bus driver/receiver chips
+/*
             if ((ica != null) && ica.value.endsWith ("540")) return Double.NaN;
             if ((icb != null) && icb.value.endsWith ("540")) return Double.NaN;
             if ((icc != null) && icc.value.endsWith ("540")) return Double.NaN;
+*/
 
             // try swapping chip locations
             if (ica != null) {
@@ -387,8 +389,10 @@ public class Layout {
             if (ica == icb) return Double.NaN;
 
             // don't move bus driver/receiver chips
+/*
             if ((ica != null) && ica.value.endsWith ("540")) return Double.NaN;
             if ((icb != null) && icb.value.endsWith ("540")) return Double.NaN;
+*/
 
             // try swapping chip locations
             if (ica != null) {
