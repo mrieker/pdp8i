@@ -31,6 +31,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include <unistd.h>
 
 #include "testlib.h"
@@ -247,8 +248,6 @@ static void hwloop ()
             INS (inbus,  a_arm_iINBUS);
         pdpat[Z_RA] = ra;
 
-        uint32_t s100 = pdpat[Z_RH];
-
         // as long as arm_iRESET is asserted, zynq.v will keep all
         // these negated regardless of what we wrote to Z_RA
         if (reset) {
@@ -266,9 +265,10 @@ static void hwloop ()
             pause   = 0;
         }
 
-        // give it 200nS to soak in good
-        int n = 0;
-        while (pdpat[Z_RH] - s100 < 20) n ++;
+        // give it up to 1uS to readback
+        uint32_t n = 0;
+        uint32_t rj;
+        while ((n < 100) && ((rj = pdpat[Z_RJ]) != n)) n = rj;
 
         // read loopback signals
         //  _busBUSINI   = _busACCLEAR   // _BUSINI pin jumpered to _ACCLEAR pin
@@ -297,12 +297,14 @@ static void hwloop ()
         uint32_t olderrors = errors;
         char printbuf[256];
         snprintf (printbuf, sizeof printbuf,
-            "%o%c%o     %o%c%o     %o%c%o    %o%c%o    %o%c%o   %o%c%o   %o%c%o     %o%c%o    %o%c%o    %o%c%o    %o%c%o   %o%c%o   %o%c%o   %04o%c%04o %6d",
+            "%o%c%o     %o%c%o     %o%c%o    %o%c%o    %o%c%o   %o%c%o   %o%c%o     %o%c%o    %o%c%o    %o%c%o    %o%c%o   %o%c%o   %o%c%o   %04o%c%04o %6d0nS",
             Q(acclear),Q(brkgnto),Q(zbrkrqs),Q(brkwrm),Q(cainc),Q(clock),Q(cycle3),Q(intrqst),Q(ioskip),Q(memdis),Q(pause),Q(reset),Q(dmafld),Q(inbus),  n);
 
         if ((++ passes % 10000 == 0) || (olderrors != errors)) {
             if (nprints % 32 == 0) {
-                printf ("                    acclear brkgnto zbrkrqs brkwrm cainc clock cycle3 intrqst ioskip memdis pause reset dmafld   inbus\n");
+                time_t now = time (NULL);
+                printf ("%02ld:%02ld:%02ld            acclear brkgnto zbrkrqs brkwrm cainc clock cycle3 intrqst ioskip memdis pause reset dmafld   inbus\n",
+                    (now / 3600) % 24, (now / 60) % 60, now % 60);
             }
             printf ("%8u  %8u    %s\n", errors, passes, printbuf);
             ++ nprints;

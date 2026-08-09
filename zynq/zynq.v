@@ -162,6 +162,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     wire[31:00] regctla, regctlb, regctlc, regctle, regctlf, regctlg, regctli;
     reg[05:00] regctld, clkdiv;
     reg[31:00] regctlh;
+    reg[07:00] regctlj;
 
     wire[11:00] sim_oACUM;
     wire        sim_oBRKCYC;
@@ -391,6 +392,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
         (readaddr        == 10'b0000000111) ? regctlg    :
         (readaddr        == 10'b0000001000) ? regctlh    :
         (readaddr        == 10'b0000001001) ? regctli    :
+        (readaddr        == 10'b0000001010) ? { 24'b0, regctlj } :
         (readaddr        == 10'b0000001110) ? memcycctr  :
         (readaddr        == 10'b0000010001) ? { ilaarmed, 3'b0, ilaafter, 4'b0, ilaindex } :
         (readaddr        == 10'b0000010010) ? {        ilardata[31:00] } :
@@ -577,6 +579,19 @@ module Zynq #(parameter BIDIRCONSDA=1) (
             arm_swSSTEP  <= 0;
             arm_swSTART  <= 0;
             arm_swSREG   <= 0;
+        end
+    end
+
+    // regctlj used by testzturn.cc to time turn-around of outgoing signals vs incoming readback
+    // requires loopback connectors be plugged in
+    always @(posedge CLOCK) begin
+        if (~ RESET_N | armwrite & (writeaddr == 1)) begin
+            regctlj <= 0;
+        end else if ((regctlj != 255) & (
+            { arm_iACCLEAR, arm_iBRKGNTO, arm_iBRKRQST, arm_iBRKWRM, arm_iCAINC, arm_iCLOCK, arm_iCYCLE3,   arm_iINTRQST,  arm_iIOSKIP,   arm_iMEMDIS, arm_iPAUSE,    arm_iRESET, arm_iDMAFLD, arm_iINBUS } !=
+            { dev_oBUSINI,  dev_oTP4,     dev_oBRKRQST, dev_oRUN,    dev_oTS1,    dev_oLINK, dev_oMAJST[0], dev_oMAJST[2], dev_oMAJST[3], dev_oBWCOV,  dev_oMAJST[1], dev_oIOP,   dev_oMEAD,   dev_oMBUF  }
+        )) begin
+            regctlj <= regctlj + 1;
         end
     end
 
