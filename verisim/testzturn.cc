@@ -592,12 +592,14 @@ static void client (char const *server)
         uint32_t olderrors = errors;
         char printbuf[256];
         snprintf (printbuf, sizeof printbuf,
-            "%o%c%o     %o%c%o     %o%c%o    %o%c%o    %o%c%o   %o%c%o   %o%c%o     %o%c%o    %o%c%o    %o%c%o    %o%c%o   %o%c%o   %o%c%o   %04o%c%04o   %04o%c%04o   %o%c%o     %o%c%o    %o%c%o    %o%c%o  %o%c%o %o%c%o  %04o%c%04o %04o%c%04o %o%c%o   %X%c%X  %o%c%o %o%c%o %o%c%o %o%c%o %o%c%o %o%c%o %o%c%o %o%c%o %o%c%o",
-            Q(acclear),Q(brkgnto),Q(zbrkrqs),Q(brkwrm),Q(cainc),Q(clock),Q(cycle3),Q(intrqst),Q(ioskip),Q(memdis),Q(pause),Q(reset),Q(dmafld),Q(inbus),Q(acum),Q(brkcyc),Q(brkgnti),Q(busini),Q(bwcov),Q(iop),Q(link),Q(madr),Q(mbuf),Q(mead),Q(majst),Q(run),Q(tp1),Q(tp2),Q(tp3),Q(tp4),Q(ts1),Q(ts2),Q(ts3),Q(ts4));
+            "%o%c%o     %o%c%o     %o%c%o    %o%c%o    %o%c%o   %o%c%o   %o%c%o     %o%c%o    %o%c%o    %o%c%o    %o%c%o   %o%c%o   %o%c%o   %04o%c%04o | %04o%c%04o   %o%c%o     %o%c%o    %o%c%o    %o%c%o  %o%c%o %o%c%o  %04o%c%04o %04o%c%04o %o%c%o   %X%c%X  %o%c%o %o%c%o %o%c%o %o%c%o %o%c%o %o%c%o %o%c%o %o%c%o %o%c%o",
+            Q(acclear),Q(brkgnto),Q(zbrkrqs),Q(brkwrm),Q(cainc),Q(clock),Q(cycle3),Q(intrqst),Q(ioskip),Q(memdis),Q(pause),Q(reset),Q(dmafld),Q(inbus),      Q(acum),Q(brkcyc),Q(brkgnti),Q(busini),Q(bwcov),Q(iop),Q(link),Q(madr),Q(mbuf),Q(mead),Q(majst),Q(run),Q(tp1),Q(tp2),Q(tp3),Q(tp4),Q(ts1),Q(ts2),Q(ts3),Q(ts4));
 
         if ((++ passes % 1000 == 0) || (olderrors != errors)) {
             if (nprints % 32 == 0) {
-                printf ("                    acclear brkgnto zbrkrqs brkwrm cainc clock cycle3 intrqst ioskip memdis pause reset dmafld   inbus       acum     brkcyc brkgnti busini bwcov iop link   madr      mbuf    mead majst run tp1 tp2 tp3 tp4 ts1 ts2 ts3 ts4\n");
+                time_t now = time (NULL);
+                printf ("%02ld:%02ld:%02ld            acclear brkgnto zbrkrqs brkwrm cainc clock cycle3 intrqst ioskip memdis pause reset dmafld   inbus   |   acum     brkcyc brkgnti busini bwcov iop link   madr      mbuf    mead majst run tp1 tp2 tp3 tp4 ts1 ts2 ts3 ts4\n",
+                    (now / 3600) % 24, (now / 60) % 60, now % 60);
             }
             printf ("%8u  %8u    %s\n", errors, passes, printbuf);
             ++ nprints;

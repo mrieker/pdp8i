@@ -38,7 +38,7 @@ static bool getdata ();
 
 #define SPEED 12    // works for PI-Zero-2
 
-#define SDA1 0
+#define SDA1 0      // GPIO bits
 #define SCK1 1
 #define SDA2 2
 #define SCK2 3
@@ -125,7 +125,8 @@ int i2cmaster (int bus, uint64_t command, uint64_t *readdata)
             // data up (to open-drain data line)
             // repeat 8 times:
             //  wait 5uS, clock up
-            //  wait 5uS, clock down, shift in data bits 7..0
+            //  wait 5uS, shift in data bits 7..0, clock down
+            //    (clock down tells 23017 to send out next bit)
             // wait 5uS, another read next ? data down : data up
             // wait 5uS, clock up
             // wait 5uS, clock down
@@ -138,8 +139,8 @@ int i2cmaster (int bus, uint64_t command, uint64_t *readdata)
                     waithalf ();
                     setclock (1);
                     waithalf ();
-                    setclock (0);
                     data += data + getdata ();
+                    setclock (0);
                 }
                 setdata  ((command >> 62) != 2);
                 waithalf ();
@@ -301,7 +302,6 @@ static void waithalf ()
 // set clock line to given value
 static void setclock (bool val)
 {
-    gpiopage[val?GPIO_CLR0:GPIO_SET0] = 0;
     gpiopage[val?GPIO_SET0:GPIO_CLR0] = clockmask;
 }
 
