@@ -571,32 +571,93 @@ static int cmd_iic (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj
     return TCL_OK;
 }
 
-// direct internal memory access - accesses 32KW 12-bit chip on extmemory.v board
-static int mungememaddr (int addr)
+// direct internal memory access - accesses 32KW 12-bit chip on extmemory.kicad_sch board
+// - take 15-bit address in MEAD,MADR registers and come up with chip addresses
+static int mungememaddr_U175 (int madx)
 {
-    int munged = addr & 070037;
-    if (addr & 00040) munged |= 04000;
-    if (addr & 00100) munged |= 02000;
-    if (addr & 00200) munged |= 01000;
-    if (addr & 00400) munged |= 00400;
-    if (addr & 01000) munged |= 00200;
-    if (addr & 02000) munged |= 00100;
-    if (addr & 04000) munged |= 00040;
-    return munged;
+    int a1400 = 0;
+    if (madx & 000001) a1400 |= 000001;
+    if (madx & 000002) a1400 |= 000002;
+    if (madx & 000004) a1400 |= 000004;
+    if (madx & 000010) a1400 |= 000010;
+    if (madx & 000020) a1400 |= 000020;
+    if (madx & 040000) a1400 |= 000040;
+    if (madx & 020000) a1400 |= 000100;
+    if (madx & 010000) a1400 |= 000200;
+    if (madx & 000400) a1400 |= 000400;
+    if (madx & 000200) a1400 |= 001000;
+    if (madx & 000100) a1400 |= 002000;
+    if (madx & 000040) a1400 |= 004000;
+    if (madx & 001000) a1400 |= 010000;
+    if (madx & 002000) a1400 |= 020000;
+    if (madx & 004000) a1400 |= 040000;
+    return a1400;
 }
-static int mungemembyte (int data)
+static int mungememaddr_U177 (int madx)
 {
-    data &= 0077;
-    if (data & 0010) data ^= 0210;
-    if (data & 0020) data ^= 0120;
-    return data;
+    int a1400 = 0;
+    if (madx & 000020) a1400 |= 000001;
+    if (madx & 000010) a1400 |= 000002;
+    if (madx & 000004) a1400 |= 000004;
+    if (madx & 000002) a1400 |= 000010;
+    if (madx & 000001) a1400 |= 000020;
+    if (madx & 004000) a1400 |= 000040;
+    if (madx & 002000) a1400 |= 000100;
+    if (madx & 001000) a1400 |= 000200;
+    if (madx & 000040) a1400 |= 000400;
+    if (madx & 000100) a1400 |= 001000;
+    if (madx & 000200) a1400 |= 002000;
+    if (madx & 000400) a1400 |= 004000;
+    if (madx & 010000) a1400 |= 010000;
+    if (madx & 020000) a1400 |= 020000;
+    if (madx & 040000) a1400 |= 040000;
+    return a1400;
 }
-static int demngmembyte (int data)
+// - likewise scramble MBUF data lines to chip data lines
+static int mungemembyte_U175 (int mbuf0500)
 {
-    data &= 0347;
-    if (data & 0200) data ^= 0210;
-    if (data & 0100) data ^= 0120;
-    return data;
+    int d0700 = 0;
+    if (mbuf0500 & 001) d0700 |= 0001;
+    if (mbuf0500 & 002) d0700 |= 0002;
+    if (mbuf0500 & 004) d0700 |= 0004;
+    if (mbuf0500 & 040) d0700 |= 0040;
+    if (mbuf0500 & 020) d0700 |= 0100;
+    if (mbuf0500 & 010) d0700 |= 0200;
+    return d0700;
+}
+static int mungemembyte_U177 (int mbuf1106)
+{
+    int d0700 = 0;
+    if (mbuf1106 & 001) d0700 |= 0001;
+    if (mbuf1106 & 002) d0700 |= 0002;
+    if (mbuf1106 & 004) d0700 |= 0004;
+    if (mbuf1106 & 040) d0700 |= 0040;
+    if (mbuf1106 & 020) d0700 |= 0100;
+    if (mbuf1106 & 010) d0700 |= 0200;
+    return d0700;
+}
+// - unscramble chip data lines for INBUS lines
+static int demunmembyte_U175 (int d0700)
+{
+    int inbus0500 = 0;
+    if (d0700 & 0001) inbus0500 |= 001;
+    if (d0700 & 0002) inbus0500 |= 002;
+    if (d0700 & 0004) inbus0500 |= 004;
+    if (d0700 & 0040) inbus0500 |= 040;
+    if (d0700 & 0100) inbus0500 |= 020;
+    if (d0700 & 0200) inbus0500 |= 010;
+    return inbus0500;
+}
+static int demunmembyte_U177 (int d0700)
+{
+    int inbus1106 = 0;
+    if (d0700 & 0001) inbus1106 |= 001;
+    if (d0700 & 0002) inbus1106 |= 002;
+    if (d0700 & 0004) inbus1106 |= 004;
+    if (d0700 & 0040) inbus1106 |= 040;
+    if (d0700 & 0100) inbus1106 |= 020;
+    if (d0700 & 0200) inbus1106 |= 010;
+    return inbus1106;
 }
 
 static int cmd_mem (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
@@ -612,9 +673,10 @@ static int cmd_mem (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj
                 Tcl_SetResultF (interp, "bad address %d", addr);
                 return TCL_ERROR;
             }
-            addr = mungememaddr (addr);
-            int datalo = demngmembyte (vbkpl->__PVT__backplane__DOT__meminst->__PVT__U175__DOT__array[addr]);
-            int datahi = demngmembyte (vbkpl->__PVT__backplane__DOT__meminst->__PVT__U177__DOT__array[addr]);
+            int addr_U175 = mungememaddr_U175 (addr);
+            int addr_U177 = mungememaddr_U177 (addr);
+            int datalo = demunmembyte_U175 (vbkpl->__PVT__backplane__DOT__meminst->__PVT__U175__DOT__array[addr_U175]);
+            int datahi = demunmembyte_U177 (vbkpl->__PVT__backplane__DOT__meminst->__PVT__U177__DOT__array[addr_U177]);
             Tcl_SetObjResult (interp, Tcl_NewIntObj ((datahi << 6) | datalo));
             return TCL_OK;
         }
@@ -635,9 +697,12 @@ static int cmd_mem (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj
                 Tcl_SetResultF (interp, "bad data %d", data);
                 return TCL_ERROR;
             }
-            addr = mungememaddr (addr);
-            vbkpl->__PVT__backplane__DOT__meminst->__PVT__U175__DOT__array[addr] = mungemembyte (data);
-            vbkpl->__PVT__backplane__DOT__meminst->__PVT__U177__DOT__array[addr] = mungemembyte (data >> 6);
+            int addr_U175 = mungememaddr_U175 (addr);
+            int addr_U177 = mungememaddr_U177 (addr);
+            int data_U175 = mungemembyte_U175 (data);
+            int data_U177 = mungemembyte_U177 (data >> 6);
+            vbkpl->__PVT__backplane__DOT__meminst->__PVT__U175__DOT__array[addr_U175] = data_U175;
+            vbkpl->__PVT__backplane__DOT__meminst->__PVT__U177__DOT__array[addr_U177] = data_U177;
             return TCL_OK;
         }
 
