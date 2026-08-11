@@ -175,14 +175,21 @@ proc disas {start {stop ""}} {
     }
 }
 
-# do memory cycle initiated by a switch (depos, exam, ldad)
+# do memory cycle initiated by a switch (depos, exam, ldad, start, cont)
 proc domemcyc {sw} {
     set oldmc [pin memcycctr]
     flicksw $sw
     ;# memcycctr increments on posedge TS3
-    ;# loop until subsequent TS3 and TS4 are complete
     set started [pin 100mhz]
-    for {set i 0} {([pin memcycctr] == $oldmc) || [pin ots3] || [pin ots4]} {incr i} {
+    while {[pin memcycctr] == $oldmc} {
+        set elapsed [expr {([pin 100mhz] - $started) & 0xFFFFFFFF}]
+        if {$elapsed > 100000} {error "$sw cycle timed out"}
+        after 1
+    }
+    ;# loop until TS3 and TS4 are complete (or yet another cycle runs)
+    set midmc [expr {($oldmc + 1) & 0xFFFFFFFF}]
+    while {[pin ots3] || [pin ots4]} {
+        if {[pin memcycctr] != $midmc} break
         set elapsed [expr {([pin 100mhz] - $started) & 0xFFFFFFFF}]
         if {$elapsed > 100000} {error "$sw cycle timed out"}
         after 1
