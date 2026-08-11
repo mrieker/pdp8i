@@ -573,7 +573,7 @@ static int cmd_iic (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj
 
 // direct internal memory access - accesses 32KW 12-bit chip on extmemory.kicad_sch board
 // - take 15-bit address in MEAD,MADR registers and come up with chip addresses
-static int mungememaddr_U175 (int madx)
+static int mungememaddr_E22 (int madx)
 {
     int a1400 = 0;
     if (madx & 000001) a1400 |= 000001;
@@ -593,7 +593,7 @@ static int mungememaddr_U175 (int madx)
     if (madx & 004000) a1400 |= 040000;
     return a1400;
 }
-static int mungememaddr_U177 (int madx)
+static int mungememaddr_E12 (int madx)
 {
     int a1400 = 0;
     if (madx & 000020) a1400 |= 000001;
@@ -614,7 +614,7 @@ static int mungememaddr_U177 (int madx)
     return a1400;
 }
 // - likewise scramble MBUF data lines to chip data lines
-static int mungemembyte_U175 (int mbuf0500)
+static int mungemembyte_E22 (int mbuf0500)
 {
     int d0700 = 0;
     if (mbuf0500 & 001) d0700 |= 0001;
@@ -625,7 +625,7 @@ static int mungemembyte_U175 (int mbuf0500)
     if (mbuf0500 & 010) d0700 |= 0200;
     return d0700;
 }
-static int mungemembyte_U177 (int mbuf1106)
+static int mungemembyte_E12 (int mbuf1106)
 {
     int d0700 = 0;
     if (mbuf1106 & 001) d0700 |= 0001;
@@ -637,7 +637,7 @@ static int mungemembyte_U177 (int mbuf1106)
     return d0700;
 }
 // - unscramble chip data lines for INBUS lines
-static int demunmembyte_U175 (int d0700)
+static int demunmembyte_E22 (int d0700)
 {
     int inbus0500 = 0;
     if (d0700 & 0001) inbus0500 |= 001;
@@ -648,7 +648,7 @@ static int demunmembyte_U175 (int d0700)
     if (d0700 & 0200) inbus0500 |= 010;
     return inbus0500;
 }
-static int demunmembyte_U177 (int d0700)
+static int demunmembyte_E12 (int d0700)
 {
     int inbus1106 = 0;
     if (d0700 & 0001) inbus1106 |= 001;
@@ -673,10 +673,10 @@ static int cmd_mem (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj
                 Tcl_SetResultF (interp, "bad address %d", addr);
                 return TCL_ERROR;
             }
-            int addr_U175 = mungememaddr_U175 (addr);
-            int addr_U177 = mungememaddr_U177 (addr);
-            int datalo = demunmembyte_U175 (vbkpl->__PVT__backplane__DOT__meminst->__PVT__U175__DOT__array[addr_U175]);
-            int datahi = demunmembyte_U177 (vbkpl->__PVT__backplane__DOT__meminst->__PVT__U177__DOT__array[addr_U177]);
+            int addr_E22 = mungememaddr_E22 (addr);
+            int addr_E12 = mungememaddr_E12 (addr);
+            int datalo = demunmembyte_E22 (vbkpl->__PVT__backplane__DOT__meminst->__PVT__E22__DOT__array[addr_E22]);
+            int datahi = demunmembyte_E12 (vbkpl->__PVT__backplane__DOT__meminst->__PVT__E12__DOT__array[addr_E12]);
             Tcl_SetObjResult (interp, Tcl_NewIntObj ((datahi << 6) | datalo));
             return TCL_OK;
         }
@@ -697,12 +697,12 @@ static int cmd_mem (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj
                 Tcl_SetResultF (interp, "bad data %d", data);
                 return TCL_ERROR;
             }
-            int addr_U175 = mungememaddr_U175 (addr);
-            int addr_U177 = mungememaddr_U177 (addr);
-            int data_U175 = mungemembyte_U175 (data);
-            int data_U177 = mungemembyte_U177 (data >> 6);
-            vbkpl->__PVT__backplane__DOT__meminst->__PVT__U175__DOT__array[addr_U175] = data_U175;
-            vbkpl->__PVT__backplane__DOT__meminst->__PVT__U177__DOT__array[addr_U177] = data_U177;
+            int addr_E22 = mungememaddr_E22 (addr);
+            int addr_E12 = mungememaddr_E12 (addr);
+            int data_E22 = mungemembyte_E22 (data);
+            int data_E12 = mungemembyte_E12 (data >> 6);
+            vbkpl->__PVT__backplane__DOT__meminst->__PVT__E22__DOT__array[addr_E22] = data_E22;
+            vbkpl->__PVT__backplane__DOT__meminst->__PVT__E12__DOT__array[addr_E12] = data_E12;
             return TCL_OK;
         }
 
