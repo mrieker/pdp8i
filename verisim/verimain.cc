@@ -75,6 +75,7 @@ static int findev (char const *ident);
 static uint32_t armread (uint32_t armaddr);
 static void armwrite (uint32_t armaddr, uint32_t armdata);
 static void zynqclock ();
+static int armwritestep (int step, uint32_t armaddr, uint32_t armdata);
 static void Tcl_SetResultF (Tcl_Interp *interp, char const *fmt, ...);
 static void siginthand (int signum);
 
@@ -187,9 +188,19 @@ int main (int argc, char **argv)
 }
 
 // arm [get] addr addr ... set addr data addr data ... [find xx]
+
+struct ArmDeferSet {
+    ArmDeferSet *next;
+    uint32_t addr;
+    uint32_t data;
+    int step;
+};
+static ArmDeferSet  *armdefersets = NULL;
+static ArmDeferSet **larmdeferset = &armdefersets;
+
 static int cmd_arm (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
-    bool setmode = false;
+    int mode = 0;
     int ngetobjs = 0;
     Tcl_Obj *getobjs[objc];
 
@@ -206,11 +217,15 @@ static int cmd_arm (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj
             continue;
         }
         if (strcasecmp (arg, "get") == 0) {
-            setmode = false;
+            mode = 0;
             continue;
         }
         if (strcasecmp (arg, "set") == 0) {
-            setmode = true;
+            mode = 1;
+            continue;
+        }
+        if (strcasecmp (arg, "deferset") == 0) {
+            mode = 2;
             continue;
         }
         char *p;
@@ -219,18 +234,41 @@ static int cmd_arm (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj
             Tcl_SetResultF (interp, "address %s not integer in range 0..1023", arg);
             return TCL_ERROR;
         }
-        if (setmode) {
-            if (++ i >= objc) {
-                Tcl_SetResultF (interp, "missing value for address 0x%X", addr);
-                return TCL_ERROR;
+        switch (mode) {
+            case 0: { // get
+                uint32_t data = armread (addr);
+                getobjs[ngetobjs++] = Tcl_NewLongObj (data);
+                break;
             }
-            int data;
-            int rc = Tcl_GetIntFromObj (interp, objv[i], &data);
-            if (rc != TCL_OK) return rc;
-            armwrite (addr, data);
-        } else {
-            uint32_t data = armread (addr);
-            getobjs[ngetobjs++] = Tcl_NewLongObj (data);
+            case 1: { // set
+                if (++ i >= objc) {
+                    Tcl_SetResultF (interp, "missing value for address 0x%X", addr);
+                    return TCL_ERROR;
+                }
+                int data;
+                int rc = Tcl_GetIntFromObj (interp, objv[i], &data);
+                if (rc != TCL_OK) return rc;
+                armwrite (addr, data);
+                break;
+            }
+            case 2: { // deferset
+                if (++ i >= objc) {
+                    Tcl_SetResultF (interp, "missing value for address 0x%X", addr);
+                    return TCL_ERROR;
+                }
+                int data;
+                int rc = Tcl_GetIntFromObj (interp, objv[i], &data);
+                if (rc != TCL_OK) return rc;
+                ArmDeferSet *ads = new ArmDeferSet;
+                ads->next = NULL;
+                ads->addr = addr;
+                ads->data = data;
+                ads->step = 0;
+                *larmdeferset = ads;
+                larmdeferset = &ads->next;
+                break;
+            }
+            default: ABORT ();
         }
     }
     if (ngetobjs == 1) {
@@ -902,6 +940,8 @@ static uint32_t armread (uint32_t armaddr)
     }
     return armdata;
 #else
+    // avoid clocking simlation state
+    // all register reading is combinational
     vbkpl->saxi_ARADDR = armaddr << 2;
     vbkpl->directread  = 1;
     vbkpl->eval ();
@@ -913,20 +953,9 @@ static uint32_t armread (uint32_t armaddr)
 // write word to the ARM bus
 static void armwrite (uint32_t armaddr, uint32_t armdata)
 {
-    vbkpl->saxi_AWADDR  = armaddr << 2;
-    vbkpl->saxi_AWVALID = 1;
-    vbkpl->saxi_WDATA   = armdata;
-    vbkpl->saxi_WVALID  = 1;
-    vbkpl->saxi_BREADY  = 1;
-    for (int i = 0; vbkpl->saxi_AWVALID | vbkpl->saxi_WVALID | vbkpl->saxi_RREADY; i ++) {
-        if (i > 100) ABORT ();
-        bool awready = vbkpl->saxi_AWREADY;
-        bool wready  = vbkpl->saxi_WREADY;
-        zynqclock ();
-        if (awready) vbkpl->saxi_AWVALID = 0;
-        if (wready)  vbkpl->saxi_WVALID  = 0;
-        if (vbkpl->saxi_BVALID) vbkpl->saxi_BREADY = 0;
-    }
+    while (armdefersets != NULL) zynqclock ();
+    int step = 0;
+    while ((step = armwritestep (step, armaddr, armdata)) != 0) zynqclock ();
 }
 
 // advance clock 10nS
@@ -940,6 +969,17 @@ static void armwrite (uint32_t armaddr, uint32_t armdata)
 //   zclock just went low after being high for 2.5nS
 static void zynqclock ()
 {
+    ArmDeferSet *ads = armdefersets;
+    if (ads != NULL) {
+        ads->step = armwritestep (ads->step, ads->addr, ads->data);
+        if (ads->step == 0) {
+            if ((armdefersets = ads->next) == NULL) {
+                larmdeferset = &armdefersets;
+            }
+            delete ads;
+        }
+    }
+
     if (vbkpl->yclock | vbkpl->zclock) ABORT();
 
     bool lastoclock = vbkpl->oCLOCK;
@@ -962,6 +1002,29 @@ static void zynqclock ()
     // count the cycle if so
     // actual freq is determined by zynq.v regctld clkratm1 (normally 9 for 10MHz)
     if (lastoclock && ! vbkpl->oCLOCK) ++ cyclenum;
+}
+
+// do single step (10nS) of a write to an zynq arm page register
+static int armwritestep (int step, uint32_t armaddr, uint32_t armdata)
+{
+    static bool awready;
+    static bool wready;
+
+    if (step == 0) {
+        vbkpl->saxi_AWADDR  = armaddr << 2;
+        vbkpl->saxi_AWVALID = 1;
+        vbkpl->saxi_WDATA   = armdata;
+        vbkpl->saxi_WVALID  = 1;
+        vbkpl->saxi_BREADY  = 1;
+    } else {
+        if (step > 100) ABORT ();
+        if (awready) vbkpl->saxi_AWVALID = 0;
+        if (wready)  vbkpl->saxi_WVALID  = 0;
+        if (vbkpl->saxi_BVALID) vbkpl->saxi_BREADY = 0;
+    }
+    awready = vbkpl->saxi_AWREADY;
+    wready  = vbkpl->saxi_WREADY;
+    return (vbkpl->saxi_AWVALID | vbkpl->saxi_WVALID | vbkpl->saxi_BREADY) ? step + 1 : 0;
 }
 
 // set result to formatted string

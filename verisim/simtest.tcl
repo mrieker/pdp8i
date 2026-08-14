@@ -79,6 +79,7 @@ proc simtest {} {
     global intrequest
     global linc
     global memcycwcover
+    global memdis
     global mquo
     global opcode
     global perclock
@@ -170,8 +171,11 @@ proc simtest {} {
             ;# once through this loop per instruction, dma transfer or interrupt acknowledge
             ;# processor should be at beginning of TS1 in FETCH, WDCNT, BREAK or INTAK cycle
 
+            ;# maybe do something with pdp8itty.v
+            ;# - but not if memdis mode cuz it takes too many cycles
+            ;# - and only half the time for testing wfi so it isn't always requesting an interrupt
             set oldttintrq [ttintrq]
-            if {($wfitests & 4) && ([randbits 6] == 0)} {
+            if {! $memdis && ($wfitests & 4) && ([randbits 6] == 0)} {
                 set r [randbits 2]
                 switch $r {
                     0 {
@@ -184,13 +188,13 @@ proc simtest {} {
                         set ttkbchar [randbits 12]
                         set ttkbflag 1
                         puts [format "                                                       ttkbflag <= 1; ttkbchar <= %04o" $ttkbchar]
-                        arm set $ttat1 [expr {0xC0000000 | $ttkbchar}]
+                        arm deferset $ttat1 [expr {0xC0000000 | $ttkbchar}]
                     }
                     3 {
                         set ttprflag 1
                         set ttprfull 0
                         puts "                                                       ttprflag <= 1; ttprfull <= 0"
-                        arm set $ttat2 0x80000000
+                        arm deferset $ttat2 0x80000000
                     }
                 }
             }
@@ -599,7 +603,7 @@ proc memorycycle {state field addr rdata wdata} {
     set expaddr [expr {($field << 12) | $addr}]
     if {$memdis} {
         ;# this script is the memory, so put read data directly on the INBUS
-        arm set 1 [expr {(1 << 24) | ($rdata << 10)}]   ;# [24]=arm_iMEMDIS, [21:10]=arm_iINBUS
+        arm deferset 1 [expr {(1 << 24) | ($rdata << 10)}]   ;# [24]=arm_iMEMDIS, [21:10]=arm_iINBUS
         ;# put unrelated number in extmemory.kicad_sch chip in case it is interfering
         mem $expaddr [randbits 12]
     } else {
@@ -612,7 +616,7 @@ proc memorycycle {state field addr rdata wdata} {
     ;# these have higher priority than plain dmarqsts
     if {! $cmdmarqst && ([randbits 6] == 0)} {
         set cmdmarqst [expr {[randbits 30] | 0x80000000}]
-        arm set $cmat1 $cmdmarqst
+        arm deferset $cmat1 $cmdmarqst
         puts -nonewline " <<cmdmarqst>>"
     }
 
@@ -627,7 +631,7 @@ proc memorycycle {state field addr rdata wdata} {
 
     ;# stop dumping memory read value onto iINBUS
     if {$memdis} {
-        arm set 1 [expr {1 << 24}]                      ;# [24]=arm_iMEMDIS, [21:10]=arm_iINBUS
+        arm deferset 1 [expr {1 << 24}]                 ;# [24]=arm_iMEMDIS, [21:10]=arm_iINBUS
     }
 
     ;# maybe put dma write data out on the inbus during TS2
@@ -715,7 +719,7 @@ proc memorycycle {state field addr rdata wdata} {
     incr memcycno
     if {$memcycno % 1024 == 0} {
         set memdis [randbits 1]
-        arm set 1 [expr {$memdis << 24}]    ;# arm_iMEMDIS
+        arm deferset 1 [expr {$memdis << 24}]   ;# arm_iMEMDIS
         puts -nonewline " <<memdis=$memdis>>"
     }
 
@@ -971,7 +975,7 @@ proc doioinstr {opcode} {
         set acclear [randbits 1]    ;# supply random values
         set ioskip  [randbits 1]
         set acbits [randbits 12]
-        arm set $syat1 [expr {0x80000000 | ($acclear << 12) | ($ioskip << 13) | $acbits}]
+        arm deferset $syat1 [expr {0x80000000 | ($acclear << 12) | ($ioskip << 13) | $acbits}]
     } elseif {$opcode == 06313} {   ;# WFI (wait for interrupt)
         incr wfitests
         ;# should be able to break out of WFI with interrupt request, dma requst, stop switch
