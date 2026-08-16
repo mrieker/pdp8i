@@ -3,7 +3,7 @@ MACH   := $(shell uname -m)
 GPP    := g++ $(CFLAGS) -std=c++11 -g -Wall
 
 COMMON := bgrep.$(MACH) last16k.$(MACH)
-ARMVxL := $(COMMON) resetmcp.$(MACH) testcon1.$(MACH) testcon1.$(MACH) testconsole.$(MACH) testprocalu.$(MACH) testzturn.$(MACH)
+ARMVxL := $(COMMON) resetmcp.$(MACH) testcon1.$(MACH) testcon1.$(MACH) testconsole.$(MACH) testprocalu.$(MACH) testprocseq.$(MACH) testzturn.$(MACH)
 
 ifeq ($(MACH),armv6l)
 	DEFAULT := $(ARMVxL)
@@ -88,6 +88,12 @@ testprocalu.$(MACH): testprocalu.$(MACH).o testlib.$(MACH).o i2cmaster.$(MACH).o
 testprocalu.$(MACH).o: testprocalu.cc testlib.h testerdefs.h i2cmaster.h veriprocalu.$(MACH)/Vprocalu.h
 	$(GPP) -g -c -o testprocalu.$(MACH).o -Iveriprocalu.$(MACH) -I/usr/share/verilator/include/ testprocalu.cc
 
+testprocseq.$(MACH): testprocseq.$(MACH).o testlib.$(MACH).o i2cmaster.$(MACH).o randbits.$(MACH).o verilated.$(MACH).o veriprocseq.$(MACH)/Vprocseq__ALL.a
+	$(GPP) -g -o testprocseq.$(MACH) testprocseq.$(MACH).o testlib.$(MACH).o i2cmaster.$(MACH).o randbits.$(MACH).o verilated.$(MACH).o veriprocseq.$(MACH)/Vprocseq__ALL.a
+
+testprocseq.$(MACH).o: testprocseq.cc testlib.h testerdefs.h i2cmaster.h veriprocseq.$(MACH)/Vprocseq.h
+	$(GPP) -g -c -o testprocseq.$(MACH).o -Iveriprocseq.$(MACH) -I/usr/share/verilator/include/ testprocseq.cc
+
 testzturn.$(MACH): testzturn.$(MACH).o testlib.$(MACH).o i2cmaster.$(MACH).o ../ccode/z8iutil.$(MACH).o
 	$(GPP) -g -o testzturn.$(MACH) testzturn.$(MACH).o testlib.$(MACH).o i2cmaster.$(MACH).o ../ccode/z8iutil.$(MACH).o
 
@@ -137,6 +143,13 @@ veriprocalu.$(MACH)/Vprocalu__ALL.a: veriprocalu.$(MACH)/Vprocalu.mk
 veriprocalu.$(MACH)/Vprocalu.cpp veriprocalu.$(MACH)/Vprocalu.h veriprocalu.$(MACH)/Vprocalu.mk: ../kicads/procalu/procalu.v chips-varns.v
 	rm -rf veriprocalu.$(MACH)
 	verilator --cc --Mdir veriprocalu.$(MACH) --top-module procalu ../kicads/procalu/procalu.v chips-varns.v
+
+veriprocseq.$(MACH)/Vprocseq__ALL.a: veriprocseq.$(MACH)/Vprocseq.mk
+	make -C veriprocseq.$(MACH) -f Vprocseq.mk
+
+veriprocseq.$(MACH)/Vprocseq.cpp veriprocseq.$(MACH)/Vprocseq.h veriprocseq.$(MACH)/Vprocseq.mk: ../kicads/procseq/procseq.v chips-varns.v
+	rm -rf veriprocseq.$(MACH)
+	verilator --cc --Mdir veriprocseq.$(MACH) --top-module procseq ../kicads/procseq/procseq.v chips-varns.v
 
 ../kicads/console/console.v: ../kicads/console/console.kicad_pcb
 	cd ../kicads/console ; ../veripcb.sh console

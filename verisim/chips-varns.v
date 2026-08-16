@@ -350,6 +350,7 @@ endmodule
 module X74HC20 (input zclock, zreset,
           input      p1
         , input      p2
+        , input      p3
         , input      p4
         , input      p5
         , output reg p6
@@ -357,6 +358,7 @@ module X74HC20 (input zclock, zreset,
         , output reg p8
         , input      p9
         , input      p10
+        , input      p11
         , input      p12
         , input      p13
         , input      p14
@@ -373,6 +375,7 @@ endmodule
 module X74AC20 (input zclock, zreset,
           input      p1
         , input      p2
+        , input      p3
         , input      p4
         , input      p5
         , output reg p6
@@ -380,6 +383,7 @@ module X74AC20 (input zclock, zreset,
         , output reg p8
         , input      p9
         , input      p10
+        , input      p11
         , input      p12
         , input      p13
         , input      p14
@@ -396,6 +400,7 @@ endmodule
 module X74HC21 (input zclock, zreset,
           input      p1
         , input      p2
+        , input      p3
         , input      p4
         , input      p5
         , output reg p6
@@ -403,6 +408,7 @@ module X74HC21 (input zclock, zreset,
         , output reg p8
         , input      p9
         , input      p10
+        , input      p11
         , input      p12
         , input      p13
         , input      p14
@@ -451,8 +457,11 @@ module X74HC30 (input zclock, zreset,
         , input      p6
         , input      p7
         , output reg p8
+        , input      p9
+        , input      p10
         , input      p11
         , input      p12
+        , input      p13
         , input      p14
 );
 
@@ -2435,6 +2444,9 @@ module XDSB2810 (input zclock, input zreset, input p1, input p2i, output p2o);
 endmodule
 
 module X330 (input zclock, input zreset, input p1, input p2);
+endmodule
+
+module X1K (input zclock, input zreset, input p1, input p2);
 endmodule
 
 module X2_2K (input zclock, input zreset, input p1, input p2);

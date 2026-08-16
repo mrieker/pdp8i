@@ -157,23 +157,21 @@ public class VeriPCB {
         System.out.println ("    X" + compon.value + " " + compon.refer + " (");
         System.out.println ("        .zclock(zclock),");
         System.out.println ("        .zreset(zreset)");
-        char sep = ',';
         for (PCB.Pad pad : compon.compads) {
             if (pad != null) {
+                int idx = pad.padidx;
                 PCB.Network network = pad.padnet ();
                 if (network != null) {
-                    int idx = pad.padidx;
                     String netname = network.netname;
                     if (pad.pintype == PCB.PinType.TRISTATE) {
                         String tnn = netname + "_" + compon.refer + "p" + idx;
-                        System.out.println (String.format ("        %c .p%di(%s) // TRISTATE", sep, idx, netname));
-                        sep = ',';
-                        System.out.println (String.format ("        %c .p%do(%s) // TRISTATE", sep, idx, tnn));
-                        sep = ',';
+                        System.out.println (String.format ("        , .p%di(%s) // TRISTATE", idx, netname));
+                        System.out.println (String.format ("        , .p%do(%s) // TRISTATE", idx, tnn));
                     } else {
-                        System.out.println (String.format ("        %c .p%d(%s) // %s", sep, idx, netname, pad.pintype.toString ()));
-                        sep = ',';
+                        System.out.println (String.format ("        , .p%d(%s) // %s", idx, netname, pad.pintype.toString ()));
                     }
+                } else {
+                        System.out.println (String.format ("        , .p%d() // %s", idx, pad.pintype.toString ()));
                 }
             }
         }
