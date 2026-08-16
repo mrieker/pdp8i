@@ -71,6 +71,11 @@ struct ProcSeq {
     void swsstep (bool v);
     void swstart (bool v);
 
+    bool clock   ();
+    bool intrqst ();
+    uint8_t  ireg ();
+    uint16_t mbuf ();
+
     // receiveables
     bool     brkgnto ();
     bool     busini  ();
@@ -94,16 +99,40 @@ struct ProcSeq {
     void init ();
     void genrand ();
     void update ();
-    void feedback ();
     void printsent ();
     void printrcvd ();
     bool verify ();
+    void puqueffs ();
+
+    enum SwitchState {
+        SS_NONE  = 0,
+        SS_CONT  = 1,
+        SS_DEPOS = 2,
+        SS_EXAM  = 3,
+        SS_LDAD  = 4,
+        SS_START = 5
+    };
+
+    int switchtimer;
+    SwitchState switchstate;
+
+    void feedback ();
 };
 
 static volatile bool ctrlcflag;
 static ProcSeq procseq;
 
 static void sighand (int signum);
+
+/***
+static void pausekb ()
+{
+    char buff[16];
+    printf (" > ");
+    fflush (stdout);
+    if (fgets (buff, sizeof buff, stdin) == NULL) exit (0);
+}
+***/
 
 int main ()
 {
@@ -128,32 +157,51 @@ int main ()
 
     uint32_t ntest = 0;
     while (! ctrlcflag) {
-        printf ("ntest=%10u\n", ++ ntest);
+        if ((++ ntest % 1000 == 0) || (procseq.majst () == 7)) {
+            printf ("%10u swst=%d ireg=%o mbuf=%03o intrqst=%d => ion=%d run=%d majst=%X\n",
+                ntest, procseq.switchstate, procseq.ireg (), procseq.mbuf (), procseq.intrqst (),
+                procseq.ion (), procseq.run (), procseq.majst ());
+        }
+
+///     printf ("\n");
+///     printf ("- - - - - - - - - - - - - - - - %10u\n", ++ ntest);
 
         // clock has been low for a while, scramble the inputs
+///     printf ("\n");
+///     printf ("  sending random inputs\n");
         procseq.genrand ();
         procseq.update ();
+///     procseq.printsent ();
 
         // now they are stable, drive clock high, everything else the same
+///     printf ("  driving clock high\n");
         procseq.clock (1);
         procseq.update ();
 
         // print and verify state
-        procseq.printsent ();
-        procseq.printrcvd ();
+///     printf ("  resultant state\n");
+////    procseq.puqueffs ();
+///     procseq.printrcvd ();
+////    if (ntest >= 335) pausekb ();
         if (! procseq.verify ()) break;
 
         // clock has been high for a while, scramble the inputs
+///     printf ("\n");
+///     printf ("  sending random inputs\n");
         procseq.genrand ();
         procseq.update ();
+///     procseq.printsent ();
 
         // now they are stable, drive clock low, everything else the same
+///     printf ("  driving clock low\n");
         procseq.clock (0);
         procseq.update ();
 
         // print and verify state
-        procseq.printsent ();
-        procseq.printrcvd ();
+///     printf ("  resultant state\n");
+////    procseq.puqueffs ();
+///     procseq.printrcvd ();
+////    if (ntest >= 335) pausekb ();
         if (! procseq.verify ()) break;
     }
 
@@ -244,6 +292,9 @@ ProcSeq::ProcSeq ()
     swsinst (0);
     swsstep (0);
     swstart (0);
+
+    switchtimer = 0;
+    switchstate = SS_NONE;
 }
 
 void ProcSeq::init ()
@@ -261,15 +312,99 @@ void ProcSeq::genrand ()
     cycle3  (randbits (1));
     intinh  (randbits (1));
     intrqst (randbits (1));
-    ireg    (randbits (3));
-    mbuf    (randbits (9));
-    swcont  (randbits (1));
-    swdepos (randbits (1));
-    swexam  (randbits (1));
-    swldad  (randbits (1));
-    swsinst (randbits (1));
-    swsstep (randbits (1));
-    swstart (randbits (1));
+
+    // change opcode at TP1 of FETCH
+    if (clock () && tp1 () && (majst () == 1)) {
+        ireg (randbits (3));
+    }
+
+    // change MBUF at TP1 and TP2 of any cycle
+    if (clock () && (tp1 () || tp2 ())) {
+        mbuf (randbits (9));
+    }
+
+    // switch action when timer runs out
+    if (-- switchtimer < 0) {
+        switch (switchstate) {
+
+            // no button currently pressed
+            // fiddle the step switches, possibly halting processor
+            // if not running, maybe press a button to start the processor
+            case SS_NONE: {
+
+                // maybe flip the step switches
+                // lean heavily on letting the processor run
+                swsinst (randbits (6) == 0);
+                swsstep (randbits (6) == 0);
+
+                // if halted, press or release a button
+                // lean on cont switch to resume processing
+                if (! run ()) {
+                    switch (randbits (3)) {
+                        case 1: {
+                            switchstate = SS_DEPOS;
+                            swdepos (1);
+                            break;
+                        }
+                        case 2: {
+                            switchstate = SS_EXAM;
+                            swexam (1);
+                            break;
+                        }
+                        case 3: {
+                            switchstate = SS_LDAD;
+                            swldad (1);
+                            break;
+                        }
+                        case 4: {
+                            switchstate = SS_START;
+                            swstart (1);
+                            break;
+                        }
+                        default: {
+                            switchstate = SS_CONT;
+                            swcont (1);
+                            break;
+                        }
+                    }
+                }
+                break;
+            }
+
+            // some button already pressed, release it
+            case SS_CONT: {
+                switchstate = SS_NONE;
+                swcont (0);
+                break;
+            }
+            case SS_DEPOS: {
+                switchstate = SS_NONE;
+                swdepos (0);
+                break;
+            }
+            case SS_EXAM: {
+                switchstate = SS_NONE;
+                swexam (0);
+                break;
+            }
+            case SS_LDAD: {
+                switchstate = SS_NONE;
+                swldad (0);
+                break;
+            }
+            case SS_START: {
+                switchstate = SS_NONE;
+                swstart (0);
+                break;
+            }
+
+            default: abort ();
+        }
+
+        // reset timer for 32..63 50nS cycles
+        // counts are 50nS each (cuz we are called twice per 100nS clock)
+        switchtimer = 64 + randbits (6);
+    }
 }
 
 // send values to circuit board then retrieve the results
@@ -350,7 +485,7 @@ void ProcSeq::printrcvd ()
         getmpin  (mp__BUSINI)  ^ 1,
         getmpin  (mp__ION)     ^ 1,
         getmpin  (mp__IOP)     ^ 1,
-        getmpins (mps__MAJST)  ^ 1,
+        getmpins (mps__MAJST)  ^ 15,
         getmpin  (mp__PAUSE)   ^ 1,
         getmpin  (mp__RUN)     ^ 1,
         getmpin (mp__TP1) ^ 1, getmpin (mp__TP2) ^ 1, getmpin (mp__TP3) ^ 1, getmpin (mp__TP4) ^ 1,
@@ -379,7 +514,38 @@ bool ProcSeq::verify ()
     return ! error;
 }
 
+// print state of all flipflops according to verilog
+void ProcSeq::puqueffs ()
+{
+    printf ("E25A MAJST_3  Q(5)=%o _Q(6)=%o\n", vprseq.procseq__DOT__majst_3, vprseq.procseq__DOT___majst_3);
+    printf ("E25B MAJST_2  Q(9)=%o _Q(8)=-\n",  vprseq.procseq__DOT__majst_2);
+    printf ("E34A MAJST_1  Q(5)=%o _Q(6)=-\n",  vprseq.procseq__DOT__majst_1);
+    printf ("E34B MAJST_0  Q(9)=%o _Q(8)=-\n",  vprseq.procseq__DOT__majst_0);
+    printf ("E47  TSCT 3(11)=%o 2(12)=%o 1(13)=%o 0(14)=%o\n", vprseq.procseq__DOT__tsct_3, vprseq.procseq__DOT__tsct_2, vprseq.procseq__DOT__tsct_1, vprseq.procseq__DOT__tsct_0);
+    printf ("E53A IOP      Q(6)=%o _Q(7)=%o\n", vprseq.procseq__DOT__iop, vprseq.procseq__DOT___iop);
+    printf ("E53B TS4     Q(10)=%o _Q(9)=%o\n", vprseq.procseq__DOT__ts4, vprseq.procseq__DOT___ts4);
+    printf ("E54A TP3      Q(6)=%o _Q(7)=%o\n", vprseq.procseq__DOT__tp3, vprseq.procseq__DOT___tp3);
+    printf ("E54B TP4      Q(9)=%o _Q(8)=%o\n", vprseq.procseq__DOT__tp4, vprseq.procseq__DOT___tp4);
+    printf ("E56A TS2      Q(6)=%o _Q(7)=%o\n", vprseq.procseq__DOT__ts2, vprseq.procseq__DOT___ts2);
+    printf ("E56B TS3     Q(10)=%o _Q(9)=%o\n", vprseq.procseq__DOT__ts3, vprseq.procseq__DOT___ts3);
+    printf ("E63A HGNT     Q(6)=%o _Q(7)=%o\n", vprseq.procseq__DOT__hgnt, vprseq.procseq__DOT__run);
+    printf ("E63B TS1     Q(10)=%o _Q(9)=%o\n", vprseq.procseq__DOT__ts1, vprseq.procseq__DOT___ts1);
+    printf ("E65A TP1      Q(6)=%o _Q(7)=%o\n", vprseq.procseq__DOT__tp1, vprseq.procseq__DOT___tp1);
+    printf ("E65B TP2      Q(9)=%o _Q(8)=%o\n", vprseq.procseq__DOT__tp2, vprseq.procseq__DOT___tp2);
+    printf ("E67A INTDEL   Q(6)=%o _Q(7)=-\n",  vprseq.procseq__DOT__intdelayed);
+    printf ("E67B ION     Q(10)=%o _Q(9)=%o\n", vprseq.procseq__DOT__ion, vprseq.procseq__DOT___ion);
+    printf ("E75A INTGRNT  Q(5)=%o=E66A-2\n",   vprseq.procseq__DOT__intgrnt);
+    printf ("E75B BRKGRNT  Q(9)=- _Q(8)=%o\n",  vprseq.procseq__DOT___brkgrnt);
+    printf ("E76A HREQ     Q(6)=%o _Q(7)=%o\n", vprseq.procseq__DOT__hreq, vprseq.procseq__DOT___hreq);
+    printf ("E76B         Q(10)=- _Q(9)=%o\n",  vprseq.procseq__DOT___hreq_k);
+    printf ("E77A SYNPAUSE Q(5)=- _Q(6)=%o\n",  vprseq.procseq__DOT___synpause);
+}
+
 
+
+///////////////////////////////////////////////////////////
+//  signals received by the board (inputs to the board)  //
+///////////////////////////////////////////////////////////
 
 void ProcSeq::brkrqst (bool v) { vprseq._BRKRQST = ! v; }
 void ProcSeq::clock   (bool v) { vprseq._CLOCK   = ! v; }
@@ -412,6 +578,33 @@ void ProcSeq::swldad  (bool v) { vprseq._SWLDAD  = ! v; }
 void ProcSeq::swsinst (bool v) { vprseq._SWSINST = ! v; }
 void ProcSeq::swsstep (bool v) { vprseq._SWSSTEP = ! v; }
 void ProcSeq::swstart (bool v) { vprseq._SWSTART = ! v; }
+
+bool ProcSeq::clock   () { return ! vprseq._CLOCK;   }
+bool ProcSeq::intrqst () { return ! vprseq._INTRQST; }
+uint8_t  ProcSeq::ireg ()
+{
+    return
+        (((uint8_t) vprseq._IREG_9  << 0) |
+         ((uint8_t) vprseq._IREG_10 << 1) |
+         ((uint8_t) vprseq._IREG_11 << 2)) ^ 7;
+}
+uint16_t ProcSeq::mbuf ()
+{
+    return
+        (((uint16_t) vprseq._MBUF_0 << 0) |
+         ((uint16_t) vprseq._MBUF_1 << 1) |
+         ((uint16_t) vprseq._MBUF_2 << 2) |
+         ((uint16_t) vprseq._MBUF_3 << 3) |
+         ((uint16_t) vprseq._MBUF_4 << 4) |
+         ((uint16_t) vprseq._MBUF_5 << 5) |
+         ((uint16_t) vprseq._MBUF_6 << 6) |
+         ((uint16_t) vprseq._MBUF_7 << 7) |
+         ((uint16_t) vprseq._MBUF_8 << 8)) ^ 0777;
+}
+
+//////////////////////////////////////////////////////////
+//  signals sent by the board (outputs from the board)  //
+//////////////////////////////////////////////////////////
 
 bool     ProcSeq::brkgnto () { return ! vprseq._BRKGNTO; }
 bool     ProcSeq::busini  () { return ! vprseq._BUSINI;  }
