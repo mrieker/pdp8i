@@ -299,6 +299,168 @@ proc testacum {} {
     }
 }
 
+# test program counter register
+# theoretically tests all conditions where it should and shouldn't load or increment
+proc testpctr {} {
+
+    ;# get starting pctr
+    set oldpctr [pin pctr]
+
+    pin set tp1 0 tp2 0 run 1
+    set run 1
+
+    set ntest 0
+    while {! [ctrlcflag]} {
+
+        ;# see what major state we are going to do (range 1..9)
+        set majst [expr {[randbits 4] % 9 + 1}]
+
+        ;# generate random opcode
+        set opcode [randbits 12]
+
+        ;# generate random 12-bit value to load into pctr
+        set aluq [randbits 12]
+
+        ;# generate random 1-bit link values
+        set cout [randbits 1]       ;# TAD instruction
+        set lnktog [randbits 1]     ;# extar instructions
+
+        ;# print about the test case
+        incr ntest
+        puts [format "%9d majst=%X opcode=%04o aluq=%04o cout=%o lnktog=%o oldpctr=%04o" \
+            $ntest $majst $opcode $aluq $cout $lnktog $oldpctr]
+
+        ;# get opcode loaded into IREG and MBUF by doing FETCH TP1
+        pin set majst 1 aluq $opcode inbus $opcode
+        pin set tp1 1
+        set x [pin ireg mbuf]
+        if {[lindex $x 0] != $opcode >> 9} {error "ireg did not load opcode"}
+        if {[lindex $x 1] != $opcode} {error "mbuf did not load opcode"}
+        pin set tp1 0
+
+        set iop    [expr {($opcode & 07000) == 06000}]
+        set ioskip [randbits 1]
+
+        ;# set up the random major state and other inputs
+        ;# run is always 1 while doing TS2,TS3
+        pin set majst $majst aluq $aluq iop $iop cout $cout lnktog $lnktog ioskip $ioskip run 1
+        set run 1
+
+        ;# make sure console switches all off (so _ldadclk = 1)
+        pin set swexam 0 swdepos 0 swldad 0
+        set _ldadclk 1
+
+        ;# test pctr updates during TS2 then TS3
+        for {set ts 2} {$ts <= 3} {incr ts} {
+            for {set pulse 0} {$pulse <= 1} {incr pulse} {
+                set bwcov [pin bwcov]
+                set acum  [pin acum]
+                set link  [pin link]
+
+                ;# send updated ts,tp signals to the physical board
+                set ts2 [expr {$ts == 2}]
+                set ts3 [expr {$ts == 3}]
+                set tp2 [expr {$ts2 & $pulse}]
+                set tp3 [expr {$ts3 & $pulse}]
+                pin set tp2 $tp2 tp3 $tp3 ts2 $ts2 ts3 $ts3
+
+                ;# compute what internal signals should be for the random numbers and timestate, timepulse
+                set msfetch [expr {$majst == 1}]
+                set msdefer [expr {$majst == 2}]
+                set msexec  [expr {$majst == 3}]
+                set msintak [expr {$majst == 7}]
+
+                set iropr   [expr {($opcode & 07000) == 07000}]
+                set group2  [expr {($opcode & 07401) == 07400}]
+                set iop     [expr {($opcode & 07000) == 06000}]
+                set irisz   [expr {($opcode & 07000) == 02000}]
+                set irjms   [expr {($opcode & 07000) == 04000}]
+                set irjmp   [expr {($opcode & 07000) == 05000}]
+                set dirjmp  [expr {($opcode & 07400) == 05000}]
+
+                set mbuf_3  [expr {($opcode >> 3) & 1}]
+                set mbuf_4  [expr {($opcode >> 4) & 1}]
+                set mbuf_5  [expr {($opcode >> 5) & 1}]
+                set mbuf_6  [expr {($opcode >> 6) & 1}]
+
+                set skipneg [expr {$mbuf_6 & ($acum >> 11)}]
+                set skipzer [expr {$mbuf_5 & ($acum == 0)}]
+                set skiplnk [expr {$mbuf_4 & $link}]
+                set g2skip  [expr {$mbuf_3 ^ ($skipneg | $skipzer | $skiplnk)}]
+
+                set e76c    [expr {! ($ioskip && $msexec && $iropr)}]
+                set e76a    [expr {! ($g2skip && $msfetch && $group2)}]
+                set e75c    [expr {! ($iop && $ioskip)}]
+                set e48b    [expr {! ($irisz && $bwcov && $msexec)}]
+                set e66b    [expr {! ($e76c && $e76a && $e75c && $e48b)}]
+                set e85a    [expr {! ($msfetch && $ts2)}]
+                set e75a    [expr {! ($ts3 & $e66b)}]
+                set pcinc   [expr {! ($e85a && $e75a)}]
+
+                set e84d    [expr {! ($tp2 && $msfetch)}]
+                set pcclk   [expr {! ($_ldadclk && ! $tp3 && $e84d)}]
+
+                set e57b    [expr {! ($dirjmp && $msfetch)}]
+                set e57c    [expr {! ($msexec && $irjms)}]
+                set e77d    [expr {! ($msdefer && $irjmp)}]
+                set e66a    [expr {! ($e57b && $e57c && ! $msintak && $e77d)}]
+                set e55b    [expr {! ($ts3 && $e66a)}]
+                set _pcld   [expr {$run && $e55b}]
+
+                ;# if pctr was clocked, update what the value should be
+                set updpctr $oldpctr
+                if {$pcclk &   $pcinc} {set updpctr [expr {($updpctr + 1) & 4095}]}
+                if {$pcclk & ! $_pcld} {set updpctr $aluq}
+
+                ;# make sure actual pc matches
+                set newpctr [pin pctr]
+                if {$newpctr != $updpctr} {
+                    error [format "newpctr=%04o updpctr=%04o oldpctr=%04o" $newpctr $updpctr $oldpctr]
+                }
+
+                set oldpctr $newpctr
+            }
+            pin set tp2 0 tp3 0
+            pin set ts2 0 ts3 0
+        }
+
+        ;# set up random number to possibly load into pctr via switches
+        ;# not running while testing switches (all of TS1,2,3,4 and TP1,2,3,4 are 0)
+        set aluq [randbits 12]
+        set run 0
+
+        ;# test console switch loading
+        ;# loads for ldad switch in any state
+        ;#           exam switch when already in exam state
+        ;#           depos switch when already in depos state
+        ;#   for the exam,depos cases, processor would set aluq=pctr+1 to increment pctr
+        ;#   ... but here we just use a random number for aluq
+        set msdepos [expr {$majst == 8}]
+        set msexam  [expr {$majst == 9}]
+        set swtch   [randbits 2]
+        set swexam  [expr {$swtch == 1}]
+        set swdepos [expr {$swtch == 2}]
+        set swldad  [expr {$swtch == 3}]
+        set ldpcen  [expr {($swexam & $msexam) | ($swdepos & $msdepos) | $swldad}]
+
+        puts [format "          majst=%X swtch=%o     aluq=%04o                 oldpctr=%04o" \
+            $majst $swtch $aluq $oldpctr]
+        pin set aluq $aluq run 0 swexam $swexam swdepos $swdepos swldad $swldad
+
+        ;# pulse memacsw, it will pulse pcclk if enabled by ldpcen
+        pin set memacsw 1
+        set newpctr [pin pctr]
+        if {$newpctr != ($ldpcen ? $aluq : $oldpctr)} {
+            error [format "majst=%X swtch=%o newpctr=%04o ldpcen=%o aluq=%04o oldpctr=%04o" \
+                $majst $swtch $newpctr $ldpcen $aluq $oldpctr]
+        }
+
+        pin set memacsw 0 swexam 0 swdepos 0 swldad 0
+
+        set oldpctr $newpctr
+    }
+}
+
 # madr loads on posedge maload
 #  inputs:
 #   swexam  : exam switch pressed
