@@ -108,11 +108,11 @@ proc pausetty {pmt} {
     close $tty
 }
 
-# test accumulator and link registers
+# test accumulator, link, bwcov registers
 # theoretically tests all conditions where they should and shouldn't load
 proc testacum {} {
 
-    ;# get starting acum and link values
+    ;# get starting acum, link, bwcov values
     pin set busini 1
     pin set busini 0
     set oldacum [pin acum]
@@ -121,6 +121,8 @@ proc testacum {} {
         puts [format "initial acum=%04o link=%o" $oldacum $oldlink]
         return
     }
+
+    set oldbwcov [pin bwcov]
 
     pin set tp1 0 tp2 0
 
@@ -142,12 +144,13 @@ proc testacum {} {
 
         ;# print about the test case
         incr ntest
-        puts [format "%9d majst=%X opcode=%04o aluq=%04o cout=%o lnktog=%o oldacum=%o.%04o" \
-            $ntest $majst $opcode $aluq $cout $lnktog $oldlink $oldacum]
+        puts [format "%9d majst=%X opcode=%04o aluq=%04o cout=%o lnktog=%o oldacum=%o.%04o oldbwcov=%o" \
+            $ntest $majst $opcode $aluq $cout $lnktog $oldlink $oldacum $oldbwcov]
 
         ;# compute what internal signals should be for those random numbers
         set msfetch [expr {$majst == 1}]
         set msexec  [expr {$majst == 3}]
+        set mswrdct [expr {$majst == 4}]
         set mbuf_0  [expr {($opcode >> 0) & 1}]
         set mbuf_1  [expr {($opcode >> 1) & 1}]
         set mbuf_2  [expr {($opcode >> 2) & 1}]
@@ -224,23 +227,30 @@ proc testacum {} {
         if {[lindex $x 1] != $opcode} {error "mbuf did not load opcode"}
         pin set tp1 0
 
-        ;# set up the random major state
-        if {$majst != 1} {pin set majst $majst}
+        ;# set up the random major state and other inputs
+        pin set majst $majst aluq $aluq iop $iop cout $cout lnktog $lnktog
 
         ;# pulse TP2 which possibly clears acum and/or link
         pin set tp2 1
-        pin set tp2 0
-        set x [pin acum link]
-        set newacum [lindex $x 0]
-        set newlink [lindex $x 1]
+        set x [pin acum link bwcov]
+        set newacum  [lindex $x 0]
+        set newlink  [lindex $x 1]
+        set newbwcov [lindex $x 2]
         if {($newacum != $clracum) || ($newlink != $clrlink)} {
             puts [format "cla=%o cll=%o newacum=%04o clracum=%04o newlink=%o clrlink=%o" $cla $cll $newacum $clracum $newlink $clrlink]
             break
         }
 
-        ;# send various values to the board
-        ;# - say we are in TS3 cuz we are about to pulse TP3
-        pin set aluq $aluq iop $iop ts3 1 cout $cout lnktog $lnktog
+        ;# TP2 pulse loads bwcov from cout if WRDCT or EXEC cycle
+        if {$newbwcov != (($mswrdct || $msexec) ? $cout : $oldbwcov)} {
+            puts "newbwcov=$newbwcov != ((mswrdct=$mswrdct || msexec=$msexec) ? cout=$cout : oldbwcov=$oldbwcov"
+            break
+        }
+
+        pin set tp2 0
+
+        ;# say we are in TS3 cuz we are about to pulse TP3
+        pin set ts3 1
 
         ;# all acum,link loading is on posedge TP3
         pin set tp3 1
@@ -283,8 +293,9 @@ proc testacum {} {
 
         pin set majst 0 aluq 0 tp3 0 ts3 0
 
-        set oldacum $newacum
-        set oldlink $newlink
+        set oldacum  $newacum
+        set oldlink  $newlink
+        set oldbwcov $newbwcov
     }
 }
 
