@@ -90,11 +90,11 @@ testprocalu.$(MACH): testprocalu.$(MACH).o testlib.$(MACH).o i2cmaster.$(MACH).o
 testprocalu.$(MACH).o: testprocalu.cc testlib.h testerdefs.h i2cmaster.h veriprocalu.$(MACH)/Vprocalu.h
 	$(GPP) -g -c -o testprocalu.$(MACH).o -Iveriprocalu.$(MACH) -I/usr/share/verilator/include/ testprocalu.cc
 
-testprocreg.$(MACH): testprocreg.$(MACH).o testlib.$(MACH).o i2cmaster.$(MACH).o randbits.$(MACH).o verilated.$(MACH).o veriprocreg.$(MACH)/Vprocreg__ALL.a tclmain.$(MACH).o ccode_readprompt.$(MACH).o
-	$(GPP) -g -o testprocreg.$(MACH) testprocreg.$(MACH).o testlib.$(MACH).o i2cmaster.$(MACH).o randbits.$(MACH).o verilated.$(MACH).o veriprocreg.$(MACH)/Vprocreg__ALL.a tclmain.$(MACH).o ccode_readprompt.$(MACH).o $(TCLLIB) -lpthread -lreadline
+testprocreg.$(MACH): testprocreg.$(MACH).o testlib.$(MACH).o i2cmaster.$(MACH).o randbits.$(MACH).o tclmain.$(MACH).o ccode_readprompt.$(MACH).o
+	$(GPP) -g -o testprocreg.$(MACH) testprocreg.$(MACH).o testlib.$(MACH).o i2cmaster.$(MACH).o randbits.$(MACH).o tclmain.$(MACH).o ccode_readprompt.$(MACH).o $(TCLLIB) -lpthread -lreadline
 
-testprocreg.$(MACH).o: testprocreg.cc testlib.h testerdefs.h i2cmaster.h veriprocreg.$(MACH)/Vprocreg.h
-	$(GPP) -g -c -o testprocreg.$(MACH).o -Iveriprocreg.$(MACH) -I/usr/share/verilator/include/ $(TCLINC) testprocreg.cc
+testprocreg.$(MACH).o: testprocreg.cc testlib.h testerdefs.h i2cmaster.h
+	$(GPP) -g -c -o testprocreg.$(MACH).o $(TCLINC) testprocreg.cc
 
 tclmain.$(MACH).o: ../ccode/tclmain.cc
 	$(GPP) -g -c -o tclmain.$(MACH).o $(TCLINC) ../ccode/tclmain.cc
@@ -157,13 +157,6 @@ veriprocalu.$(MACH)/Vprocalu__ALL.a: veriprocalu.$(MACH)/Vprocalu.mk
 veriprocalu.$(MACH)/Vprocalu.cpp veriprocalu.$(MACH)/Vprocalu.h veriprocalu.$(MACH)/Vprocalu.mk: ../kicads/procalu/procalu.v chips-varns.v
 	rm -rf veriprocalu.$(MACH)
 	verilator --cc --Mdir veriprocalu.$(MACH) --top-module procalu ../kicads/procalu/procalu.v chips-varns.v
-
-veriprocreg.$(MACH)/Vprocreg__ALL.a: veriprocreg.$(MACH)/Vprocreg.mk
-	make -C veriprocreg.$(MACH) -f Vprocreg.mk
-
-veriprocreg.$(MACH)/Vprocreg.cpp veriprocreg.$(MACH)/Vprocreg.h veriprocreg.$(MACH)/Vprocreg.mk: ../kicads/procreg/procreg.v chips-varns.v
-	rm -rf veriprocreg.$(MACH)
-	verilator --cc --Mdir veriprocreg.$(MACH) --top-module procreg ../kicads/procreg/procreg.v chips-varns.v
 
 veriprocseq.$(MACH)/Vprocseq__ALL.a: veriprocseq.$(MACH)/Vprocseq.mk
 	make -C veriprocseq.$(MACH) -f Vprocseq.mk
