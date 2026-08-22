@@ -622,6 +622,41 @@ proc testmbuf {} {
     }
 }
 
+# test brkcyc flipflop
+proc testbrkcyc {} {
+
+    ;# reset the flipflop
+    pin set busini 1 majst 0 ts1 0 ts2 0 ts3 0 ts4 0 tp1 0 tp2 0 tp3 0 tp4 0
+    pin set busini 0
+
+    if {[pin brkcyc]} {error "brkcyc not clear on startup"}
+
+    set ntest 0
+    while {! [ctrlcflag]} {
+
+        ;# see what major state we are going to do (range 1..9)
+        set majst [expr {[randbits 4] % 9 + 1}]
+        incr ntest
+        puts [format "%9d majst=%X" $ntest $majst]
+        pin set majst $majst
+        if {[pin brkcyc]} {error "brkcyc not clear after setting majst $majst"}
+
+        ;# TS1 sets the flipflop only if majst == 6
+        pin set ts1 1
+        if {$majst == 6} {
+            if {! [pin brkcyc]} {error "brkcyc not set after setting TS1 of majst $majst"}
+        } else {
+            if {[pin brkcyc]} {error "brkcyc not clear after setting TS1 of majst $majst"}
+        }
+        pin set ts1 0
+
+        ;# TS4 always clears the flipflop
+        pin set ts4 1
+        if {[pin brkcyc]} {error "brkcyc not clear after setting TS4"}
+        pin set ts4 0
+    }
+}
+
 # madr loads on posedge maload
 #  inputs:
 #   swexam  : exam switch pressed
