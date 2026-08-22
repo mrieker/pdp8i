@@ -461,6 +461,167 @@ proc testpctr {} {
     }
 }
 
+# test memory address register
+# theoretically tests all conditions where it should and shouldn't load
+proc testmadr {} {
+
+    ;# get starting madr
+    set oldmadr [pin madr]
+
+    pin set tp1 0 tp2 0 run 1
+    set run 1
+
+    set ntest 0
+    while {! [ctrlcflag]} {
+
+        ;# see what major state we are going to do (range 1..9)
+        set majst [expr {[randbits 4] % 9 + 1}]
+
+        ;# generate random 12-bit value to load into madr
+        set aluq [randbits 12]
+
+        ;# print about the test case
+        incr ntest
+        puts [format "%9d majst=%X   TP4   aluq=%04o oldmadr=%04o" $ntest $majst $aluq $oldmadr]
+
+        ;# set up major state and random number to load
+        pin set majst $majst set aluq $aluq
+
+        ;# make sure console switches all off (so _ldadclk = 1)
+        pin set memacsw 0 swexam 0 swdepos 0 swldad 0
+
+        ;# pulse TP4 to maybe load madr
+        pin set tp4 1
+        set newmadr [pin madr]
+        if {$newmadr != (($majst & 8) ? $oldmadr : $aluq)} {error "madr TP4 mismatch"}
+        pin set tp4 0
+        set oldmadr $newmadr
+
+        ;# set up random number to possibly load into madr via switches
+        set aluq [randbits 12]
+
+        ;# test console switch loading
+        ;# loads for ldad switch in any state
+        ;#           exam switch when already in exam state
+        ;#           depos switch when already in depos state
+        set msdepos [expr {$majst == 8}]
+        set msexam  [expr {$majst == 9}]
+        set swtch   [randbits 2]
+        set swexam  [expr {$swtch == 1}]
+        set swdepos [expr {$swtch == 2}]
+        set swldad  [expr {$swtch == 3}]
+        set ldmaen  [expr {($swexam & $msexam) | ($swdepos & $msdepos) | $swldad}]
+
+        puts [format "          majst=%X swtch=%o aluq=%04o oldmadr=%04o" $majst $swtch $aluq $oldmadr]
+        pin set aluq $aluq swexam $swexam swdepos $swdepos swldad $swldad
+
+        ;# pulse memacsw, it will pulse maload if enabled by ldmaen
+        pin set memacsw 1
+        set newmadr [pin madr]
+        if {$newmadr != ($ldmaen ? $aluq : $oldmadr)} {
+            error [format "majst=%X swtch=%o newmadr=%04o ldmaen=%o aluq=%04o oldmadr=%04o" \
+                $majst $swtch $newmadr $ldmaen $aluq $oldmadr]
+        }
+
+        pin set memacsw 0 swexam 0 swdepos 0 swldad 0
+
+        set oldmadr $newmadr
+    }
+}
+
+# test memory buffer register
+# theoretically tests all conditions where it should and shouldn't load
+proc testmbuf {} {
+
+    ;# get starting mbuf
+    set oldpctr [pin mbuf]
+
+    pin set tp1 0 tp2 0 run 1
+    set run 1
+
+    set ntest 0
+    while {! [ctrlcflag]} {
+
+        ;# see what major state we are going to do (range 1..9)
+        set majst [expr {[randbits 4] % 9 + 1}]
+
+        ;# if doing defer state, load a random address in madr
+        set madr -1
+        if {$majst == 2} {
+            set madr [randbits 12]
+            loadmadr $madr
+        }
+
+        ;# generate random opcode
+        set opcode [randbits 12]
+
+        ;# generate random 12-bit value to load into mbuf
+        set aluq [randbits 12]
+
+        ;# generate random 1-bit link values
+        set brkwrm [randbits 1]
+        set cainc  [randbits 1]
+
+        ;# print about the test case
+        incr ntest
+        puts [format "%9d majst=%X opcode=%04o aluq=%04o" $ntest $majst $opcode $aluq]
+
+        ;# get opcode loaded into IREG and MBUF by doing FETCH TP1
+        pin set majst 1 aluq $opcode inbus $opcode
+        pin set tp1 1
+        set x [pin ireg mbuf]
+        if {[lindex $x 0] != $opcode >> 9} {error "ireg did not load opcode"}
+        if {[lindex $x 1] != $opcode} {error "mbuf did not load opcode"}
+        pin set tp1 0
+
+        ;# set input pins to the random values
+        pin set majst $majst aluq $aluq brkwrm $brkwrm cainc $cainc
+
+        ;# mbuf current has 12-bit opcode in it
+        set oldmbuf $opcode
+
+        ;# see if loading at TP2 is enabled by the state and opcode
+        set irisz   [expr {($opcode & 07000) == 02000}]
+        set irdca   [expr {($opcode & 07000) == 03000}]
+        set irjms   [expr {($opcode & 07000) == 04000}]
+        set msfetch [expr {$majst == 1}]
+        set msdefer [expr {$majst == 2}]
+        set msexec  [expr {$majst == 3}]
+        set mswrdct [expr {$majst == 4}]
+        set mscurad [expr {$majst == 5}]
+        set msbreak [expr {$majst == 6}]
+        set msintak [expr {$majst == 7}]
+        set msdepos [expr {$majst == 8}]
+        set autoinc [expr {($madr >> 3) == 1}]
+        set e48a    [expr {$irisz | $irjms | $irdca}]
+        set e58b    [expr {! ($e48a && $msexec)}]
+        set e92a    [expr {! ($brkwrm && $msbreak)}]
+        set e93c    [expr {! ($cainc && $mscurad)}]
+        set e77c    [expr {! ($msdefer && $autoinc)}]
+        set e96a    [expr {! ($e58b && ! $msintak && ! $mswrdct && ! $msdepos && $e92a && $e93c && $e77c)}]
+
+        ;# don't test loading mbuf in fetch again here so opcode doesn't get messed up
+        if {! $msfetch} {
+            ;# not doing fetch, test TP1 mbuf load for other states
+            pin set tp1 1
+            set newmbuf [pin mbuf]
+            if {$newmbuf != $aluq} {error "mbuf tp1 mismatch"}
+            pin set tp1 0
+            ;# mbuf now has aluq in it
+            set oldmbuf $aluq
+            ;# get new random value for TP2
+            set aluq [randbits 12]
+            pin set aluq $aluq
+        }
+
+        ;# test loading at TP2
+        pin set tp2 1
+        set newmbuf [pin mbuf]
+        if {$newmbuf != ($e96a ? $aluq : $oldmbuf)} {error "mbuf tp2 mismatch"}
+        pin set tp2 0
+    }
+}
+
 # madr loads on posedge maload
 #  inputs:
 #   swexam  : exam switch pressed
