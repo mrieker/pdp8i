@@ -104,6 +104,4 @@ private:
 
 extern Z8IPage z8ipage;
 
-uint32_t randbits (int nbits);
-
 #endif

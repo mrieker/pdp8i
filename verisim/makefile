@@ -1,6 +1,8 @@
 CFLAGS ?= -O2 -Werror
 MACH   := $(shell uname -m)
 GPP    := g++ $(CFLAGS) -std=c++11 -g -Wall
+TCLINC := -I$(shell ../ccode/tclinc.sh)
+TCLLIB := -l$(shell ../ccode/tcllib.sh)
 
 COMMON := bgrep.$(MACH) last16k.$(MACH)
 ARMVxL := $(COMMON) resetmcp.$(MACH) testcon1.$(MACH) testcon1.$(MACH) testconsole.$(MACH) testprocalu.$(MACH) testprocreg.$(MACH) testprocseq.$(MACH) testzturn.$(MACH)
@@ -88,11 +90,17 @@ testprocalu.$(MACH): testprocalu.$(MACH).o testlib.$(MACH).o i2cmaster.$(MACH).o
 testprocalu.$(MACH).o: testprocalu.cc testlib.h testerdefs.h i2cmaster.h veriprocalu.$(MACH)/Vprocalu.h
 	$(GPP) -g -c -o testprocalu.$(MACH).o -Iveriprocalu.$(MACH) -I/usr/share/verilator/include/ testprocalu.cc
 
-testprocreg.$(MACH): testprocreg.$(MACH).o testlib.$(MACH).o i2cmaster.$(MACH).o randbits.$(MACH).o verilated.$(MACH).o veriprocreg.$(MACH)/Vprocreg__ALL.a
-	$(GPP) -g -o testprocreg.$(MACH) testprocreg.$(MACH).o testlib.$(MACH).o i2cmaster.$(MACH).o randbits.$(MACH).o verilated.$(MACH).o veriprocreg.$(MACH)/Vprocreg__ALL.a
+testprocreg.$(MACH): testprocreg.$(MACH).o testlib.$(MACH).o i2cmaster.$(MACH).o randbits.$(MACH).o verilated.$(MACH).o veriprocreg.$(MACH)/Vprocreg__ALL.a tclmain.$(MACH).o ccode_readprompt.$(MACH).o
+	$(GPP) -g -o testprocreg.$(MACH) testprocreg.$(MACH).o testlib.$(MACH).o i2cmaster.$(MACH).o randbits.$(MACH).o verilated.$(MACH).o veriprocreg.$(MACH)/Vprocreg__ALL.a tclmain.$(MACH).o ccode_readprompt.$(MACH).o $(TCLLIB) -lpthread -lreadline
 
 testprocreg.$(MACH).o: testprocreg.cc testlib.h testerdefs.h i2cmaster.h veriprocreg.$(MACH)/Vprocreg.h
-	$(GPP) -g -c -o testprocreg.$(MACH).o -Iveriprocreg.$(MACH) -I/usr/share/verilator/include/ testprocreg.cc
+	$(GPP) -g -c -o testprocreg.$(MACH).o -Iveriprocreg.$(MACH) -I/usr/share/verilator/include/ $(TCLINC) testprocreg.cc
+
+tclmain.$(MACH).o: ../ccode/tclmain.cc
+	$(GPP) -g -c -o tclmain.$(MACH).o $(TCLINC) ../ccode/tclmain.cc
+
+ccode_readprompt.$(MACH).o: ../ccode/readprompt.cc
+	$(GPP) -g -c -o ccode_readprompt.$(MACH).o ../ccode/readprompt.cc
 
 testprocseq.$(MACH): testprocseq.$(MACH).o testlib.$(MACH).o i2cmaster.$(MACH).o randbits.$(MACH).o verilated.$(MACH).o veriprocseq.$(MACH)/Vprocseq__ALL.a
 	$(GPP) -g -o testprocseq.$(MACH) testprocseq.$(MACH).o testlib.$(MACH).o i2cmaster.$(MACH).o randbits.$(MACH).o verilated.$(MACH).o veriprocseq.$(MACH)/Vprocseq__ALL.a
@@ -118,8 +126,8 @@ testlib.$(MACH).o: testlib.cc testlib.h testerdefs.h i2cmaster.h
 i2cmaster.$(MACH).o: i2cmaster.cc i2cmaster.h
 	$(GPP) -g -fPIC -c -o i2cmaster.$(MACH).o i2cmaster.cc
 
-randbits.$(MACH).o: randbits.cc randbits.h
-	$(GPP) -g -fPIC -c -o randbits.$(MACH).o randbits.cc
+randbits.$(MACH).o: ../ccode/randbits.cc ../ccode/randbits.h
+	$(GPP) -g -fPIC -c -o randbits.$(MACH).o ../ccode/randbits.cc
 
 testerdefs.h: ../kicads/tester/tester.kicad_pcb
 	cd ../kicads ; ./testerdefs.sh > $(CURDIR)/testerdefs.h

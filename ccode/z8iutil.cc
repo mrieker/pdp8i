@@ -254,22 +254,3 @@ void Z8IPage::waitint (uint32_t mask)
     }
 #endif
 }
-
-// generate a random number
-uint32_t randbits (int nbits)
-{
-    static uint64_t seed = 0x123456789ABCDEF0ULL;
-
-    uint16_t randval = 0;
-
-    while (-- nbits >= 0) {
-
-        // https://www.xilinx.com/support/documentation/application_notes/xapp052.pdf
-        uint64_t xnor = ~ ((seed >> 63) ^ (seed >> 62) ^ (seed >> 60) ^ (seed >> 59));
-        seed = (seed << 1) | (xnor & 1);
-
-        randval += randval + (seed & 1);
-    }
-
-    return randval;
-}

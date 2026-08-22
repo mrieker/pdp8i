@@ -26,15 +26,16 @@
 #include <signal.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <string.h>
 #include <unistd.h>
 
-#include "randbits.h"
+#include "../ccode/randbits.h"
+#include "../ccode/tclmain.h"
+
 #include "testlib.h"
 #include "Vprocreg.h"
 
 #define mp_memacsw mp__SCTR_4   // J2 P19
-
-#define MAPMPIN(mp) do { vprregbits[mp_##mp] = &vprreg.mp; vprregnames[mp_##mp] = #mp; } while (0)
 
 static int const procreg_impins[] = {
     mp__BRKWRM, mp__BUSINI, mp__CAINC, mp__INBUS_9, mp__INBUS_10, mp__INBUS_11, mp__IOP, mp__IOSKIP, mp__LNKTOG,
@@ -86,6 +87,32 @@ struct ProcReg {
     void cout      (bool v);
     void memacsw   (bool v);
 
+    // - read verilog output pins
+    bool     brkwrm    ();
+    bool     busini    ();
+    bool     cainc     ();
+    uint8_t  inbus1109 ();
+    bool     iop       ();
+    bool     ioskip    ();
+    bool     lnktog    ();
+    uint8_t  majst     ();
+    bool     run       ();
+    bool     swcont    ();
+    bool     swdepos   ();
+    bool     swexam    ();
+    bool     swldad    ();
+    bool     tp1       ();
+    bool     tp2       ();
+    bool     tp3       ();
+    bool     tp4       ();
+    bool     ts1       ();
+    bool     ts2       ();
+    bool     ts3       ();
+    bool     ts4       ();
+    uint16_t aluq      ();
+    bool     cout      ();
+    bool     memacsw   ();
+
     // write verilog registers
     void mbuf  (uint16_t v);
     void madr  (uint16_t v);
@@ -107,23 +134,42 @@ struct ProcReg {
     void init ();
     void genrand ();
     void update ();
+    void updverilog ();
     void printsent ();
     void printrcvd ();
     bool verify ();
 };
 
-static volatile bool ctrlcflag;
+static Tcl_ObjCmdProc cmd_pin;
+static TclFunDef const tclfundefs[] = { { cmd_pin, "pin", "access edge connector pins" }, { NULL, NULL, NULL } };
+
 static ProcReg procreg;
 
 static void sighand (int signum);
+static void printinputs ();
+static void printoutiss ();
+static void printoutsbs ();
 
-int main ()
+
+
+int main (int argc, char **argv)
 {
     setlinebuf (stdout);
 
-    signal (SIGINT, sighand);
-
     procreg.init ();
+
+    if ((argc > 1) && (strcasecmp (argv[1], "-tcl") == 0)) {
+        return tclmain (
+            tclfundefs,
+            argv[0],
+            "testprocreg",
+            NULL,
+            "testprocreg.tcl",
+            0,
+            NULL);
+    }
+
+    signal (SIGINT, sighand);
 
     // reset state of physical board and verilog so they match up
     // registers cleared by busini: acum link brkcyc
@@ -136,84 +182,155 @@ int main ()
     procreg.update ();
 
     // read physical as-is registers then stuff the values into verilog registers
-    procreg.mbuf (getmpins (mps__MBUF) ^ 07777);
-    procreg.madr (getmpins (mps__MADR) ^ 07777);
-    procreg.pctr (getmpins (mps__PCTR) ^ 07777);
-    procreg.ireg (getmpins (mps__IREG) ^ 07777);
-    procreg.bwcov (getmpin (mp__BWCOV) ^ 1);
-    procreg.update ();  // get the verilog registers to soak through to the verilog edge connectors
+    uint16_t inimbuf  = getmpins (mps__MBUF) ^ 07777;
+    uint16_t inimadr  = getmpins (mps__MADR) ^ 07777;
+    uint16_t inipctr  = getmpins (mps__PCTR) ^ 07777;
+    uint8_t  iniireg  = getmpins (mps__IREG) ^ 7;
+    bool     inibwcov = getmpin  (mp__BWCOV) ^ 1;
+
+    printf ("initial mbuf=%04o madr=%04o pctr=%04o ireg=%o bwcov=%o\n", inimbuf, inimadr, inipctr, iniireg, inibwcov);
+
+    procreg.bwcov (inibwcov);
+    procreg.ireg  (iniireg);
+    procreg.madr  (inimadr);
+    procreg.mbuf  (inimbuf);
+    procreg.pctr  (inipctr);
 
     // should all match up now
-    if (! procreg.verify ()) return 0;
+    printinputs ();
+    printoutiss ();
+    if (procreg.verify ()) {
 
-    uint32_t ntest = 0;
-    while (! ctrlcflag) {
-        printf ("ntest=%10u\n", ++ ntest);
+        uint32_t ntest = 0;
+        while (! ctrlcflag) {
+            printf ("ntest=%10u\n", ++ ntest);
 
-        procreg.genrand ();
-        procreg.update ();
+            // maybe some inputs change right after posedge TP4
+            printf ("right after posedge TP4\n");
+            procreg.genrand ();
+            printinputs ();
+            procreg.update ();
 
-        procreg.ts4 (0);
-        procreg.tp4 (0);
-        procreg.ts1 (1);
-        procreg.update ();
-        if (! procreg.verify ()) break;
+            // drop TS4, TP4, raise TS1 then verify
+            printf ("raise TS1\n");
+            procreg.ts4 (0);
+            procreg.tp4 (0);
+            procreg.ts1 (1);
+            printinputs ();
+            procreg.update ();
+            printoutiss ();
+            if (! procreg.verify ()) break;
 
-        procreg.genrand ();
-        procreg.update ();
+            // maybe some inputs change right after posedge TS1
+            printf ("right after posedge TS1\n");
+            procreg.genrand ();
+            printinputs ();
+            procreg.update ();
 
-        procreg.tp1 (1);
-        procreg.update ();
-        if (! procreg.verify ()) break;
+            // raise TP1 then verify
+            printf ("raise TP1\n");
+            procreg.tp1 (1);
+            printinputs ();
+            procreg.update ();
+            printoutiss ();
+            if (! procreg.verify ()) break;
 
-        procreg.genrand ();
-        procreg.update ();
+            // maybe some inputs change right after posedge TP1
+            printf ("right after posedge TP1\n");
+            procreg.genrand ();
+            printinputs ();
+            procreg.update ();
 
-        procreg.ts1 (0);
-        procreg.tp1 (0);
-        procreg.ts2 (1);
-        procreg.update ();
-        if (! procreg.verify ()) break;
+            // drop TS1, TP1, raise TS2 then verify
+            printf ("raise TS2\n");
+            procreg.ts1 (0);
+            procreg.tp1 (0);
+            procreg.ts2 (1);
+            printinputs ();
+            procreg.update ();
+            printoutiss ();
+            if (! procreg.verify ()) break;
 
-        procreg.genrand ();
-        procreg.update ();
+            // maybe some inputs change right after posedge TS2
+            printf ("right after posedge TS2\n");
+            procreg.genrand ();
+            printinputs ();
+            procreg.update ();
 
-        procreg.tp2 (1);
-        procreg.update ();
-        if (! procreg.verify ()) break;
+            // raise TP2 then verify
+            printf ("raise TP2\n");
+            procreg.tp2 (1);
+            printinputs ();
+            procreg.update ();
+            printoutiss ();
+            if (! procreg.verify ()) break;
 
-        procreg.genrand ();
-        procreg.update ();
+            // maybe some inputs change right after posedge TP2
+            printf ("right after posedge TP2\n");
+            procreg.genrand ();
+            printinputs ();
+            procreg.update ();
 
-        procreg.ts2 (0);
-        procreg.tp2 (0);
-        procreg.ts3 (1);
-        procreg.update ();
-        if (! procreg.verify ()) break;
+            // drop TS2, TP2, raise TS3 then verify
+            printf ("raise TS3\n");
+            procreg.ts2 (0);
+            procreg.tp2 (0);
+            procreg.ts3 (1);
+            printinputs ();
+            procreg.update ();
+            printoutiss ();
+            if (! procreg.verify ()) break;
 
-        procreg.genrand ();
-        procreg.update ();
+            // maybe some inputs change right after posedge TS3
+            printf ("right after posedge TS3\n");
+            procreg.genrand ();
+            printinputs ();
+            procreg.update ();
 
-        procreg.tp3 (1);
-        procreg.update ();
-        if (! procreg.verify ()) break;
+            // raise TP3 then verify
+            printf ("raise TP3\n");
+            procreg.tp3 (1);
+            printinputs ();
+            procreg.update ();
+            printoutiss ();
+            if (! procreg.verify ()) break;
 
-        procreg.genrand ();
-        procreg.update ();
+            // maybe some inputs change right after posedge TP3
+            printf ("right after posedge TP3\n");
+            procreg.genrand ();
+            printinputs ();
+            procreg.update ();
 
-        procreg.ts3 (0);
-        procreg.tp3 (0);
-        procreg.ts4 (1);
-        procreg.update ();
-        if (! procreg.verify ()) break;
+            // drop TS3, TP3, raise TS4 then verify
+            printf ("raise TS4\n");
+            procreg.ts3 (0);
+            procreg.tp3 (0);
+            procreg.ts4 (1);
+            printinputs ();
+            procreg.update ();
+            printoutiss ();
+            if (! procreg.verify ()) break;
 
-        procreg.genrand ();
-        procreg.update ();
+            // maybe some inputs change right after posedge TS4
+            printf ("right after posedge TS4\n");
+            procreg.genrand ();
+            printinputs ();
+            procreg.update ();
 
-        procreg.tp4 (1);
-        procreg.update ();
-        if (! procreg.verify ()) break;
+            // raise TP4 then verify
+            printf ("raise TP4\n");
+            procreg.tp4 (1);
+            printinputs ();
+            procreg.update ();
+            printoutiss ();
+            if (! procreg.verify ()) break;
+
+            // majst updates only on posedge TP4
+            procreg.majst (randbits (4));
+        }
     }
+
+    printoutsbs ();
 
     return 0;
 }
@@ -223,6 +340,62 @@ static void sighand (int signum)
     if (ctrlcflag) exit (1);
     ctrlcflag = true;
 }
+
+static void printinputs ()
+{
+    printf ("inputs: brkwrm=%o busini=%o cainc=%o inbus=%o--- iop=%o ioskip=%o lnktog=%o majst=%X run=%o swcont=%o swdepos=%o swexam=%o swldad=%o tp=%o%o%o%o ts=%o%o%o%o aluq=%04o cout=%o memacsw=%o\n",
+        procreg.brkwrm (),
+        procreg.busini (),
+        procreg.cainc (),
+        procreg.inbus1109 (),
+        procreg.iop (),
+        procreg.ioskip (),
+        procreg.lnktog (),
+        procreg.majst (),
+        procreg.run (),
+        procreg.swcont (),
+        procreg.swdepos (),
+        procreg.swexam (),
+        procreg.swldad (),
+        procreg.tp1 (),
+        procreg.tp2 (),
+        procreg.tp3 (),
+        procreg.tp4 (),
+        procreg.ts1 (),
+        procreg.ts2 (),
+        procreg.ts3 (),
+        procreg.ts4 (),
+        procreg.aluq (),
+        procreg.cout (),
+        procreg.memacsw ());
+}
+
+static void printoutiss ()
+{
+    printf ("out is: acum=%04o madr=%04o mbuf=%04o pctr=%04o brkcyc=%o bwcov=%o ireg=%o link=%o\n",
+        getmpins (mps__ACUM) ^ 07777,
+        getmpins (mps__MADR) ^ 07777,
+        getmpins (mps__MBUF) ^ 07777,
+        getmpins (mps__PCTR) ^ 07777,
+        getmpin (mp__BRKCYC) ^ 1,
+        getmpin (mp__BWCOV) ^ 1,
+        getmpins (mps__IREG) ^ 7,
+        getmpin (mp__LINK) ^ 1);
+}
+
+static void printoutsbs ()
+{
+    printf ("out sb: acum=%04o madr=%04o mbuf=%04o pctr=%04o brkcyc=%o bwcov=%o ireg=%o link=%o\n",
+        procreg.acum (),
+        procreg.madr (),
+        procreg.mbuf (),
+        procreg.pctr (),
+        procreg.brkcyc (),
+        procreg.bwcov (),
+        procreg.ireg (),
+        procreg.link ());
+}
+
 
 
 ProcReg::ProcReg ()
@@ -232,6 +405,8 @@ ProcReg::ProcReg ()
 
     memset (vprregbits,  0, sizeof vprregbits);
     memset (vprregnames, 0, sizeof vprregnames);
+
+    // procreg module input pins
 
 #define MAPMPIN(mp) do { vprregbits[mp_##mp] = &vprreg.mp; vprregnames[mp_##mp] = #mp; } while (0)
 
@@ -276,60 +451,64 @@ ProcReg::ProcReg ()
     MAPMPIN (cout);
     MAPMPIN (memacsw);
 
-    MAPMPIN (_ACUM_0);
-    MAPMPIN (_ACUM_1);
-    MAPMPIN (_ACUM_2);
-    MAPMPIN (_ACUM_3);
-    MAPMPIN (_ACUM_4);
-    MAPMPIN (_ACUM_5);
-    MAPMPIN (_ACUM_6);
-    MAPMPIN (_ACUM_7);
-    MAPMPIN (_ACUM_8);
-    MAPMPIN (_ACUM_9);
-    MAPMPIN (_ACUM_10);
-    MAPMPIN (_ACUM_11);
-    MAPMPIN (_MADR_0);
-    MAPMPIN (_MADR_1);
-    MAPMPIN (_MADR_2);
-    MAPMPIN (_MADR_3);
-    MAPMPIN (_MADR_4);
-    MAPMPIN (_MADR_5);
-    MAPMPIN (_MADR_6);
-    MAPMPIN (_MADR_7);
-    MAPMPIN (_MADR_8);
-    MAPMPIN (_MADR_9);
-    MAPMPIN (_MADR_10);
-    MAPMPIN (_MADR_11);
-    MAPMPIN (_MBUF_0);
-    MAPMPIN (_MBUF_1);
-    MAPMPIN (_MBUF_2);
-    MAPMPIN (_MBUF_3);
-    MAPMPIN (_MBUF_4);
-    MAPMPIN (_MBUF_5);
-    MAPMPIN (_MBUF_6);
-    MAPMPIN (_MBUF_7);
-    MAPMPIN (_MBUF_8);
-    MAPMPIN (_MBUF_9);
-    MAPMPIN (_MBUF_10);
-    MAPMPIN (_MBUF_11);
-    MAPMPIN (_PCTR_0);
-    MAPMPIN (_PCTR_1);
-    MAPMPIN (_PCTR_2);
-    MAPMPIN (_PCTR_3);
-    MAPMPIN (_PCTR_4);
-    MAPMPIN (_PCTR_5);
-    MAPMPIN (_PCTR_6);
-    MAPMPIN (_PCTR_7);
-    MAPMPIN (_PCTR_8);
-    MAPMPIN (_PCTR_9);
-    MAPMPIN (_PCTR_10);
-    MAPMPIN (_PCTR_11);
-    MAPMPIN (_BRKCYC);
-    MAPMPIN (_BWCOV);
-    MAPMPIN (_IREG_9);
-    MAPMPIN (_IREG_10);
-    MAPMPIN (_IREG_11);
-    MAPMPIN (_LINK);
+    // procreg module tristate output pins
+
+#define MAPMPIN_O(mp) do { vprregbits[mp_##mp] = &vprreg.mp##_o; vprregnames[mp_##mp] = #mp; } while (0)
+
+    MAPMPIN_O (_ACUM_0);
+    MAPMPIN_O (_ACUM_1);
+    MAPMPIN_O (_ACUM_2);
+    MAPMPIN_O (_ACUM_3);
+    MAPMPIN_O (_ACUM_4);
+    MAPMPIN_O (_ACUM_5);
+    MAPMPIN_O (_ACUM_6);
+    MAPMPIN_O (_ACUM_7);
+    MAPMPIN_O (_ACUM_8);
+    MAPMPIN_O (_ACUM_9);
+    MAPMPIN_O (_ACUM_10);
+    MAPMPIN_O (_ACUM_11);
+    MAPMPIN_O (_MADR_0);
+    MAPMPIN_O (_MADR_1);
+    MAPMPIN_O (_MADR_2);
+    MAPMPIN_O (_MADR_3);
+    MAPMPIN_O (_MADR_4);
+    MAPMPIN_O (_MADR_5);
+    MAPMPIN_O (_MADR_6);
+    MAPMPIN_O (_MADR_7);
+    MAPMPIN_O (_MADR_8);
+    MAPMPIN_O (_MADR_9);
+    MAPMPIN_O (_MADR_10);
+    MAPMPIN_O (_MADR_11);
+    MAPMPIN_O (_MBUF_0);
+    MAPMPIN_O (_MBUF_1);
+    MAPMPIN_O (_MBUF_2);
+    MAPMPIN_O (_MBUF_3);
+    MAPMPIN_O (_MBUF_4);
+    MAPMPIN_O (_MBUF_5);
+    MAPMPIN_O (_MBUF_6);
+    MAPMPIN_O (_MBUF_7);
+    MAPMPIN_O (_MBUF_8);
+    MAPMPIN_O (_MBUF_9);
+    MAPMPIN_O (_MBUF_10);
+    MAPMPIN_O (_MBUF_11);
+    MAPMPIN_O (_PCTR_0);
+    MAPMPIN_O (_PCTR_1);
+    MAPMPIN_O (_PCTR_2);
+    MAPMPIN_O (_PCTR_3);
+    MAPMPIN_O (_PCTR_4);
+    MAPMPIN_O (_PCTR_5);
+    MAPMPIN_O (_PCTR_6);
+    MAPMPIN_O (_PCTR_7);
+    MAPMPIN_O (_PCTR_8);
+    MAPMPIN_O (_PCTR_9);
+    MAPMPIN_O (_PCTR_10);
+    MAPMPIN_O (_PCTR_11);
+    MAPMPIN_O (_BRKCYC);
+    MAPMPIN_O (_BWCOV);
+    MAPMPIN_O (_IREG_9);
+    MAPMPIN_O (_IREG_10);
+    MAPMPIN_O (_IREG_11);
+    MAPMPIN_O (_LINK);
 
     brkwrm    (0);
     busini    (0);
@@ -374,40 +553,47 @@ void ProcReg::genrand ()
     iop       (randbits  (1));
     ioskip    (randbits  (1));
     lnktog    (randbits  (1));
-    majst     (randbits  (1));
+////    majst     (randbits  (4));
     run       (randbits  (1));
-    swcont    (randbits  (1));
-    swdepos   (randbits  (1));
-    swexam    (randbits  (1));
-    swldad    (randbits  (1));
+////    swcont    (randbits  (1));
+////    swdepos   (randbits  (1));
+////    swexam    (randbits  (1));
+////    swldad    (randbits  (1));
     aluq      (randbits (12));
     cout      (randbits  (1));
-    memacsw   (randbits  (1));
+////    memacsw   (randbits  (1));
 }
 
 // send values to circuit board then retrieve the results
 void ProcReg::update ()
 {
+    // copy input bits from verilog to circuit board inputs
     int mp;
     for (int const *impins = procreg_impins; (mp = *impins) != 0; impins ++) {
         CData *v = vprregbits[mp];
         setmpin (mp, *v);
     }
 
-    // send bits to circuit board
+    // send bits to circuit board so it can process them
     mcpsend ();
 
-    // send random bits to verilog then compute reply
-    // clock it through 500nS of chips-varns.v delays
+    // process those same bits through verilog as well
+    updverilog ();
+
+    // receive bits from circuit board
+    mcprecv ();
+}
+
+// send random bits to verilog then compute reply
+// clock it through 500nS of chips-varns.v delays
+void ProcReg::updverilog ()
+{
     for (int i = 0; i < 100; i ++) {
         vprreg.eval ();
         vprreg.zclock = 1;
         vprreg.eval ();
         vprreg.zclock = 0;
     }
-
-    // receive bits from circuit board
-    mcprecv ();
 }
 
 void ProcReg::printsent ()
@@ -480,70 +666,70 @@ bool ProcReg::verify ()
 void ProcReg::mbuf  (uint16_t v)
 {
     aluq (v);       // set flipflop data inputs
-    vprreg.eval ();
+    updverilog ();
     tp1 (1);        // MBUF clocks on all TP1s
-    vprreg.eval ();
+    updverilog ();
     aluq (0);       // restore input pins 0
     tp1 (0);
-    vprreg.eval ();
+    updverilog ();
 
-    if (mbuf () != v) abort ();
+    if (mbuf () != v) ABORT ();
 }
 
 void ProcReg::madr  (uint16_t v)
 {
     aluq (v);       // set flipflop inputs
-    vprreg.eval ();
+    updverilog ();
     tp4 (1);        // MADR clocks on TP4 with MAJST<3> = 0
-    vprreg.eval ();
+    updverilog ();
     aluq (0);       // restore input pins 0
     tp4 (0);
-    vprreg.eval ();
+    updverilog ();
 
-    if (madr () != v) abort ();
+    if (madr () != v) ABORT ();
 }
 
 void ProcReg::pctr  (uint16_t v)
 {
     aluq (v);       // set flipflop inputs
-    vprreg.eval ();
+    updverilog ();
     tp3 (1);        // PCTR clock on TP3 with RUN = 0
-    vprreg.eval ();
+    updverilog ();
     aluq (0);       // restore input pins 0
     tp3 (0);
-    vprreg.eval ();
+    updverilog ();
 
-    if (pctr () != v) abort ();
+    if (pctr () != v) ABORT ();
 }
 
 void ProcReg::ireg  (uint8_t  v)
 {
     inbus1109 (v);  // set flipflop inputs
     majst (1);      // set MAJST = FETCH
-    vprreg.eval ();
+    updverilog ();
     tp1 (1);        // IREG clocks on TP1 with MAJST = FETCH
-    vprreg.eval ();
+    updverilog ();
     inbus1109 (0);  // restore input pins 0
     majst (0);
     tp1 (0);
-    vprreg.eval ();
+    updverilog ();
 
-    if (ireg () != v) abort ();
+    if (ireg () != v) ABORT ();
 }
 
 void ProcReg::bwcov (bool     v)
 {
     cout (v);       // set flipflop input
     majst (3);      // set MAJST = EXEC
-    vprreg.eval ();
+    updverilog ();
     tp2 (1);        // BWCOV clocks on TP2 with MAJST = EXEC or WRDCT
-    vprreg.eval ();
-    inbus1109 (0);  // restore input pins 0
+    updverilog ();
+    cout (0);       // restore input pins 0
     majst (0);
     tp2 (0);
-    vprreg.eval ();
+    updverilog ();
 
-    if (bwcov () != v) abort ();
+    if (bwcov () != v) ABORT ();
 }
 
 // write verilog input pins
@@ -598,78 +784,311 @@ void ProcReg::aluq      (uint16_t v)
     vprreg.aluq_11 = (v >> 11) & 1;
 }
 
+bool ProcReg::brkwrm    () { return ! vprreg._BRKWRM;  }
+bool ProcReg::busini    () { return ! vprreg._BUSINI;  }
+bool ProcReg::cainc     () { return ! vprreg._CAINC;   }
+bool ProcReg::iop       () { return ! vprreg._IOP;     }
+bool ProcReg::ioskip    () { return ! vprreg._IOSKIP;  }
+bool ProcReg::lnktog    () { return ! vprreg._LNKTOG;  }
+bool ProcReg::run       () { return ! vprreg._RUN;     }
+bool ProcReg::swcont    () { return ! vprreg._SWCONT;  }
+bool ProcReg::swdepos   () { return ! vprreg._SWDEPOS; }
+bool ProcReg::swexam    () { return ! vprreg._SWEXAM;  }
+bool ProcReg::swldad    () { return ! vprreg._SWLDAD;  }
+bool ProcReg::tp1       () { return ! vprreg._TP1;     }
+bool ProcReg::tp2       () { return ! vprreg._TP2;     }
+bool ProcReg::tp3       () { return ! vprreg._TP3;     }
+bool ProcReg::tp4       () { return ! vprreg._TP4;     }
+bool ProcReg::ts1       () { return ! vprreg._TS1;     }
+bool ProcReg::ts2       () { return ! vprreg._TS2;     }
+bool ProcReg::ts3       () { return ! vprreg._TS3;     }
+bool ProcReg::ts4       () { return ! vprreg._TS4;     }
+bool ProcReg::cout      () { return   vprreg.cout;     }
+bool ProcReg::memacsw   () { return   vprreg.memacsw;  }
+
+uint8_t ProcReg::inbus1109 ()
+{
+    return
+        (vprreg._INBUS_9  ? 0 : 1) |
+        (vprreg._INBUS_10 ? 0 : 2) |
+        (vprreg._INBUS_11 ? 0 : 4);
+}
+uint8_t ProcReg::majst ()
+{
+    return
+        (vprreg._MAJST_0  ? 0 : 1) |
+        (vprreg._MAJST_1  ? 0 : 2) |
+        (vprreg._MAJST_2  ? 0 : 4) |
+        (vprreg._MAJST_3  ? 0 : 8);
+}
+uint16_t ProcReg::aluq ()
+{
+    return
+        (vprreg.aluq_0  ? 00001 : 0) |
+        (vprreg.aluq_1  ? 00002 : 0) |
+        (vprreg.aluq_2  ? 00004 : 0) |
+        (vprreg.aluq_3  ? 00010 : 0) |
+        (vprreg.aluq_4  ? 00020 : 0) |
+        (vprreg.aluq_5  ? 00040 : 0) |
+        (vprreg.aluq_6  ? 00100 : 0) |
+        (vprreg.aluq_7  ? 00200 : 0) |
+        (vprreg.aluq_8  ? 00400 : 0) |
+        (vprreg.aluq_9  ? 01000 : 0) |
+        (vprreg.aluq_10 ? 02000 : 0) |
+        (vprreg.aluq_11 ? 04000 : 0);
+}
+
 // read verilog output pins
 uint16_t ProcReg::acum   ()
 {
     return
-        (((uint16_t) vprreg._ACUM_11 << 11) |
-         ((uint16_t) vprreg._ACUM_10 << 10) |
-         ((uint16_t) vprreg._ACUM_9  <<  9) |
-         ((uint16_t) vprreg._ACUM_8  <<  8) |
-         ((uint16_t) vprreg._ACUM_7  <<  7) |
-         ((uint16_t) vprreg._ACUM_6  <<  6) |
-         ((uint16_t) vprreg._ACUM_5  <<  5) |
-         ((uint16_t) vprreg._ACUM_4  <<  4) |
-         ((uint16_t) vprreg._ACUM_3  <<  3) |
-         ((uint16_t) vprreg._ACUM_2  <<  2) |
-         ((uint16_t) vprreg._ACUM_1  <<  1) |
-         ((uint16_t) vprreg._ACUM_0  <<  0)) ^ 07777;
+        (((uint16_t) vprreg._ACUM_11_o << 11) |
+         ((uint16_t) vprreg._ACUM_10_o << 10) |
+         ((uint16_t) vprreg._ACUM_9_o  <<  9) |
+         ((uint16_t) vprreg._ACUM_8_o  <<  8) |
+         ((uint16_t) vprreg._ACUM_7_o  <<  7) |
+         ((uint16_t) vprreg._ACUM_6_o  <<  6) |
+         ((uint16_t) vprreg._ACUM_5_o  <<  5) |
+         ((uint16_t) vprreg._ACUM_4_o  <<  4) |
+         ((uint16_t) vprreg._ACUM_3_o  <<  3) |
+         ((uint16_t) vprreg._ACUM_2_o  <<  2) |
+         ((uint16_t) vprreg._ACUM_1_o  <<  1) |
+         ((uint16_t) vprreg._ACUM_0_o  <<  0)) ^ 07777;
 }
 uint16_t ProcReg::madr   ()
 {
     return
-        (((uint16_t) vprreg._MADR_11 << 11) |
-         ((uint16_t) vprreg._MADR_10 << 10) |
-         ((uint16_t) vprreg._MADR_9  <<  9) |
-         ((uint16_t) vprreg._MADR_8  <<  8) |
-         ((uint16_t) vprreg._MADR_7  <<  7) |
-         ((uint16_t) vprreg._MADR_6  <<  6) |
-         ((uint16_t) vprreg._MADR_5  <<  5) |
-         ((uint16_t) vprreg._MADR_4  <<  4) |
-         ((uint16_t) vprreg._MADR_3  <<  3) |
-         ((uint16_t) vprreg._MADR_2  <<  2) |
-         ((uint16_t) vprreg._MADR_1  <<  1) |
-         ((uint16_t) vprreg._MADR_0  <<  0)) ^ 07777;
+        (((uint16_t) vprreg._MADR_11_o << 11) |
+         ((uint16_t) vprreg._MADR_10_o << 10) |
+         ((uint16_t) vprreg._MADR_9_o  <<  9) |
+         ((uint16_t) vprreg._MADR_8_o  <<  8) |
+         ((uint16_t) vprreg._MADR_7_o  <<  7) |
+         ((uint16_t) vprreg._MADR_6_o  <<  6) |
+         ((uint16_t) vprreg._MADR_5_o  <<  5) |
+         ((uint16_t) vprreg._MADR_4_o  <<  4) |
+         ((uint16_t) vprreg._MADR_3_o  <<  3) |
+         ((uint16_t) vprreg._MADR_2_o  <<  2) |
+         ((uint16_t) vprreg._MADR_1_o  <<  1) |
+         ((uint16_t) vprreg._MADR_0_o  <<  0)) ^ 07777;
 }
 uint16_t ProcReg::mbuf   ()
 {
     return
-        (((uint16_t) vprreg._MBUF_11 << 11) |
-         ((uint16_t) vprreg._MBUF_10 << 10) |
-         ((uint16_t) vprreg._MBUF_9  <<  9) |
-         ((uint16_t) vprreg._MBUF_8  <<  8) |
-         ((uint16_t) vprreg._MBUF_7  <<  7) |
-         ((uint16_t) vprreg._MBUF_6  <<  6) |
-         ((uint16_t) vprreg._MBUF_5  <<  5) |
-         ((uint16_t) vprreg._MBUF_4  <<  4) |
-         ((uint16_t) vprreg._MBUF_3  <<  3) |
-         ((uint16_t) vprreg._MBUF_2  <<  2) |
-         ((uint16_t) vprreg._MBUF_1  <<  1) |
-         ((uint16_t) vprreg._MBUF_0  <<  0)) ^ 07777;
+        (((uint16_t) vprreg._MBUF_11_o << 11) |
+         ((uint16_t) vprreg._MBUF_10_o << 10) |
+         ((uint16_t) vprreg._MBUF_9_o  <<  9) |
+         ((uint16_t) vprreg._MBUF_8_o  <<  8) |
+         ((uint16_t) vprreg._MBUF_7_o  <<  7) |
+         ((uint16_t) vprreg._MBUF_6_o  <<  6) |
+         ((uint16_t) vprreg._MBUF_5_o  <<  5) |
+         ((uint16_t) vprreg._MBUF_4_o  <<  4) |
+         ((uint16_t) vprreg._MBUF_3_o  <<  3) |
+         ((uint16_t) vprreg._MBUF_2_o  <<  2) |
+         ((uint16_t) vprreg._MBUF_1_o  <<  1) |
+         ((uint16_t) vprreg._MBUF_0_o  <<  0)) ^ 07777;
 }
 uint16_t ProcReg::pctr   ()
 {
     return
-        (((uint16_t) vprreg._PCTR_11 << 11) |
-         ((uint16_t) vprreg._PCTR_10 << 10) |
-         ((uint16_t) vprreg._PCTR_9  <<  9) |
-         ((uint16_t) vprreg._PCTR_8  <<  8) |
-         ((uint16_t) vprreg._PCTR_7  <<  7) |
-         ((uint16_t) vprreg._PCTR_6  <<  6) |
-         ((uint16_t) vprreg._PCTR_5  <<  5) |
-         ((uint16_t) vprreg._PCTR_4  <<  4) |
-         ((uint16_t) vprreg._PCTR_3  <<  3) |
-         ((uint16_t) vprreg._PCTR_2  <<  2) |
-         ((uint16_t) vprreg._PCTR_1  <<  1) |
-         ((uint16_t) vprreg._PCTR_0  <<  0)) ^ 07777;
+        (((uint16_t) vprreg._PCTR_11_o << 11) |
+         ((uint16_t) vprreg._PCTR_10_o << 10) |
+         ((uint16_t) vprreg._PCTR_9_o  <<  9) |
+         ((uint16_t) vprreg._PCTR_8_o  <<  8) |
+         ((uint16_t) vprreg._PCTR_7_o  <<  7) |
+         ((uint16_t) vprreg._PCTR_6_o  <<  6) |
+         ((uint16_t) vprreg._PCTR_5_o  <<  5) |
+         ((uint16_t) vprreg._PCTR_4_o  <<  4) |
+         ((uint16_t) vprreg._PCTR_3_o  <<  3) |
+         ((uint16_t) vprreg._PCTR_2_o  <<  2) |
+         ((uint16_t) vprreg._PCTR_1_o  <<  1) |
+         ((uint16_t) vprreg._PCTR_0_o  <<  0)) ^ 07777;
 }
-bool     ProcReg::brkcyc () { return ! vprreg._BRKCYC; }
-bool     ProcReg::bwcov  () { return ! vprreg._BWCOV;  }
+bool     ProcReg::brkcyc () { return ! vprreg._BRKCYC_o; }
+bool     ProcReg::bwcov  () { return ! vprreg._BWCOV_o;  }
 uint8_t  ProcReg::ireg   ()
 {
     return
-        (((uint8_t) vprreg._IREG_11 << 2) |
-         ((uint8_t) vprreg._IREG_10 << 1) |
-         ((uint8_t) vprreg._IREG_9  << 0)) ^ 7;
+        (((uint8_t) vprreg._IREG_11_o << 2) |
+         ((uint8_t) vprreg._IREG_10_o << 1) |
+         ((uint8_t) vprreg._IREG_9_o  << 0)) ^ 7;
 }
-bool     ProcReg::link   () { return ! vprreg._LINK;   }
+bool     ProcReg::link   () { return ! vprreg._LINK_o;   }
+
+
+// tcl command to give direct access to tester pins
+
+// pin definitions
+struct PinDef {
+    char name[16];
+    int mpin;
+    bool writ;
+};
+
+struct PinsDef {
+    char name[16];
+    int const *mpins;
+    bool writ;
+};
+
+static PinDef const pindefs[] = {
+    { "_BRKWRM",  mp__BRKWRM,  true  },
+    { "_BUSINI",  mp__BUSINI,  true  },
+    { "_CAINC",   mp__CAINC,   true  },
+    { "_IOP",     mp__IOP,     true  },
+    { "_IOSKIP",  mp__IOSKIP,  true  },
+    { "_LNKTOG",  mp__LNKTOG,  true  },
+    { "_RUN",     mp__RUN,     true  },
+    { "_SWCONT",  mp__SWCONT,  true  },
+    { "_SWDEPOS", mp__SWDEPOS, true  },
+    { "_SWEXAM",  mp__SWEXAM,  true  },
+    { "_SWLDAD",  mp__SWLDAD,  true  },
+    { "_TP1",     mp__TP1,     true  },
+    { "_TP2",     mp__TP2,     true  },
+    { "_TP3",     mp__TP3,     true  },
+    { "_TP4",     mp__TP4,     true  },
+    { "_TS1",     mp__TS1,     true  },
+    { "_TS2",     mp__TS2,     true  },
+    { "_TS3",     mp__TS3,     true  },
+    { "_TS4",     mp__TS4,     true  },
+    { "cout",     mp_cout,     true  },
+    { "memacsw",  mp_memacsw,  true  },
+
+    { "_BRKCYC",  mp__BRKCYC,  false  },
+    { "_BWCOV",   mp__BWCOV,   false  },
+    { "_LINK",    mp__LINK,    false  },
+
+    { "", 0, 0 }
+};
+
+static PinsDef const pinsdefs[] = {
+    { "_INBUS",   mps__INBUS,  true  },
+    { "_MAJST",   mps__MAJST,  true  },
+    { "aluq",     mps_aluq,    true  },
+
+    { "_ACUM",    mps__ACUM,   false  },
+    { "_IREG",    mps__IREG,   false  },
+    { "_MADR",    mps__MADR,   false  },
+    { "_MBUF",    mps__MBUF,   false  },
+    { "_PCTR",    mps__PCTR,   false  },
+
+    { "", NULL, 0 }
+};
+
+static int cmd_pin (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
+{
+    if ((objc == 2) && (strcasecmp (Tcl_GetString (objv[1]), "help") == 0)) {
+        puts ("");
+        puts ("  pin {get pin ...} | {set pin val ...} ...");
+        puts ("    defaults to get");
+        puts ("    get returns integer value");
+        puts ("");
+        return TCL_OK;
+    }
+
+    bool needtorecv = true;
+    bool needtosend = false;
+    bool setmode = false;
+    int ngotvals = 0;
+    Tcl_Obj *gotvals[objc];
+
+    for (int i = 0; ++ i < objc;) {
+        char const *name = Tcl_GetString (objv[i]);
+
+        if (strcasecmp (name, "get") == 0) {
+            setmode = false;
+            continue;
+        }
+        if (strcasecmp (name, "set") == 0) {
+            setmode = true;
+            continue;
+        }
+
+        bool writeable;
+        int const *pinsptr;
+        int singlepin[2];
+
+        int complement = (*name == '_');
+        name += complement;
+
+        // signalname
+        {
+            PinDef const *pte = NULL;
+            PinsDef const *pste = NULL;
+            for (pte = pindefs; pte->name[0] != 0; pte ++) {
+                char const *pn = pte->name;
+                int com = (*pn == '_');
+                pn += com;
+                if (strcasecmp (pn, name) == 0) {
+                    complement ^= com;
+                    writeable = pte->writ;
+                    singlepin[0] = pte->mpin;
+                    singlepin[1] = 0;
+                    pinsptr = singlepin;
+                    goto gotit;
+                }
+            }
+            pte = NULL;
+            for (pste = pinsdefs; pste->name[0] != 0; pste ++) {
+                char const *pn = pste->name;
+                int com = (*pn == '_');
+                pn += com;
+                if (strcasecmp (pn, name) == 0) {
+                    complement ^= com;
+                    writeable = pste->writ;
+                    pinsptr = pste->mpins;
+                    goto gotit;
+                }
+            }
+            Tcl_SetResultF (interp, "bad pin name %s", name);
+            return TCL_ERROR;
+        gotit:;
+        }
+
+        if (setmode) {
+            if (! writeable) {
+                Tcl_SetResultF (interp, "pin %s not settable", name);
+                return TCL_ERROR;
+            }
+            if (++ i >= objc) {
+                Tcl_SetResultF (interp, "missing pin value for set %s", name);
+                return TCL_ERROR;
+            }
+            int val;
+            int rc  = Tcl_GetIntFromObj (interp, objv[i], &val);
+            if (rc != TCL_OK) return rc;
+            if (complement) {
+                for (int j = 0; pinsptr[j] != 0; j ++) val ^= 1 << j;
+            }
+            setmpins (pinsptr, val);
+            needtosend = true;
+        } else {
+            if (needtosend) {
+                mcpsend ();
+                needtosend = false;
+                needtorecv = true;
+            }
+            if (needtorecv) {
+                mcprecv ();
+                needtorecv = false;
+            }
+            int val = getmpins (pinsptr);
+            if (complement) {
+                for (int j = 0; pinsptr[j] != 0; j ++) val ^= 1 << j;
+            }
+            gotvals[ngotvals++] = Tcl_NewIntObj (val);
+        }
+    }
+
+    if (needtosend) {
+        mcpsend ();
+    }
+
+    if (ngotvals > 0) {
+        if (ngotvals < 2) {
+            Tcl_SetObjResult (interp, gotvals[0]);
+        } else {
+            Tcl_SetObjResult (interp, Tcl_NewListObj (ngotvals, gotvals));
+        }
+    }
+    return TCL_OK;
+}

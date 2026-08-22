@@ -13,6 +13,7 @@ LIBOBJS := \
 	cmd_pin.$(MACH).o \
 	disassemble.$(MACH).o \
 	i2czlib.$(MACH).o \
+	randbits.$(MACH).o \
 	readprompt.$(MACH).o \
 	tclmain.$(MACH).o \
 	z8iutil.$(MACH).o

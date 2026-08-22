@@ -34,6 +34,7 @@
 #include <tcl.h>
 #include <unistd.h>
 
+#include "randbits.h"
 #include "readprompt.h"
 #include "tclmain.h"
 
@@ -49,6 +50,7 @@ struct TclExit {
 static Tcl_ObjCmdProc cmd_atexit;
 static Tcl_ObjCmdProc cmd_ctrlcflag;
 static Tcl_ObjCmdProc cmd_help;
+static Tcl_ObjCmdProc cmd_randbits;
 static Tcl_ObjCmdProc cmd_waitpid;
 
 bool volatile ctrlcflag;
@@ -107,6 +109,7 @@ int tclmain (
     if (Tcl_CreateObjCommand (interp, "atexit", cmd_atexit, NULL, NULL) == NULL) ABORT ();
     if (Tcl_CreateObjCommand (interp, "ctrlcflag", cmd_ctrlcflag, NULL, NULL) == NULL) ABORT ();
     if (Tcl_CreateObjCommand (interp, "help", cmd_help, NULL, NULL) == NULL) ABORT ();
+    if (Tcl_CreateObjCommand (interp, "randbits", cmd_randbits, NULL, NULL) == NULL) ABORT ();
     if (Tcl_CreateObjCommand (interp, "waitpid", cmd_waitpid, NULL, NULL) == NULL) ABORT ();
 
     char exedir[1024];
@@ -490,9 +493,10 @@ int cmd_ctrlcflag (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj 
 int cmd_help (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
     puts ("");
-    bool didatexit  = false;
-    bool didctrlc   = false;
-    bool didwaitpid = false;
+    bool didatexit   = false;
+    bool didctrlc    = false;
+    bool didrandbits = false;
+    bool didwaitpid  = false;
     for (TclFunDef const *fd = fundefs; fd->help != NULL; fd ++) {
         if (! didatexit && (strcasecmp (fd->name, "atexitflag") > 0)) {
             printf ("  %10s - %s\n", "atexit", "execute given command on exit");
@@ -501,6 +505,10 @@ int cmd_help (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj *cons
         if (! didctrlc && (strcasecmp (fd->name, "ctrlcflag") > 0)) {
             printf ("  %10s - %s\n", "ctrlcflag", "read and clear control-C flag");
             didctrlc = true;
+        }
+        if (! didrandbits && (strcasecmp (fd->name, "randbits") > 0)) {
+            printf ("  %10s - %s\n", "randbits", "get random bits");
+            didrandbits = true;
         }
         if (! didwaitpid && (strcasecmp (fd->name, "waitpid") > 0)) {
             printf ("  %10s - %s\n", "waitpid", "wait for process to exit");
@@ -514,6 +522,9 @@ int cmd_help (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj *cons
     if (! didctrlc) {
         printf ("  %10s - %s\n", "ctrlcflag", "read and clear control-C flag");
     }
+    if (! didrandbits) {
+        printf ("  %10s - %s\n", "randbits", "get random bits");
+    }
     if (! didwaitpid) {
         printf ("  %10s - %s\n", "waitpid", "wait for process to exit");
     }
@@ -524,6 +535,20 @@ int cmd_help (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj *cons
         puts (inihelp);
     }
     puts ("");
+    return TCL_OK;
+}
+
+int cmd_randbits (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
+{
+    if (objc != 2) {
+        Tcl_SetResultF (interp, "missing nbits");
+        return TCL_ERROR;
+    }
+    int nbits;
+    int rc = Tcl_GetIntFromObj (interp, objv[1], &nbits);
+    if (rc != TCL_OK) return rc;
+    int rands = randbits (nbits);
+    Tcl_SetObjResult (interp, Tcl_NewIntObj (rands));
     return TCL_OK;
 }
 

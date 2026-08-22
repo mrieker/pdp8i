@@ -36,6 +36,7 @@
 
 #include "testlib.h"
 
+#include "../ccode/randbits.h"
 #include "../ccode/z8idefs.h"
 #include "../ccode/z8iutil.h"
 
