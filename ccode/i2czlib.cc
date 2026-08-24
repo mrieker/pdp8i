@@ -115,6 +115,7 @@ void I2CZLib::readpads (Z8IPanel *pads)
     pads->light.ifld   = EXT (fp10, fp10_lbIF);
     pads->light.dfld   = EXT (fp10, fp10_lbDF);
 
+    // buttons: logical OR of physical switch and value sent by writepads()
     pads->button.stop  = EXT (fp11, fp11_swSTOP);
     pads->button.cont  = EXT (fp11, fp11_swCONT);
     pads->button.start = EXT (fp11, fp11_swSTART);
@@ -122,12 +123,15 @@ void I2CZLib::readpads (Z8IPanel *pads)
     pads->button.exam  = EXT (fp11, fp11_swEXAM);
     pads->button.depos = EXT (fp11, fp11_swDEPOS);
 
+    // toggle switch values
     pads->togval.reg   = EXT (fp11, fp11_swREG);
     pads->togval.dfld  = EXT (fp11, fp11_swDFLD);
     pads->togval.ifld  = EXT (fp11, fp11_swIFLD);
     pads->togval.sinst = EXT (fp11, fp11_swSINST);
     pads->togval.sstep = EXT (fp11, fp11_swSSTEP);
 
+    // ovr=0: physical switch
+    //     1: as overidden by writepads()
     pads->togovr.reg   = EXT (fp12, fp11_swREG);
     pads->togovr.dfld  = EXT (fp12, fp11_swDFLD);
     pads->togovr.ifld  = EXT (fp12, fp11_swIFLD);
@@ -158,7 +162,7 @@ void I2CZLib::writepads (Z8IPanel const *pads)
         INS (pads->togovr.reg,  fp11_swREG);
 
     // pdp8ifpi2c.v won't update fpat[11] bits from physical switches what have corresponding fpat[12] bit set
-    // otherwise it will occasionally load fpat[11] bits from physical switches and ignore writes from the arm
+    // otherwise it will periodically load fpat[11] bits from physical switches and ignore writes from the arm
 
     // set up values to be sent out
     fpat[11] =
@@ -189,9 +193,13 @@ void I2CZLib::waitpass ()
         uint32_t nowzrh = pdpat[Z_RH];
         uint32_t nownum = fpat[7] & 0xFFFFFFC0U;
         if (nownum - begnum > 0x200U) break;
-        if (nowzrh - begzrh > 1000000) {        // give it 10mS
-            fprintf (stderr, "I2CZLib::writepads: timed out\n");
-            ABORT ();   // should take ~2.27mS
+        if (nowzrh - begzrh > 3300000) {        // 31.5mS with i2c,ltspeed at slowest
+            if (fpat[5] & FP5_MANUAL) {
+                fprintf (stderr, "I2CZLib::waitpass: fpi2c in manual\n");
+            } else {
+                fprintf (stderr, "I2CZLib::waitpass: timed out\n");
+            }
+            ABORT ();
         }
         usleep (345);
     }

@@ -56,6 +56,7 @@ static bool volatile exitflag;
 static char const *eol = EOL;
 static char stdoutbuf[8000];
 
+static void dump_fp (uint32_t const *fpat);
 static void dump_sh (uint32_t const *shat);
 
 static void siginthand (int signum)
@@ -199,7 +200,9 @@ int main (int argc, char **argv)
                 if (oncemode) printf ("\npagelen=%d\n", pagelen);
                 break;
             }
-            if (((idver >> 24) == 'S') && (((idver >> 16) & 255) == 'H')) {
+            if (((idver >> 24) == 'F') && (((idver >> 16) & 255) == 'P')) {
+                dump_fp (&z8is[i]);
+            } else if (((idver >> 24) == 'S') && (((idver >> 16) & 255) == 'H')) {
                 dump_sh (&z8is[i]);
             } else {
                 if ((idver & 0xF000U) == 0x0000U) {
@@ -231,6 +234,37 @@ int main (int argc, char **argv)
     return 0;
 }
 
+// pdp8ifpi2c.v - front panel via i2c
+static void dump_fp (uint32_t const *fpat)
+{
+    uint32_t fp1  = fpat[1];
+    uint32_t fp2  = fpat[2];
+    uint32_t fp3  = fpat[3];
+    uint32_t fp4  = fpat[4];
+    uint32_t fp5  = fpat[5];
+    uint32_t fp6  = fpat[6];
+    uint32_t fp7  = fpat[7];
+//  uint32_t fp8  = fpat[8];
+//  uint32_t fp9  = fpat[9];
+//  uint32_t fp10 = fpat[10];
+    uint32_t fp11 = fpat[11];
+    uint32_t fp12 = fpat[12];
+    uint32_t fp13 = fpat[13];
+
+    printf ("%sVERSION=%08X FP i2ccmd=%08X%08X i2csts=%08X%08X i2cstate=%o i2ccount=%05u lock=%08X%s",
+        eol, fpat[0], EXT(fp2,FP2_CMDHI), EXT(fp1,FP1_CMDLO), EXT(fp4,FP4_STSHI), EXT(fp3,FP3_STSLO), EXT(fp5,FP5_I2CSTATE), EXT(fp5,FP5_I2CCOUNT), EXT(fp6,FP6_LOCK), eol);
+
+    printf ("                    mcppassno=%06X mcpltrow=%o mcpswrow=%o mcpstate=%02u  dbncount=%02u dbnlimit=%02u%s",
+        EXT(fp7,fp7_mcpassno), EXT(fp7,fp7_mcpltrow), EXT(fp7,fp7_mcpswrow), EXT(fp7,fp7_mcpstate), EXT(fp12,fp12_dbncount), EXT(fp13,fp13_dbnlimit), eol);
+
+    printf ("                    position start=%o ldad=%o depos=%o exam=%o cont=%o stop=%o sstep=%o sinst=%o dfld=%o ifld=%o reg=%04o%s",
+        EXT(fp11,fp11_swSTART), EXT(fp11,fp11_swLDAD), EXT(fp11,fp11_swDEPOS), EXT(fp11,fp11_swEXAM), EXT(fp11,fp11_swCONT), EXT(fp11,fp11_swSTOP), EXT(fp11,fp11_swSSTEP), EXT(fp11,fp11_swSINST), EXT(fp11,fp11_swDFLD), EXT(fp11,fp11_swIFLD), EXT(fp11,fp11_swREG), eol);
+
+    printf ("                    override start=%o ldad=%o depos=%o exam=%o cont=%o stop=%o sstep=%o sinst=%o dfld=%o ifld=%o reg=%04o%s",
+        EXT(fp12,fp11_swSTART), EXT(fp12,fp11_swLDAD), EXT(fp12,fp11_swDEPOS), EXT(fp12,fp11_swEXAM), EXT(fp12,fp11_swCONT), EXT(fp12,fp11_swSTOP), EXT(fp12,fp11_swSSTEP), EXT(fp12,fp11_swSINST), EXT(fp12,fp11_swDFLD), EXT(fp12,fp11_swIFLD), EXT(fp12,fp11_swREG), eol);
+}
+
+// pdp8ishad.v - processor shadowing
 static void dump_sh (uint32_t const *shat)
 {
     static char const *const msstr[] = { "---", "FET", "DEF", "EXE", "WCT", "CAD", "BRK", "IAK",
