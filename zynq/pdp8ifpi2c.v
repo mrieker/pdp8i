@@ -68,7 +68,7 @@ module pdp8ifpi2c (
     reg[5:0] dbncount, dbnlimit;
     wire debounced = (dbncount == dbnlimit);
 
-    assign armrdata = (armraddr ==  0) ? 32'h46503004 : // [31:16] = 'FP'; [15:12] = (log2 nreg) - 1; [11:00] = version
+    assign armrdata = (armraddr ==  0) ? 32'h46503005 : // [31:16] = 'FP'; [15:12] = (log2 nreg) - 1; [11:00] = version
                       (armraddr ==  1) ? { comand[31:00] } :
                       (armraddr ==  2) ? { comand[63:32] } :
                       (armraddr ==  3) ? { status[31:00] } :
@@ -312,7 +312,8 @@ module pdp8ifpi2c (
                             //  0x15 <= row<1:0> ~ swval<05:00>
                             // only changes one iicsel bit (sets iicsel_3) to avoid glitching ldswrows<n>
                             // ...which smoothly drives ldswrow<n> low
-                            command  <= { WR, 8'h40, WR, 8'h14, WR, { 2'b10, ~ switchrows[mcpswrow][05:00] }, WR, { mcpswrow, ~ switchrows[mcpswrow][11:06] }, 24'b0 };
+                            /*repaired console board: command  <= { WR, 8'h40, WR, 8'h14, WR, { 2'b10, ~ switchrows[mcpswrow][05:00] }, WR, { mcpswrow, ~ switchrows[mcpswrow][11:06] }, 24'b0 };*/
+                            /*broken console board:*/ command  <= { WR, 8'h40, WR, 8'h14, WR, { 2'b10,   switchrows[mcpswrow][05:00] }, WR, { mcpswrow,   switchrows[mcpswrow][11:06] }, 24'b0 };
                             startbit <= 1;
                             mcpstate <= 5;
                         end
@@ -368,7 +369,8 @@ module pdp8ifpi2c (
                             // by doing 0x15 <= 2'b10 ~ val<05:00>
                             // driving ldswrow0 high (clocking data into swrow0)
                             //  with side-effect of driving ldswrow2 low
-                            command  <= { WR, 8'h40, WR, 8'h15, WR, { 2'b10, ~ switchrows[mcpswrow][11:06] }, 34'b0 };
+                            /*repaired console board: command  <= { WR, 8'h40, WR, 8'h15, WR, { 2'b10, ~ switchrows[mcpswrow][11:06] }, 34'b0 };*/
+                            /*broken console board:*/ command  <= { WR, 8'h40, WR, 8'h15, WR, { 2'b10,   switchrows[mcpswrow][11:06] }, 34'b0 };
                             startbit <= 1;
                             mcpstate <= 8;
                         end else begin
@@ -376,7 +378,8 @@ module pdp8ifpi2c (
                             // doing swrow 1 or 2, transitioning iicsel from 1001 or 1010 to 1011 won't glitch
                             // drives ldswrow<n> high to clock the data into the flipflops
                             // so do 0x15 <= 2'b11 ~ val<05:00>
-                            command  <= { WR, 8'h40, WR, 8'h15, WR, { 2'b11, ~ switchrows[mcpswrow][11:06] }, 34'b0 };
+                            /*repaired console board: command  <= { WR, 8'h40, WR, 8'h15, WR, { 2'b11, ~ switchrows[mcpswrow][11:06] }, 34'b0 };*/
+                            /*broken console board:*/ command  <= { WR, 8'h40, WR, 8'h15, WR, { 2'b11,   switchrows[mcpswrow][11:06] }, 34'b0 };
                             startbit <= 1;
                             mcpstate <= 7;
                         end
@@ -402,7 +405,8 @@ module pdp8ifpi2c (
                         // ldswrow2 is now low after driving ldswrow0 high
                         // we must clock in proper swrow2 contents before driving ldswrow2 high
                         mcpswrow <= 2;
-                        command  <= { WR, 8'h40, WR, 8'h14, WR, { 2'b10, ~ switchrows[2][05:00] }, WR, { 2'b10, ~ switchrows[2][11:06] }, 24'b0 };
+                        /*repaired console board: command  <= { WR, 8'h40, WR, 8'h14, WR, { 2'b10, ~ switchrows[2][05:00] }, WR, { 2'b10, ~ switchrows[2][11:06] }, 24'b0 };*/
+                        /*broken console board:*/ command  <= { WR, 8'h40, WR, 8'h14, WR, { 2'b10,   switchrows[2][05:00] }, WR, { 2'b10,   switchrows[2][11:06] }, 24'b0 };
                         startbit <= 1;
                         mcpstate <= 6;
                     end
