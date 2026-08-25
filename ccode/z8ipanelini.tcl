@@ -745,6 +745,13 @@ proc rdmem {addr} {
     return [pin ombuf]
 }
 
+# - direct access to externmem within zynq.v
+proc rdextmem {addr} {
+    if {! [pin fpgamemen]} {error "external memory not enabled"}
+    pin set extmemaddr $addr extmemread 1
+    return [pin extmemrdat]
+}
+
 # send character to tty keyboard pipe
 # does not wait for echo
 proc sendchartottykb {ch} {
@@ -896,6 +903,12 @@ proc wrmem {addr data} {
     domemcyc ldad
     setsw reg $data
     domemcyc depos
+}
+
+# - direct access to externmem within zynq.v
+proc wrextmem {addr data} {
+    if {! [pin fpgamemen]} {error "external memory not enabled"}
+    pin set extmemaddr $addr extmemwdat $data extmemwrite 1
 }
 
 # zero block of memory

@@ -131,7 +131,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
 );
 
     // [31:16] = '8I'; [15:12] = (log2 len)-1; [11:00] = version
-    localparam VERSION = 32'h38494001;
+    localparam VERSION = 32'h38494002;
 
     assign ground = 0;
 
@@ -448,6 +448,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
             hdw_poweron_n <= 1;                         // start with 'always on' outputs turned off
 
             arm_iRESET  <= 0;
+            arm_iMEMDIS <= 0;
 
             regctld     <= 9;                           // default 10MHz PDP clock
             simit       <= 0;                           // assume want to access real PDP-8/I by default
@@ -567,7 +568,6 @@ module Zynq #(parameter BIDIRCONSDA=1) (
             arm_iINBUS   <= 0;
             arm_iINTRQST <= 0;
             arm_iIOSKIP  <= 0;
-            arm_iMEMDIS  <= 0;
             arm_iPAUSE   <= 0;
             arm_swCONT   <= 0;
             arm_swDEPOS  <= 0;
@@ -961,6 +961,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
                     else if (~ xmlasttp3 & dev_oTP3) begin
                         extmemaddr  <= { dev_oMEAD, dev_oMADR };
                         extmemwdat  <= dev_oMBUF;
+                        extmemwren  <= 1;
                         extmemstate <= XMS_WRITE1;
                         xmlasttp3   <= 1;
                     end
