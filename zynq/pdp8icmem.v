@@ -63,13 +63,13 @@ module pdp8icmem (
     input busini
 );
 
-    reg ctl3cycl, ctlcainc, ctlbusy, ctlwcovf, ctlwrite;
+    reg ctl3cycl, ctlcainc, ctlbusy, ctlwcovf, ctlwrite, lastcird;
     reg[14:00] ctladdr;
     reg[11:00] ctldata;
     reg[31:00] armlock;
     wire blkgntpass;
 
-    assign armrdata = (armraddr == 0) ? 32'h434D1019 :  // [31:16] = 'CM'; [15:12] = (log2 nreg) - 1; [11:00] = version
+    assign armrdata = (armraddr == 0) ? 32'h434D101A :  // [31:16] = 'CM'; [15:12] = (log2 nreg) - 1; [11:00] = version
                       (armraddr == 1) ? { ctlbusy, ctlwcovf, ctl3cycl, ctlcainc, ctldata, ctlwrite, ctladdr } :
                       (armraddr == 2) ? { 31'b0, brkgnti & blkgntpass } :
                       armlock;
@@ -106,8 +106,9 @@ module pdp8icmem (
 
     always @(posedge CLOCK) begin
         if (RESET) begin
-            armlock <= 0;
-            ctlbusy <= 0;
+            armlock  <= 0;
+            ctlbusy  <= 0;
+            lastcird <= 0;
         end
 
         // arm processor is writing one of the registers
@@ -144,7 +145,14 @@ module pdp8icmem (
                 ctldata <= brkmbuf;
             end
             ctlwcovf <= brkwcovf;
+            lastcird <= 1;
+        end
+
+        // clockinreaddata dropped, clear busy telling arm
+        // we are done and ready for another request
+        else if (lastcird) begin
             ctlbusy  <= 0;
+            lastcird <= 0;
         end
     end
 endmodule
