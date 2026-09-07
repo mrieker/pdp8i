@@ -39,6 +39,16 @@ module dmareq (
     output gatecontrolsout, // gate controls (dmafld, cycle3, cainc, brkwrm) out to bus
     output gatewrdataout);  // gate write data out to bus
 
+    // brkgnti clears at beginning of TP2 as seen by processor
+    // stretch it through to end of TP2
+    reg brkgntistretch, lasttp2;
+    always @(posedge CLOCK) begin
+        if (RESET) brkgntistretch <= 0;
+        else if (brkgnti) brkgntistretch <= 1;
+        else if (lasttp2 & ~ tp2) brkgntistretch <= 0;
+        lasttp2 <= tp2;
+    end
+
     // when idle, pass grant signal from inner boards to outer boards
     // when active, block passing grant signal
     assign brkgnto = brkgnti & ~ blkgntpass;
@@ -51,7 +61,8 @@ module dmareq (
     wire endofbrk = isgranted & brkcyc;
 
     // clock in read data at TP2 of the break cycle
-    assign clockinreaddata = endofbrk & tp2;
+    // make sure this pulse is not just a glitch at TP2 by stretching it throughout TP2
+    assign clockinreaddata = brkrqsto & brkgntistretch & brkcyc & tp2;
 
     // gate control signals out as long as our request is being granted
     assign gatecontrolsout = isgranted;
@@ -82,7 +93,7 @@ module dmareq (
 
             // drop request at TP2 of our break cycle
             // keep blocking outgoing grant until our incoming grant stops
-            if (endofbrk & tp2) begin
+            if (brkgntistretch & brkcyc & tp2) begin
                 brkrqsto <= 0;
             end
 
