@@ -33,6 +33,9 @@ module pdp8ifpi2c (
     input[31:00] armwdata,
     output[31:00] armrdata,
 
+    input run,
+    input majst_3,
+
     output i2cclo,
     input  i2ccli,
     output i2cdao,
@@ -63,8 +66,8 @@ module pdp8ifpi2c (
     wire[14:00] i2ccount;
     wire[63:00] comand, status;
 
-    // start,dep,exam,cont button debounce
-    localparam[11:00] BUTTMASK = 12'b101110000000;
+    // start,ldaddr,dep,exam,cont button debounce
+    localparam[11:00] BUTTMASK = 12'b111110000000;
     reg[5:0] dbncount, dbnlimit;
     wire debounced = (dbncount == dbnlimit);
 
@@ -137,6 +140,9 @@ module pdp8ifpi2c (
         .count (i2ccount));
 
     // status bits read from MCP23017 give 12 bits of data
+    // - status[15:08] = gpio A (lsbs)
+    // - status[07:00] = gpio B (msbs)
+    // lights and switches are active low so provide inverted value in _sts12
     wire[11:00]  sts12 = { status[05:00], status[13:08] };
     wire[11:00] _sts12 = ~ sts12;
 
@@ -427,14 +433,15 @@ module pdp8ifpi2c (
                 // then go on to display next light row
                 11: begin
                     if (status[63:60] == 0) begin
-                        ////$display ("pdp8ifpi2c*: read switch row %o got data %o", mcpswrow, _sts12);
+                        ////$display ("pdp8ifpi2c*: read switch row %o got data %o run=%b majst_3=%b", mcpswrow, _sts12, run, majst_3);
                         if (mcpswrow != 2) begin
                             switchrows[mcpswrow] <= switchovrs[mcpswrow] & switchrows[mcpswrow] |   // overridden, ignore phys switch
                                                   ~ switchovrs[mcpswrow] & _sts12;                  // else save phys switch (active low)
                         end else begin
-                            switchrows[2] <= switchovrs[2] & switchrows[2] |        // overridden, ignore phys switch
-                                           ~ switchovrs[2] & _sts12 & (debounced ? 12'o7777 : ~ BUTTMASK);
-                                                                                    // else save debounced switch (active low)
+                            switchrows[2] <= (run & ~ majst_3 ? ~ BUTTMASK : 12'o7777) &            // ignore any start,ldaddr,dep,exam,cont when running
+                                     (switchovrs[2] & switchrows[2] |                               // stopped, overridden, ignore phys switch
+                                    ~ switchovrs[2] & _sts12 & (debounced ? 12'o7777 : ~ BUTTMASK));
+                                                                                                    // else save debounced switch (active low)
                             if ((_sts12 & BUTTMASK) == 0) begin
                                 dbncount <= 0;                                      // no debounceable button pushed, reset counter
                             end else if (~ debounced) begin
