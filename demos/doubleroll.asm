@@ -2,13 +2,12 @@
 ; roll AC / PC lights
 ; reverse direction every SR'th steps
 
-; ../asm/assemble doubleroll.asm doubleroll.obj > doubleroll.lis
-; ../asm/link -o doubleroll.oct doubleroll.obj > doubleroll.map
+; 'z8ipanel [-sim/-real] doubleroll.tcl' to load and start
 
-; ../driver/raspictl doubleroll.oct                on the tubes
-; ../driver/guiraspictl -csrclib doubleroll.oct    gui simulator
+	hasextar = 0	; 0=no extarith boards installed
+			; 1=has extarith boards installed
 
-	ion  = 06001
+	ion  = 06001	; enable interrupts
 
 	clze = 06130	; (RTC) clear the given enable bits
 	clsk = 06131	; (RTC) skip if requesting interrupt
@@ -127,7 +126,7 @@ __boot:
 	clde
 	cla cll
 	tad	_4001		; put 4001 in AC
-	ion			; enable interruots
+	ion			; enable interrupts
 	jmpi	_4001		; put 4001 in PC
 
 _4001:	.word	04001
@@ -158,6 +157,7 @@ step:	.word	.-.
 	dca	count		; reset count
 stepinc:
 	isz	count		; count < SR, increment
+.if hasextar
 	tad	direc
 	and	_0021
 	iac
@@ -166,6 +166,7 @@ stepinc:
 	dca	.+2
 	scl
 	.word	.-.
+.endif
 	tad	direc		; get direction
 	sma cla
 	jmp	stepup		; pos - pc goes up
@@ -182,7 +183,11 @@ stepup:
 	tad	count		; compute count-switches
 	cma iac			; now switches-count
 stepnext:
+.if hasextar
 	mql			; AC -> MQ; 0 -> AC
+.else
+	cla			; 0 -> AC
+.endif
 	tadi	step
 	dca	steppc
 	isz	step

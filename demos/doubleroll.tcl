@@ -5,7 +5,7 @@
 
 exec -ignorestderr make doubleroll.bin
 hardreset
-set startaddr [loadbinptr doubleroll.bin]
+set startaddr [loadbin doubleroll.bin]
 setsw reg $startaddr
 domemcyc ldad
 setsw reg 0140
