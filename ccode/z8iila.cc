@@ -40,6 +40,7 @@
 #define ILADAT 022
 
 #define CTL_ARMED  0x80000000U
+#define CTL_FREEZE 0x40000000U
 #define CTL_AFTER0 0x00010000U
 #define CTL_INDEX0 0x00000001U
 #define CTL_AFTER  (CTL_AFTER0 * (DEPTH - 1))
@@ -73,7 +74,8 @@ int main (int argc, char **argv)
 
     uint32_t ctl;
     if (asisflag) {
-        ctl = pdpat[ILACTL] & CTL_INDEX;
+        pdpat[ILACTL] = CTL_FREEZE;
+        ctl = pdpat[ILACTL];
     } else {
 
         // tell zynq.v to start collecting samples
@@ -103,14 +105,23 @@ int main (int argc, char **argv)
         if (nodots || (i == 0) || (i == DEPTH - 1) ||
                 (thisentry != preventry) || (thisentry != nextentry)) {
 
-            printf ("%6.2f state=%o wren=%o addr=%05o wdat=%04o rdat=%04o\n",
+            printf ("%6.2f brkcyc=%o brkgnti=%o brkrqst=%o majst=%X ts=%o%o%o%o tp=%o%o%o%o xadr=%05o mbuf=%04o\n",
                 (i - DEPTH + AFTER + 1) / 100.0,        // trigger shows as 0.00uS
 
-                (unsigned) (thisentry >> 40) & 7,       // extmemstate
-                (unsigned) (thisentry >> 39) & 1,       // extmemwren
-                (unsigned) (thisentry >> 24) & 077777,  // extmemaddr
-                (unsigned) (thisentry >> 12) & 07777,   // extmemwdat
-                (unsigned) (thisentry >>  0) & 07777    // extmemrdat
+                (unsigned) (thisentry >> 41) & 1,       // brkcyc
+                (unsigned) (thisentry >> 40) & 1,       // brkgnti
+                (unsigned) (thisentry >> 39) & 1,       // brkrqst
+                (unsigned) (thisentry >> 35) & 15,      // majst
+                (unsigned) (thisentry >> 34) & 1,       // ts1
+                (unsigned) (thisentry >> 33) & 1,
+                (unsigned) (thisentry >> 32) & 1,
+                (unsigned) (thisentry >> 31) & 1,
+                (unsigned) (thisentry >> 30) & 1,       // tp1
+                (unsigned) (thisentry >> 29) & 1,
+                (unsigned) (thisentry >> 28) & 1,
+                (unsigned) (thisentry >> 27) & 1,
+                (unsigned) (thisentry >> 12) & 077777,  // XADR
+                (unsigned) (thisentry >>  0) & 07777    // MBUF
             );
             indotdotdot = false;
         } else if (! indotdotdot) {
