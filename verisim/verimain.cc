@@ -857,34 +857,34 @@ static int cmdpintable (int pincount, Pin const *pintable, Tcl_Interp *interp, i
                     case -1: {  // "swreg"
                         Vbackplane_console *vcon = vbkpl->__PVT__backplane__DOT__conboard;
                         val =
-                            (((vcon->__PVT___swreg_11 & 1) << 11) |
-                             ((vcon->__PVT___swreg_10 & 1) << 10) |
-                             ((vcon->__PVT___swreg_9  & 1) <<  9) |
-                             ((vcon->__PVT___swreg_8  & 1) <<  8) |
-                             ((vcon->__PVT___swreg_7  & 1) <<  7) |
-                             ((vcon->__PVT___swreg_6  & 1) <<  6) |
-                             ((vcon->__PVT___swreg_5  & 1) <<  5) |
-                             ((vcon->__PVT___swreg_4  & 1) <<  4) |
-                             ((vcon->__PVT___swreg_3  & 1) <<  3) |
-                             ((vcon->__PVT___swreg_2  & 1) <<  2) |
-                             ((vcon->__PVT___swreg_1  & 1) <<  1) |
-                             ((vcon->__PVT___swreg_0  & 1) <<  0)) ^ 07777;
+                             ((vcon->__PVT__swreg_11 & 1) << 11) |
+                             ((vcon->__PVT__swreg_10 & 1) << 10) |
+                             ((vcon->__PVT__swreg_9  & 1) <<  9) |
+                             ((vcon->__PVT__swreg_8  & 1) <<  8) |
+                             ((vcon->__PVT__swreg_7  & 1) <<  7) |
+                             ((vcon->__PVT__swreg_6  & 1) <<  6) |
+                             ((vcon->__PVT__swreg_5  & 1) <<  5) |
+                             ((vcon->__PVT__swreg_4  & 1) <<  4) |
+                             ((vcon->__PVT__swreg_3  & 1) <<  3) |
+                             ((vcon->__PVT__swreg_2  & 1) <<  2) |
+                             ((vcon->__PVT__swreg_1  & 1) <<  1) |
+                             ((vcon->__PVT__swreg_0  & 1) <<  0);
                         break;
                     }
                     case -2: {  // "swdfld"
                         Vbackplane_console *vcon = vbkpl->__PVT__backplane__DOT__conboard;
                         val =
-                            (((vcon->__PVT___swdfld_2 & 1) << 2) |
-                             ((vcon->__PVT___swdfld_1 & 1) << 1) |
-                             ((vcon->__PVT___swdfld_0 & 1) << 0)) ^ 7;
+                             ((vcon->__PVT__swdfld_2 & 1) << 2) |
+                             ((vcon->__PVT__swdfld_1 & 1) << 1) |
+                             ((vcon->__PVT__swdfld_0 & 1) << 0);
                         break;
                     }
                     case -3: {  // "swifld"
                         Vbackplane_console *vcon = vbkpl->__PVT__backplane__DOT__conboard;
                         val =
-                            (((vcon->__PVT___swifld_2 & 1) << 2) |
-                             ((vcon->__PVT___swifld_1 & 1) << 1) |
-                             ((vcon->__PVT___swifld_0 & 1) << 0)) ^ 7;
+                             ((vcon->__PVT__swifld_2 & 1) << 2) |
+                             ((vcon->__PVT__swifld_1 & 1) << 1) |
+                             ((vcon->__PVT__swifld_0 & 1) << 0);
                         break;
                     }
                     default: ABORT ();

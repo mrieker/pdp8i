@@ -47,36 +47,51 @@ proc getttypr {} {
 }
 
 # reset to power-up state
-set usefpi2c 0
+set usefpi2c 0      ;# 0 = use console.kicad_sch scanners for switches & lights
+                    ;# 1 = use pdp8ifpi2c.v scanners for switches & lights
 proc hardreset {} {
-    global usefpi2c
+    global swrowpends usefpi2c
 
     puts "hardreset: starting"
 
-    ;# power-on reset for 10uS
-    arm set 1 0x4000000                     ;# arm_iRESET = 1
-    clk 100
-    arm set 1 0                             ;# arm_iRESET = 0
+    set fpat [arm find FP]                      ;# find pdp8ifpi2c.v registers
 
-    ;# maybe use pdp8ifpi2c.v to scan panel
-    ;# otherwise console.kicad_sch internal counters scan panel
     if {$usefpi2c} {
-        set fpat [arm find FP]              ;# find pdp8ifpi2c.v registers
-        ;# turn pdp8ifpi2c.v scanning on
-        arm set [expr {$fpat +  5}] 0       ;# fp_manual=0
-        ;# tell it to scan quickly (sim mcp23017 is fast)
-        arm set [expr {$fpat + 13}] 0x3C0F  ;# fp_ltspeed=15; fp_i2cspeed=15
-        ;# wait for state 2 meaning the mcp23017 has received a command,
-        ;#  shutting off console.kicad_sch internal scanners
-        for {set i 0} {true} {incr i} {
-            set fp7 [arm [expr {$fpat + 7}]]
-            if {($fp7 & 15) == 2} break     ;# fp_mcpstate==2
-            if {$i > 2000} {                ;# usually takes 914
-                error "pdp8ifpi2c startup timed out"
-            }
+        arm set [expr {$fpat +  5}] 0           ;# fp_manual  = 0 to turn pdp8ifpi2c.v scanning on
+        arm set [expr {$fpat + 12}] 0           ;# switchovrs = 0 all switches off
+        arm set [expr {$fpat + 11}] 0           ;# switchrows = 0
+        arm set [expr {$fpat + 13}] 076017      ;# <31:26> = dbnlimit =  0
+                                                ;# <25:10> = ltspeed  = 31
+                                                ;# <09:00> = i2cspeed = 15
+
+        arm set 1 0x4000000                     ;# arm_iRESET = 1
+        runloop 100
+        arm set 1 0                             ;# arm_iRESET = 0
+
+        for {set i 0} true {incr i} {
             runstep
+            set fp7 [arm [expr {$fpat + 7}]]
+            ;#set mcpstate [expr {($fp7      ) & 15}]
+            ;#set mcpswrow [expr {($fp7 >>  4) &  3}]
+            ;#set mcpltrow [expr {($fp7 >>  6) &  7}]
+            set mcpassno [expr {($fp7 >>  9)}]
+            if {$mcpassno >= 2} break
+            if {$i > 10000} {
+                error "pdp8ifpi2c did not start up"
+            }
         }
+    } else {
+        arm set [expr {$fpat +  5}] 8           ;# fp_manual = 1 to turn pdp8ifpi2c.v scanning off
+        arm set 1 0x4000000                     ;# arm_iRESET = 1
+        runloop 100
+        arm set 1 0                             ;# arm_iRESET = 0
     }
+
+    lset swrowpends 2 0                         ;# queue clearing all toggles
+    swtchwait sstep 1                           ;# sstep+start just does businit
+    swtchwait start 1                           ;# ...without starting processor
+    swtchwait start 0
+    swtchwait sstep 0
 
     puts "hardreset: finished"
 }
@@ -453,7 +468,7 @@ proc runloop {{n ""}} {
 set lastgpio  0
 proc runstep {} {
     global lastgpio lightrows runquiet
-    global swrowpends
+    global swrowpends usefpi2c
 
     ;# kerchunk the 10MHz clock
     clk
@@ -470,7 +485,12 @@ proc runstep {} {
                 if {~ $g & (0x1000 << $r)} {    ;# if low switch select, send the row contents (active low)
                                                 ;# goes directly into console.kicad_sch flipflops (usefpi2c=0)
                                                 ;# ...or into console.kicad_sch mcp23017 (usefpi2c=1)
-                    gpio [expr {[lindex $swrowpends $r] ^ 07777}]
+                    ;## puts "runstep*: swtchpends $r = [octal [lindex $swrowpends $r]]"
+                    if {$usefpi2c} {
+                        gpio [expr {[lindex $swrowpends $r] ^ 07777}] ;# fixed pdp8ifpi2c.v expects active-low switches
+                    } else {
+                        gpio [lindex $swrowpends $r] ;# broken console.kicad_sch expects active-high switches
+                    }
                 }
             }
         }
@@ -482,6 +502,8 @@ proc runstep {} {
         }
         set lastgpio $g                         ;# save gpio to detect edges
     }
+
+    ;## puts "runstep*: run=[bus orun] swstart=[bus swstart] swldad=[bus swldad] swdepos=[bus swdepos] swexam=[bus swexam] swcont=[bus swcont] swsstep=[bus swsstep] swsinst=[bus swsinst]"
 }
 
 # start processor at the given address
@@ -573,11 +595,11 @@ proc swtch {args} {
 ;# ...including any debounce time
 proc swtchwait {name valu} {
     swtch set $name $valu
-    for {set i 0} {[swtch $name] != $valu} {incr i} {
-        if {$i > 200000} {
-            error "timed out setting sw$name to $valu"
-        }
+    for {set i 0} {[set actual [swtch $name]] != $valu} {incr i} {
         runstep
+        if {$i > 200000} {
+            error "timed out setting sw$name to $valu (is $actual)"
+        }
     }
 }
 

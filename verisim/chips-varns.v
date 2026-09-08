@@ -2312,6 +2312,7 @@ module X74HC4075 (input zclock, zreset,
 
 endmodule
 
+// alliance memory AS7C256C-15PCN
 module XCY7C199 (input zclock, zreset,
     input      p1,   // A5
     input      p2,   // A6
