@@ -39,6 +39,7 @@ proc helpini {} {
     puts "  startat <addr>          - load pc and start at given address"
     puts "  stepit                  - step one cycle then dump"
     puts "  steploop                - step one cycle, dump, then loop on enter key"
+    puts "  ttykbtest               - deposit simple tty keyboard test in memory"
     puts "  ttyprtest               - deposit simple tty printer test in memory"
     puts "  wait                    - wait for CTRLC or STOP"
     puts "  waitforttypr            - wait for prompt string on tty"
@@ -849,7 +850,27 @@ proc steploop {} {
     }
 }
 
-# load a simple tty test program into memory
+# load a simple tty keyboard test program into memory
+proc ttykbtest {} {
+    hardreset
+
+    assem 060 iot 06031 ;# skip if keyboard ready
+    assem 061 jmp 060   ;# repeat if not ready
+    assem 062 and 070   ;# keep top bits only
+    assem 063 tad 071   ;# increment top bits
+    assem 064 dca 072
+    assem 065 iot 06036 ;# read kb char, clear flag
+    assem 066 tad 072   ;# re-insert top bits
+    assem 067 jmp 060
+
+    wrmem 070 07000
+    wrmem 071 01000
+
+    puts "do './z8itty' on another screen"
+    puts "do 'startat 060' to start test then type chars on keyboard"
+}
+
+# load a simple tty printer test program into memory
 proc ttyprtest {} {
     hardreset
     assem 040 tad 060   ;# load 0040 in acum
