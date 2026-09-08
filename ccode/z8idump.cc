@@ -177,8 +177,8 @@ int main (int argc, char **argv)
 
         // zynq.v register dump
         printf ("VERSION=%08X %c%c  %s%s", z8is[0], (char)(z8is[0] >> 24), (char)(z8is[0] >> 16), mode, eol);
-        printf ("  oACUM=%04o    iACCLEAR=%o%c     lbAC=%04o    swCONT=%o     armintena=%08X%s",       FLD(Z_RF,f_oACUM),    FLD(Z_RC,c_dev_iACCLEAR), ioenabd, pads.light.ac,   pads.button.cont,  z8is[ZG_INTENABS], eol);
-        printf ("  oBRKCYC=%o     iBRKGNTO=%o%c     lbMA=%04o    swDEPOS=%o    armintreq=%08X%s",     FLD(Z_RF,f_oBRKCYC),  FLD(Z_RC,c_dev_iBRKGNTO), poweron, pads.light.ma,   pads.button.depos, z8is[ZG_INTFLAGS], eol);
+        printf ("  oACUM=%04o    iACCLEAR=%o%c     lbAC=%04o    swCONT=%o     armintena=%08X%s",  FLD(Z_RF,f_oACUM),    FLD(Z_RC,c_dev_iACCLEAR), ioenabd, pads.light.ac,   pads.button.cont,  z8is[ZG_INTENABS], eol);
+        printf ("  oBRKCYC=%o     iBRKGNTO=%o%c     lbMA=%04o    swDEPOS=%o    armintreq=%08X%s", FLD(Z_RF,f_oBRKCYC),  FLD(Z_RC,c_dev_iBRKGNTO), poweron, pads.light.ma,   pads.button.depos, z8is[ZG_INTFLAGS], eol);
         printf ("  oBRKGNTI=%o    iBRKRQST=%o%c     lbSC=%02o      swDFLD=%o  %s",   FLD(Z_RF,f_oBRKGNTI), FLD(Z_RC,c_dev_iBRKRQST), poweron, pads.light.sc,   pads.togval.dfld,      eol);
         printf ("  oBRKRQST=%o    iBRKWRM=%o%c      lbION=%o      swEXAM=%o  %s",    FLD(Z_RF,f_oBRKRQST), FLD(Z_RC,c_dev_iBRKWRM),  dmagntd, pads.light.ion,  pads.button.exam,      eol);
         printf ("  oBUSINI=%o     iCAINC=%o%c       lbLINK=%o     swIFLD=%o  %s",    FLD(Z_RF,f_oBUSINI),  FLD(Z_RC,c_dev_iCAINC),   dmagntd, pads.light.link, pads.togval.ifld,      eol);
@@ -187,11 +187,11 @@ int main (int argc, char **argv)
         printf ("  oLINK=%o       iINBUS=%04o%c    lbMQ=%04o    swSSTEP=%o %s",      FLD(Z_RF,f_oLINK),    FLD(Z_RC,c_dev_iINBUS),   ioenabd, pads.light.mq,   pads.togval.sstep,     eol);
         printf ("  oMADR=%05o   iINTRQST=%o%c     lbMS=%-5s   swSTART=%o %s",        FLD(Z_RE,e_oMADX),    FLD(Z_RC,c_dev_iINTRQST), poweron, msstr,           pads.button.start,     eol);
         printf ("  oMBUF=%04o    iIOSKIP=%o%c      lbIR=%s     swREG=%04o %s",       FLD(Z_RE,e_oMBUF),    FLD(Z_RC,c_dev_iIOSKIP),  ioenabd, irstr,           pads.togval.reg,       eol);
-        printf ("  oRUN=%o        iPAUSE=%o%c       lbRUN=%o                %s",     FLD(Z_RF,f_oRUN),     FLD(Z_RC,c_dev_iPAUSE),   poweron, pads.light.run,                         eol);
-        printf ("  oTP=%04o      iCLOCK=%o%c       lbPC=%04o    fpgamemen=%o%s",     timepulse,            FLD(Z_RC,c_dev_iCLOCK),   poweron, pads.light.pc,   FLD(Z_RE,e_fpgamemen), eol);
-        printf ("  oTS=%04o      iRESET=%o%c       lbDF=%o       clkratm1=%-2u(%s)%s", timestate,          FLD(Z_RC,c_dev_iRESET),   poweron, pads.light.dfld, clkratm1, clkratstr,   eol);
-        printf ("  oMAJST=%X      iMEMDIS=%o%c      lbEA=%o       memcycctr=%08X%s", FLD(Z_RF,f_oMAJST),   FLD(Z_RC,c_dev_iMEMDIS),  poweron, pads.light.ema,  FLD(Z_RN,n_memcycctr), eol);
-        printf ("                                lbIF=%o       100MHzctr=%08X%s",                                                    pads.light.ifld,          FLD(Z_RH,h_100MHz),    eol);
+        printf ("  oRUN=%o        iPAUSE=%o%c       lbRUN=%o      fpgamemen=%o%s",   FLD(Z_RF,f_oRUN),     FLD(Z_RC,c_dev_iPAUSE),   poweron, pads.light.run,  FLD(Z_RE,e_fpgamemen), eol);
+        printf ("  oTP=%04o      iCLOCK=%o%c       lbPC=%04o    clkratm1=%-2u(%s)%s",timepulse,            FLD(Z_RC,c_dev_iCLOCK),   poweron, pads.light.pc,   clkratm1, clkratstr,   eol);
+        printf ("  oTS=%04o      iRESET=%o%c       lbDF=%o       memcycctr=%08X%s",  timestate,            FLD(Z_RC,c_dev_iRESET),   poweron, pads.light.dfld, FLD(Z_RN,n_memcycctr), eol);
+        printf ("  oMAJST=%X      iMEMDIS=%o%c      lbEA=%o        10MHzctr=%08X%s", FLD(Z_RF,f_oMAJST),   FLD(Z_RC,c_dev_iMEMDIS),  poweron, pads.light.ema,  FLD(Z_RK, k_10MHz),    eol);
+        printf ("                                lbIF=%o       100MHzctr=%08X%s",                                                    pads.light.ifld,          FLD(Z_RH, h_100MHz),   eol);
 
         for (int i = 0; i < pagelen;) {
             uint32_t idver = z8is[i];

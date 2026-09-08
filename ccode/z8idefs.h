@@ -134,6 +134,10 @@
 #define i_extmemrdat   (07777U <<  0)
 #define i_extmemread       (1U << 31)
 
+#define j_loopbakctr   0xFFU
+
+#define k_10MHz        0xFFFFFFFFU  // frequency subject to d_clkratm1
+
 #define n_memcycctr    0xFFFFFFFFU
 
 #define q_ilaarmed     (1U << 31)

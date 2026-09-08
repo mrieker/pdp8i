@@ -110,6 +110,7 @@ static PinDef const pindefs[] = {
     { "extmemread",      DEV_8I, Z_RG, g_extmemread,   true  },
     { "100mhz",          DEV_8I, Z_RH, h_100MHz,       false },
     { "extmemrdat",      DEV_8I, Z_RI, i_extmemrdat,   false },
+    { "10mhz",           DEV_8I, Z_RK, k_10MHz,        false },
     { "memcycctr",       DEV_8I, Z_RN, n_memcycctr,    false },
 
     { "CM_ADDR",         DEV_CM, 1, CM_ADDR,               true  },

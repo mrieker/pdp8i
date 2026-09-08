@@ -830,16 +830,16 @@ static bool delayblk ()
 // the TC08 diagnostics do the I/O instruction to start the I/O THEN write IDCA and IDWC
 static bool delayloop (uint32_t usec)
 {
-    uint32_t tenns  = usec * 100;
-    uint32_t begzrh = pdpat[Z_RH];  // 100MHz (much slower for verilator)
+    uint32_t hundns = usec * 10;
+    uint32_t begzrk = pdpat[Z_RK];  // 10MHz (subject to d_clkratm1, and much slower for verilator)
     while (! exiting) {
 
         // wait
         usleep (usec);
 
         // see if waited long enough
-        uint32_t delta = pdpat[Z_RH] - begzrh;
-        if (delta >= tenns) return false;
+        uint32_t delta = pdpat[Z_RH] - begzrk;
+        if (delta >= hundns) return false;
     }
 
     // tell caller to abort if exiting

@@ -185,14 +185,16 @@ found:;
 //     cm<CM_WCOVF> = wordcount overflow in 3-cycle
 uint32_t Z8IPage::dmacycle (uint32_t cm)
 {
-    ASSERT (h_100MHz == 0xFFFFFFFFU);
+    ASSERT (k_10MHz == 0xFFFFFFFFU);
     cmlock ();
     cmemat[1] = CM_BUSY | cm;
-    uint32_t started = pdpat[Z_RH];
-    while ((cm = cmemat[1]) & CM_BUSY) {
-        uint32_t now = pdpat[Z_RH];
+    uint32_t started = pdpat[Z_RK];
+    while (true) {
+        uint32_t now = pdpat[Z_RK];
+        cm = cmemat[1];
+        if (! (cm & CM_BUSY)) break;
         uint32_t diff = now - started;
-        if (diff > 100000) {    // 1mS
+        if (diff > 10000) {     // 1mS subject to d_clkratm1
             fprintf (stderr, "Z8IPage::dmacycle: cmem controller is stuck %08X - %08X = %08X\n", now, started, diff);
             ABORT ();
         }
