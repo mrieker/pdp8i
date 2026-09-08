@@ -131,7 +131,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
 );
 
     // [31:16] = '8I'; [15:12] = (log2 len)-1; [11:00] = version
-    localparam VERSION = 32'h38494002;
+    localparam VERSION = 32'h38494003;
 
     assign ground = 0;
 
@@ -161,7 +161,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
 
     wire[31:00] regctla, regctlb, regctlc, regctle, regctlf, regctlg, regctli;
     reg[05:00] regctld, clkdiv;
-    reg[31:00] regctlh;
+    reg[31:00] regctlh, regctlk;
     reg[07:00] regctlj;
 
     wire[11:00] sim_oACUM;
@@ -349,7 +349,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     assign saxi_RRESP = 0;  // A3.4.4/A10.3 transfer OK
 
     // our own integrated logic analyzer
-    reg[42:00] ilaarray[4095:0], ilardata;
+    reg[41:00] ilaarray[4095:0], ilardata;
     reg[11:00] ilaafter, ilaindex;
     reg ilaarmed;
 
@@ -364,12 +364,31 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     // 11: 120nS =  8.3MHz
     // 63: 640nS =  1.6MHz
     always @(posedge CLOCK) begin
+
+        // if power on reset
+        // or reached end of 100nS time
+        // or frozen by shadow mismatch ...
         if (~ RESET_N | (clkdiv == regctld[5:0]) | shad_freeze) begin
+
+            // if power on reset, clear 10MHz cycle counter
+            // else if high-to-low 10MHz clock transition, increment counter
+            if (~ RESET_N) regctlk <= 0;
+            else if (dev_iCLOCK & ~ arm_iCLOCK) regctlk <= regctlk + 1;
+
+            // reset 100nS time measure counter
             clkdiv <= 0;
+
+            // normally negates dev_iCLOCK
+            // but if manually clocking (regctld[5:0] == 0), clock via arm_iCLOCK
             dev_iCLOCK <= arm_iCLOCK;
+
         end else begin
-            clkdiv <= clkdiv + 1;
+
+            // if halfway through 100nS period, assert dev_iCLOCK
             if (clkdiv == { 1'b0, regctld[5:1] }) dev_iCLOCK <= 1;
+
+            // count through 100nS period
+            clkdiv <= clkdiv + 1;
         end
     end
 
@@ -393,10 +412,11 @@ module Zynq #(parameter BIDIRCONSDA=1) (
         (readaddr        == 10'b0000001000) ? regctlh    :
         (readaddr        == 10'b0000001001) ? regctli    :
         (readaddr        == 10'b0000001010) ? { 24'b0, regctlj } :
+        (readaddr        == 10'b0000001011) ? regctlk    :
         (readaddr        == 10'b0000001110) ? memcycctr  :
         (readaddr        == 10'b0000010001) ? { ilaarmed, 3'b0, ilaafter, 4'b0, ilaindex } :
         (readaddr        == 10'b0000010010) ? {        ilardata[31:00] } :
-        (readaddr        == 10'b0000010011) ? { 21'b0, ilardata[42:32] } :
+        (readaddr        == 10'b0000010011) ? { 22'b0, ilardata[41:32] } :
         (readaddr        == 10'b0000011010) ? { 1'b0, regarmintena } : // ZG_INTENABS
         (readaddr        == 10'b0000011011) ? zgintflags : // ZG_INTFLAGS
         (readaddr[11:06] ==  6'b000010)     ? fpi2crdata :
@@ -584,6 +604,8 @@ module Zynq #(parameter BIDIRCONSDA=1) (
 
     // regctlj used by testzturn.cc to time turn-around of outgoing signals vs incoming readback
     // requires loopback connectors be plugged in
+    // starts counting when regctla written
+    // counts 10nS cycles until all the loopback signals are looped back (ie, all receiveds match all sents)
     always @(posedge CLOCK) begin
         if (~ RESET_N | armwrite & (writeaddr == 1)) begin
             regctlj <= 0;
@@ -599,22 +621,28 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     //  synchronize signals output by the PDP-8/I  //
     /////////////////////////////////////////////////
 
-    wire hsy_oBRKGNTI, hsy_oBRKRQST, hsy_oBUSINI, hsy_oIOP, hsy_oRUN, hsy_oTP1;
-    wire hsy_oTP2, hsy_oTP3, hsy_oTP4, hsy_oTS1, hsy_oTS2, hsy_oTS3, hsy_oTS4;
+    wire hsy_oBRKGNTI, hsy_oBRKRQST, hsy_oBUSINI, hsy_oIOP, hsy_oRUN;
+    wire hsz_oTP1, hsz_oTP2, hsz_oTP3, hsz_oTP4;
+    wire hsy_oTS1, hsy_oTS2, hsy_oTS3, hsy_oTS4;
 
     synk synkbg (CLOCK, hsy_oBRKGNTI, hdw_oBRKGNTI);
     synk synkbr (CLOCK, hsy_oBRKRQST, hdw_oBRKRQST);
     synk synkbi (CLOCK, hsy_oBUSINI,  hdw_oBUSINI);
     synk synkip (CLOCK, hsy_oIOP,     hdw_oIOP);
     synk synkrn (CLOCK, hsy_oRUN,     hdw_oRUN);
-    synk synkp1 (CLOCK, hsy_oTP1,     hdw_oTP1);
-    synk synkp2 (CLOCK, hsy_oTP2,     hdw_oTP2);
-    synk synkp3 (CLOCK, hsy_oTP3,     hdw_oTP3);
-    synk synkp4 (CLOCK, hsy_oTP4,     hdw_oTP4);
+    synk synkp1 (CLOCK, hsz_oTP1,     hdw_oTP1);
+    synk synkp2 (CLOCK, hsz_oTP2,     hdw_oTP2);
+    synk synkp3 (CLOCK, hsz_oTP3,     hdw_oTP3);
+    synk synkp4 (CLOCK, hsz_oTP4,     hdw_oTP4);
     synk synks1 (CLOCK, hsy_oTS1,     hdw_oTS1);
     synk synks2 (CLOCK, hsy_oTS2,     hdw_oTS2);
     synk synks3 (CLOCK, hsy_oTS3,     hdw_oTS3);
     synk synks4 (CLOCK, hsy_oTS4,     hdw_oTS4);
+
+    wire hsy_oTP1 = hsz_oTP1 & hsy_oTS1;    // hsz_oTP1 can linger on into hsy_oTS2, so gate it with hsy_oTS1
+    wire hsy_oTP2 = hsz_oTP2 & hsy_oTS2;    // likewise ...
+    wire hsy_oTP3 = hsz_oTP3 & hsy_oTS3;
+    wire hsy_oTP4 = hsz_oTP4 & hsy_oTS4;
 
     /////////////////////////////////////////////////////
     //  select between simulated and hardware PDP-8/I  //
@@ -816,6 +844,9 @@ module Zynq #(parameter BIDIRCONSDA=1) (
         lastts3 <= dev_oTS3;
     end
 
+    // jam 0 onto inbus,acclear,ioskip when real processor is doing ION,IOF,WFI instructions
+    wire procio = dev_oIOP & ((dev_oMBUF[8:0] == 9'o001) | (dev_oMBUF[8:0] == 9'o002) | (dev_oMBUF[8:0] == 9'o313));
+
     // internal pio busses - wire-ored (active high) from device to processor
     assign dev_iACCLEAR = arm_iACCLEAR | ttacclr | rkacclr | vcacclr | tcacclr | pracclr | pbacclr | dcacclr | rcacclr | syacclr;
     assign dev_iBRKRQST = arm_iBRKRQST | cmbrkrqst;
@@ -825,7 +856,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     assign dev_iDMAFLD  = arm_iDMAFLD  | cmbrkema;
     assign dev_iINBUS   = arm_iINBUS   | ttinbus | rkinbus | vcinbus | tcinbus | prinbus | pbinbus | dcinbus | rcinbus | syinbus | cmbrkinbus | xminbus;
     assign dev_iINTRQST = arm_iINTRQST | ttintrq | rkintrq | vcintrq | tcintrq | printrq | ppintrq | dcintrq | rcintrq | syintrq;
-    assign dev_iIOSEL   =                ttiosel | rkiosel | vciosel | tciosel | priosel | ppiosel | dciosel | rciosel | syiosel | pbiosel;
+    assign dev_iIOSEL   = procio       | ttiosel | rkiosel | vciosel | tciosel | priosel | ppiosel | dciosel | rciosel | syiosel | pbiosel;
     assign dev_iIOSKIP  = arm_iIOSKIP  | ttioskp | rkioskp | vcioskp | tcioskp | prioskp | ppioskp | dcioskp | rcioskp | syioskp | pbioskp;
     assign dev_iMEMDIS  = arm_iMEMDIS;
     assign dev_iPAUSE   = arm_iPAUSE   | sypause;
@@ -952,14 +983,14 @@ module Zynq #(parameter BIDIRCONSDA=1) (
 
                     // pdp wants to read something
                     if (dev_oTS1) begin
-                        extmemaddr  <= { dev_oMEAD, dev_oMADR };
+                        extmemaddr  <= { 3'o0, dev_oMADR }; // dev_oMEAD
                         extmemstate <= XMS_PDPRD1;
                         xmlasttp3   <= 0;
                     end
 
                     // pdp wants to write something
                     else if (~ xmlasttp3 & dev_oTP3) begin
-                        extmemaddr  <= { dev_oMEAD, dev_oMADR };
+                        extmemaddr  <= { 3'o0, dev_oMADR }; // dev_oMEAD
                         extmemwdat  <= dev_oMBUF;
                         extmemwren  <= 1;
                         extmemstate <= XMS_WRITE1;
@@ -1333,6 +1364,9 @@ module Zynq #(parameter BIDIRCONSDA=1) (
         .armwdata (saxi_WDATA),
         .armrdata (fpi2crdata),
 
+        .run     (dev_oRUN),
+        .majst_3 (dev_oMAJST[3]),
+
         .i2cclo (fpi2c_clock),
         .i2ccli (fpi2c_clock),
         .i2cdao (fpi2c_datao),
@@ -1443,11 +1477,13 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     //  ilaindex = next entry in ilaarray to write
 
     reg lastldad;
+    reg[2:0] sevenzs;
 
     always @(posedge CLOCK) begin
         if (~ RESET_N) begin
             ilaarmed <= 0;
             ilaafter <= 0;
+            sevenzs  <= 0;
         end else begin
 
             if (armwrite & (writeaddr == 10'b0000010001)) begin
@@ -1455,19 +1491,31 @@ module Zynq #(parameter BIDIRCONSDA=1) (
                 // arm processor is writing control register
                 ilaarmed <= saxi_WDATA[31];
                 ilaafter <= saxi_WDATA[27:16];
-                ilaindex <= saxi_WDATA[11:00];
-                ilardata <= ilaarray[saxi_WDATA[11:00]];
+                if (~ saxi_WDATA[30]) begin
+                    ilaindex <= saxi_WDATA[11:00];
+                    ilardata <= ilaarray[saxi_WDATA[11:00]];
+                    sevenzs  <= 0;
+                end
             end else begin
 
                 // capture signals while before trigger and for ilaafter cycles thereafter
-                //if (ilaarmed | (ilaafter != 0)) begin
-                if (extmemstate != 0) begin
+                if (ilaarmed | (ilaafter != 0)) begin
                     ilaarray[ilaindex] <= {
-                        extmemstate,    //40
-                        extmemwren,     //39
-                        extmemaddr,     //24
-                        extmemwdat,     //12
-                        extmemrdat      //00
+                        dev_oBRKCYC,    //41
+                        dev_oBRKGNTI,   //40
+                        dev_iBRKRQST,   //39
+                        dev_oMAJST,     //35
+                        dev_oTS1,       //34
+                        dev_oTS2,       //33
+                        dev_oTS3,       //32
+                        dev_oTS4,       //31
+                        dev_oTP1,       //30
+                        dev_oTP2,       //29
+                        dev_oTP3,       //28
+                        dev_oTP4,       //27
+                        dev_oMEAD,      //24
+                        dev_oMADR,      //12
+                        dev_oMBUF       //00
                     };
 
                     ilaindex <= ilaindex + 1;
@@ -1475,7 +1523,11 @@ module Zynq #(parameter BIDIRCONSDA=1) (
                 end
 
                 // check trigger condition
-                if (sim_run) begin
+                if (dev_oTS1 | dev_oTS2 | dev_oTS3 | dev_oTS4) begin
+                    sevenzs  <= 0;
+                end else if (sevenzs != 7) begin
+                    sevenzs  <= sevenzs + 1;
+                end else begin
                     ilaarmed <= 0;
                 end
             end
