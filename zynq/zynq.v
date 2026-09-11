@@ -131,7 +131,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
 );
 
     // [31:16] = '8I'; [15:12] = (log2 len)-1; [11:00] = version
-    localparam VERSION = 32'h38494003;
+    localparam VERSION = 32'h38494004;
 
     assign ground = 0;
 
@@ -243,7 +243,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     wire        dev_iPAUSE;
     wire        dev_iRESET;
 
-    reg simit, fpgamemen, lastts3, didio;
+    reg simit, fpgamemen, fpgamem4k, lastts3, didio;
     reg arm_dmagntd, arm_ioenabd;
     wire acclr, intrq, ioskp;
     reg[31:00] memcycctr;
@@ -473,6 +473,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
             regctld     <= 9;                           // default 10MHz PDP clock
             simit       <= 0;                           // assume want to access real PDP-8/I by default
             fpgamemen   <= 0;                           // also use the memory on physical memory board
+            fpgamem4k   <= 0;
             arm_dmagntd <= 0;
             arm_ioenabd <= 0;
 
@@ -547,6 +548,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
                                                             // (use arm_iMEMDIS to disable extmemory.kicad_sch 32KW memory)
                         arm_dmagntd  <= saxi_WDATA[02];     // testzturn.cc force dma drivers on
                         arm_ioenabd  <= saxi_WDATA[03];     // testzturn.cc force pio drivers on
+                        fpgamem4k    <= saxi_WDATA[04];     // limit fpgamem to 4K (ignore ext mem addr bits)
                     end
 
                     10'b0000011010: begin
@@ -797,7 +799,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     assign regctle[01]    = fpgamemen;
     assign regctle[02]    = arm_dmagntd;
     assign regctle[03]    = arm_ioenabd;
-    assign regctle[04]    = 0;
+    assign regctle[04]    = fpgamem4k;
     assign regctle[16:05] = dev_oMADR;
     assign regctle[19:17] = dev_oMEAD;
     assign regctle[31:20] = dev_oMBUF;
@@ -963,6 +965,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     );
 
     reg xmlasttp3;
+    wire[15:00] fpgamemad = { fpgamem4k ? 3'o0 : dev_oMEAD, dev_oMADR };
 
     always @(posedge CLOCK) begin
         if (RESET_N & fpgamemen) begin
@@ -983,14 +986,14 @@ module Zynq #(parameter BIDIRCONSDA=1) (
 
                     // pdp wants to read something
                     if (dev_oTS1) begin
-                        extmemaddr  <= { 3'o0, dev_oMADR }; // dev_oMEAD
+                        extmemaddr  <= fpgamemad;
                         extmemstate <= XMS_PDPRD1;
                         xmlasttp3   <= 0;
                     end
 
                     // pdp wants to write something
                     else if (~ xmlasttp3 & dev_oTP3) begin
-                        extmemaddr  <= { 3'o0, dev_oMADR }; // dev_oMEAD
+                        extmemaddr  <= fpgamemad;
                         extmemwdat  <= dev_oMBUF;
                         extmemwren  <= 1;
                         extmemstate <= XMS_WRITE1;
@@ -1040,7 +1043,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
                 XMS_PDPRD1: begin
                     if (dev_oTS1) begin
                         xminbus     <= extmemrdat;
-                        extmemaddr  <= { dev_oMEAD, dev_oMADR };
+                        extmemaddr  <= fpgamemad;
                     end else begin
                         xminbus     <= 0;
                         extmemstate <= XMS_IDLE;

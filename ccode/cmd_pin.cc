@@ -80,6 +80,7 @@ static PinDef const pindefs[] = {
 
     { "simit",           DEV_8I, Z_RE, e_simit,        true  },
     { "fpgamemen",       DEV_8I, Z_RE, e_fpgamemen,    true  },
+    { "fpgamem4k",       DEV_8I, Z_RE, e_fpgamem4k,    true  },
     { "oMADR",           DEV_8I, Z_RE, e_oMADR,        false },
     { "oMEAD",           DEV_8I, Z_RE, e_oMEAD,        false },
     { "oMBUF",           DEV_8I, Z_RE, e_oMBUF,        false },

@@ -100,6 +100,7 @@
 #define e_fpgamemen     (1U <<  1)  //rw enables zynq.v externmem ram (must also set a_arm_iMEMDIS)
 #define e_arm_dmagntd   (1U <<  2)  //rw forces ioenabd drivers on
 #define e_arm_ioenabd   (1U <<  3)  //rw forces dmagntd drivers on
+#define e_fpgamem4k     (1U <<  4)  //rw limit zynq.v externmem to 4K (ignore field, assume it is 0)
 #define e_oMADR     (07777U <<  5)  //ro dev_oMADR
 #define e_oMEAD         (7U << 17)  //ro dev_oMEAD
 #define e_oMBUF     (07777U << 20)  //ro dev_oMBUF
