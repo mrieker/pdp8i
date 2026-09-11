@@ -149,20 +149,6 @@ void I2CZLib::writepads (Z8IPanel const *pads)
     //   if released, resorts to what physical button is
     // - toggles are sent when explicitly enabled
     fpat[12] =
-#if 111
-        // override all physical switches (buttons and toggles)
-        fp11_swSTOP  |
-        fp11_swCONT  |
-        fp11_swSTART |
-        fp11_swLDAD  |
-        fp11_swEXAM  |
-        fp11_swDEPOS |
-        fp11_swSINST |
-        fp11_swSSTEP |
-        fp11_swDFLD  |
-        fp11_swIFLD  |
-        fp11_swREG;
-#else
         (pads->button.stop  ? fp11_swSTOP  : 0) |
         (pads->button.cont  ? fp11_swCONT  : 0) |
         (pads->button.start ? fp11_swSTART : 0) |
@@ -174,7 +160,6 @@ void I2CZLib::writepads (Z8IPanel const *pads)
         INS (pads->togovr.dfld, fp11_swDFLD) |
         INS (pads->togovr.ifld, fp11_swIFLD) |
         INS (pads->togovr.reg,  fp11_swREG);
-#endif
 
     // pdp8ifpi2c.v won't update fpat[11] bits from physical switches what have corresponding fpat[12] bit set
     // otherwise it will periodically load fpat[11] bits from physical switches and ignore writes from the arm
