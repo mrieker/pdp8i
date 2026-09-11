@@ -28,7 +28,7 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#include "randbits.h"
+#include "../ccode/randbits.h"
 #include "testlib.h"
 #include "Vprocalu.h"
 

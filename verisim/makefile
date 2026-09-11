@@ -5,7 +5,7 @@ TCLINC := -I$(shell ../ccode/tclinc.sh)
 TCLLIB := -l$(shell ../ccode/tcllib.sh)
 
 COMMON := bgrep.$(MACH) last16k.$(MACH)
-ARMVxL := $(COMMON) resetmcp.$(MACH) testcon1.$(MACH) testcon1.$(MACH) testconsole.$(MACH) testprocalu.$(MACH) testprocreg.$(MACH) testprocseq.$(MACH) testzturn.$(MACH)
+ARMVxL := $(COMMON) resetmcp.$(MACH) testcon1.$(MACH) testcon1.$(MACH) testconsole.$(MACH) testextmemory.$(MACH) testprocalu.$(MACH) testprocreg.$(MACH) testprocseq.$(MACH) testzturn.$(MACH)
 
 ifeq ($(MACH),armv6l)
 	DEFAULT := $(ARMVxL)
@@ -84,6 +84,12 @@ testconsole.$(MACH): testconsole.$(MACH).o testlib.$(MACH).o i2cmaster.$(MACH).o
 testconsole.$(MACH).o: testconsole.cc testlib.h testerdefs.h i2cmaster.h
 	$(GPP) -g -c -Wno-narrowing -o testconsole.$(MACH).o testconsole.cc
 
+testextmemory.$(MACH): testextmemory.$(MACH).o testlib.$(MACH).o i2cmaster.$(MACH).o randbits.$(MACH).o tclmain.$(MACH).o ccode_readprompt.$(MACH).o
+	$(GPP) -g -o testextmemory.$(MACH) testextmemory.$(MACH).o testlib.$(MACH).o i2cmaster.$(MACH).o randbits.$(MACH).o tclmain.$(MACH).o ccode_readprompt.$(MACH).o $(TCLLIB) -lpthread -lreadline
+
+testextmemory.$(MACH).o: testextmemory.cc testlib.h testerdefs.h i2cmaster.h
+	$(GPP) -g -c -o testextmemory.$(MACH).o $(TCLINC) testextmemory.cc
+
 testprocalu.$(MACH): testprocalu.$(MACH).o testlib.$(MACH).o i2cmaster.$(MACH).o randbits.$(MACH).o verilated.$(MACH).o veriprocalu.$(MACH)/Vprocalu__ALL.a
 	$(GPP) -g -o testprocalu.$(MACH) testprocalu.$(MACH).o testlib.$(MACH).o i2cmaster.$(MACH).o randbits.$(MACH).o verilated.$(MACH).o veriprocalu.$(MACH)/Vprocalu__ALL.a
 
@@ -108,8 +114,8 @@ testprocseq.$(MACH): testprocseq.$(MACH).o testlib.$(MACH).o i2cmaster.$(MACH).o
 testprocseq.$(MACH).o: testprocseq.cc testlib.h testerdefs.h i2cmaster.h veriprocseq.$(MACH)/Vprocseq.h
 	$(GPP) -g -c -o testprocseq.$(MACH).o -Iveriprocseq.$(MACH) -I/usr/share/verilator/include/ testprocseq.cc
 
-testzturn.$(MACH): testzturn.$(MACH).o testlib.$(MACH).o i2cmaster.$(MACH).o ../ccode/z8iutil.$(MACH).o
-	$(GPP) -g -o testzturn.$(MACH) testzturn.$(MACH).o testlib.$(MACH).o i2cmaster.$(MACH).o ../ccode/z8iutil.$(MACH).o
+testzturn.$(MACH): testzturn.$(MACH).o testlib.$(MACH).o i2cmaster.$(MACH).o randbits.$(MACH).o ../ccode/z8iutil.$(MACH).o
+	$(GPP) -g -o testzturn.$(MACH) testzturn.$(MACH).o testlib.$(MACH).o i2cmaster.$(MACH).o randbits.$(MACH).o ../ccode/z8iutil.$(MACH).o
 
 testzturn.$(MACH).o: testzturn.cc testlib.h testerdefs.h i2cmaster.h ../ccode/z8idefs.h ../ccode/z8iutil.h
 	$(GPP) -g -c -o testzturn.$(MACH).o testzturn.cc
