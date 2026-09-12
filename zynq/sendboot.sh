@@ -13,8 +13,13 @@ then
     scp image.ub root@$1:/boot/imagex.ub
     ssh root@$1 mv -f /boot/imagex.ub /boot/image.ub
 fi
-zcat BOOT.BIN.gz | ssh root@$1 dd of=/boot/BOOTX.BIN
-ssh root@$1 mv -f /boot/BOOTX.BIN /boot/BOOT.BIN
+remboot=`ssh root@$1 md5sum /boot/BOOT.BIN`
+lclboot=`zcat BOOT.BIN.gz | md5sum`
+if [ ${remboot:0:32} != ${lclboot:0:32} ]
+then
+    zcat BOOT.BIN.gz | ssh root@$1 dd of=/boot/BOOTX.BIN
+    ssh root@$1 mv -f /boot/BOOTX.BIN /boot/BOOT.BIN
+fi
 set +e
 ssh root@$1 reboot
 ping -c 90 $1

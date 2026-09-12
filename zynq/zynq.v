@@ -349,7 +349,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     assign saxi_RRESP = 0;  // A3.4.4/A10.3 transfer OK
 
     // our own integrated logic analyzer
-    reg[41:00] ilaarray[4095:0], ilardata;
+    reg[59:00] ilaarray[4095:0], ilardata;
     reg[11:00] ilaafter, ilaindex;
     reg ilaarmed;
 
@@ -415,8 +415,8 @@ module Zynq #(parameter BIDIRCONSDA=1) (
         (readaddr        == 10'b0000001011) ? regctlk    :
         (readaddr        == 10'b0000001110) ? memcycctr  :
         (readaddr        == 10'b0000010001) ? { ilaarmed, 3'b0, ilaafter, 4'b0, ilaindex } :
-        (readaddr        == 10'b0000010010) ? {        ilardata[31:00] } :
-        (readaddr        == 10'b0000010011) ? { 22'b0, ilardata[41:32] } :
+        (readaddr        == 10'b0000010010) ? {       ilardata[31:00] } :
+        (readaddr        == 10'b0000010011) ? { 4'b0, ilardata[59:32] } :
         (readaddr        == 10'b0000011010) ? { 1'b0, regarmintena } : // ZG_INTENABS
         (readaddr        == 10'b0000011011) ? zgintflags : // ZG_INTFLAGS
         (readaddr[11:06] ==  6'b000010)     ? fpi2crdata :
@@ -720,7 +720,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
                        dev_iIOSEL  |
                        dev_dmagntd & dev_oTS4 |
                        dev_dmagntd & dev_oBRKCYC & dev_oTS2 |
-                       dev_iMEMDIS & dev_oTS1;
+                       dev_iMEMDIS & dev_oTS1 & fpgamemen;
     assign hdw_ioenabd_n = simit ? 1 : ~ dev_ioenabd;
 
     // when simulating, send signals from the simulated PDP-8/I on to the internal devices
@@ -935,11 +935,10 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     ///////////////////////
 
     // setting arm_iMEMDIS disables the memory chips on the extmemory.kicad_sch board
-    // so this memory fills in for it
-    // allows shadowing to check memory reads,
-    //   as zynq.v cannot read hdw_iINBUS which has the
-    //   extmemory.kicad_sch memory read data during TS1
-    // must set both arm_iMEMDIS and fpgamemen
+    //   so this memory fills in for it provided fpgamemen is set
+    // if no extmemory board present, ifld,dfld lines are floating,
+    //   so can only do low 4K, so must have fpgamem4k turned on
+    // always captures memory writes so shadowing can verify reads
 
     reg[14:00] extmemaddr;
     reg[11:00] extmemwdat;
@@ -957,7 +956,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
 
     blk_mem_gen_1 externmem (
       .clka(CLOCK),         // input wire clka
-      .ena(fpgamemen),      // input wire ena
+      .ena(1),              // input wire ena
       .wea(extmemwren),     // input wire [0 : 0] wea
       .addra(extmemaddr),   // input wire [14 : 0] addra
       .dina(extmemwdat),    // input wire [11 : 0] dina
@@ -968,7 +967,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     wire[15:00] fpgamemad = { fpgamem4k ? 3'o0 : dev_oMEAD, dev_oMADR };
 
     always @(posedge CLOCK) begin
-        if (RESET_N & fpgamemen) begin
+        if (RESET_N) begin
 
             // arm writing regctlg to initiate a read or a write
             if (armwrite & (writeaddr == 7)) begin
@@ -1085,6 +1084,8 @@ module Zynq #(parameter BIDIRCONSDA=1) (
         .armwaddr   (writeaddr[4:2]),
         .armwdata   (saxi_WDATA),
         .armrdata   (shardata),
+
+        .fpgamemen  (fpgamemen),
 
         // all signals coming in from the bus
         .oACUM      (dev_oACUM),
@@ -1504,19 +1505,17 @@ module Zynq #(parameter BIDIRCONSDA=1) (
                 // capture signals while before trigger and for ilaafter cycles thereafter
                 if (ilaarmed | (ilaafter != 0)) begin
                     ilaarray[ilaindex] <= {
-                        dev_oBRKCYC,    //41
-                        dev_oBRKGNTI,   //40
-                        dev_iBRKRQST,   //39
-                        dev_oMAJST,     //35
-                        dev_oTS1,       //34
-                        dev_oTS2,       //33
-                        dev_oTS3,       //32
-                        dev_oTS4,       //31
-                        dev_oTP1,       //30
-                        dev_oTP2,       //29
-                        dev_oTP3,       //28
-                        dev_oTP4,       //27
-                        dev_oMEAD,      //24
+                        extmemrdat,     //48
+                        dev_oMAJST,     //44
+                        dev_oTS1,       //43
+                        dev_oTS2,       //42
+                        dev_oTS3,       //41
+                        dev_oTS4,       //40
+                        dev_oTP1,       //39
+                        dev_oTP2,       //38
+                        dev_oTP3,       //37
+                        dev_oTP4,       //36
+                        dev_oACUM,      //24
                         dev_oMADR,      //12
                         dev_oMBUF       //00
                     };
@@ -1526,11 +1525,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
                 end
 
                 // check trigger condition
-                if (dev_oTS1 | dev_oTS2 | dev_oTS3 | dev_oTS4) begin
-                    sevenzs  <= 0;
-                end else if (sevenzs != 7) begin
-                    sevenzs  <= sevenzs + 1;
-                end else begin
+                if (shad_freeze) begin
                     ilaarmed <= 0;
                 end
             end
