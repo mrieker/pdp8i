@@ -51,7 +51,6 @@ static PinDef const pindefs[] = {
     { "arm_iBRKRQST",    DEV_8I, Z_RA, a_arm_iBRKRQST, true  },
     { "arm_iBRKWRM",     DEV_8I, Z_RA, a_arm_iBRKWRM,  true  },
     { "arm_iCAINC",      DEV_8I, Z_RA, a_arm_iCAINC,   true  },
-    { "arm_iCLOCK",      DEV_8I, Z_RA, a_arm_iCLOCK,   true  },
     { "arm_iCYCLE3",     DEV_8I, Z_RA, a_arm_iCYCLE3,  true  },
     { "arm_iDMAFLD",     DEV_8I, Z_RA, a_arm_iDMAFLD,  true  },
     { "arm_iINBUS",      DEV_8I, Z_RA, a_arm_iINBUS,   true  },
@@ -77,6 +76,7 @@ static PinDef const pindefs[] = {
     { "dev_iRESET",      DEV_8I, Z_RC, c_dev_iRESET,   false },
 
     { "clkratm1",        DEV_8I, Z_RD, d_clkratm1,     true  },
+    { "arm_iCLOCK",      DEV_8I, Z_RD, d_arm_iCLOCK,   true  },
 
     { "simit",           DEV_8I, Z_RE, e_simit,        true  },
     { "fpgamemen",       DEV_8I, Z_RE, e_fpgamemen,    true  },

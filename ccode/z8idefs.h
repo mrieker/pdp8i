@@ -53,7 +53,6 @@
 #define a_arm_iBRKRQST      (1U <<  2)
 #define a_arm_iBRKWRM       (1U <<  3)
 #define a_arm_iCAINC        (1U <<  4)
-#define a_arm_iCLOCK        (1U <<  5)
 #define a_arm_iCYCLE3       (1U <<  6)
 #define a_arm_iDMAFLD       (7U <<  7)
 #define a_arm_iINBUS    (07777U << 10)
@@ -95,6 +94,7 @@
 #define c_dev_ioenabd       (1U << 31)
 
 #define d_clkratm1     (077U << 0)  //rw clock ratio minus 1, eg, 9 for 10MHz = 100MHz / (d_clkratm1 + 1)
+#define d_arm_iCLOCK     (1U << 6)  //rw manual clocking when d_clkratm1 == 0
 
 #define e_simit         (1U <<  0)  //rw 0=real PDP-8/I; 1=pdp8isim.v
 #define e_fpgamemen     (1U <<  1)  //rw enables zynq.v externmem ram (must also set a_arm_iMEMDIS)

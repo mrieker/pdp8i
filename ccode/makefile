@@ -5,8 +5,8 @@ LNKFLG := -lpthread -lreadline -lrt -l$(shell ./tcllib.sh)
 EXECUTEABLES := z8idump.$(MACH) \
 	z8iila.$(MACH) z8ipanel.$(MACH) z8ipbit.$(MACH) \
 	z8iptp.$(MACH) z8iptr.$(MACH) z8irk8je.$(MACH) \
-	z8isys.$(MACH) \
-	z8itc08.$(MACH) z8itty.$(MACH) z8ivc8.$(MACH)
+	z8isys.$(MACH) z8itc08.$(MACH) z8itrace.$(MACH) \
+	z8itty.$(MACH) z8ivc8.$(MACH)
 
 LIBOBJS := \
 	assemble.$(MACH).o \

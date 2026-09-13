@@ -83,7 +83,8 @@ module pdp8ishad (
     input        iPAUSE,   // [poweron] open collector
 
     // stop clocking processor
-    output freeze
+    output freeze,
+    output[11:00] shadowpc
 );
 
     localparam MS_FETCH =  1;       // memory cycle is fetching instruction
@@ -113,6 +114,8 @@ module pdp8ishad (
     reg[4:0] sctr;
     reg[3:0] majst, timestate;
     reg clearit, intendly, intenabd, intinhuj, link, tp1datvalid;
+
+    assign shadowpc = pctr;
 
     // field registers:
     //  <3> = 0: <2:0> = not known to match processor

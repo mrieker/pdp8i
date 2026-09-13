@@ -131,7 +131,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
 );
 
     // [31:16] = '8I'; [15:12] = (log2 len)-1; [11:00] = version
-    localparam VERSION = 32'h38494004;
+    localparam VERSION = 32'h38494005;
 
     assign ground = 0;
 
@@ -160,7 +160,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     //  arm uses dev_o... signals instead of having arm_o... signals
 
     wire[31:00] regctla, regctlb, regctlc, regctle, regctlf, regctlg, regctli;
-    reg[05:00] regctld, clkdiv;
+    reg[05:00] regctld, clkdiv, clkratm1;
     reg[31:00] regctlh, regctlk;
     reg[07:00] regctlj;
 
@@ -368,24 +368,30 @@ module Zynq #(parameter BIDIRCONSDA=1) (
         // if power on reset
         // or reached end of 100nS time
         // or frozen by shadow mismatch ...
-        if (~ RESET_N | (clkdiv == regctld[5:0]) | shad_freeze) begin
+        if (~ RESET_N | (clkdiv == clkratm1) | shad_freeze) begin
 
             // if power on reset, clear 10MHz cycle counter
             // else if high-to-low 10MHz clock transition, increment counter
-            if (~ RESET_N) regctlk <= 0;
-            else if (dev_iCLOCK & ~ arm_iCLOCK) regctlk <= regctlk + 1;
+            if (~ RESET_N) begin
+                regctlk <= 0;
+            end else if (dev_iCLOCK & ~ arm_iCLOCK) begin
+                regctlk <= regctlk + 1;
+            end
 
             // reset 100nS time measure counter
             clkdiv <= 0;
 
+            // maybe get new clock rate from arm
+            clkratm1 <= regctld[05:00];
+
             // normally negates dev_iCLOCK
-            // but if manually clocking (regctld[5:0] == 0), clock via arm_iCLOCK
+            // but if manually clocking (regctld[05:00] == 0), clock via arm_iCLOCK
             dev_iCLOCK <= arm_iCLOCK;
 
         end else begin
 
             // if halfway through 100nS period, assert dev_iCLOCK
-            if (clkdiv == { 1'b0, regctld[5:1] }) dev_iCLOCK <= 1;
+            if (clkdiv == { 1'b0, clkratm1[5:1] }) dev_iCLOCK <= 1;
 
             // count through 100nS period
             clkdiv <= clkdiv + 1;
@@ -405,7 +411,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
         (readaddr        == 10'b0000000001) ? regctla    :
         (readaddr        == 10'b0000000010) ? regctlb    :
         (readaddr        == 10'b0000000011) ? regctlc    :
-        (readaddr        == 10'b0000000100) ? { 20'b0, clkdiv, regctld } :
+        (readaddr        == 10'b0000000100) ? { 25'b0, arm_iCLOCK, regctld } :
         (readaddr        == 10'b0000000101) ? regctle    :
         (readaddr        == 10'b0000000110) ? regctlf    :
         (readaddr        == 10'b0000000111) ? regctlg    :
@@ -467,6 +473,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
 
             hdw_poweron_n <= 1;                         // start with 'always on' outputs turned off
 
+            arm_iCLOCK  <= 0;
             arm_iRESET  <= 0;
             arm_iMEMDIS <= 0;
 
@@ -514,7 +521,6 @@ module Zynq #(parameter BIDIRCONSDA=1) (
                         arm_iBRKRQST <= saxi_WDATA[02];
                         arm_iBRKWRM  <= saxi_WDATA[03];
                         arm_iCAINC   <= saxi_WDATA[04];
-                        arm_iCLOCK   <= saxi_WDATA[05];
                         arm_iCYCLE3  <= saxi_WDATA[06];
                         arm_iDMAFLD  <= saxi_WDATA[09:07];
                         arm_iINBUS   <= saxi_WDATA[21:10];
@@ -539,7 +545,8 @@ module Zynq #(parameter BIDIRCONSDA=1) (
                     end
 
                     10'b0000000100: begin
-                        regctld[05:00] <= saxi_WDATA[05:00];
+                        regctld      <= saxi_WDATA[05:00];
+                        arm_iCLOCK   <= (saxi_WDATA[05:00] == 0) ? saxi_WDATA[06] : 1'b0;
                     end
 
                     10'b0000000101: begin
@@ -753,7 +760,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     assign regctla[02]    = arm_iBRKRQST;
     assign regctla[03]    = arm_iBRKWRM;
     assign regctla[04]    = arm_iCAINC;
-    assign regctla[05]    = arm_iCLOCK;
+    assign regctla[05]    = 0;
     assign regctla[06]    = arm_iCYCLE3;
     assign regctla[09:07] = arm_iDMAFLD;
     assign regctla[21:10] = arm_iINBUS;
@@ -964,7 +971,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     );
 
     reg xmlasttp3;
-    wire[15:00] fpgamemad = { fpgamem4k ? 3'o0 : dev_oMEAD, dev_oMADR };
+    wire[14:00] fpgamemad = { fpgamem4k ? 3'o0 : dev_oMEAD, dev_oMADR };
 
     always @(posedge CLOCK) begin
         if (RESET_N) begin
@@ -1075,6 +1082,8 @@ module Zynq #(parameter BIDIRCONSDA=1) (
 
     // verifies that the processor is doing what it should be doing
 
+    wire[11:00] shadowpc;
+
     pdp8ishad shadinst (
         .CLOCK      (CLOCK),
         .RESET      (~ RESET_N),
@@ -1132,7 +1141,8 @@ module Zynq #(parameter BIDIRCONSDA=1) (
         .iPAUSE     (dev_iPAUSE),
 
         // stop clocking processor
-        .freeze     (shad_freeze)
+        .freeze     (shad_freeze),
+        .shadowpc   (shadowpc)
     );
 
     /////////////////////
@@ -1503,9 +1513,9 @@ module Zynq #(parameter BIDIRCONSDA=1) (
             end else begin
 
                 // capture signals while before trigger and for ilaafter cycles thereafter
-                if (ilaarmed | (ilaafter != 0)) begin
+                if ((ilaarmed | (ilaafter != 0)) & ~ xmlasttp3 & dev_oTP3 & (shadowpc == 12'o7774)) begin
                     ilaarray[ilaindex] <= {
-                        extmemrdat,     //48
+                        shadowpc,       //48
                         dev_oMAJST,     //44
                         dev_oTS1,       //43
                         dev_oTS2,       //42

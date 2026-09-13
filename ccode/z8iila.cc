@@ -105,22 +105,21 @@ int main (int argc, char **argv)
         if (nodots || (i == 0) || (i == DEPTH - 1) ||
                 (thisentry != preventry) || (thisentry != nextentry)) {
 
-            printf ("%6.2f brkcyc=%o brkgnti=%o brkrqst=%o majst=%X ts=%o%o%o%o tp=%o%o%o%o xadr=%05o mbuf=%04o\n",
+            printf ("%6.2f rdat=%04o majst=%X ts=%o%o%o%o tp=%o%o%o%o acum=%04o madr=%04o mbuf=%04o\n",
                 (i - DEPTH + AFTER + 1) / 100.0,        // trigger shows as 0.00uS
 
-                (unsigned) (thisentry >> 41) & 1,       // brkcyc
-                (unsigned) (thisentry >> 40) & 1,       // brkgnti
-                (unsigned) (thisentry >> 39) & 1,       // brkrqst
-                (unsigned) (thisentry >> 35) & 15,      // majst
-                (unsigned) (thisentry >> 34) & 1,       // ts1
-                (unsigned) (thisentry >> 33) & 1,
-                (unsigned) (thisentry >> 32) & 1,
-                (unsigned) (thisentry >> 31) & 1,
-                (unsigned) (thisentry >> 30) & 1,       // tp1
-                (unsigned) (thisentry >> 29) & 1,
-                (unsigned) (thisentry >> 28) & 1,
-                (unsigned) (thisentry >> 27) & 1,
-                (unsigned) (thisentry >> 12) & 077777,  // XADR
+                (unsigned) (thisentry >> 48) & 07777,   // extmemrdat
+                (unsigned) (thisentry >> 44) & 15,      // majst
+                (unsigned) (thisentry >> 43) & 1,       // ts1
+                (unsigned) (thisentry >> 42) & 1,
+                (unsigned) (thisentry >> 41) & 1,
+                (unsigned) (thisentry >> 40) & 1,
+                (unsigned) (thisentry >> 39) & 1,       // tp1
+                (unsigned) (thisentry >> 38) & 1,
+                (unsigned) (thisentry >> 37) & 1,
+                (unsigned) (thisentry >> 36) & 1,
+                (unsigned) (thisentry >> 24) & 07777,   // ACUM
+                (unsigned) (thisentry >> 12) & 07777,   // MADR
                 (unsigned) (thisentry >>  0) & 07777    // MBUF
             );
             indotdotdot = false;

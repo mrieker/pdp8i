@@ -126,12 +126,12 @@ static uint16_t sysioinstr (uint16_t opcode, uint16_t input)
 
                 // clock processor through a 100nS cycle
                 // assume clock has been low for at least 50nS
-                uint32_t ra = pdpat[Z_RA];
-                pdpat[Z_RA] = ra |   a_arm_iCLOCK;      // drive clock high
+                uint32_t rd = pdpat[Z_RD];
+                pdpat[Z_RD] = rd |   d_arm_iCLOCK;      // drive clock high
                 ASSERT (h_100MHz == 0xFFFFFFFFU);
                 uint32_t old100 = pdpat[Z_RH];          // wait at least 50nS
                 while (pdpat[Z_RH] - old100 <= (saveclkratm1 + 1) / 2) { }
-                pdpat[Z_RA] = ra & ~ a_arm_iCLOCK;      // drive clock low
+                pdpat[Z_RD] = rd & ~ d_arm_iCLOCK;      // drive clock low
                 old100 = pdpat[Z_RH];                   // wait at least 50nS
                 while (pdpat[Z_RH] - old100 <= (saveclkratm1 + 1) / 2) { }
 

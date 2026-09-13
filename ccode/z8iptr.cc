@@ -56,7 +56,7 @@ int main (int argc, char **argv)
             puts ("  ./z8iptr [-7bit] [-clear] [-cps <charspersec>] [-inscr] [-killit] [-text] <filename>");
             puts ("     -7bit   : force top bit of byte = 1");
             puts ("     -clear  : clear status bits at beginning");
-            puts ("     -cps    : set chars per second, default 300");
+            puts ("     -cps    : set chars per second, default 300, 0 for infinite");
             puts ("     -inscr  : insert <CR> before <LF>");
             puts ("     -killit : kill other process that is processing paper tape reader");
             puts ("     -text   : equivalent to -7bit -inscr");
@@ -78,8 +78,8 @@ int main (int argc, char **argv)
             }
             char *p;
             cps = strtoul (argv[i], &p, 0);
-            if ((*p != 0) || (cps == 0) || (cps > 1000)) {
-                fprintf (stderr, "-cps value %s must be integer in range 1..1000\n", argv[i]);
+            if ((*p != 0) || (cps > 1000)) {
+                fprintf (stderr, "-cps value %s must be integer in range 0..1000\n", argv[i]);
                 return 1;
             }
             continue;
@@ -133,9 +133,17 @@ int main (int argc, char **argv)
 
     bool lastcr = false;
     uint32_t nbytes = 0;
+    uint32_t nspc = (cps == 0) ? 0 : 1000000000 / cps;
     while (! ctrlcflag) {
         printf ("\r%u/%u byte%s so far ", nbytes, fsize, ((nbytes == 1) ? "" : "s"));
         fflush (stdout);
+
+        if (nspc > 0) {
+            struct timespec nowts;
+            if (clock_gettime (CLOCK_MONOTONIC, &nowts) < 0) ABORT ();
+            uint32_t nstogo = nspc - nowts.tv_nsec % nspc;
+            usleep (nstogo / 1000);
+        }
 
         z8ipage.waitint (ZGINT_PR);
         if (ptrat[1] & PTR_STEP) {
