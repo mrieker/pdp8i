@@ -131,7 +131,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
 );
 
     // [31:16] = '8I'; [15:12] = (log2 len)-1; [11:00] = version
-    localparam VERSION = 32'h38494005;
+    localparam VERSION = 32'h38494006;
 
     assign ground = 0;
 
@@ -854,7 +854,11 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     end
 
     // jam 0 onto inbus,acclear,ioskip when real processor is doing ION,IOF,WFI instructions
-    wire procio = dev_oIOP & ((dev_oMBUF[8:0] == 9'o001) | (dev_oMBUF[8:0] == 9'o002) | (dev_oMBUF[8:0] == 9'o313));
+    //  also for CDF, CIF instructions
+    wire procio = dev_oIOP & ((dev_oMBUF[8:0]           == 9'o001) |
+                              (dev_oMBUF[8:0]           == 9'o002) |
+                              (dev_oMBUF[8:0]           == 9'o313) |
+                             ((dev_oMBUF[8:0] & 9'o704) == 9'o200));
 
     // internal pio busses - wire-ored (active high) from device to processor
     assign dev_iACCLEAR = arm_iACCLEAR | ttacclr | rkacclr | vcacclr | tcacclr | pracclr | pbacclr | dcacclr | rcacclr | syacclr;
