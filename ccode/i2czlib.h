@@ -56,7 +56,6 @@ struct Z8ILights {
     uint16_t pc;
     uint8_t dfld;
     uint8_t ifld;
-    uint8_t ema;
     uint8_t ir;
     uint8_t ms;
     uint8_t sc;

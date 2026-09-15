@@ -285,7 +285,6 @@ static int cmd_getlb (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_O
         uint16_t regval = 0xFFFFU;
         if (strcasecmp (regname, "ac")   == 0) regval = pads.light.ac;
         if (strcasecmp (regname, "df")   == 0) regval = pads.light.dfld;
-        if (strcasecmp (regname, "ea")   == 0) regval = pads.light.ema;
         if (strcasecmp (regname, "ir")   == 0) regval = pads.light.ir;
         if (strcasecmp (regname, "ma")   == 0) regval = pads.light.ma;
         if (strcasecmp (regname, "mb")   == 0) regval = pads.light.mb;
