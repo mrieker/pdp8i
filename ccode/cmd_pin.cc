@@ -211,13 +211,14 @@ static PinDef const pindefs[] = {
     { "sh_intendly",     DEV_SH,  3, sh3_intendly,         false },
     { "sh_intenabd",     DEV_SH,  3, sh3_intenabd,         false },
     { "sh_intinhuj",     DEV_SH,  3, sh3_intinhuj,         false },
-    { "sh_mred",         DEV_SH,  3, sh3_mred,             false },
+    { "sh_tp1datval",    DEV_SH,  3, sh3_tp1datval,        false },
+    { "sh_mbrd",         DEV_SH,  3, sh3_mbrd,             false },
     { "sh_madr",         DEV_SH,  3, sh3_madr,             false },
     { "sh_dfldkn",       DEV_SH,  4, sh4_dfldkn,           false },
     { "sh_dfld",         DEV_SH,  4, sh4_dfld,             false },
     { "sh_ifajkn",       DEV_SH,  4, sh4_ifajkn,           false },
     { "sh_ifaj",         DEV_SH,  4, sh4_ifaj,             false },
-    { "sh_mwbk",         DEV_SH,  4, sh4_mwbk,             false },
+    { "sh_mbwr",         DEV_SH,  4, sh4_mbwr,             false },
     { "sh_acum",         DEV_SH,  4, sh4_acum,             false },
     { "sh_pctrkn",       DEV_SH,  5, sh5_pctrkn,           false },
     { "sh_madrkn",       DEV_SH,  5, sh5_madrkn,           false },
@@ -230,6 +231,7 @@ static PinDef const pindefs[] = {
     { "sh_link",         DEV_SH,  5, sh5_link,             false },
     { "sh_sctr",         DEV_SH,  5, sh5_sctr,             false },
     { "sh_mquo",         DEV_SH,  5, sh5_mquo,             false },
+    { "sh_tp1dat",       DEV_SH,  6, sh6_tp1dat,           false },
 
     { "", 0, 0, 0, false }
 };

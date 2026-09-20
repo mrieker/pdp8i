@@ -5,7 +5,6 @@
 #   $1 = zturn hostname
 #
 set -e -x
-make
 remimage=`ssh root@$1 md5sum /boot/image.ub`
 lclimage=`md5sum image.ub`
 if [ ${remimage:0:32} != ${lclimage:0:32} ]

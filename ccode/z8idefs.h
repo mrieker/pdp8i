@@ -193,14 +193,15 @@
 #define sh3_intendly  (1U      << 31)
 #define sh3_intenabd  (1U      << 30)
 #define sh3_intinhuj  (1U      << 29)
-#define sh3_mred      (07777U  << 12)
+#define sh3_tp1datval (1U      << 24)
+#define sh3_mbrd      (07777U  << 12)
 #define sh3_madr      (07777U  <<  0)
 
 #define sh4_dfldkn    (1U      << 31)
 #define sh4_dfld      (7U      << 28)
 #define sh4_ifajkn    (1U      << 27)
 #define sh4_ifaj      (7U      << 24)
-#define sh4_mwbk      (07777U  << 12)
+#define sh4_mbwr      (07777U  << 12)
 #define sh4_acum      (07777U  <<  0)
 
 #define sh5_pctrkn    (1U      << 31)
@@ -214,6 +215,8 @@
 #define sh5_link      (1U      << 17)
 #define sh5_sctr      (037U    << 12)
 #define sh5_mquo      (07777U  <<  0)
+
+#define sh6_tp1dat    (07777U  <<  0)
 
 // pdp8ixmem.v registers
 #define XM_OS8ZAP (1U <<  0)

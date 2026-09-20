@@ -274,10 +274,12 @@ static void dump_sh (uint32_t const *shat)
     uint32_t sh3 = shat[3];
     uint32_t sh4 = shat[4];
     uint32_t sh5 = shat[5];
+    uint32_t sh6 = shat[6];
 
-    char mastr[8], pcstr[8];
+    char mastr[8], pcstr[8], tp1datstr[8];
     sprintf (mastr, "%04o", EXT (sh3, sh3_madr));
     sprintf (pcstr, "%04o", EXT (sh2, sh2_pctr));
+    sprintf (tp1datstr, "%04o", EXT (sh6, sh6_tp1dat));
 
     printf ("%sVERSION=%08X SH "
         "foe=%o "
@@ -320,10 +322,12 @@ static void dump_sh (uint32_t const *shat)
         eol);
 
     printf ("                    "
-        "mred=%04o "
-        "mwbk=%04o "
+        "mbrd=%04o "
+        "mbwr=%04o "
+        "tp1dat=%s"
         "%s",
-        EXT (sh3, sh3_mred),
-        EXT (sh4, sh4_mwbk),
+        EXT (sh3, sh3_mbrd),
+        EXT (sh4, sh4_mbwr),
+        EXT (sh3, sh3_tp1datval) ? tp1datstr : "????",
         eol);
 }
