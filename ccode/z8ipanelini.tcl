@@ -181,18 +181,18 @@ proc domemcyc {sw} {
     set oldmc [pin memcycctr]
     flicksw $sw
     ;# memcycctr increments on posedge TS3
-    set started [pin 100mhz]
+    set started [pin 10mhz]
     while {[pin memcycctr] == $oldmc} {
-        set elapsed [expr {([pin 100mhz] - $started) & 0xFFFFFFFF}]
-        if {$elapsed > 100000} {error "$sw cycle timed out"}
+        set elapsed [expr {([pin 10mhz] - $started) & 0xFFFFFFFF}]
+        if {$elapsed > 10000} {error "$sw cycle timed out"}
         after 1
     }
     ;# loop until TS3 and TS4 are complete (or yet another cycle runs)
     set midmc [expr {($oldmc + 1) & 0xFFFFFFFF}]
     while {[pin ots3] || [pin ots4]} {
         if {[pin memcycctr] != $midmc} break
-        set elapsed [expr {([pin 100mhz] - $started) & 0xFFFFFFFF}]
-        if {$elapsed > 100000} {error "$sw cycle timed out"}
+        set elapsed [expr {([pin 10mhz] - $started) & 0xFFFFFFFF}]
+        if {$elapsed > 10000} {error "$sw cycle timed out"}
         after 1
     }
 }
@@ -284,16 +284,14 @@ proc getrestofttyline {{tmsec 30000}} {
 
 # halt and reset the CPU
 proc hardreset {} {
-    set oldsstepovr [pin fp_ovrsstep]       ;# save SSTEP override state
     pin set fp_manual 0                     ;# make sure pdp8ifpi2c.v is scanning
-    pin set fp_ovrsstep 1 fp_ovrstart 1     ;# set START + SSTEP
-    pin set fp_setsstep 1 fp_setstart 1     ;# ...holds processor in reset state
+    pin set arm_iRESET 1 arm_iRESET 0       ;# pulse fpga reset to make sure reset is cleared
+    setsw sstep 1                           ;# set START + SSTEP
+    setsw start 1                           ;# ...holds processor in reset state
     pin set arm_iRESET 1 arm_iRESET 0       ;# pulse fpga reset
     setsw start 0                           ;# release START
     setsw sstep 0                           ;# release SSTEP
-    if {! $oldsstepovr} {
-        relsw sstep
-    }
+    relsw sstep
 }
 
 # convert integer to character
@@ -495,9 +493,11 @@ proc loadbinptr {fname} {
     rimloader hi
 
     puts "loadbinptr: reading in bin loader"
-    exec -ignorestderr make -C $Z8IHOME binloader.rim
-    set ptrpid [exec -ignorestderr $Z8IHOME/z8iptr -killit $Z8IHOME/binloader.rim &]
-    after 1000
+    if {! [file exists $Z8IHOME/binloader.rim]} {
+        exec make -C $Z8IHOME binloader.rim
+    }
+    set ptrpid [exec $Z8IHOME/z8iptr -killit $Z8IHOME/binloader.rim &]
+    after 123
     setsw reg 07756 ; domemcyc ldad
     setsw reg 00000 ; domemcyc start
     while true {
@@ -510,8 +510,8 @@ proc loadbinptr {fname} {
     flicksw stop
 
     puts "loadbinptr: reading in $fname"
-    set ptrpid [exec -ignorestderr $Z8IHOME/z8iptr -killit $fname &]
-    after 1000
+    set ptrpid [exec $Z8IHOME/z8iptr -killit $fname &]
+    after 123
     setsw reg 07777 ; domemcyc ldad
     setsw reg 00000 ; domemcyc start
     while {[getlb run]} {
@@ -710,23 +710,23 @@ proc rimloader {speed} {
         }
         "hi" {
             setsw reg 07756 ; domemcyc ldad
-            setsw reg 06014 ; domemcyc depos
-            setsw reg 06011 ; domemcyc depos
-            setsw reg 05357 ; domemcyc depos
-            setsw reg 06016 ; domemcyc depos
-            setsw reg 07106 ; domemcyc depos
-            setsw reg 07006 ; domemcyc depos
-            setsw reg 07510 ; domemcyc depos
-            setsw reg 05374 ; domemcyc depos
-            setsw reg 07006 ; domemcyc depos
-            setsw reg 06011 ; domemcyc depos
-            setsw reg 05367 ; domemcyc depos
-            setsw reg 06016 ; domemcyc depos
-            setsw reg 07420 ; domemcyc depos
-            setsw reg 03776 ; domemcyc depos
-            setsw reg 03376 ; domemcyc depos
-            setsw reg 05357 ; domemcyc depos
-            setsw reg 00000 ; domemcyc depos
+            setsw reg 06014 ; domemcyc depos    ;# 7756 IOT  6014   clear flag, start reading
+            setsw reg 06011 ; domemcyc depos    ;# 7757 IOT  6011   skip if reader ready
+            setsw reg 05357 ; domemcyc depos    ;# 7760 JMP  7757
+            setsw reg 06016 ; domemcyc depos    ;# 7761 IOT  6016   read char, clear flag, start reading
+            setsw reg 07106 ; domemcyc depos    ;# 7762 CLL RTL     shift char left 4 bits
+            setsw reg 07006 ; domemcyc depos    ;# 7763 RTL
+            setsw reg 07510 ; domemcyc depos    ;# 7764 SPA
+            setsw reg 05374 ; domemcyc depos    ;# 7765 JMP  7774   char<7> was set, skip leader/trailer char
+            setsw reg 07006 ; domemcyc depos    ;# 7766 RTL         char<7> was clear, shift over 2 more bits
+            setsw reg 06011 ; domemcyc depos    ;# 7767 IOT  6011   skip if reader ready
+            setsw reg 05367 ; domemcyc depos    ;# 7770 JMP  7767
+            setsw reg 06016 ; domemcyc depos    ;# 7771 IOT  6016   read char into low bits, clear flag, start reading
+            setsw reg 07420 ; domemcyc depos    ;# 7772 SNL
+            setsw reg 03776 ; domemcyc depos    ;# 7773 DCAI 7776   first char<6> clear, store data word
+            setsw reg 03376 ; domemcyc depos    ;# 7774 DCA  7776   first char<6> set, store address word
+            setsw reg 05357 ; domemcyc depos    ;# 7775 JMP  7757   read another word
+            setsw reg 00000 ; domemcyc depos    ;# 7776 0000        address to write to
         }
         default {
             error "bad speed $speed"
@@ -739,10 +739,18 @@ proc rimloader {speed} {
 # read memory location
 # - does loadaddress which reads the location
 proc rdmem {addr} {
-    setsw ifld [expr {$addr >> 12}] \
-          dfld [expr {$addr >> 12}] \
-         reg [expr {$addr & 07777}]
+    set fld [expr {$addr >> 12}]
+    set adr [expr {$addr & 07777}]
+    setsw ifld $fld dfld $fld reg $adr
+    if {[getsw ifld dfld reg] != "$fld $fld $adr"} {
+        error "ifld dfld reg switches did not load"
+    }
     domemcyc ldad
+    set mead [pin omead]
+    set madr [pin omadr]
+    if {($mead != $fld) || ($madr != $adr)} {
+        error [format "madr did not load, is %o%04o, expect %o%04o" $mead $madr $fld $adr]
+    }
     return [pin ombuf]
 }
 

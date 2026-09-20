@@ -4,12 +4,13 @@
 #  [vcsize=1024] ./z8ipanel -sim  kaleid.tcl e|i    simulator
 
 set vt [lindex $argv 0]
+if {$vt == ""} {set vt "e"}
 if {($vt != "e") && ($vt != "i")} {
     puts "bad or missing 'e' or 'i' argument"
     exit 1
 }
 exec -ignorestderr make kaleid-$vt.bin
-set startaddr [loadbinptr kaleid-$vt.bin]
+set startaddr [loadbin kaleid-$vt.bin]
 set nowtv [clock microseconds]
 set initx [expr {$nowtv % 1000 + 1234}]
 set inity [expr {$nowtv / 1000 % 1000 + 2345}]

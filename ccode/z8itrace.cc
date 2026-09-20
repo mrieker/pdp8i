@@ -140,6 +140,6 @@ static void siginthand (int signum)
     if (ctrlcflag) exit (1);
     ctrlcflag = true;
     if ((signum == SIGINT) && (isatty (0) > 0)) {
-        write (0, "\n", 1);
+        asm volatile ("" : : "g" (write (0, "\n", 1)));
     }
 }
