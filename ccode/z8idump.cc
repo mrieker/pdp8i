@@ -68,7 +68,6 @@ int main (int argc, char **argv)
 {
     setvbuf (stdout, stdoutbuf, _IOFBF, sizeof stdoutbuf);
 
-    bool enabpads = true;
     bool oncemode = false;
     bool pagemode = false;
     int fps = 20;
@@ -78,11 +77,10 @@ int main (int argc, char **argv)
             puts ("     Dump ZTurn FPGA state");
             puts ("     Does not alter the state");
             puts ("");
-            puts ("  ./z8idump.armv7l [-fps <num> | -once | -page] [-nopads]");
+            puts ("  ./z8idump.armv7l [-fps <num> | -once | -page]");
             puts ("      -fps : this many frames per second 1..1000 (default 20)");
             puts ("     -once : just print the state once, else update continually");
             puts ("     -page : just dump the raw page then exit");
-            puts ("   -nopads : disable using i2c bus for lights/switches");
             puts ("");
             return 0;
         }
@@ -102,10 +100,6 @@ int main (int argc, char **argv)
         if (strcasecmp (argv[i], "-once") == 0) {
             eol = "\n";
             oncemode = true;
-            continue;
-        }
-        if (strcasecmp (argv[i], "-nopads") == 0) {
-            enabpads = false;
             continue;
         }
         if (strcasecmp (argv[i], "-page") == 0) {
@@ -148,11 +142,7 @@ int main (int argc, char **argv)
         }
 
         Z8IPanel pads;
-        if (enabpads) {
-            i2czlib.readpads (&pads);
-        } else {
-            memset (&pads, 0, sizeof pads);
-        }
+        i2czlib.readpads (&pads, false);
 
         if (! oncemode) printf (ESC_HOMEC);
 
@@ -162,10 +152,10 @@ int main (int argc, char **argv)
 
         uint32_t msbin = pads.light.ms;
         ASSERT (msbin < sizeof msstrs / sizeof msstrs[0]);
-        char const *msstr = enabpads ? msstrs[msbin] : "-----";
+        char const *msstr = msstrs[msbin];
         uint32_t irbin = pads.light.ir;
         ASSERT (irbin < sizeof irstrs / sizeof irstrs[0]);
-        char const *irstr = enabpads ? irstrs[irbin] : "---";
+        char const *irstr = irstrs[irbin];
         uint32_t clkratm1 = FLD(Z_RD,d_clkratm1);
         char clkratstr[10];
         if (clkratm1 == 0) strcpy (clkratstr, "manual");

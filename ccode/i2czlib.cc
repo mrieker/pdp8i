@@ -78,9 +78,9 @@ void I2CZLib::unlkpads ()
 // read light bulbs and switches
 // pdp8ifpi2c.v is continuously scanning the lights and switches
 //  and updating fpat[8,9,10,11,12] registers
-void I2CZLib::readpads (Z8IPanel *pads)
+void I2CZLib::readpads (Z8IPanel *pads, bool wait)
 {
-    waitpass ();
+    if (wait) waitpass ();
 
     memset (pads, 0, sizeof *pads);
 

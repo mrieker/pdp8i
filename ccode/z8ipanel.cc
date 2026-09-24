@@ -276,7 +276,7 @@ static int cmd_getlb (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_O
     }
 
     Z8IPanel pads;
-    padlib->readpads (&pads);
+    padlib->readpads (&pads, true);
 
     int ngotvals = 0;
     Tcl_Obj *gotvals[objc];
@@ -498,7 +498,7 @@ Switches::Switches ()
 
     mademods = false;
     padlib->lockpads ();
-    padlib->readpads (&pads);
+    padlib->readpads (&pads, true);
 }
 
 Switches::~Switches ()
@@ -666,7 +666,7 @@ static int showstatus (int argc, char **argv)
 
         // read bulbs and switches
         Z8IPanel pads;
-        padlib->readpads (&pads);
+        padlib->readpads (&pads, false);
 
         bool irand = pads.light.ir == 0;
         bool irtad = pads.light.ir == 1;

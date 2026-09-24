@@ -79,7 +79,7 @@ struct I2CZLib {
 
     void lockpads ();
     void unlkpads ();
-    void readpads (Z8IPanel *pads);
+    void readpads (Z8IPanel *pads, bool wait);
     void writepads (Z8IPanel const *pads);
 
 private:
