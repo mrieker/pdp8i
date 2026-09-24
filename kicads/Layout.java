@@ -126,6 +126,7 @@ public class Layout {
         for (PCB.Compon compon : iccompons) {
             int atx20thin = (int) Math.round (compon.atxin () * 20);
             int aty20thin = (int) Math.round (compon.atyin () * 20);
+            System.out.println (String.format ("chip=%-6s  x=%5.2f  y=%5.2f", compon.refer, (atx20thin / 20.0), (aty20thin / 20.0)));
             col20thins.add (atx20thin);
             row20thins.add (aty20thin);
             if (minatx20thin > atx20thin) minatx20thin = atx20thin;
