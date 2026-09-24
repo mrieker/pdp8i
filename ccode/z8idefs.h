@@ -350,8 +350,9 @@
 #define fp12_dbncount  (0x3FU << 26)
 
 #define fp13_dbnlimit  (0x3FU << 26)
-#define fp13_ltspeed (0xFFFFU << 10)
 #define fp13_i2cspeed (0x3FFU <<  0)
+
+#define fp14_ltspeed (0xFFFFFU << 0)
 
 // pdp8isys.v
 #define sy1_enable       (1U << 31)

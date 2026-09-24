@@ -55,11 +55,11 @@ module pdp8ifpi2c (
     reg[2:0]   mcpltrow;    // light row being processed 0..7
     reg[3:0]   mcpstate;    // processing state
     reg[22:00] mcpassno;
-    reg[15:00] mcpltime;    // time for displaying light row
+    reg[19:00] mcpltime;    // time for displaying light row
 
     reg[11:00] lightrows[7:0], switchrows[2:0], switchovrs[2:0];
 
-    reg[15:00] ltspeed;
+    reg[19:00] ltspeed;
     reg[9:0] i2cspeed;
 
     wire[2:0] i2cstate;
@@ -119,8 +119,11 @@ module pdp8ifpi2c (
                                            switchovrs[0] } :        //00 REG[11:00]
 
                       (armraddr == 13) ? { dbnlimit,                //26
-                                           ltspeed,                 //10
+                                           16'b0,                   //10
                                            i2cspeed } :             //00
+
+                      (armraddr == 14) ? { 12'b0,                   //20
+                                           ltspeed } :              //00
 
                        32'hDEADBEEF;
 
@@ -208,8 +211,11 @@ module pdp8ifpi2c (
 
                 13: begin
                     dbnlimit <= armwdata[31:26];
-                    ltspeed  <= armwdata[25:10];
                     i2cspeed <= (armwdata[09:00] >= 10) ? armwdata[09:00] : 10'd9;
+                end
+
+                14: begin
+                    ltspeed  <= armwdata[19:00];
                 end
             endcase
 
@@ -265,7 +271,6 @@ module pdp8ifpi2c (
                 // send command to set iicsel selection pins to the light row
                 // when command completes, the register (AC,PC,etc) will be gated to the lights
                 1: begin
-                    mcpltime <= mcpltime + 1;
                     if (status[63:60] == 0) begin
                         ////$display ("pdp8ifpi2c*: selecting light row %o", mcpltrow);
                         // set iicsel selection pins to the light row
@@ -452,11 +457,11 @@ module pdp8ifpi2c (
                     end
                 end
 
-                // startup delay 1uS after power-on reset
+                // startup delay 2.56uS after power-on reset
                 // then send out 3F3F to registers 0C,0D for pullups (100K)
                 15: begin
                     mcpltime <= mcpltime + 1;
-                    if (mcpltime >= 100) begin
+                    if (mcpltime[8]) begin
                         // enable input pin pullups: 0x0C <= 0x3F3F
                         command  <= { WR, 8'h40, WR, 8'h0C, WR, 8'h3F, WR, 8'h3F, 24'b0 };
                         startbit <= 1;

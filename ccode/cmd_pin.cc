@@ -199,7 +199,7 @@ static PinDef const pindefs[] = {
     { "FP_DBNCOUNT",     DEV_FP, 12, fp12_dbncount,        false },
     { "FP_DBNLIMIT",     DEV_FP, 13, fp13_dbnlimit,        true  },
     { "FP_I2CSPEED",     DEV_FP, 13, fp13_i2cspeed,        true  },
-    { "FP_LTSPEED",      DEV_FP, 13, fp13_ltspeed,         true  },
+    { "FP_LTSPEED",      DEV_FP, 14, fp14_ltspeed,         true  },
 
     { "sh_frzonerr",     DEV_SH,  1, sh1_frzonerr,         true  },
     { "sh_clearit",      DEV_SH,  1, sh1_clearit,          true  },
@@ -258,23 +258,24 @@ int cmd_pin (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj *const
         return TCL_OK;
     }
 
-    if ((objc == 2) && (strcasecmp (Tcl_GetString (objv[1]), "list") == 0)) {
-        for (PinDef const *pte = pindefs; pte->name[0] != 0; pte ++) {
-            Z8IU32 *ptr = devs[pte->dev];
-            printf ("  %-16s  %c%c[%2u]  %08X\n",
-                pte->name, (ptr[0] >> 24) & 0xFFU, (ptr[0] >> 16) & 0xFFU, pte->reg, pte->mask);
-        }
-        return TCL_OK;
-    }
-
+    // access the zynq io page and find devices thereon
     if (devs[0] == NULL) {
-
-        // access the zynq io page and find devices thereon
         devs[DEV_8I] = z8ipage.findev ("8I", NULL, NULL, false);
         devs[DEV_CM] = z8ipage.findev ("CM", NULL, NULL, false);
         devs[DEV_TT] = z8ipage.findev ("TT", NULL, NULL, false);
         devs[DEV_FP] = z8ipage.findev ("FP", NULL, NULL, false);
         devs[DEV_SH] = z8ipage.findev ("SH", NULL, NULL, false);
+    }
+
+    // maybe list out pins
+    if ((objc == 2) && (strcasecmp (Tcl_GetString (objv[1]), "list") == 0)) {
+        for (PinDef const *pte = pindefs; pte->name[0] != 0; pte ++) {
+            Z8IU32 *ptr = devs[pte->dev];
+            uint32_t at0 = ptr[0];
+            printf ("  %-16s  %c%c[%2u]  %08X\n",
+                pte->name, (at0 >> 24) & 0xFFU, (at0 >> 16) & 0xFFU, pte->reg, pte->mask);
+        }
+        return TCL_OK;
     }
 
     bool setmode = false;
