@@ -249,6 +249,13 @@ module pdp8ifpi2c (
             // assumes ltspeed = 19999 = 200uS = time light row stays on
             //        i2cspeed = 29 = 300nS = time to transmit half a bit (1.667MHz, 6uS per byte)
 
+            // iicsel  function
+            //  0nnn   display light row n
+            //  10nn   (n 0..2) drive ldswrow<n> low, drive all others high
+            //  1011   drive all ldswrows high
+            //  11nn   (n 0..2) sense physical switch row n
+            //  1111   let console.kicad_sch scan lights/switches on its own
+
             case (mcpstate)
 
                 // send command to set all data pins to input mode so we can sense what board is sending to the lights
@@ -306,8 +313,9 @@ module pdp8ifpi2c (
                 end
 
                 // let lights soak for 200uS
-                // then if light row 0..2, set data pins to like-numbered switch row value
-                //                   3..7, go on to next light row
+                // then if light row 0,1,   set data pins to like-numbered switch row value
+                //                   4,5,6, sense like-numbered physical switch row values
+                //                   2,3,7, go on to next light row
                 4: begin
                     mcpltime <= mcpltime + 1;
                     // wait for light row displayed for 200uS
@@ -353,7 +361,7 @@ module pdp8ifpi2c (
 
                 // wait for mcp to get the switch value to be sent to flipflops
                 // ...and for ldswrow<n> to go low
-                // then set data pins to output mode so bits get sent out the mcp to flipflop inpts
+                // then set data pins to output mode so bits get sent out the mcp to flipflop inputs
                 5: begin
                     // waiting for mcp to get the data
                     // and for ldswrow<n> to go low
