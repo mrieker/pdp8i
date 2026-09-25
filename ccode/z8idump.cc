@@ -240,11 +240,11 @@ static void dump_fp (uint32_t const *fpat)
     uint32_t fp12 = fpat[12];
     uint32_t fp13 = fpat[13];
 
-    printf ("%sVERSION=%08X FP i2ccmd=%08X%08X i2csts=%08X%08X i2cstate=%o i2ccount=%05u lock=%08X%s",
-        eol, fpat[0], EXT(fp2,FP2_CMDHI), EXT(fp1,FP1_CMDLO), EXT(fp4,FP4_STSHI), EXT(fp3,FP3_STSLO), EXT(fp5,FP5_I2CSTATE), EXT(fp5,FP5_I2CCOUNT), EXT(fp6,FP6_LOCK), eol);
+    printf ("%sVERSION=%08X FP i2ccmd=%08X%08X i2csts=%08X%08X i2cstate=%o i2ccount=%05u i2cspeed=%04u%s",
+        eol, fpat[0], EXT(fp2,FP2_CMDHI), EXT(fp1,FP1_CMDLO), EXT(fp4,FP4_STSHI), EXT(fp3,FP3_STSLO), EXT(fp5,FP5_I2CSTATE), EXT(fp5,FP5_I2CCOUNT), EXT(fp13,fp13_i2cspeed), eol);
 
-    printf ("                    mcppassno=%06X mcpltrow=%o mcpswrow=%o mcpstate=%02u  dbncount=%02u dbnlimit=%02u%s",
-        EXT(fp7,fp7_mcpassno), EXT(fp7,fp7_mcpltrow), EXT(fp7,fp7_mcpswrow), EXT(fp7,fp7_mcpstate), EXT(fp12,fp12_dbncount), EXT(fp13,fp13_dbnlimit), eol);
+    printf ("                    mcppassno=%06X mcpltrow=%o mcpswrow=%o mcpstate=%02u  dbncount=%02u dbnlimit=%02u  lock=%08X%s",
+        EXT(fp7,fp7_mcpassno), EXT(fp7,fp7_mcpltrow), EXT(fp7,fp7_mcpswrow), EXT(fp7,fp7_mcpstate), EXT(fp12,fp12_dbncount), EXT(fp13,fp13_dbnlimit), EXT(fp6,FP6_LOCK), eol);
 
     printf ("                    position start=%o ldad=%o depos=%o exam=%o cont=%o stop=%o sstep=%o sinst=%o dfld=%o ifld=%o reg=%04o%s",
         EXT(fp11,fp11_swSTART), EXT(fp11,fp11_swLDAD), EXT(fp11,fp11_swDEPOS), EXT(fp11,fp11_swEXAM), EXT(fp11,fp11_swCONT), EXT(fp11,fp11_swSTOP), EXT(fp11,fp11_swSSTEP), EXT(fp11,fp11_swSINST), EXT(fp11,fp11_swDFLD), EXT(fp11,fp11_swIFLD), EXT(fp11,fp11_swREG), eol);
