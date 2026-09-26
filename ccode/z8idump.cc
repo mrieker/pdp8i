@@ -57,6 +57,7 @@ static char const *eol = EOL;
 static char stdoutbuf[8000];
 
 static void dump_fp (uint32_t const *fpat);
+static void dump_pb (uint32_t const *pbat);
 static void dump_sh (uint32_t const *shat);
 
 static void siginthand (int signum)
@@ -191,6 +192,8 @@ int main (int argc, char **argv)
             }
             if (((idver >> 24) == 'F') && (((idver >> 16) & 255) == 'P')) {
                 dump_fp (&z8is[i]);
+            } else if (((idver >> 24) == 'P') && (((idver >> 16) & 255) == 'B')) {
+                dump_pb (&z8is[i]);
             } else if (((idver >> 24) == 'S') && (((idver >> 16) & 255) == 'H')) {
                 dump_sh (&z8is[i]);
             } else {
@@ -251,6 +254,14 @@ static void dump_fp (uint32_t const *fpat)
 
     printf ("                    override start=%o ldad=%o depos=%o exam=%o cont=%o stop=%o sstep=%o sinst=%o dfld=%o ifld=%o reg=%04o%s",
         EXT(fp12,fp11_swSTART), EXT(fp12,fp11_swLDAD), EXT(fp12,fp11_swDEPOS), EXT(fp12,fp11_swEXAM), EXT(fp12,fp11_swCONT), EXT(fp12,fp11_swSTOP), EXT(fp12,fp11_swSSTEP), EXT(fp12,fp11_swSINST), EXT(fp12,fp11_swDFLD), EXT(fp12,fp11_swIFLD), EXT(fp12,fp11_swREG), eol);
+}
+
+// pdp8ipbit.v - pulse-bit audio
+static void dump_pb (uint32_t const *pbat)
+{
+    uint32_t idver = pbat[0];
+    printf ("%sVERSION=%08X %c%c %08X %08X %08X %08X %08X %08X %08X %5uHz%s", eol, idver, idver >> 24, idver >> 16,
+            pbat[1], pbat[2], pbat[3], pbat[4], pbat[5], pbat[6], pbat[7], pbat[5] >> 16, eol);
 }
 
 // pdp8ishad.v - processor shadowing

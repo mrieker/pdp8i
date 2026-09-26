@@ -51,14 +51,16 @@ module pdp8ipbit (
     reg [12:00] count, width;
     reg [15:00] samprate, sampincr, sampcount, sampinteg;
     reg [31:00] sampbytes;
-    reg [15:00] fcount, ffinal;
-    reg [26:00] onesec;
+    reg [15:00] fcount, fpart1, fpart2, fpart3, fpart4;
+    reg [24:00] qtrsec;
+
+    wire[15:00] ffinal = fpart1 + fpart2 + fpart3 + fpart4;
 
     assign armrdata = (armraddr == 0) ? 32'h50422008 : // [31:16] = 'PB'; [15:12] = (log2 nreg) - 1; [11:00] = version
                       (armraddr == 1) ? { iszac, 5'b0, width, count } :
                       (armraddr == 2) ? { samprate, sampincr } :
                       (armraddr == 3) ? sampbytes :
-                      (armraddr == 4) ? { 5'b0, onesec } :
+                      (armraddr == 4) ? { 7'b0, qtrsec } :
                       (armraddr == 5) ? { ffinal, fcount } :
                       (armraddr == 6) ? { 12'b0, stcount, stretch } :
                                         32'hDEADBEEF;
@@ -71,9 +73,8 @@ module pdp8ipbit (
             width  <= 599;      // 6.00uS pulse width
             count  <= 0;
             pulse  <= 0;
-            onesec <= 0;
+            qtrsec <= 0;
             fcount <= 0;
-            ffinal <= 0;
             stcount   <= 0;
             stretch   <= 0;
             lastpulse <= 0;
@@ -144,12 +145,15 @@ module pdp8ipbit (
 
             // run a frequency counter
             // counts the 0-to-1 transitions of pulse
-            if (onesec == 99999999) begin
-                onesec <= 0;
-                ffinal <= fcount;
+            if (qtrsec == 24999999) begin
+                qtrsec <= 0;
+                fpart1 <= fpart2;
+                fpart2 <= fpart3;
+                fpart3 <= fpart4;
+                fpart4 <= fcount;
                 fcount <= { 15'b0, ~ lastpulse & pulse };
             end else begin
-                onesec <= onesec + 1;
+                qtrsec <= qtrsec + 1;
                 if (~ lastpulse & pulse & (fcount != 65535)) begin
                     fcount <= fcount + 1;
                 end
