@@ -274,7 +274,7 @@ static void dump_sh (uint32_t const *shat)
     printf ("%sVERSION=%08X SH "
         "foe=%o "
         "clr=%o "
-        "err=%08X "
+        "err=%08X.%02X "
         "ms=%s "
         "ts=%u "
         "ir=%04o "
@@ -285,7 +285,7 @@ static void dump_sh (uint32_t const *shat)
         shat[0],
         EXT (sh1, sh1_frzonerr),
         EXT (sh1, sh1_clearit),
-        EXT (sh1, sh1_err),
+        EXT (sh1, sh1_err1), EXT (sh6, sh6_err2),
         msstr[EXT(sh2,sh2_majst)],
         EXT (sh2, sh2_timestate),
         EXT (sh2, sh2_ireg),

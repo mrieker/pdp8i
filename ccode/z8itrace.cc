@@ -68,9 +68,10 @@ int main (int argc, char **argv)
         // check for shadow freeze
         // if set, don't clock and wait for user to reset
         uint32_t sh1 = shat[1];
-        if ((sh1 & sh1_err) && (sh1 & sh1_frzonerr)) {
+        uint32_t sh6 = shat[6];
+        if (((sh1 & sh1_err1) || (sh6 & sh6_err2)) && (sh1 & sh1_frzonerr)) {
             if (! errorprintd) {
-                printf ("<<shadow freeze %08X>>\n", EXT (sh1, sh1_err));
+                printf ("<<shadow freeze %08X.%02X>>\n", EXT (sh1, sh1_err1), EXT (sh6, sh6_err2));
                 errorprintd = true;
                 haltprinted = false;
             }

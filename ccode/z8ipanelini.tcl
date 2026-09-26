@@ -319,6 +319,7 @@ proc getrestofttyline {{tmsec 30000}} {
 proc hardreset {} {
     pin set fp_manual 0                     ;# make sure pdp8ifpi2c.v is scanning
     pin set arm_iRESET 1 arm_iRESET 0       ;# pulse fpga reset to make sure reset is cleared
+    pin set sh_clearit 1 sh_clearit 0       ;# clear shadow error so clock will run
     setsw sstep 1                           ;# set START + SSTEP
     setsw start 1                           ;# ...holds processor in reset state
     pin set arm_iRESET 1 arm_iRESET 0       ;# pulse fpga reset
@@ -865,7 +866,7 @@ proc simon {} {
     pin set sh_clearit 1
     pin set sh_frzonerr 1
     pin set sh_clearit 0
-p   hardreset
+    hardreset
 }
 
 # load PC and start at given address

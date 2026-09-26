@@ -184,7 +184,7 @@
 // pdp8ishad.v registers
 #define sh1_frzonerr  (1U   << 31)
 #define sh1_clearit   (1U   << 30)
-#define sh1_err       (0x3FFFFFFFU)
+#define sh1_err1      (0x3FFFFFFFU)
 
 #define sh2_majst     (15U     << 28)
 #define sh2_timestate (15U     << 24)
@@ -217,6 +217,7 @@
 #define sh5_sctr      (037U    << 12)
 #define sh5_mquo      (07777U  <<  0)
 
+#define sh6_err2      (037U    << 12)
 #define sh6_tp1dat    (07777U  <<  0)
 
 // pdp8ixmem.v registers

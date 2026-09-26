@@ -110,7 +110,8 @@ module pdp8ishad (
 
     reg maknown, pcknown, frzonerr;
     reg[11:00] acum, ireg, madr, mquo, mbrd, mbwr, pctr, tp1dat;
-    reg[29:00] err;
+    reg[29:00] err1;
+    reg[4:0] err2;
     reg[4:0] sctr;
     reg[3:0] majst, timestate;
     reg clearit, intendly, intenabd, intinhuj, link, tp1datval;
@@ -123,16 +124,16 @@ module pdp8ishad (
     reg[3:0] dfld, ifaj, ifld, saveddf, savedif;
     reg[2:0] tp1fld;
 
-    wire error = (err != 0);
+    wire error = (err1 != 0) | (err2 != 0);
     assign freeze = error & frzonerr;
 
     assign armrdata = (armraddr == 0) ? 32'h53482004 : // [31:16] = 'SH'; [15:12] = (log2 nreg) - 1; [11:00] = version
-                      (armraddr == 1) ? { frzonerr, clearit, err } :
+                      (armraddr == 1) ? { frzonerr, clearit, err1 } :
                       (armraddr == 2) ? { majst, timestate, ireg, pctr } :
                       (armraddr == 3) ? { intendly, intenabd, intinhuj, 4'b0, tp1datval, mbrd, madr } :
                       (armraddr == 4) ? { dfld, ifaj, mbwr, acum } :
                       (armraddr == 5) ? { pcknown, maknown, ifld, saveddf, savedif, link, sctr, mquo } :
-                      (armraddr == 6) ? { 20'b0, tp1dat } :
+                      (armraddr == 6) ? { 15'b0, err2, tp1dat } :
                       32'hDEADBEEF;
 
     wire [11:00] eadr = { mbrd[07] ? madr[11:07] : 5'b0, mbrd[06:00] };
@@ -235,9 +236,13 @@ module pdp8ishad (
         else if (armwrite) begin
             case (armwaddr)
                 1: begin
-                    err   <= armwdata[29:00];
+                    err1     <= armwdata[29:00];
                     clearit  <= armwdata[30];
                     frzonerr <= armwdata[31];
+                end
+
+                6: begin
+                    err2     <= armwdata[16:12];
                 end
             endcase
         end
@@ -245,7 +250,8 @@ module pdp8ishad (
         // pulse from START switch or reset
         else if (oBUSINI | clearit) begin
             acum        <= oACUM;
-            err         <= 0;
+            err1        <= 0;
+            err2        <= 0;
             eago        <= 0;
             intendly    <= 0;
             intenabd    <= 0;
@@ -269,13 +275,13 @@ module pdp8ishad (
             // TS1 and TS3 should always have at least 1 cycle gap (more like dozens)
             if ((oTS1 | lastts1) & (oTS3 | lastts3)) begin
                 $display ("pdp8ishad: 00 oTS1=%b lastts1=%b oTS3=%b lastts3=%b", oTS1, lastts1, oTS3, lastts3);
-                err[00] <= 1;
+                err1[00] <= 1;
             end
 
             // likewise for TS2 and TS4
             if ((oTS2 | lastts2) & (oTS4 | lastts4)) begin
                 $display ("pdp8ishad: 01 oTS2=%b lastts2=%b oTS4=%b lastts4=%b", oTS2, lastts2, oTS4, lastts4);
-                err[01] <= 1;
+                err1[01] <= 1;
             end
 
             case (timestate)
@@ -313,7 +319,7 @@ module pdp8ishad (
                 TS_1: begin
                     if (oTS3 | oTS4) begin
                         $display ("pdp8ishad: 02 oTS3=%b oTS4=%b", oTS3, oTS4);
-                        err[02] <= 1;
+                        err1[02] <= 1;
                     end
                     if (oTS1) begin
 
@@ -323,13 +329,13 @@ module pdp8ishad (
                             // verify major state is what we expect
                             if (majst != oMAJST) begin
                                 $display ("pdp8ishad: 03 majst=%x oMAJST=%x", majst, oMAJST);
-                                err[03] <= 1;
+                                err1[03] <= 1;
                             end
 
                             // can't be acknowledging interrupt if interrupts disabled
                             if ((majst == MS_INTAK) & (~ intenabd | intinhuj)) begin
                                 $display ("pdp8ishad: 27 intenabd=%b intinhuj=%b", intenabd, intinhuj);
-                                err[27] <= 1;
+                                err1[27] <= 1;
                             end
 
                             // verify extended memory address is what we expect
@@ -339,7 +345,7 @@ module pdp8ishad (
                                 maknown <= 1;
                             end else if (madr != oMADR) begin
                                 $display ("pdp8ishad: 04 majst=%x madr=%o oMADR=%o", majst, madr, oMADR);
-                                err[04] <= 1;
+                                err1[04] <= 1;
                             end
                             case (majst)
                                 MS_FETCH, MS_DEFER, MS_DEPOS, MS_EXAM: begin
@@ -347,7 +353,7 @@ module pdp8ishad (
                                         ifld <= { 1'b1, oMEAD };
                                     end else if (ifld[2:0] != oMEAD) begin
                                         $display ("pdp8ishad: 04 majst=%x ifld=%o oMEAD=%o", majst, ifld[2:0], oMEAD);
-                                        err[04] <= 1;
+                                        err2[00] <= 1;
                                     end
                                 end
                                 MS_EXEC: begin
@@ -356,27 +362,27 @@ module pdp8ishad (
                                             dfld <= { 1'b1, oMEAD };
                                         end else if (dfld[2:0] != oMEAD) begin
                                             $display ("pdp8ishad: 04 majst=%x dfld=%o oMEAD=%o", majst, dfld[2:0], oMEAD);
-                                            err[04] <= 1;
+                                            err2[01] <= 1;
                                         end
                                     end else begin
                                         if (~ ifld[3]) begin
                                             ifld <= { 1'b1, oMEAD };
                                         end else if (ifld[2:0] != oMEAD) begin
                                             $display ("pdp8ishad: 04 majst=%x ifld=%o oMEAD=%o", majst, ifld[2:0], oMEAD);
-                                            err[04] <= 1;
+                                            err2[02] <= 1;
                                         end
                                     end
                                 end
                                 MS_INTAK, MS_WRDCT, MS_CURAD: begin
                                     if (oMEAD != 0) begin
                                         $display ("pdp8ishad: 04 majst=%x oMEAD=%o", majst, oMEAD);
-                                        err[04] <= 1;
+                                        err2[03] <= 1;
                                     end
                                 end
                                 MS_BREAK: begin
                                     if (dmagntd & (iDMAFLD != oMEAD)) begin
                                         $display ("pdp8ishad: 04 iDMAFLD=%o oMEAD=%o", iDMAFLD, oMEAD);
-                                        err[04] <= 1;
+                                        err2[04] <= 1;
                                     end
                                 end
                             endcase
@@ -398,7 +404,7 @@ module pdp8ishad (
                         // make sure the processor latched the correct value in oMBUF
                         if (tp1datval & (oMBUF != tp1dat)) begin
                             $display ("pdp8ishad: 29 majst=%x oMADR=%o.%o oMBUF=%o iINBUS=%o", majst, oMEAD, oMADR, oMBUF, tp1dat);
-                            err[29] <= 1;
+                            err1[29] <= 1;
                         end
 
                         // if read from (PC)+, increment PC
@@ -406,7 +412,7 @@ module pdp8ishad (
                             if (~ pcknown) pcknown <= 1;
                             else if (oMADR != pctr) begin
                                 $display ("pdp8ishad: 05 pctr=%o oMADR=%o", pctr, oMADR);
-                                err[05] <= 1;
+                                err1[05] <= 1;
                             end
                             pctr  <= oMADR + 1;
                         end
@@ -432,12 +438,12 @@ module pdp8ishad (
                 TS_2: begin
                     if (oTS1 | oTS4) begin
                         $display ("pdp8ishad: 06 oTS1=%b oTS4=%b", oTS1, oTS4);
-                        err[06] <= 1;
+                        err1[06] <= 1;
                     end
                     if (~ oTS2) begin
                         if (((majst == MS_FETCH) & (ireg[11:09] == 6)) ^ oIOP) begin
                             $display ("pdp8ishad: 07 majst=%x ireg=%o oIOP=%b", majst, ireg, oIOP);
-                            err[07] <= 1;
+                            err1[07] <= 1;
                         end
                         if (oTS3) begin
                             eago      <= 0;
@@ -452,7 +458,7 @@ module pdp8ishad (
                 TS_3: begin
                     if (oTS1 | oTS2) begin
                         $display ("pdp8ishad: 08 oTS1=%b oTS2=%b", oTS1, oTS2);
-                        err[08] <= 1;
+                        err1[08] <= 1;
                     end
                     if (oTS3) begin
 
@@ -468,7 +474,7 @@ module pdp8ishad (
                         // field and address persist from TS1 through TS3
                         if ({ tp1fld, madr } != { oMEAD, oMADR }) begin
                             $display ("pdp8ishad: 28 majst=%x madr sb %o.%o but is %o.%o", majst, tp1fld, madr, oMEAD, oMADR);
-                            err[28] <= 1;
+                            err1[28] <= 1;
                         end
 
                         // MBUF gets loaded at end of TS2 with value to be written to memory
@@ -478,7 +484,7 @@ module pdp8ishad (
                             MS_FETCH: begin
                                 if (oMBUF != mbrd) begin
                                     $display ("pdp8ishad: 09 oMBUF=%o mbrd=%o", oMBUF, mbrd);
-                                    err[09] <= 1;
+                                    err1[09] <= 1;
                                 end
                                 // start extarith for non-memory opcodes (NOP,NMI)
                                 eago <= extarnom;
@@ -486,7 +492,7 @@ module pdp8ishad (
                             MS_DEFER: begin
                                 if (oMBUF != mbrd + autoinc) begin
                                     $display ("pdp8ishad: 10 oMBUF=%o mbrd=%o autoinc=%o", oMBUF, mbrd, autoinc);
-                                    err[10] <= 1;
+                                    err1[10] <= 1;
                                 end
                             end
                             MS_EXEC: begin
@@ -494,19 +500,19 @@ module pdp8ishad (
                                     2: begin    // ISZ
                                         if (oMBUF != mbrd + 12'b1) begin
                                             $display ("pdp8ishad: 11 oMBUF=%o mbrd=%o", oMBUF, mbrd);
-                                            err[11] <= 1;
+                                            err1[11] <= 1;
                                         end
                                     end
                                     3: begin    // DCA
                                         if (oMBUF != acum) begin
                                             $display ("pdp8ishad: 12 oMBUF=%o acum=%o", oMBUF, acum);
-                                            err[12] <= 1;
+                                            err1[12] <= 1;
                                         end
                                     end
                                     4: begin    // JMS
                                         if (pcknown & (oMBUF != pctr)) begin
                                             $display ("pdp8ishad: 13 oMBUF=%o pctr=%o", oMBUF, pctr);
-                                            err[13] <= 1;
+                                            err1[13] <= 1;
                                         end
                                     end
                                     7: begin    // OPR (only OPRs using EXEC should be extarith with memory operand)
@@ -516,7 +522,7 @@ module pdp8ishad (
                                     default: begin
                                         if (oMBUF != mbrd) begin
                                             $display ("pdp8ishad: 14 oMBUF=%o mbrd=%o", oMBUF, mbrd);
-                                            err[14] <= 1;
+                                            err1[14] <= 1;
                                         end
                                     end
                                 endcase
@@ -524,32 +530,32 @@ module pdp8ishad (
                             MS_WRDCT: begin
                                 if (oMBUF != mbrd + 12'b1) begin
                                     $display ("pdp8ishad: 15 oMBUF=%o mbrd=%o", oMBUF, mbrd);
-                                    err[15] <= 1;
+                                    err1[15] <= 1;
                                 end
                             end
                             MS_CURAD: begin
                                 if (dmagntd) begin
                                     if (oMBUF != mbrd + { 11'b0, iCAINC }) begin
                                         $display ("pdp8ishad: 16 oMBUF=%o mbrd=%o iCAINC=%b", oMBUF, mbrd, iCAINC);
-                                        err[16] <= 1;
+                                        err1[16] <= 1;
                                     end
                                 end else begin
                                     if ((oMBUF != mbrd) & (oMBUF != mbrd + 12'b1)) begin
                                         $display ("pdp8ishad: 26 oMBUF=%o mbrd=%o", oMBUF, mbrd);
-                                        err[26] <= 1;
+                                        err1[26] <= 1;
                                     end
                                 end
                             end
                             MS_INTAK: begin
                                 if (pcknown & (oMBUF != pctr)) begin
                                     $display ("pdp8ishad: 17 oMBUF=%o pctr=%o", oMBUF, pctr);
-                                    err[17] <= 1;
+                                    err1[17] <= 1;
                                 end
                             end
                             MS_EXAM: begin
                                 if (oMBUF != mbrd) begin
                                     $display ("pdp8ishad: 18 oMBUF=%o mbrd=%o", oMBUF, mbrd);
-                                    err[18] <= 1;
+                                    err1[18] <= 1;
                                 end
                             end
                         endcase
@@ -640,7 +646,7 @@ module pdp8ishad (
                                         end else if (extarnom) begin
                                             if (extarstep != 0) begin
                                                 $display ("pdp8ishad: 22 extarstep=%o sctr=%o", extarstep, sctr);
-                                                err[22] <= 1;
+                                                err1[22] <= 1;
                                             end
                                             eago <= 0;
                                             acum <= eaac;
@@ -689,7 +695,7 @@ module pdp8ishad (
                                         if (extarmem) begin
                                             if (extarstep != 0) begin
                                                 $display ("pdp8ishad: 25 extarstep=%o sctr=%o", extarstep, sctr);
-                                                err[25] <= 1;
+                                                err1[25] <= 1;
                                             end
                                             eago <= 0;
                                             acum <= eaac;
@@ -709,7 +715,7 @@ module pdp8ishad (
                 TS_4: begin
                     if (oTS2 | oTS3) begin
                         $display ("pdp8ishad: 19 oTS2=%b oTS3=%b", oTS2, oTS3);
-                        err[19] <= 1;
+                        err1[19] <= 1;
                     end
 
                     if (oTS4) begin
@@ -717,7 +723,7 @@ module pdp8ishad (
                         // verify changes made at TP3
                         if ((oACUM != acum) | (oLINK != link)) begin
                             $display ("pdp8ishad: 20 ireg=%o majst=%x oLINK.ACUM=%b.%o link.acum=%b.%o", ireg, majst, oLINK, oACUM, link, acum);
-                            err[20] <= 1;
+                            err1[20] <= 1;
                         end
 
                         // compute what next major state and memory address should be
@@ -793,7 +799,7 @@ module pdp8ishad (
                                                 // fetch is next, address should be PC (no IOSKIP) or PC+1 (with IOSKIP)
                                                 if ((oMEAD != ifld[2:0]) | ((oMADR != pctr) & (oMADR != pctr + 12'b1))) begin
                                                     $display ("pdp8ishad: 21 oMEAD,oMADR=%o%o ifld,pctr=%o%o", oMEAD, oMADR, ifld, pctr);
-                                                    err[21] <= 1;
+                                                    err1[21] <= 1;
                                                 end
                                                 madr <= oMADR;
                                                 pctr <= oMADR;
@@ -810,7 +816,7 @@ module pdp8ishad (
                                         // if HLT instruction, make sure it halted
                                         if (((ireg[08:00] & 9'o403) == 9'o402) & oTS1) begin
                                             $display ("pdp8ishad: 23 ireg=%o oTS1=%b", ireg, oTS1);
-                                            err[23] <= 1;
+                                            err1[23] <= 1;
                                         end
 
                                         // extarith with memory operand goes to EXEC state next
@@ -886,7 +892,7 @@ module pdp8ishad (
                             MS_DEPOS, MS_EXAM: begin
                                 if (oTS1) begin
                                     $display ("pdp8ishad: 24");
-                                    err[24] <= 1;
+                                    err1[24] <= 1;
                                 end
                             end
                         endcase
