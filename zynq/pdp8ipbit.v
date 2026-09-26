@@ -41,24 +41,29 @@ module pdp8ipbit (
     output reg AC_CLEAR,
     output reg IO_SKIP,
     output reg SELECTED,
+    output     PAUSE,
 
     output reg pulse
 );
 
     reg iszac, lastpulse;
+    reg [9:0] stretch, stcount;
     reg [12:00] count, width;
     reg [15:00] samprate, sampincr, sampcount, sampinteg;
     reg [31:00] sampbytes;
     reg [15:00] fcount, ffinal;
     reg [26:00] onesec;
 
-    assign armrdata = (armraddr == 0) ? 32'h50422006 : // [31:16] = 'PB'; [15:12] = (log2 nreg) - 1; [11:00] = version
+    assign armrdata = (armraddr == 0) ? 32'h50422008 : // [31:16] = 'PB'; [15:12] = (log2 nreg) - 1; [11:00] = version
                       (armraddr == 1) ? { iszac, 5'b0, width, count } :
                       (armraddr == 2) ? { samprate, sampincr } :
                       (armraddr == 3) ? sampbytes :
                       (armraddr == 4) ? { 5'b0, onesec } :
                       (armraddr == 5) ? { ffinal, fcount } :
+                      (armraddr == 6) ? { 12'b0, stcount, stretch } :
                                         32'hDEADBEEF;
+
+    assign PAUSE = stcount != 0;
 
     always @(posedge CLOCK) begin
         if (RESET) begin
@@ -69,6 +74,8 @@ module pdp8ipbit (
             onesec <= 0;
             fcount <= 0;
             ffinal <= 0;
+            stcount   <= 0;
+            stretch   <= 0;
             lastpulse <= 0;
         end else begin
 
@@ -88,6 +95,9 @@ module pdp8ipbit (
                         sampinteg <= 0;
                         sampbytes <= 0;
                     end
+                    6: begin
+                        stretch <= armwdata[09:00];
+                    end
                 endcase
             end else begin
                 if (iopstart) begin
@@ -98,6 +108,7 @@ module pdp8ipbit (
 
                     // maybe do increment accumulator and skip if zero
                     if (iszac & (ioopcode == 12'o6004)) begin
+                        stcount  <= stretch;
                         SELECTED <= 1;
                         AC_CLEAR <= 1;
                         { IO_SKIP, devtocpu } <= { 1'b0, cputodev } + 13'o00001;
@@ -114,6 +125,8 @@ module pdp8ipbit (
                     end else begin
                         pulse <= 0;
                     end
+
+                    if (PAUSE) stcount <= stcount - 1;
                 end
 
                 // at 8000 samples/second:

@@ -142,6 +142,7 @@
 #define n_memcycctr    0xFFFFFFFFU
 
 #define q_ilaarmed     (1U << 31)
+#define q_ilafreeze    (1U << 30)
 #define q_ilaafter (07777U << 16)
 #define q_ilaindex (07777U <<  0)
 
@@ -175,10 +176,10 @@
 #define Z_TTYPR 2
 #define Z_TTYPN 3
 
-#define KB_FLAG 0x80000000
-#define KB_ENAB 0x40000000
-#define PR_FLAG 0x80000000
-#define PR_FULL 0x40000000
+#define KB_FLAG 0x80000000U
+#define KB_ENAB 0x40000000U
+#define PR_FLAG 0x80000000U
+#define PR_FULL 0x40000000U
 
 // pdp8ishad.v registers
 #define sh1_frzonerr  (1U   << 31)

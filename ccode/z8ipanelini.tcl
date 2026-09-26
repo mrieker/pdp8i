@@ -10,6 +10,7 @@ proc helpini {} {
     puts "  chartoint               - convert character to integer"
     puts "  checkttymatch           - check for matching tty printer characters"
     puts "  checkttyprompt          - check tty for prompt and send reply string"
+    puts "  clearmem                - clear all 32KW memory"
     puts "  disas <start> <stop>    - disassemble given range"
     puts "  domemcyc <switch>       - do switch-initiated memory cycle"
     puts "  dumpit                  - dump registers and switches"
@@ -159,6 +160,38 @@ proc checkttyprompt {prompt reply {tmsec 30000}} {
     sendchartottykb "\r"
 }
 
+# set all 32KW memory to known values
+proc clearmem {} {
+    hardreset
+    assem 000 iot 06201 ;# CDF set DFLD
+    assem 001 dcai 020  ;# clear mem location
+    assem 002 isz  020  ;# on to next location
+    assem 003 jmp  001
+    assem 004 tad  000  ;# increment field
+    assem 005 tad  015  ;# 0010
+    assem 006 dca  000
+    assem 007 tad  000  ;# see if done all fields
+    assem 010 and  016  ;# 0100
+    assem 011 sna
+    assem 012 jmp  000  ;# change field if not
+    assem 013 hlt       ;# all done
+    assem 014 jmp  013
+    wrmem 015 0010
+    wrmem 016 0100
+    wrmem 017 0000
+    wrmem 020 0021
+    set begmc [pin memcycctr]
+    startat 0
+    while {! [ctrlcflag]} {
+        if {! [pin orun]} break
+        set nowmc [pin memcycctr]
+        set delmc [expr {($nowmc - $begmc) & 0xFFFFFFFF}]
+        ;# usually 196603 cycles
+        if {$delmc > 250000} {error "clearmem: too many cycles"}
+        after 100
+    }
+}
+
 # disassemble block of memory
 # - disas addr         ;# disassemble in vacinity of given address
 # - disas start stop   ;# disassemble the given range
@@ -184,7 +217,7 @@ proc domemcyc {sw} {
     set started [pin 10mhz]
     while {[pin memcycctr] == $oldmc} {
         set elapsed [expr {([pin 10mhz] - $started) & 0xFFFFFFFF}]
-        if {$elapsed > 10000} {error "$sw cycle timed out"}
+        if {$elapsed > 1000000} {error "$sw cycle timed out"}
         after 1
     }
     ;# loop until TS3 and TS4 are complete (or yet another cycle runs)
@@ -192,7 +225,7 @@ proc domemcyc {sw} {
     while {[pin ots3] || [pin ots4]} {
         if {[pin memcycctr] != $midmc} break
         set elapsed [expr {([pin 10mhz] - $started) & 0xFFFFFFFF}]
-        if {$elapsed > 10000} {error "$sw cycle timed out"}
+        if {$elapsed > 1000000} {error "$sw cycle timed out"}
         after 1
     }
 }
@@ -811,20 +844,28 @@ proc shadowon {} {
 
 # put in real mode
 proc simoff {} {
+    pin set arm_ireset 1 arm_ireset 0
     pin set simit 0
     pin set fp_manual 0
-    pin set fp_i2cspeed 29      ;# 1.667MHz
-    pin set fp_ltspeed 20000    ;# 200uS
+    pin set fp_i2cspeed 149     ;# 333KHz
+    pin set fp_ltspeed 19999    ;# 200uS
+    pin set sh_clearit 1
+    pin set sh_frzonerr 1
+    pin set sh_clearit 0
     hardreset
 }
 
 # put in simulator mode
 proc simon {} {
+    pin set arm_ireset 1 arm_ireset 0
     pin set simit 1
     pin set fp_manual 0
     pin set fp_i2cspeed 29
     pin set fp_ltspeed 63
-    hardreset
+    pin set sh_clearit 1
+    pin set sh_frzonerr 1
+    pin set sh_clearit 0
+p   hardreset
 }
 
 # load PC and start at given address
@@ -895,6 +936,40 @@ proc ttyprtest {} {
     disas 040 050
     puts "do './z8itty' on another screen"
     puts "do 'startat 040' to start test"
+}
+
+# - same thing but print output inline and verify
+proc ttyprtestauto {} {
+    hardreset
+    assem 040 tad 060   ;# load 0040 in acum
+    assem 041 iot 06046 ;# start printing char
+    assem 042 iot 06041 ;# skip if printer ready
+    assem 043 jmp 042   ;# repeat if not ready
+    assem 044 iac       ;# inc acum
+    assem 045 and 061   ;# mask to 7 bits
+    assem 046 sza       ;# see if wrapped
+    assem 047 jmp 041   ;# no wrap, print next char
+    assem 050 jmp 040   ;# wrap, skip control chars
+    wrmem 060 00040
+    wrmem 061 00177
+    disas 040 050
+    startat 040
+    set expect 32
+    while {! [ctrlcflag]} {
+        set ch [readttychartimed 1000]
+        if {$ch == ""} {
+            error "ttyprtest: timeout reading char"
+        }
+        puts -nonewline $ch
+        flush stdout
+        set actual [chartoint $ch]
+        if {$expect != $actual} {
+            puts ""
+            puts "ttyprtest: expect $expect  actual $actual"
+            set expect $actual
+        }
+        if {[incr expect] == 128} {set expect 32}
+    }
 }
 
 # wait for control-C or processor stopped

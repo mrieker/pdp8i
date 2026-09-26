@@ -131,12 +131,13 @@ module Zynq #(parameter BIDIRCONSDA=1) (
 );
 
     // [31:16] = '8I'; [15:12] = (log2 len)-1; [11:00] = version
-    localparam VERSION = 32'h38494006;
+    localparam VERSION = 32'h38494007;
 
     assign ground = 0;
 
     wire[11:02] readaddr;
     reg[11:02] latrdaddr, writeaddr;
+    reg[31:00] writedata;
     wire debounced, lastswLDAD, lastswSTART, simmemen;
 
     // fpga sends interrupt request to arm
@@ -341,7 +342,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     // pulsebit interface wires
     wire[31:00] pbardata;
     wire[11:00] pbinbus;
-    wire pbacclr, pbiosel, pbioskp;
+    wire pbacclr, pbiosel, pbioskp, pbpause;
     wire pulsebit;
 
     // bus values that are constants
@@ -349,7 +350,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     assign saxi_RRESP = 0;  // A3.4.4/A10.3 transfer OK
 
     // our own integrated logic analyzer
-    reg[59:00] ilaarray[4095:0], ilardata;
+    reg[50:00] ilaarray[4095:0], ilardata;
     reg[11:00] ilaafter, ilaindex;
     reg ilaarmed;
 
@@ -421,8 +422,8 @@ module Zynq #(parameter BIDIRCONSDA=1) (
         (readaddr        == 10'b0000001011) ? regctlk    :
         (readaddr        == 10'b0000001110) ? memcycctr  :
         (readaddr        == 10'b0000010001) ? { ilaarmed, 3'b0, ilaafter, 4'b0, ilaindex } :
-        (readaddr        == 10'b0000010010) ? {       ilardata[31:00] } :
-        (readaddr        == 10'b0000010011) ? { 4'b0, ilardata[59:32] } :
+        (readaddr        == 10'b0000010010) ? {        ilardata[31:00] } :
+        (readaddr        == 10'b0000010011) ? { 13'b0, ilardata[50:32] } :
         (readaddr        == 10'b0000011010) ? { 1'b0, regarmintena } : // ZG_INTENABS
         (readaddr        == 10'b0000011011) ? zgintflags : // ZG_INTFLAGS
         (readaddr[11:06] ==  6'b000010)     ? fpi2crdata :
@@ -440,7 +441,20 @@ module Zynq #(parameter BIDIRCONSDA=1) (
         (readaddr[11:03] ==  9'b000110100)  ? syardata   :
         32'hDEADBEEF;
 
-    wire armwrite   = saxi_WREADY & saxi_WVALID;    // arm is writing a register (single fpga clock cycle)
+    reg iopstart;
+
+    // there is data waiting to be written to a register when:
+    //  we have accepted an address from the arm
+    //  we have accepted write data from the arm
+    wire writepend  = ~ saxi_AWREADY & ~ saxi_WREADY;
+
+    // actually perform the write when one is pending and not doing i/o for the pdp
+    // iopstart is set for exactly one 10nS cycle at TP2 of an i/o instruction
+    // ...so it only delays the write one fpga cycle worst case
+    // the resulting armwrite pulse should last only one fpga cycle and never overlap iopstart
+    // ...cuz many i/o device modules assume armwrite and iopstart never overlap
+    wire armwrite   = writepend & ~ iopstart;
+
     wire fpi2cwrite = armwrite & writeaddr[11:06] == 6'b000010;
     wire rkawrite   = armwrite & writeaddr[11:05] == 7'b0000110;
     wire vcawrite   = armwrite & writeaddr[11:05] == 7'b0000111;
@@ -468,13 +482,13 @@ module Zynq #(parameter BIDIRCONSDA=1) (
             saxi_RVALID  <= 0;                          // we are not sending out read data
 
             saxi_AWREADY <= 1;                          // we are ready to accept write address
-            saxi_WREADY  <= 0;                          // we are not ready to accept write data
+            saxi_WREADY  <= 1;                          // we are ready to accept write data
             saxi_BVALID  <= 0;                          // we are not acknowledging any write
 
             hdw_poweron_n <= 1;                         // start with 'always on' outputs turned off
 
             arm_iCLOCK  <= 0;
-            arm_iRESET  <= 0;
+            arm_iRESET  <= 1;
             arm_iMEMDIS <= 0;
 
             regctld     <= 9;                           // default 10MHz PDP clock
@@ -510,83 +524,88 @@ module Zynq #(parameter BIDIRCONSDA=1) (
             //  register write  //
             //////////////////////
 
-            // check for PS sending us write data
-            if (armwrite) begin
+            // check for PS sending us a write address
+            if (saxi_AWREADY & saxi_AWVALID) begin
                 hdw_poweron_n <= 0;                         // z8ipanel or some such is running, turn 'always on' outputs on
+                writeaddr     <= saxi_AWADDR[11:02];        // save address bits we care about
+                saxi_AWREADY  <= 0;                         // we are no longer accepting a write address
+            end
 
-                case (writeaddr)                            // write data to register
+            // check for PS sending us write data
+            if (saxi_WREADY & saxi_WVALID) begin
+                writedata     <= saxi_WDATA;                // capture data being written
+                saxi_WREADY   <= 0;                         // we are no longer accepting write data
+            end
+
+            // check for PS acknowledging write acceptance
+            if (saxi_BVALID & saxi_BREADY) begin
+                saxi_BVALID   <= 0;
+            end
+
+            // the stars have all aligned and we can do the write
+            if (armwrite) begin
+                case (writeaddr)
                      10'b0000000001: begin
-                        arm_iACCLEAR <= saxi_WDATA[00];
-                        arm_iBRKGNTO <= saxi_WDATA[01];
-                        arm_iBRKRQST <= saxi_WDATA[02];
-                        arm_iBRKWRM  <= saxi_WDATA[03];
-                        arm_iCAINC   <= saxi_WDATA[04];
-                        arm_iCYCLE3  <= saxi_WDATA[06];
-                        arm_iDMAFLD  <= saxi_WDATA[09:07];
-                        arm_iINBUS   <= saxi_WDATA[21:10];
-                        arm_iINTRQST <= saxi_WDATA[22];
-                        arm_iIOSKIP  <= saxi_WDATA[23];
-                        arm_iMEMDIS  <= saxi_WDATA[24];
-                        arm_iPAUSE   <= saxi_WDATA[25];
-                        arm_iRESET   <= saxi_WDATA[26];
+                        arm_iACCLEAR <= writedata[00];
+                        arm_iBRKGNTO <= writedata[01];
+                        arm_iBRKRQST <= writedata[02];
+                        arm_iBRKWRM  <= writedata[03];
+                        arm_iCAINC   <= writedata[04];
+                        arm_iCYCLE3  <= writedata[06];
+                        arm_iDMAFLD  <= writedata[09:07];
+                        arm_iINBUS   <= writedata[21:10];
+                        arm_iINTRQST <= writedata[22];
+                        arm_iIOSKIP  <= writedata[23];
+                        arm_iMEMDIS  <= writedata[24];
+                        arm_iPAUSE   <= writedata[25];
+                        arm_iRESET   <= writedata[26];
                     end
 
                     10'b0000000010: begin
-                        arm_swCONT   <= saxi_WDATA[00];
-                        arm_swDEPOS  <= saxi_WDATA[01];
-                        arm_swDFLD   <= saxi_WDATA[04:02];
-                        arm_swEXAM   <= saxi_WDATA[05];
-                        arm_swIFLD   <= saxi_WDATA[08:06];
-                        arm_swLDAD   <= saxi_WDATA[09];
-                        arm_swSINST  <= saxi_WDATA[10];
-                        arm_swSSTEP  <= saxi_WDATA[11];
-                        arm_swSTART  <= saxi_WDATA[12];
-                        arm_swSREG   <= saxi_WDATA[24:13];
+                        arm_swCONT   <= writedata[00];
+                        arm_swDEPOS  <= writedata[01];
+                        arm_swDFLD   <= writedata[04:02];
+                        arm_swEXAM   <= writedata[05];
+                        arm_swIFLD   <= writedata[08:06];
+                        arm_swLDAD   <= writedata[09];
+                        arm_swSINST  <= writedata[10];
+                        arm_swSSTEP  <= writedata[11];
+                        arm_swSTART  <= writedata[12];
+                        arm_swSREG   <= writedata[24:13];
                     end
 
                     10'b0000000100: begin
-                        regctld      <= saxi_WDATA[05:00];
-                        arm_iCLOCK   <= (saxi_WDATA[05:00] == 0) ? saxi_WDATA[06] : 1'b0;
+                        regctld      <= writedata[05:00];
+                        arm_iCLOCK   <= (writedata[05:00] == 0) ? writedata[06] : 1'b0;
                     end
 
                     10'b0000000101: begin
-                        simit        <= saxi_WDATA[00];     // 0=use real PDP boards; 1=use pdp8isim.v simulator
-                        fpgamemen    <= saxi_WDATA[01];     // enable zynq.v 32KW memory
-                                                            // (use arm_iMEMDIS to disable extmemory.kicad_sch 32KW memory)
-                        arm_dmagntd  <= saxi_WDATA[02];     // testzturn.cc force dma drivers on
-                        arm_ioenabd  <= saxi_WDATA[03];     // testzturn.cc force pio drivers on
-                        fpgamem4k    <= saxi_WDATA[04];     // limit fpgamem to 4K (ignore ext mem addr bits)
+                        simit        <= writedata[00];  // 0=use real PDP boards; 1=use pdp8isim.v simulator
+                        fpgamemen    <= writedata[01];  // enable zynq.v 32KW memory
+                                                        // (use arm_iMEMDIS to disable extmemory.kicad_sch 32KW memory)
+                        arm_dmagntd  <= writedata[02];  // testzturn.cc force dma drivers on
+                        arm_ioenabd  <= writedata[03];  // testzturn.cc force pio drivers on
+                        fpgamem4k    <= writedata[04];  // limit fpgamem to 4K (ignore extended mem addr bits)
                     end
 
                     10'b0000011010: begin
-                        regarmintena    <= saxi_WDATA[30:00];
+                        regarmintena    <= writedata[30:00];
                     end
                     10'b0000011011: begin
-                        regarmintreq_30 <= saxi_WDATA[30];
+                        regarmintreq_30 <= writedata[30];
                     end
 
                     default: begin end
                 endcase
-                saxi_AWREADY <= 1;                          // we are ready to accept an address again
-                saxi_WREADY  <= 0;                          // we are no longer accepting write data
-                saxi_BVALID  <= 1;                          // we have accepted the data
 
-            end else begin
-                // check for PS sending us a write address
-                if (saxi_AWREADY & saxi_AWVALID) begin
-                    writeaddr <= saxi_AWADDR[11:02];        // save address bits we care about
-                    saxi_AWREADY <= 0;                      // we are no longer accepting a write address
-                    saxi_WREADY  <= 1;                      // we are ready to accept write data
-                end
-
-                // check for PS acknowledging write acceptance
-                if (saxi_BVALID & saxi_BREADY) begin
-                    saxi_BVALID <= 0;
-                end
+                // tell arm we have completed this write and can accept another
+                saxi_AWREADY <= 1;
+                saxi_WREADY  <= 1;
+                saxi_BVALID  <= 1;
             end
         end
 
-        if (~ armwrite & dev_iRESET) begin
+        if (dev_iRESET) begin
             arm_iACCLEAR <= 0;
             arm_iBRKGNTO <= 0;
             arm_iBRKRQST <= 0;
@@ -872,7 +891,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     assign dev_iIOSEL   = procio       | ttiosel | rkiosel | vciosel | tciosel | priosel | ppiosel | dciosel | rciosel | syiosel | pbiosel;
     assign dev_iIOSKIP  = arm_iIOSKIP  | ttioskp | rkioskp | vcioskp | tcioskp | prioskp | ppioskp | dcioskp | rcioskp | syioskp | pbioskp;
     assign dev_iMEMDIS  = arm_iMEMDIS;
-    assign dev_iPAUSE   = arm_iPAUSE   | sypause;
+    assign dev_iPAUSE   = arm_iPAUSE   | pbpause | sypause;
     assign dev_iRESET   = arm_iRESET   | ~ RESET_N;
 
     // unused arm interrupt request bits
@@ -982,10 +1001,10 @@ module Zynq #(parameter BIDIRCONSDA=1) (
 
             // arm writing regctlg to initiate a read or a write
             if (armwrite & (writeaddr == 7)) begin
-                arm_extmemaddr <= saxi_WDATA[14:00];
-                arm_extmemwdat <= saxi_WDATA[26:15];
-                if (saxi_WDATA[30]) arm_extmemwrite <= 1;
-                if (saxi_WDATA[31]) arm_extmemread  <= 1;
+                arm_extmemaddr <= writedata[14:00];
+                arm_extmemwdat <= writedata[26:15];
+                if (writedata[30]) arm_extmemwrite <= 1;
+                if (writedata[31]) arm_extmemread  <= 1;
             end
 
             // otherwise process based on state
@@ -1095,7 +1114,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
         .armwrite   (shawrite),
         .armraddr   (readaddr[4:2]),
         .armwaddr   (writeaddr[4:2]),
-        .armwdata   (saxi_WDATA),
+        .armwdata   (writedata),
         .armrdata   (shardata),
 
         .fpgamemen  (fpgamemen),
@@ -1158,9 +1177,11 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     //   also gives plenty of time for reply data to make it back to the processor
     //  iopstop happens when the processor no longer wants the reply data
 
-    reg iopstart, lasttp2;
+    // many devices assume iopstart and armwrite never happen on same cycle
+
+    reg lasttp2;
     always @(posedge CLOCK) begin
-        if (~ armwrite) begin
+        if (~ writepend) begin
             iopstart <= ~ lasttp2 & dev_oTP2 & dev_oIOP;
             lasttp2  <= dev_oTP2;
         end else begin
@@ -1180,7 +1201,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
         .armwrite (ttawrite),
         .armraddr (readaddr[3:2]),
         .armwaddr (writeaddr[3:2]),
-        .armwdata (saxi_WDATA),
+        .armwdata (writedata),
         .armrdata (ttardata),
 
         .iopstart (iopstart),
@@ -1207,7 +1228,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
         .armwrite (syawrite),
         .armraddr (readaddr[2]),
         .armwaddr (writeaddr[2]),
-        .armwdata (saxi_WDATA),
+        .armwdata (writedata),
         .armrdata (syardata),
 
         .iopstart (iopstart),
@@ -1233,7 +1254,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
         .armwrite (dcawrite),
         .armraddr (readaddr[4:2]),
         .armwaddr (writeaddr[4:2]),
-        .armwdata (saxi_WDATA),
+        .armwdata (writedata),
         .armrdata (dcardata),
 
         .iopstart (iopstart),
@@ -1258,7 +1279,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
         .armwrite (rkawrite),
         .armraddr (readaddr[4:2]),
         .armwaddr (writeaddr[4:2]),
-        .armwdata (saxi_WDATA),
+        .armwdata (writedata),
         .armrdata (rkardata),
         .armintrq (regarmintreq[03]), // ZGINT_RK
 
@@ -1287,7 +1308,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
         .armwrite (cmawrite),                   //< arm writing to backside register
         .armraddr (readaddr[3:2]),              //< arm reading from backside register
         .armwaddr (writeaddr[3:2]),             //< arm writing to backside register
-        .armwdata (saxi_WDATA),                 //< data to write to backside register
+        .armwdata (writedata),                  //< data to write to backside register
         .armrdata (cmardata),                   //> data being read from backside register
 
         .brk3cycl (cmbrk3cycl),                 //> dma 3-cycle
@@ -1320,7 +1341,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
         .armwrite (tcawrite),
         .armraddr (readaddr[2]),
         .armwaddr (writeaddr[2]),
-        .armwdata (saxi_WDATA),
+        .armwdata (writedata),
         .armrdata (tcardata),
         .armintrq (regarmintreq[04]), // ZGINT_TC
 
@@ -1346,7 +1367,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
         .armwrite (vcawrite),
         .armraddr (readaddr[4:2]),
         .armwaddr (writeaddr[4:2]),
-        .armwdata (saxi_WDATA),
+        .armwdata (writedata),
         .armrdata (vcardata),
 
         .iopstart (iopstart),
@@ -1379,7 +1400,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
         .armwrite (fpi2cwrite),
         .armraddr (readaddr[5:2]),
         .armwaddr (writeaddr[5:2]),
-        .armwdata (saxi_WDATA),
+        .armwdata (writedata),
         .armrdata (fpi2crdata),
 
         .run     (dev_oRUN),
@@ -1400,7 +1421,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
         .armwrite (prawrite),
         .armraddr (readaddr[2]),
         .armwaddr (writeaddr[2]),
-        .armwdata (saxi_WDATA),
+        .armwdata (writedata),
         .armrdata (prardata),
         .armintrq (regarmintreq[02]), // ZGINT_PR
 
@@ -1424,7 +1445,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
         .armwrite (pbawrite),
         .armraddr (readaddr[4:2]),
         .armwaddr (writeaddr[4:2]),
-        .armwdata (saxi_WDATA),
+        .armwdata (writedata),
         .armrdata (pbardata),
 
         .iopstart (iopstart),
@@ -1436,6 +1457,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
         .AC_CLEAR (pbacclr),
         .IO_SKIP  (pbioskp),
         .SELECTED (pbiosel),
+        .PAUSE    (pbpause),
 
         .pulse (pulsebit)
     );
@@ -1449,7 +1471,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
         .armwrite (ppawrite),
         .armraddr (readaddr[2]),
         .armwaddr (writeaddr[2]),
-        .armwdata (saxi_WDATA),
+        .armwdata (writedata),
         .armrdata (ppardata),
         .armintrq (regarmintreq[01]), // ZGINT_PP
 
@@ -1473,7 +1495,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
         .armwrite (rcawrite),
         .armraddr (readaddr[2]),
         .armwaddr (writeaddr[2]),
-        .armwdata (saxi_WDATA),
+        .armwdata (writedata),
         .armrdata (rcardata),
 
         .iopstart (iopstart),
@@ -1494,32 +1516,31 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     //  ilaafter = number of cycles to record after trigger condition satisfied
     //  ilaindex = next entry in ilaarray to write
 
-    reg lastldad;
-    reg[2:0] sevenzs;
+    reg lasticlock;
 
     always @(posedge CLOCK) begin
         if (~ RESET_N) begin
             ilaarmed <= 0;
             ilaafter <= 0;
-            sevenzs  <= 0;
         end else begin
 
             if (armwrite & (writeaddr == 10'b0000010001)) begin
 
                 // arm processor is writing control register
-                ilaarmed <= saxi_WDATA[31];
-                ilaafter <= saxi_WDATA[27:16];
-                if (~ saxi_WDATA[30]) begin
-                    ilaindex <= saxi_WDATA[11:00];
-                    ilardata <= ilaarray[saxi_WDATA[11:00]];
-                    sevenzs  <= 0;
+                ilaarmed <= writedata[31];
+                ilaafter <= writedata[27:16];
+                if (~ writedata[30]) begin
+                    ilaindex <= writedata[11:00];
+                    ilardata <= ilaarray[writedata[11:00]];
                 end
             end else begin
 
                 // capture signals while before trigger and for ilaafter cycles thereafter
-                if ((ilaarmed | (ilaafter != 0)) & ~ xmlasttp3 & dev_oTP3 & (shadowpc == 12'o7774)) begin
+                if ((ilaarmed | (ilaafter != 0)) & lasticlock & dev_iCLOCK) begin
                     ilaarray[ilaindex] <= {
-                        shadowpc,       //48
+                        hdw_ioenabd_n,  //50
+                        dev_iIOSEL,     //49
+                        dev_oIOP,       //48
                         dev_oMAJST,     //44
                         dev_oTS1,       //43
                         dev_oTS2,       //42
@@ -1545,6 +1566,6 @@ module Zynq #(parameter BIDIRCONSDA=1) (
             end
         end
 
-        lastldad <= sim_swldad;
+        lasticlock <= dev_iCLOCK;
     end
 endmodule

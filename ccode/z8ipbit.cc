@@ -76,17 +76,19 @@ int main (int argc, char **argv)
 
     bool doiszac = true;
     char const *sound = NULL;
+    uint32_t stretch = 250; // 2.5uS
     uint32_t width = 599;   // 6.0uS
     for (int i = 0; ++ i < argc;) {
         if (strcmp (argv[i], "-?") == 0) {
             puts ("");
             puts ("  Set pulsebit generator parameters");
             puts ("");
-            puts ("    ./z8ipbit [-noiszac] [-sound <serverhostname>] [-width <width>]");
+            puts ("    ./z8ipbit [-noiszac] [-sound <serverhostname>] [-stretch <count>] [-width <width>]");
             puts ("");
             puts ("      -noiszac = disable ISZAC I/O instruction 6004");
             puts ("      -sound   = forward sound on to server (see -server)");
-            puts ("      -width   = set width of pulses in 10nS units, 1..8192");
+            puts ("      -stretch = stretch the ISZAC I/O instruction by count*10nS (default 250)");
+            puts ("      -width   = set width of pulses in 10nS units, 1..8192 (default 599)");
             puts ("");
             puts ("    ./z8ipbit -server");
             puts ("");
@@ -105,6 +107,18 @@ int main (int argc, char **argv)
                 return 1;
             }
             sound = argv[i];
+            continue;
+        }
+        if (strcasecmp (argv[i], "-stretch") == 0) {
+            if ((++ i >= argc) || (argv[i][0] == '-')) {
+                fprintf (stderr, "missing -stretch argument\n");
+                return 1;
+            }
+            stretch = strtoul (argv[i], &p, 0);
+            if ((*p != 0) || (stretch > 1023)) {
+                fprintf (stderr, "stretch count %s must be in range 0..1023\n", argv[1]);
+                return 1;
+            }
             continue;
         }
         if (strcasecmp (argv[i], "-width") == 0) {
@@ -126,6 +140,7 @@ int main (int argc, char **argv)
 
     pbat = z8ipage.findev ("PB", NULL, NULL, false);
     pbat[1] = (doiszac ? (1U << 31) : 0) | (width << 13);
+    pbat[6] = stretch;
 
     if (sound != NULL) {
         return soundclient (sound);

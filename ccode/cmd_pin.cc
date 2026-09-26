@@ -41,8 +41,9 @@ struct PinDef {
 #define DEV_TT 2
 #define DEV_FP 3
 #define DEV_SH 4
+#define DEV_PB 5
 
-static Z8IU32 *devs[5];
+static Z8IU32 *devs[6];
 
 static PinDef const pindefs[] = {
 
@@ -233,6 +234,8 @@ static PinDef const pindefs[] = {
     { "sh_mquo",         DEV_SH,  5, sh5_mquo,             false },
     { "sh_tp1dat",       DEV_SH,  6, sh6_tp1dat,           false },
 
+    { "pb_stretch",      DEV_PB,  6, 1023,                 true  },
+
     { "", 0, 0, 0, false }
 };
 
@@ -265,6 +268,7 @@ int cmd_pin (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj *const
         devs[DEV_TT] = z8ipage.findev ("TT", NULL, NULL, false);
         devs[DEV_FP] = z8ipage.findev ("FP", NULL, NULL, false);
         devs[DEV_SH] = z8ipage.findev ("SH", NULL, NULL, false);
+        devs[DEV_PB] = z8ipage.findev ("PB", NULL, NULL, false);
     }
 
     // maybe list out pins

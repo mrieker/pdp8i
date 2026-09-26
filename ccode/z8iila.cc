@@ -74,8 +74,8 @@ int main (int argc, char **argv)
 
     uint32_t ctl;
     if (asisflag) {
-        pdpat[ILACTL] = CTL_FREEZE;
-        ctl = pdpat[ILACTL];
+        pdpat[ILACTL] = CTL_FREEZE; // freeze ilaindex and ilaarray contents, ie, stop further collection
+        ctl = pdpat[ILACTL];        // read ilaindex = next entry to be written = oldest entry written
     } else {
 
         // tell zynq.v to start collecting samples
@@ -105,10 +105,13 @@ int main (int argc, char **argv)
         if (nodots || (i == 0) || (i == DEPTH - 1) ||
                 (thisentry != preventry) || (thisentry != nextentry)) {
 
-            printf ("%6.2f rdat=%04o majst=%X ts=%o%o%o%o tp=%o%o%o%o acum=%04o madr=%04o mbuf=%04o\n",
+            printf ("%04o %6.2f _ioen=%o iosel=%o iop=%o majst=%X ts=%o%o%o%o tp=%o%o%o%o acum=%04o madr=%04o mbuf=%04o\n",
+                EXT (ctl + i * CTL_INDEX0, CTL_INDEX),  // ilaarray index
                 (i - DEPTH + AFTER + 1) / 100.0,        // trigger shows as 0.00uS
 
-                (unsigned) (thisentry >> 48) & 07777,   // extmemrdat
+                (unsigned) (thisentry >> 50) & 1,       // _ioenabd
+                (unsigned) (thisentry >> 49) & 1,       // dev_iiosel
+                (unsigned) (thisentry >> 48) & 1,       // dev_oIOP
                 (unsigned) (thisentry >> 44) & 15,      // majst
                 (unsigned) (thisentry >> 43) & 1,       // ts1
                 (unsigned) (thisentry >> 42) & 1,
