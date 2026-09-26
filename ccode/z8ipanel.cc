@@ -624,7 +624,7 @@ static char const grnbitoff[] =           ESC_GRNFG           "-" ESC_NORMV;
 
 #define REG12L(v) REG3L (red, (v) >> 9), REG3L (yel, (v) >> 6), REG3L (red, (v) >> 3), REG3L (yel, (v) >> 0)
 #define REG3L(c,v) RBITL (c, (v), 2), RBITL (c, (v), 1), RBITL (c, (v), 0)
-#define REG5L(v) RBITL (blu, (v), 4), RBITL (blu, (v), 3), RBITL (grn, (v), 2), RBITL (grn, (v), 1), RBITL (grn, (v), 0)
+#define REG5L(v) RBITL (blu, (v), 4), RBITL (blu, (v), 3), RBITL (blu, (v), 2), RBITL (grn, (v), 1), RBITL (grn, (v), 0)
 #define RBITL(c,v,n) BOOL (c, ((v) >> (n)) & 1)
 #define BOOL(c,b) (b ? c##biton : c##bitoff)
 #define STL(c,b,on,off) (b ? (ESC_BOLDV ESC_##c##BG ESC_BLKFG on ESC_NORMV) : (ESC_##c##FG off ESC_NORMV))
@@ -720,7 +720,7 @@ static int showstatus (int argc, char **argv)
         printf ("                                                                     %s  %s" EOL,
             STL (CYN, iropr, "OPR", "opr"), STL (GRN, msdep, "DEPOS", "depos"));
 
-        printf ("          " ESC_CYNFG " SC " ESC_NORMV " %s %s  %s %s %s   %s %s %s  %s %s %s  %s %s %s  %s %s %s  MQ  " ESC_BOLDV "%02o.%04o" ESC_NORMV "       %s" EOL,
+        printf ("        " ESC_CYNFG " SC " ESC_NORMV " %s %s %s  %s %s     %s %s %s  %s %s %s  %s %s %s  %s %s %s  MQ  " ESC_BOLDV "%02o.%04o" ESC_NORMV "       %s" EOL,
             REG5L (pads.light.sc), REG12L (pads.light.mq), pads.light.sc, pads.light.mq, STL (GRN, msexm, "EXAM ", "exam "));
 
         printf (EOL);
