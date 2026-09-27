@@ -150,7 +150,7 @@ int main (int argc, char **argv)
                 // keep kerchunking until both transfers have completed
                 // capture read data on cycle where both RREADY and RVALID are set
                 for (int i = 0; vzynq->saxi_ARVALID | vzynq->saxi_RREADY; i ++) {
-                    if (i > 100) ABORT ();
+                    if (i > 10) ABORT ();
                     bool arready = vzynq->saxi_ARREADY;
                     kerchunk ();
                     if (arready) vzynq->saxi_ARVALID = 0;
@@ -188,13 +188,13 @@ int main (int argc, char **argv)
 
                 // keep kerchunking until all 3 transfers have completed
                 for (int i = 0; vzynq->saxi_AWVALID | vzynq->saxi_WVALID | vzynq->saxi_BREADY; i ++) {
-                    if (i > 100) ABORT ();
+                    if (i > 10) ABORT ();
                     bool awready = vzynq->saxi_AWREADY;
                     bool wready  = vzynq->saxi_WREADY;
+                    bool bvalid  = vzynq->saxi_BVALID;
                     kerchunk ();
                     if (awready) vzynq->saxi_AWVALID = 0;
                     if (wready)  vzynq->saxi_WVALID  = 0;
-                    bool bvalid  = vzynq->saxi_BVALID;
                     if (bvalid)  vzynq->saxi_BREADY  = 0;
                 }
                 break;

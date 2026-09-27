@@ -1009,6 +1009,7 @@ static int armwritestep (int step, uint32_t armaddr, uint32_t armdata)
 {
     static bool awready;
     static bool wready;
+    static bool bvalid;
 
     if (step == 0) {
         vbkpl->saxi_AWADDR  = armaddr << 2;
@@ -1020,10 +1021,11 @@ static int armwritestep (int step, uint32_t armaddr, uint32_t armdata)
         if (step > 100) ABORT ();
         if (awready) vbkpl->saxi_AWVALID = 0;
         if (wready)  vbkpl->saxi_WVALID  = 0;
-        if (vbkpl->saxi_BVALID) vbkpl->saxi_BREADY = 0;
+        if (bvalid)  vbkpl->saxi_BREADY  = 0;
     }
     awready = vbkpl->saxi_AWREADY;
     wready  = vbkpl->saxi_WREADY;
+    bvalid  = vbkpl->saxi_BVALID;
     return (vbkpl->saxi_AWVALID | vbkpl->saxi_WVALID | vbkpl->saxi_BREADY) ? step + 1 : 0;
 }
 

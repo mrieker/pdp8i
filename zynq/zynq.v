@@ -131,7 +131,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
 );
 
     // [31:16] = '8I'; [15:12] = (log2 len)-1; [11:00] = version
-    localparam VERSION = 32'h38494007;
+    localparam VERSION = 32'h38494008;
 
     assign ground = 0;
 
@@ -444,9 +444,9 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     reg iopstart;
 
     // there is data waiting to be written to a register when:
-    //  we have accepted an address from the arm
+    //  we have accepted an address from the arm and
     //  we have accepted write data from the arm
-    wire writepend  = ~ saxi_AWREADY & ~ saxi_WREADY;
+    reg writepend;
 
     // actually perform the write when one is pending and not doing i/o for the pdp
     // iopstart is set for exactly one 10nS cycle at TP2 of an i/o instruction
@@ -484,6 +484,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
             saxi_AWREADY <= 1;                          // we are ready to accept write address
             saxi_WREADY  <= 1;                          // we are ready to accept write data
             saxi_BVALID  <= 0;                          // we are not acknowledging any write
+            writepend    <= 0;                          // no arm data waiting to be written to register
 
             hdw_poweron_n <= 1;                         // start with 'always on' outputs turned off
 
@@ -535,6 +536,12 @@ module Zynq #(parameter BIDIRCONSDA=1) (
             if (saxi_WREADY & saxi_WVALID) begin
                 writedata     <= saxi_WDATA;                // capture data being written
                 saxi_WREADY   <= 0;                         // we are no longer accepting write data
+            end
+
+            // see if we got them both or are getting them both
+            if (~ writepend & (~ saxi_AWREADY | saxi_AWVALID) & (~ saxi_WREADY | saxi_WVALID)) begin
+                writepend     <= 1;                         // we have both address and data
+                saxi_BVALID   <= 1;                         // acknowledge write to processor
             end
 
             // check for PS acknowledging write acceptance
@@ -598,10 +605,12 @@ module Zynq #(parameter BIDIRCONSDA=1) (
                     default: begin end
                 endcase
 
+                // write complete
+                writepend    <= 0;
+
                 // tell arm we have completed this write and can accept another
                 saxi_AWREADY <= 1;
                 saxi_WREADY  <= 1;
-                saxi_BVALID  <= 1;
             end
         end
 

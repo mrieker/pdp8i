@@ -51,17 +51,16 @@ module pdp8ipbit (
     reg [12:00] count, width;
     reg [15:00] samprate, sampincr, sampcount, sampinteg;
     reg [31:00] sampbytes;
-    reg [15:00] fcount, fpart1, fpart2, fpart3, fpart4;
+    reg [15:00] ffinal;
+    reg [13:00] fpart1, fpart2, fpart3, fpart4;
     reg [24:00] qtrsec;
-
-    wire[15:00] ffinal = fpart1 + fpart2 + fpart3 + fpart4;
 
     assign armrdata = (armraddr == 0) ? 32'h50422008 : // [31:16] = 'PB'; [15:12] = (log2 nreg) - 1; [11:00] = version
                       (armraddr == 1) ? { iszac, 5'b0, width, count } :
                       (armraddr == 2) ? { samprate, sampincr } :
                       (armraddr == 3) ? sampbytes :
                       (armraddr == 4) ? { 7'b0, qtrsec } :
-                      (armraddr == 5) ? { ffinal, fcount } :
+                      (armraddr == 5) ? { ffinal, 2'b0, fpart1 } :
                       (armraddr == 6) ? { 12'b0, stcount, stretch } :
                                         32'hDEADBEEF;
 
@@ -74,7 +73,7 @@ module pdp8ipbit (
             count  <= 0;
             pulse  <= 0;
             qtrsec <= 0;
-            fcount <= 0;
+            fpart1 <= 0;
             stcount   <= 0;
             stretch   <= 0;
             lastpulse <= 0;
@@ -131,8 +130,8 @@ module pdp8ipbit (
                 end
 
                 // at 8000 samples/second:
-                //  samprate = 100000000 / 8000 - 1 = 12499
-                //  sampincr = 65535 / (samprate + 1) = 5
+                //  samprate = 100000000 / 8000 - 1 = 12499  ; how many 10nS clocks per integration
+                //  sampincr = 65535 / (samprate + 1) = 5    ; how much to add to integration each 10nS
                 if (sampcount == samprate) begin
                     sampbytes <= { sampbytes[23:00], sampinteg[15:08] };
                     sampcount <= 0;
@@ -147,15 +146,15 @@ module pdp8ipbit (
             // counts the 0-to-1 transitions of pulse
             if (qtrsec == 24999999) begin
                 qtrsec <= 0;
-                fpart1 <= fpart2;
-                fpart2 <= fpart3;
-                fpart3 <= fpart4;
-                fpart4 <= fcount;
-                fcount <= { 15'b0, ~ lastpulse & pulse };
+                ffinal <= { 2'b0, fpart1 } + { 2'b0, fpart2 } + { 2'b0, fpart3 } + { 2'b0, fpart4 };
+                fpart1 <= { 13'b0, ~ lastpulse & pulse };
+                fpart2 <= fpart1;
+                fpart3 <= fpart2;
+                fpart4 <= fpart3;
             end else begin
                 qtrsec <= qtrsec + 1;
-                if (~ lastpulse & pulse & (fcount != 65535)) begin
-                    fcount <= fcount + 1;
+                if (~ lastpulse & pulse & (fpart1 != 16383)) begin
+                    fpart1 <= fpart1 + 1;
                 end
             end
 

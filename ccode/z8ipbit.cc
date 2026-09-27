@@ -88,7 +88,7 @@ int main (int argc, char **argv)
             puts ("      -noiszac = disable ISZAC I/O instruction 6004");
             puts ("      -sound   = forward sound on to server (see -server)");
             puts ("      -stretch = stretch the ISZAC I/O instruction by count*10nS (default 250)");
-            puts ("      -width   = set width of pulses in 10nS units, 1..8192 (default 599)");
+            puts ("      -width   = set width of pulses in 10nS units, 1..8192 (default 600)");
             puts ("");
             puts ("    ./z8ipbit -server");
             puts ("");
