@@ -139,7 +139,7 @@ public class SCM {
         ps.println ("");
     }
 
-    private static class Printer {
+    public static class Printer {
         public int level = 0;
         public int linum = 1;
         public PrintStream ps;

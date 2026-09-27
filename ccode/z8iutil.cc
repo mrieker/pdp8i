@@ -188,6 +188,7 @@ uint32_t Z8IPage::dmacycle (uint32_t cm)
     ASSERT (k_10MHz == 0xFFFFFFFFU);
     cmlock ();
     cmemat[1] = CM_BUSY | cm;
+start:;
     uint32_t started = pdpat[Z_RK];
     while (true) {
         uint32_t now = pdpat[Z_RK];
@@ -195,6 +196,14 @@ uint32_t Z8IPage::dmacycle (uint32_t cm)
         if (! (cm & CM_BUSY)) break;
         uint32_t diff = now - started;
         if (diff > 10000) {     // 1mS subject to d_clkratm1
+            if (! EXT (pdpat[Z_RF], f_oRUN)) {
+                fprintf (stderr, "Z8IPage::dmacycle: dma while halted\n");
+                while (! EXT (pdpat[Z_RF], f_oRUN)) {
+                    usleep (12345);
+                }
+                fprintf (stderr, "Z8IPage::dmacycle: resuming\n");
+                goto start;
+            }
             fprintf (stderr, "Z8IPage::dmacycle: cmem controller is stuck %08X - %08X = %08X\n", now, started, diff);
             ABORT ();
         }

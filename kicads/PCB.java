@@ -264,9 +264,8 @@ public class PCB {
         public Pad (SCM.ArrValue modulepad)
                 throws Exception
         {
-            if (modulepad.elems[1] instanceof SCM.NumValue) {
-                padidx = modulepad.elems[1].asint ();
-            }
+            // (pad "1" ...)
+            padidx = modulepad.elems[1].asint ();
 
             pintype = PinType.OTHER;
             atxin = Double.NaN;

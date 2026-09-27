@@ -25,6 +25,7 @@
 	tfl   = 06040
 	tsf   = 06041
 	tls   = 06046
+	wfi   = 06313
 	dtra  = 06761
 	dtxa  = 06764
 	dtla  = 06766
@@ -486,34 +487,25 @@ wfd_loop:
 	jmpi	waitfordone
 	tadi	_idwc
 	ion			; busy, enable interrupts
-	nop
 wfd_hang:
-	jmp	wfd_hang	; hang here for interrupt
+	wfi			; hang here for interrupt
+	jmp	wfd_hang	; ..also resumes after break (dma) cycle
 
 __wfd_hang: .word -wfd_hang
 
 ;
-; interrupt service -
-;  prints status B and clears GO bit
+; interrupt service
 ;
 intserv:
 	dtsf			; check for tape op complete
-	jmp	intret
-	dca	intacsave
+	hlt			; should be only reason to interrupt
+	cla
 	tad	0		; see if interrupted waitfordone's hang loop
 	tad	__wfd_hang
-	sna cla
-	jmp	wfd_loop	; if so, just jump back to it without enabling interrupts
-	dtra			; if not, read status A
-	and	_0204		; get existing GO,IE bits
-	tad	_0003		; leave status B bits alone
-	dtxa			; clear GO,IE, leave status B alone
-	tad	intacsave
-intret:
-	ion
-	jmpi	0
-
-intacsave: .word .-.
+	cll rar
+	sza
+	hlt			; should be the only place it can interrupt
+	jmp	wfd_loop	; jump back to it without enabling interrupts
 
 
 	.align	00200
