@@ -45,7 +45,7 @@ module pdp8idc02
 
     input iopstart,
     input iopstop,
-    input[11:00] ioopcode,
+    input[08:00] ioopcode,
     input[11:00] cputodev,
 
     output reg[11:00] devtocpu,
@@ -111,11 +111,11 @@ module pdp8idc02
             // process the IOP only on the leading edge
             // ...but leave output signals to PDP-8/I in place until given the all clear
             if (iopstart & enable) begin
-                SELECTED <= ((ioopcode & 12'o7770) == 12'o6110) | ((ioopcode & 12'o7770) == 12'o6120);
+                SELECTED <= ((ioopcode & 9'o770) == 9'o110) | ((ioopcode & 9'o770) == 9'o120);
                 case (ioopcode)
 
                     // MKSF - skip if enabled keyboard ready
-                    12'o6111: begin
+                    9'o111: begin
                         IO_SKIP <=
                             kbflags[0] & mtonreg[11] |
                             kbflags[1] & mtonreg[10] |
@@ -126,7 +126,7 @@ module pdp8idc02
                     end
 
                     // MKCC - clear enabled keyboard flags
-                    12'o6112: begin
+                    9'o112: begin
                         AC_CLEAR <= 1;
                         if (mtonreg[11]) kbflags[0] <= 0;
                         if (mtonreg[10]) kbflags[1] <= 0;
@@ -137,7 +137,7 @@ module pdp8idc02
                     end
 
                     // MTPF - read all printer flags
-                    12'o6113: begin
+                    9'o113: begin
                         devtocpu[11] <= prflags[0];
                         devtocpu[10] <= prflags[1];
                         devtocpu[09] <= prflags[2];
@@ -148,7 +148,7 @@ module pdp8idc02
                     end
 
                     // MKRS - read enabled keyboard characters
-                    12'o6114: begin
+                    9'o114: begin
                         devtocpu <=
                             (mtonreg[11] ? kbchars[0] : 12'o0000) |
                             (mtonreg[10] ? kbchars[1] : 12'o0000) |
@@ -159,12 +159,12 @@ module pdp8idc02
                     end
 
                     // MINT - set global interrupt enable
-                    12'o6115: begin
+                    9'o115: begin
                         intenab <= cputodev[00];
                     end
 
                     // MKRB - read enabled keyboard characters and clear enabled flags
-                    12'o6116: begin
+                    9'o116: begin
                         devtocpu <=
                             (mtonreg[11] ? kbchars[0] : 12'o0000) |
                             (mtonreg[10] ? kbchars[1] : 12'o0000) |
@@ -184,12 +184,12 @@ module pdp8idc02
                     // MTON - set enabled lines
                     //  edu20c uses [11] to enable terminal 0, [10] to enable terminal 1, ..., [04] to enable terminal 7
                     //  it also always sets [03:00] = 4'b0100, comments says 'GROUP 1', but we ignore them
-                    12'o6117: begin
+                    9'o117: begin
                         mtonreg <= cputodev;
                     end
 
                     // MTSF - skip if enabled printer ready
-                    12'o6121: begin
+                    9'o121: begin
                         IO_SKIP <=
                             prflags[0] & mtonreg[11] |
                             prflags[1] & mtonreg[10] |
@@ -200,7 +200,7 @@ module pdp8idc02
                     end
 
                     // MTCF - clear enabled printer flag
-                    12'o6122: begin
+                    9'o122: begin
                         if (mtonreg[11]) prflags[0] <= 0;
                         if (mtonreg[10]) prflags[1] <= 0;
                         if (mtonreg[09]) prflags[2] <= 0;
@@ -210,7 +210,7 @@ module pdp8idc02
                     end
 
                     // MTKF - read all keyboard flags
-                    12'o6123: begin
+                    9'o123: begin
                         devtocpu[11] <= kbflags[0];
                         devtocpu[10] <= kbflags[1];
                         devtocpu[09] <= kbflags[2];
@@ -221,12 +221,12 @@ module pdp8idc02
                     end
 
                     // MINS - multiple interrupt and skip
-                    12'o6125: begin
+                    9'o125: begin
                         IO_SKIP <= INT_RQST;
                     end
 
                     // MTLS - clear printer ready and start printing
-                    12'o6126: begin
+                    9'o126: begin
                         if (mtonreg[11]) begin prflags[0] <= 0; prfulls[0] <= 1; prchars[0] <= cputodev; end
                         if (mtonreg[10]) begin prflags[1] <= 0; prfulls[1] <= 1; prchars[1] <= cputodev; end
                         if (mtonreg[09]) begin prflags[2] <= 0; prfulls[2] <= 1; prchars[2] <= cputodev; end

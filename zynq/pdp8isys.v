@@ -32,7 +32,7 @@ module pdp8isys (
 
     input iopstart,
     input iopstop,
-    input[11:00] ioopcode,
+    input[08:00] ioopcode,
     input[11:00] cputodev,
 
     output reg[11:00] devtocpu,

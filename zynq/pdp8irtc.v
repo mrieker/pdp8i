@@ -31,7 +31,7 @@ module pdp8irtc (
 
     input iopstart,
     input iopstop,
-    input[11:00] ioopcode,
+    input[08:00] ioopcode,
     input[11:00] cputodev,
 
     output reg[11:00] devtocpu,
@@ -70,20 +70,20 @@ module pdp8irtc (
             // process the IOP only on the leading edge
             // ...but leave output signals to PDP-8/I in place until given the all clear
             if (iopstart) begin
-                SELECTED <= (ioopcode & 12'o7770) == 12'o6130;
+                SELECTED <= (ioopcode & 9'o770) == 9'o130;
                 case (ioopcode)
-                    12'o6130: enable  <= enable & ~ cputodev;       // clear enable bits
-                    12'o6131: IO_SKIP <= status11;                  // skip on clock overflow
-                    12'o6132: enable  <= enable |   cputodev;       // set enable bits
-                    12'o6133: begin
+                    9'o130: enable  <= enable & ~ cputodev;         // clear enable bits
+                    9'o131: IO_SKIP <= status11;                    // skip on clock overflow
+                    9'o132: enable  <= enable |   cputodev;         // set enable bits
+                    9'o133: begin
                         counter  <= cputodev;                       // set counter
                         buffer   <= cputodev;                       // and buffer
                     end
-                    12'o6134: devtocpu <= enable;                   // read enable register
-                    12'o6135: devtocpu <= { status11, 11'b0 };      // read status register
+                    9'o134: devtocpu <= enable;                     // read enable register
+                    9'o135: devtocpu <= { status11, 11'b0 };        // read status register
                                                                     // clear status below
-                    12'o6136: devtocpu <= buffer;                   // read buffer register
-                    12'o6137: begin
+                    9'o136: devtocpu <= buffer;                     // read buffer register
+                    9'o137: begin
                         buffer   <= counter;                        // read counter into buffer
                         devtocpu <= counter;                        // ...and return to cpu
                     end
@@ -100,9 +100,9 @@ module pdp8irtc (
             end
 
             // increment divider and counter and status
-            if (iopstart & (ioopcode == 12'o6135) | overflow) status11 <= overflow;
+            if (iopstart & (ioopcode == 9'o135) | overflow) status11 <= overflow;
 
-            if (~ iopstart | (ioopcode != 12'o6133)) begin
+            if (~ iopstart | (ioopcode != 9'o133)) begin
                 if (tick) begin
                     case (enable[10:09])
                         0: counter <= counter + 1;

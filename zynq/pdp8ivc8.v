@@ -30,7 +30,7 @@ module pdp8ivc8 (
 
     input iopstart,
     input iopstop,
-    input[11:00] ioopcode,
+    input[08:00] ioopcode,
     input[11:00] cputodev,
 
     output reg[11:00] devtocpu,
@@ -131,36 +131,36 @@ module pdp8ivc8 (
                 if (typee) begin
 
                     // VC-8/E style
-                    SELECTED <= ioopcode[11:03] == 9'o605;
+                    SELECTED <= ioopcode[08:03] == 6'o05;
                     case (ioopcode)
 
                         // we can't do DILC - logic clear - cuz opcode 6050 ends in 0
                         // it resets eflags = 0
 
                         // DICD - clear done flag
-                        12'o6051: begin
+                        9'o051: begin
                             eflags[EF_V_DN] <= 0;
                         end
 
                         // DISD - skip on done
-                        12'o6052: begin
+                        9'o052: begin
                             IO_SKIP <= eflags[EF_V_DN];
                         end
 
                         // DILX - load x
-                        12'o6053: begin
+                        9'o053: begin
                             xcobuf <= cputodev[9:0] ^ 10'o1000;
                             eflags[EF_V_DN] <= 1;
                         end
 
                         // DILY - load y
-                        12'o6054: begin
+                        9'o054: begin
                             ycobuf <= cputodev[9:0] ^ 10'o1000;
                             eflags[EF_V_DN] <= 1;
                         end
 
                         // DIXY - intensify at (x,y)
-                        12'o6055: begin
+                        9'o055: begin
                             vidaddra <= insert;
                             viddataa <= { intens, ycobuf, xcobuf };
                             videnaba <= 1;
@@ -169,13 +169,13 @@ module pdp8ivc8 (
                         end
 
                         // DILE - load enable/status register
-                        12'o6056: begin
+                        9'o056: begin
                             eflags[05:00] <= cputodev[05:00];
                             intens <= cputodev[EF_V_CO] ? 3 : 0;    // 3=RED; 0=GREEN
                         end
 
                         // DIRE - read enable/status register
-                        12'o6057: begin
+                        9'o057: begin
                             devtocpu <= eflags;
                             AC_CLEAR <= 1;
                         end
@@ -186,7 +186,7 @@ module pdp8ivc8 (
 
                     // VC-8/I style
 
-                    if (ioopcode[11:03] == 9'o605) begin
+                    if (ioopcode[08:03] == 6'o05) begin
                         SELECTED <= 1;
                         xcobuf <= newixcobuf;
                         if (ioopcode[02]) begin
@@ -198,7 +198,7 @@ module pdp8ivc8 (
                         end
                     end
 
-                    if (ioopcode[11:03] == 9'o606) begin
+                    if (ioopcode[08:03] == 6'o06) begin
                         SELECTED <= 1;
                         ycobuf <= newiycobuf;
                         if (ioopcode[02]) begin
@@ -210,7 +210,7 @@ module pdp8ivc8 (
                         end
                     end
 
-                    if (ioopcode[11:03] == 9'o607) begin
+                    if (ioopcode[08:03] == 6'o07) begin
                         SELECTED <= 1;
                         if (ioopcode[02]) intens <= ioopcode[1:0];
                     end

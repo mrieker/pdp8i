@@ -1215,7 +1215,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
 
         .iopstart (iopstart),
         .iopstop  (iopstop),
-        .ioopcode (dev_oMBUF),
+        .ioopcode (dev_oMBUF[08:00]),
         .cputodev (dev_oACUM),
 
         .devtocpu (ttinbus),
@@ -1242,7 +1242,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
 
         .iopstart (iopstart),
         .iopstop  (iopstop),
-        .ioopcode (dev_oMBUF),
+        .ioopcode (dev_oMBUF[08:00]),
         .cputodev (dev_oACUM),
 
         .devtocpu (syinbus),
@@ -1268,7 +1268,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
 
         .iopstart (iopstart),
         .iopstop  (iopstop),
-        .ioopcode (dev_oMBUF),
+        .ioopcode (dev_oMBUF[08:00]),
         .cputodev (dev_oACUM),
 
         .devtocpu (dcinbus),
@@ -1294,7 +1294,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
 
         .iopstart (iopstart),
         .iopstop  (iopstop),
-        .ioopcode (dev_oMBUF),
+        .ioopcode (dev_oMBUF[08:00]),
         .cputodev (dev_oACUM),
 
         .devtocpu (rkinbus),
@@ -1356,7 +1356,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
 
         .iopstart (iopstart),
         .iopstop  (iopstop),
-        .ioopcode (dev_oMBUF),
+        .ioopcode (dev_oMBUF[08:00]),
         .cputodev (dev_oACUM),
 
         .devtocpu (tcinbus),
@@ -1381,7 +1381,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
 
         .iopstart (iopstart),
         .iopstop  (iopstop),
-        .ioopcode (dev_oMBUF),
+        .ioopcode (dev_oMBUF[08:00]),
         .cputodev (dev_oACUM),
 
         .devtocpu (vcinbus),
@@ -1436,7 +1436,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
 
         .iopstart (iopstart),
         .iopstop  (iopstop),
-        .ioopcode (dev_oMBUF),
+        .ioopcode (dev_oMBUF[08:00]),
         .cputodev (dev_oACUM),
 
         .devtocpu (prinbus),
@@ -1459,7 +1459,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
 
         .iopstart (iopstart),
         .iopstop  (iopstop),
-        .ioopcode (dev_oMBUF),
+        .ioopcode (dev_oMBUF[08:00]),
         .cputodev (dev_oACUM),
 
         .devtocpu (pbinbus),
@@ -1486,7 +1486,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
 
         .iopstart (iopstart),
         .iopstop  (iopstop),
-        .ioopcode (dev_oMBUF),
+        .ioopcode (dev_oMBUF[08:00]),
         .cputodev (dev_oACUM),
 
         .IO_SKIP  (ppioskp),
@@ -1509,7 +1509,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
 
         .iopstart (iopstart),
         .iopstop  (iopstop),
-        .ioopcode (dev_oMBUF),
+        .ioopcode (dev_oMBUF[08:00]),
         .cputodev (dev_oACUM),
 
         .devtocpu (rcinbus),

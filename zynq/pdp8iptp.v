@@ -36,7 +36,7 @@ module pdp8iptp (
 
     input iopstart,
     input iopstop,
-    input[11:00] ioopcode,
+    input[08:00] ioopcode,
     input[11:00] cputodev,
 
     output reg IO_SKIP,
@@ -75,7 +75,7 @@ module pdp8iptp (
 
             // process the IOP only on the leading edge
             // ...but leave output signals to PDP-8/I in place until given the all clear
-            if (iopstart & enable & (ioopcode[11:03] == 9'o602)) begin
+            if (iopstart & enable & (ioopcode[08:03] == 6'o02)) begin
                 SELECTED <= 1;
                 if (ioopcode[00]) IO_SKIP <= wrflag;
                 if (ioopcode[01]) wrflag  <= 0;

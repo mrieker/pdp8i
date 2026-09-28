@@ -34,7 +34,7 @@ module pdp8ipbit (
 
     input iopstart,
     input iopstop,
-    input[11:00] ioopcode,
+    input[08:00] ioopcode,
     input[11:00] cputodev,
 
     output reg[11:00] devtocpu,
@@ -107,7 +107,7 @@ module pdp8ipbit (
                     pulse <= 1;
 
                     // maybe do increment accumulator and skip if zero
-                    if (iszac & (ioopcode == 12'o6004)) begin
+                    if (iszac & (ioopcode == 9'o004)) begin
                         stcount  <= stretch;
                         SELECTED <= 1;
                         AC_CLEAR <= 1;

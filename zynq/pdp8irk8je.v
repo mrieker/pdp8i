@@ -31,7 +31,7 @@ module pdp8irk8je (
 
     input iopstart,
     input iopstop,
-    input[11:00] ioopcode,
+    input[08:00] ioopcode,
     input[11:00] cputodev,
 
     output reg[11:00] devtocpu,
@@ -100,17 +100,17 @@ module pdp8irk8je (
         // ...but leave output signals to PDP-8/I in place until given the all clear
         else begin
             if (iopstart & enable) begin
-                SELECTED <= (ioopcode & 12'o7770) == 12'o6740;
+                SELECTED <= (ioopcode & 9'o770) == 9'o740;
                 case (ioopcode)
 
                     // DSKP - skip if transfer done or error
                     // p 225 v 9-116
-                    12'o6741: begin
+                    9'o741: begin
                         IO_SKIP <= stskip;
                     end
 
                     // DCLR - function in AC<01:00>
-                    12'o6742: begin
+                    9'o742: begin
                         case (cputodev[01:00])
 
                             // clear status (unless busy doing something)
@@ -156,7 +156,7 @@ module pdp8irk8je (
                     end
 
                     // DLAG - load disk address, clear accumulator and start function in command register
-                    12'o6743: begin
+                    9'o743: begin
                         if (stbusy) begin
                             status[ST_CBSY] <= 1;
                         end else begin
@@ -170,7 +170,7 @@ module pdp8irk8je (
                     end
 
                     // DLCA - load current memory address register from the AC
-                    12'o6744: begin
+                    9'o744: begin
                         if (stbusy) begin
                             status[ST_CBSY] <= 1;
                         end else begin
@@ -181,13 +181,13 @@ module pdp8irk8je (
                     end
 
                     // DRST - clear the AC and read conents of status register into the AC
-                    12'o6745: begin
+                    9'o745: begin
                         AC_CLEAR <= 1;
                         devtocpu <= status;
                     end
 
                     // DLDC - load command register from the AC, clear AC and clear status register
-                    12'o6746: begin
+                    9'o746: begin
                         if (stbusy) begin
                             status[ST_CBSY] <= 1;
                         end else begin

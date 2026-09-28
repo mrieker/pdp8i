@@ -31,7 +31,7 @@ module pdp8itc08 (
 
     input iopstart,
     input iopstop,
-    input[11:00] ioopcode,
+    input[08:00] ioopcode,
     input[11:00] cputodev,
 
     output reg[11:00] devtocpu,
@@ -81,7 +81,7 @@ module pdp8itc08 (
             if (iopstart & enable) begin
 
                 // 676x opcodes
-                if (ioopcode[11:03] == 9'o676) begin
+                if (ioopcode[08:03] == 6'o76) begin
                     SELECTED <= 1;
                     if (ioopcode[02]) begin
                         status_a <= new_status_a;                   // maybe clear status_a, maybe start IO
@@ -98,7 +98,7 @@ module pdp8itc08 (
                 end
 
                 // 677x opcodes
-                if (ioopcode[11:03] == 9'o677) begin
+                if (ioopcode[08:03] == 6'o77) begin
                     SELECTED <= 1;
                     if (ioopcode[02]) begin
                         status_b[05:03] <= cputodev[05:03];         // load DMA extended address bits of status register B
