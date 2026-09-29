@@ -17,6 +17,8 @@ proc helpini {} {
     puts "  dumpmem <start> <stop>  - dump memory in octal"
     puts "  escapechr               - convert character to escape"
     puts "  flicksw <switch>        - flick momentary switch on then off"
+    puts "  fpfpgascan              - enable fpga console i2c scanning counters"
+    puts "  fpselfscan              - enable console board self-scanning counters"
     puts "  getenv                  - get environment variable"
     puts "  getrestofttyline        - read rest of line from tty"
     puts "  hardreset               - reset the processor"
@@ -291,6 +293,35 @@ proc escapechr {ch} {
 proc flicksw {swname} {
     setsw $swname 1
     setsw $swname 0
+}
+
+proc fpfpgascan {} {
+    # tell pdp8ifpi2c.v to start scanning console
+    pin set fp_manual 0
+}
+
+proc fpselfscan {} {
+    # tell pdp8ifpi2c.v to stop scanning console
+    pin set fp_manual 1
+    # wait for it to stop
+    set beg100 [pin 100mhz]
+    while {[pin fp_mcpstate] != 0} {
+        set del100 [expr {([pin 100mhz] - $beg100) & 0xFFFFFFFF}]
+        if {$del100 > 3300000} {error "pdp8ifpi2c timed out"}
+        after 123
+    }
+    # set all mcp23017 pins to input mode
+    # pullups will set iicsel = 1111 so board will scan on its own
+    # command <= { WR, 8'h40,     WR, 8'h00,     WR, 8'hFF,     WR,  8'hFF,     24'b0 };
+    #              11  01.0000.00 11. 0000.0000. 11  11.1111.11 11.  1111.1111. 0...
+    pin set fp_cmdlo 0xFF000000 fp_cmdhi 0xD0300FFF
+    set beg100 [pin 100mhz]
+    while {[set stshi [pin fp_stshi]] & 0xF0000000} {
+        if {! ($stshi & 0x80000000)} {error [format "pdp8ifpi2c error %08X" $stshi]}
+        set del100 [expr {([pin 100mhz] - $beg100) & 0xFFFFFFFF}]
+        if {$del100 > 3300000} {error "pdp8ifpi2c timed out"}
+        after 123
+    }
 }
 
 # get environment variable, return default value if not defined

@@ -71,7 +71,7 @@ module pdp8ifpi2c (
     reg[5:0] dbncount, dbnlimit;
     wire debounced = (dbncount == dbnlimit);
 
-    assign armrdata = (armraddr ==  0) ? 32'h46503005 : // [31:16] = 'FP'; [15:12] = (log2 nreg) - 1; [11:00] = version
+    assign armrdata = (armraddr ==  0) ? 32'h46503006 : // [31:16] = 'FP'; [15:12] = (log2 nreg) - 1; [11:00] = version
                       (armraddr ==  1) ? { comand[31:00] } :
                       (armraddr ==  2) ? { comand[63:32] } :
                       (armraddr ==  3) ? { status[31:00] } :
@@ -272,6 +272,8 @@ module pdp8ifpi2c (
                             inmode   <= 1;
                         end
                         mcpstate <= 1;
+                    end else begin
+                        inmode <= 0;
                     end
                 end
 
