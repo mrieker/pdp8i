@@ -17,7 +17,6 @@ set intdelayed   0
 set intenabled   0
 set intrequest   0
 set linc         0
-set memdis       0
 set memcycno     0
 set memcycwcover 0
 set mquo         0
@@ -26,7 +25,6 @@ set panelhalt    0
 set perclock     0
 set pctr         0
 set sctr         0
-set shat1        0
 set ttat1        0
 set ttat2        0
 set ttinten      1
@@ -79,13 +77,11 @@ proc simtest {} {
     global intrequest
     global linc
     global memcycwcover
-    global memdis
     global mquo
     global opcode
     global perclock
     global pctr
     global sctr
-    global shat1
     global swdfldpend
     global swifldpend
     global swregpend
@@ -172,10 +168,9 @@ proc simtest {} {
             ;# processor should be at beginning of TS1 in FETCH, WDCNT, BREAK or INTAK cycle
 
             ;# maybe do something with pdp8itty.v
-            ;# - but not if memdis mode cuz it takes too many cycles
             ;# - and only half the time for testing wfi so it isn't always requesting an interrupt
             set oldttintrq [ttintrq]
-            if {! $memdis && ($wfitests & 4) && ([randbits 6] == 0)} {
+            if {($wfitests & 4) && ([randbits 6] == 0)} {
                 set r [randbits 2]
                 switch $r {
                     0 {
@@ -579,7 +574,7 @@ proc memorycycle {state field addr rdata wdata} {
     global dma3cycle dmacainc dmarqst dmawrmem dmawdata dmaaddr dmafield
     global memcycwcover opcode
     global MS_BREAK MS_CURAD MS_DEPOS MS_EXAM MS_EXEC MS_FETCH MS_INTAK MS_WRDCT
-    global haltdelay haltwhy memcycno memdis panelhalt testcons
+    global haltdelay haltwhy memcycno panelhalt testcons
 
     ;# maybe flip on an halt switch if none flipped on already
     ;# takes several cycles to soak through console board
@@ -599,18 +594,10 @@ proc memorycycle {state field addr rdata wdata} {
     ;# should now be fully transitioned to the major state
     verify12 [bus majst] $state "bad state at start of mem cycle"
 
-    ;# get the read data on the INBUS so cpu can read it
+    ;# put get the read data into extmemory.kicad_sch memory chips, so cpu can read it
+    ;# it should then soak onto INBUS
     set expaddr [expr {($field << 12) | $addr}]
-    if {$memdis} {
-        ;# this script is the memory, so put read data directly on the INBUS
-        arm deferset 1 [expr {(1 << 24) | ($rdata << 10)}]   ;# [24]=arm_iMEMDIS, [21:10]=arm_iINBUS
-        ;# put unrelated number in extmemory.kicad_sch chip in case it is interfering
-        mem $expaddr [randbits 12]
-    } else {
-        ;# extmemory.kicad_sch memory chip enabled, so put read data directly in chip
-        ;# it should then soak onto INBUS
-        mem $expaddr $rdata
-    }
+    mem $expaddr $rdata
 
     ;# maybe generate a dma request via pdp8icmem.v
     ;# these have higher priority than plain dmarqsts
@@ -628,11 +615,6 @@ proc memorycycle {state field addr rdata wdata} {
 
     ;# end of TS1 means it finished reading that memory location into MB
     waitnegate TS1
-
-    ;# stop dumping memory read value onto iINBUS
-    if {$memdis} {
-        arm deferset 1 [expr {1 << 24}]                 ;# [24]=arm_iMEMDIS, [21:10]=arm_iINBUS
-    }
 
     ;# maybe put dma write data out on the inbus during TS2
     if {$dmarqst && $dmawrmem && ($state == $MS_BREAK) && [bus oBRKGNTO]} {
@@ -703,24 +685,11 @@ proc memorycycle {state field addr rdata wdata} {
     }
 
     ;# verify the extmemory.kicad_sch memory contents
-    if {! $memdis} {
-        verify12 [mem $expaddr] $wdata [format "address %05o mismatch" $expaddr]
-    }
+    verify12 [mem $expaddr] $wdata [format "address %05o mismatch" $expaddr]
 
     ;# if requesting break and it is granted, output address during all TS4s
     if {$dmarqst && [bus oBRKGNTO]} {
         bus set iINBUS $dmaaddr
-    }
-
-    ;# maybe flip memdis flag for next cycle
-    ;#  memdis = 0 : extmemory.kicad_sch ram chips read data will be gated onto inbus during ts1
-    ;#           1 : the ram chip data will not be gated onto inbus
-    ;#               ...this tcl code must put read data directly on inbus during ts1
-    incr memcycno
-    if {$memcycno % 1024 == 0} {
-        set memdis [randbits 1]
-        arm deferset 1 [expr {$memdis << 24}]   ;# arm_iMEMDIS
-        puts -nonewline " <<memdis=$memdis>>"
     }
 
     ;# step to end of cycle
@@ -729,6 +698,8 @@ proc memorycycle {state field addr rdata wdata} {
 
     ;# stop outputting dma address so it doesn't jam up bus
     bus set iINBUS 0
+
+    incr memcycno
 
     ;# check for halted/running
     if {$haltwhy != ""} {error "unprocessed haltwhy $haltwhy}

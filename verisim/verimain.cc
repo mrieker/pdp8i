@@ -425,7 +425,8 @@ static int cmd_clk (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj
                     uint32_t shad3 = armread (shat + 3);
                     uint32_t shad4 = armread (shat + 4);
                     uint32_t shad5 = armread (shat + 5);
-                    Tcl_SetResultF (interp, "shadow error %08X %08X %08X %08X %08X", shad1, shad2, shad3, shad4, shad5);
+                    uint32_t shad6 = armread (shat + 6);
+                    Tcl_SetResultF (interp, "shadow error %08X %08X %08X %08X %08X %08X", shad1, shad2, shad3, shad4, shad5, shad6);
                 }
                 return TCL_ERROR;
             }
@@ -735,12 +736,18 @@ static int cmd_mem (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj
                 Tcl_SetResultF (interp, "bad data %d", data);
                 return TCL_ERROR;
             }
+
+            // write to extmemory.kicad_sch memory
             int addr_E22 = mungememaddr_E22 (addr);
             int addr_E12 = mungememaddr_E12 (addr);
             int data_E22 = mungemembyte_E22 (data);
             int data_E12 = mungemembyte_E12 (data >> 6);
             vbkpl->__PVT__backplane__DOT__meminst->__PVT__E22__DOT__array[addr_E22] = data_E22;
             vbkpl->__PVT__backplane__DOT__meminst->__PVT__E12__DOT__array[addr_E12] = data_E12;
+
+            // write to zynq.v externmem array
+            vbkpl->backplane__DOT__zturnboard__DOT__zynqinst__DOT__externmem__DOT__ram[addr] = data;
+
             return TCL_OK;
         }
 

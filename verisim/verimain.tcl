@@ -57,6 +57,10 @@ proc hardreset {} {
     set fpat [arm find FP]                      ;# find pdp8ifpi2c.v registers
 
     if {$usefpi2c} {
+        arm set 1 0x4000000                     ;# arm_iRESET = 1
+        runloop 100
+        arm set 1 0                             ;# arm_iRESET = 0
+
         arm set [expr {$fpat +  5}] 0           ;# fp_manual  = 0 to turn pdp8ifpi2c.v scanning on
         arm set [expr {$fpat + 12}] 0           ;# switchovrs = 0 all switches off
         arm set [expr {$fpat + 11}] 0           ;# switchrows = 0
@@ -76,7 +80,7 @@ proc hardreset {} {
             ;#set mcpltrow [expr {($fp7 >>  6) &  7}]
             set mcpassno [expr {($fp7 >>  9)}]
             if {$mcpassno >= 2} break
-            if {$i > 10000} {
+            if {$i > 100000} {
                 error "pdp8ifpi2c did not start up"
             }
         }
