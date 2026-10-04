@@ -348,15 +348,20 @@ proc getrestofttyline {{tmsec 30000}} {
 
 # halt and reset the CPU
 proc hardreset {} {
-    pin set fp_manual 0                     ;# make sure pdp8ifpi2c.v scanning is enabled
-    pin set fp_ovrsstep 1 fp_setsstep 1     ;# stop at end of current cycle
-    pin set arm_iRESET 1 arm_iRESET 0       ;# pulse power-on reset to get pdp8ifpi2c.v scanning
-    pin set sh_clearit 1 sh_clearit 0       ;# clear shadow error so clock will run
+    pin set arm_iRESET 1                    ;# hold console mcp23017 and pdp8ifpi2c.v in reset state
+    pin set fp_manual 0                     ;# make sure pdp8ifpi2c.v is scanning so switches will be processed
+    pin set sh_clearit 1                    ;# clear shadow so 10MHz clock will run
+    pin set arm_iRESET 0                    ;# let console 23017 communicate with pdp8ifpi2c
+    setsw sstep 1                           ;# stop processor at end of current cycle
     setsw start 1                           ;# sstep + start holds processor in reset state
-    pin set arm_iRESET 1 arm_iRESET 0       ;# pulse power-on reset
+    pin set sh_clearit 0                    ;# clear shadow error so 10MHz clock will run
     setsw start 0                           ;# release START
     setsw sstep 0                           ;# release SSTEP
     relsw sstep
+    set rc [pin obusini orun sh_err1 sh_err2]
+    if {$rc != "0 0 0 0"} {
+        error "hardreset failed to reset ($rc)"
+    }
 }
 
 # convert integer to character
@@ -876,27 +881,25 @@ proc shadowon {} {
 
 # put in real mode
 proc simoff {} {
-    pin set arm_ireset 1 arm_ireset 0
+    pin set arm_ireset 1
     pin set simit 0
     pin set fp_manual 0
     pin set fp_i2cspeed 149     ;# 333KHz
     pin set fp_ltspeed 19999    ;# 200uS
     pin set sh_clearit 1
     pin set sh_frzonerr 1
-    pin set sh_clearit 0
     hardreset
 }
 
 # put in simulator mode
 proc simon {} {
-    pin set arm_ireset 1 arm_ireset 0
+    pin set arm_ireset 1
     pin set simit 1
     pin set fp_manual 0
     pin set fp_i2cspeed 29
     pin set fp_ltspeed 63
     pin set sh_clearit 1
     pin set sh_frzonerr 1
-    pin set sh_clearit 0
     hardreset
 }
 
