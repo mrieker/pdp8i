@@ -9,6 +9,11 @@
 
 	ion  = 06001	; enable interrupts
 
+	cdf0 = 06201
+	cdf1 = 06211
+	cif0 = 06202
+	rib  = 06234
+
 	clze = 06130	; (RTC) clear the given enable bits
 	clsk = 06131	; (RTC) skip if requesting interrupt
 	clde = 06132	; (RTC) set the given enable bits
@@ -116,6 +121,23 @@ h4001:	wfi
 	. = 02000
 	.global	__boot
 __boot:
+
+	; copy whole program to fields 1..7
+loopfield:
+	tadi	copyaddr	; read word from source field
+dstcdf:	cdf1			; change to dest field
+	dcai	copyaddr	; write word to dest field
+	cdf0			; back to source field
+	isz	copyaddr	; on to next word
+	jmp	loopfield
+	tad	dstcdf		; on to next data field
+	tad	_0010
+	dca	dstcdf
+	tad	dstcdf
+	and	_0100
+	sna cla
+	jmp	loopfield
+
 	cla cma
 	clze			; clear all RTC enable bits
 	cla
@@ -129,8 +151,11 @@ __boot:
 	ion			; enable interrupts
 	jmpi	_4001		; put 4001 in PC
 
+_0010:	.word	00010
+_0100:	.word	00100
 _4001:	.word	04001
 
+copyaddr: .word	.-.
 intena:	.word	05400		;    <11> = interrupt enable
 				; <10:09> = 01  : repeat
 				; <08:06> = 100 : 100uS ticks
@@ -138,70 +163,167 @@ period:	.word	-667		; interrupt every 66700uS
 
 ; step PC and AC
 ;  jmsi   _step
-;  .word  pcup,acup
-;  .word  pcdn,acdn
-;  .word  pchl,achl
+;  .word  pcleft,acright
+;  .word  pcright,acleft
+;  .word  pchold,achold
+; saveddf,if = possibly one bit set
+;      df,if = zero
+
 step:	.word	.-.
 	clsa			; clear clock interrupt request
-	ion			; re-enable interrupts
-	cla osr			; read switches
-	cll cma iac		; ...negative
-	sna
-	jmp	stephold	; - zero: hold in place
-	tad	count		; compute count-switches
-	snl cla
-	jmp	stepinc
-	tad	direc		; count >= SR, flip direction
-	cma
-	dca	direc
-	dca	count		; reset count
-stepinc:
-	isz	count		; count < SR, increment
+
+	cla cll			; save data & instr fields
+	rib			; AC = 000000iiiddd
+	ral
+	rtl			; AC = 000iiiddd000
+	dca	olddfif
+	tad	olddfif
+	bsw			; AC = ddd000000iii
+	tad	olddfif		; AC = dddiiidddiii
+	and	_0077		; AC = 000000dddiii
+	dca	olddfif
+
 .if hasextar
-	tad	direc
-	and	_0021
-	iac
-	and	_0021
-	cma
-	dca	.+2
-	scl
-	.word	.-.
-.endif
-	tad	direc		; get direction
-	sma cla
-	jmp	stepup		; pos - pc goes up
-stepdn:
-	isz	step		; neg - pc goes down
-	isz	step
-	tad	count		; display count in pidp's MQ leds
-	jmp	stepnext
-stepup:
-	cla osr			; read switches
-	cll cma iac		; ...negative
-	sna
-	jmp	stephold	; - zero: hold in place
-	tad	count		; compute count-switches
-	cma iac			; now switches-count
-stepnext:
-.if hasextar
-	mql			; AC -> MQ; 0 -> AC
+	cla sca			; read SC into AC
 .else
-	cla			; 0 -> AC
+	tad	fakesc
 .endif
-	tadi	step
-	dca	steppc
+	rar			; put SC<00> in link
+	snl cla
+	jmp	countup
+
+	; rotating AC rightward
+	; rotating PC leftward
+	; decrementing MQ down to 0
+countdn:
+.if hasextar
+	cla mqa			; read MQ (count) into AC
+.else
+	tad	fakemq
+.endif
+	sna
+	jmp	countdnend	; zero, switch to counting up
+	tad	_7777		; more to go, decrement count
+.if hasextar
+	mql			; store new count into MQ, then clear AC
+.else
+	dca	fakemq
+.endif
+	tadi	step		; get what new PC will be
+	tad	_4000		; see if it will be 4000
+	sza cla
+	jmp	loadit
+	tad	olddfif		; if so, rotate DFIF left one bit
+	cll
+	sna
+	cml
+	ral
+	dca	olddfif
+	jmp	loadit
+
+	; change to counting up
+countdnend:
+.if hasextar
+	scl			; set SC = 20
+	.word	07757
+.else
+	tad	_0020
+	dca	fakesc
+.endif
+
+	; - rotating AC leftward
+	;   rotating PC rightward
+	;   incrementing MQ up to SR
+countup:
+.if hasextar
+	cla mqa			; read MQ (count) into AC
+.else
+	tad	fakemq
+.endif
+	cll cma			; get complement count
+	dca	comcount
+	cla osr			; read limit from SR into AC
+	tad	comcount	; compute limit-count-1
+	iac			; compute limit-count
+	snl cla
+	jmp	countupend
+.if hasextar
+	cla mqa			; read MQ (count) into AC
+.else
+	tad	fakemq
+.endif
+	iac			; increment count
+.if hasextar
+	mql			; store new count into MQ, then clear AC
+.else
+	dca	fakemq
+.endif
 	isz	step
-	tadi	step
-	jmpi	steppc
-stephold:
-	isz	step		; SR=0: hold in place
 	isz	step
-	jmp	stepdn
+	tadi	step		; get what new PC will be
+	tad	_4000		; see if it will be 4000
+	sza cla
+	jmp	loadit
+	tad	olddfif		; if so, rotate DFIF right one bit
+	cll bsw
+	sna
+	cml
+	rar
+	bsw
+	dca	olddfif
 
-count:	.word	.-.
-direc:	.word	.-.
+	; step = points to newpc, newac words
+	; olddfif = hold new df,if registers
+loadit:
+	tadi	step		; get new PC
+	dca	newpc
+	isz	step		; get new AC
+	tadi	step
+	dca	newac
 
-steppc:	.word	.-.
+	tad	olddfif		; load up new DF
+	and	_0070
+	tad	_6201
+	dca	.+1
+	.word	.-.
+	tad	olddfif		; load up new IF
+	ral
+	rtl
+	and	_0070
+	tad	_6202
+	dca	.+1
+	.word	.-.
+	tad	newac		; load up new AC
+	ion			; allow RTC interrupt
+	jmpi	newpc		; load up new PC
 
-_0021:	.word	00021
+	; change to counting down
+countupend:
+.if hasextar
+	scl			; set SC = 01
+	.word	07776
+.else
+	iac
+	dca	fakesc
+.endif
+	jmp	countdn
+
+_0020:	.word	00020
+_0070:	.word	00070
+_0077:	.word	00077
+_4000:	.word	04000
+_6201:	.word	06201
+_6202:	.word	06202
+_7776:	.word	07776
+_7777:	.word	07777
+
+comcount: .word	.-.
+newac:	  .word	.-.
+newpc:    .word	.-.
+olddfif:  .word	.-.		; <05:03> = DF; <02:00> = IF
+
+.if hasextar ^ 1
+fakemq:	.word	.-.
+fakesc:	.word	.-.
+.endif
 
