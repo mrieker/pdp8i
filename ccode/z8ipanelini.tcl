@@ -348,10 +348,11 @@ proc getrestofttyline {{tmsec 30000}} {
 
 # halt and reset the CPU
 proc hardreset {} {
-    pin set arm_iRESET 1                    ;# hold console mcp23017 and pdp8ifpi2c.v in reset state
+    pin set arm_ireset 0                    ;# so we can set fp params
     pin set fp_manual 0                     ;# make sure pdp8ifpi2c.v is scanning so switches will be processed
+    pin set arm_ireset 1                    ;# hold console mcp23017 and pdp8ifpi2c.v in reset state
     pin set sh_clearit 1                    ;# clear shadow so 10MHz clock will run
-    pin set arm_iRESET 0                    ;# let console 23017 communicate with pdp8ifpi2c
+    pin set arm_ireset 0                    ;# let console 23017 communicate with pdp8ifpi2c
     setsw sstep 1                           ;# stop processor at end of current cycle
     setsw start 1                           ;# sstep + start holds processor in reset state
     pin set sh_clearit 0                    ;# clear shadow error so 10MHz clock will run
@@ -881,11 +882,12 @@ proc shadowon {} {
 
 # put in real mode
 proc simoff {} {
-    pin set arm_ireset 1
-    pin set simit 0
+    pin set arm_ireset 0        ;# so we can set fp params
     pin set fp_manual 0
     pin set fp_i2cspeed 149     ;# 333KHz
     pin set fp_ltspeed 19999    ;# 200uS
+    pin set arm_ireset 1
+    pin set simit 0
     pin set sh_clearit 1
     pin set sh_frzonerr 1
     hardreset
@@ -893,11 +895,12 @@ proc simoff {} {
 
 # put in simulator mode
 proc simon {} {
-    pin set arm_ireset 1
-    pin set simit 1
+    pin set arm_ireset 0        ;# so we can set fp params
     pin set fp_manual 0
     pin set fp_i2cspeed 29
     pin set fp_ltspeed 63
+    pin set arm_ireset 1
+    pin set simit 1
     pin set sh_clearit 1
     pin set sh_frzonerr 1
     hardreset

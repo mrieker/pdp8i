@@ -71,7 +71,7 @@ module pdp8ifpi2c (
     reg[5:0] dbncount, dbnlimit;
     wire debounced = (dbncount == dbnlimit);
 
-    assign armrdata = (armraddr ==  0) ? 32'h46503006 : // [31:16] = 'FP'; [15:12] = (log2 nreg) - 1; [11:00] = version
+    assign armrdata = (armraddr ==  0) ? 32'h46503007 : // [31:16] = 'FP'; [15:12] = (log2 nreg) - 1; [11:00] = version
                       (armraddr ==  1) ? { comand[31:00] } :
                       (armraddr ==  2) ? { comand[63:32] } :
                       (armraddr ==  3) ? { status[31:00] } :
@@ -152,6 +152,7 @@ module pdp8ifpi2c (
     always @(posedge CLOCK) begin
         if (iRESET) begin           // processor power-on reset
             if (RESET) begin        // fpga power-on reset
+                armlock  <= 0;      // nothing using arm registers
                 manual   <= 1;      // let console.kicad_sch clock itself
                 ltspeed  <= 19999;  // each light row stays on for 200uS
                 i2cspeed <= 29;     // operate i2c at 1.667MHz
@@ -160,7 +161,6 @@ module pdp8ifpi2c (
                 switchovrs[1] <= 0;
                 switchovrs[2] <= 0;
             end
-            armlock  <= 0;
             inmode   <= 0;          // data pins not known to be in input mode
             mcpassno <= 0;
             mcpltime <= 0;
