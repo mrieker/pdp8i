@@ -1,0 +1,14 @@
+#!/bin/bash
+#
+#  runs on zynq to connect to a remote pidp8 panel plugged into a raspi
+#  raspi must be running pidptcpserver
+#
+dd=`dirname $0`
+$dd/loadmod.sh
+dbg=
+if [ "$1" == "-gdb" ]
+then
+    dbg='gdb --args'
+    shift
+fi
+exec $dbg $0.`uname -m` "$@"
