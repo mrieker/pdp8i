@@ -90,8 +90,10 @@
 
 static uint16_t const swmasks[3] = { 0xFFF0, 0xC0F0, 0xC3F0 };
 
+static int buttonindex;
 static int gpiotcpfd = -1;
 static struct sockaddr_in gpiotcpsa;
+static uint32_t buttonring[8];
 static uint32_t rdcychz;    // actually cycles/0.131072sec
 static uint32_t volatile *gpiopage;
 
@@ -205,6 +207,13 @@ bool pidp_proc (PiDPMsg *pidpmsg)
             waitus (3);
             pidpmsg->swrows[i] = swmasks[i] & ~ gpiopage[GPIO_LEV0];
             set_output_high (0x70000U);
+        }
+
+        // debounce button row
+        buttonring[buttonindex] = pidpmsg->swrows[2];
+        buttonindex = (buttonindex + 1) % 8;
+        for (int i = 0; i < 8; i ++) {
+            pidpmsg->swrows[2] &= buttonring[i];
         }
     } else {
         PiDPMsg recvbuf;

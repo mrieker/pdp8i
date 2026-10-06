@@ -25,7 +25,7 @@
 //  ./pidptcpserver
 
 // on zynq:
-//  ./pidptcpclient <raspihostname>
+//  ./pidptcpclient [-nomqsc] <raspihostname>
 
 #include <signal.h>
 #include <string.h>
@@ -64,11 +64,28 @@ int main (int argc, char **argv)
 {
     setlinebuf (stdout);
 
-    if (argc != 2) {
+    bool nomqsc = false;
+    char const *server = NULL;
+    for (int i = 0; ++ i < argc;) {
+        if (strcasecmp (argv[i], "-nomqsc") == 0) {
+            nomqsc = true;
+            continue;
+        }
+        if (argv[i][0] == '-') {
+            fprintf (stderr, "unknown option %s\n", argv[i]);
+            return 1;
+        }
+        if (server != NULL) {
+            fprintf (stderr, "unknown parameter %s\n", argv[i]);
+            return 1;
+        }
+        server = argv[i];
+    }
+    if (server == NULL) {
         fprintf (stderr, "missing server hostname\n");
         return 1;
     }
-    pidp_open (argv[1]);
+    pidp_open (server);
 
     opcodeleds[0] = 1 << COL1;
     opcodeleds[1] = 1 << COL2;
@@ -125,7 +142,9 @@ int main (int argc, char **argv)
         pidpmsg.ledrows[1] = ledscrams[pads.light.ma];
         pidpmsg.ledrows[2] = ledscrams[pads.light.mb];
         pidpmsg.ledrows[3] = ledscrams[pads.light.ac];
-        pidpmsg.ledrows[4] = ledscrams[pads.light.mq];
+        if (! nomqsc) {
+            pidpmsg.ledrows[4] = ledscrams[pads.light.mq];
+        }
 
         pidpmsg.ledrows[5] =
             opcodeleds[pads.light.ir] |
@@ -139,8 +158,10 @@ int main (int argc, char **argv)
             ((pads.light.ms == MS_BREAK) ? (1 << COL2) : 0) |
             (pads.light.ion ? (1 << COL3) : 0) |
             (pads.light.pau ? (1 << COL4) : 0) |
-            (pads.light.run ? (1 << COL5) : 0) |
-            ledscrams[pads.light.sc<<2];
+            (pads.light.run ? (1 << COL5) : 0);
+        if (! nomqsc) {
+            pidpmsg.ledrows[6] |= ledscrams[pads.light.sc<<2];
+        }
 
         pidpmsg.ledrows[7] =
             ledscrams[(pads.light.dfld<<9)|(pads.light.ifld<<6)] |
@@ -154,15 +175,16 @@ int main (int argc, char **argv)
         // only send switches to fpga if there is a change
         // - this allows other things (like tcl scripts) to use switches
         // - and it takes over the switches only when someone is using them
-        if (! firstswrow && ((pidpmsg.swrows[0] != lastswrows[0]) || (pidpmsg.swrows[1] != lastswrows[1]) || (pidpmsg.swrows[2] != lastswrows[2]))) {
+        if (! firstswrow && ((pidpmsg.swrows[0] != lastswrows[0]) ||
+                (pidpmsg.swrows[1] != lastswrows[1]) || (pidpmsg.swrows[2] != lastswrows[2]))) {
 
             // send all switches to fpga
             pads.togval.reg = swunscrams[pidpmsg.swrows[0]>>COLMIN];
             uint32_t sr2 = swunscrams[pidpmsg.swrows[1]>>COLMIN];
             pads.togval.dfld  = (sr2 >> 9) & 7;
             pads.togval.ifld  = (sr2 >> 6) & 7;
-            pads.togval.sinst = (pidpmsg.swrows[1] >> COL8) & 1;
-            pads.togval.sstep = (pidpmsg.swrows[1] >> COL7) & 1;
+            pads.togval.sinst = (pidpmsg.swrows[2] >> COL8) & 1;
+            pads.togval.sstep = (pidpmsg.swrows[2] >> COL7) & 1;
             pads.button.stop  = (pidpmsg.swrows[2] >> COL6) & 1;
             pads.button.cont  = (pidpmsg.swrows[2] >> COL5) & 1;
             pads.button.start = (pidpmsg.swrows[2] >> COL1) & 1;
