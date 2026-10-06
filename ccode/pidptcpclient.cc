@@ -21,7 +21,11 @@
 // runs on zynq to send lights to and receive switches from raspi plugged into pidp8i panel
 // this is a different pidp8i panel than one plugged into console.kicad_sch board
 
-//  pidptcpclient <raspihostname>
+// on raspi:
+//  ./pidptcpserver
+
+// on zynq:
+//  ./pidptcpclient <raspihostname>
 
 #include <signal.h>
 #include <string.h>

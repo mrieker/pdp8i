@@ -18,19 +18,19 @@
 //
 //    http://www.gnu.org/licenses/gpl-2.0.html
 
-// runs on raspberry pi plugged into pidp8 panel to serve up leds and switches
-// used by raspictl -pidp whenever envar pidptcpaddr is set
+// runs on raspberry pi plugged into a pidp8 panel to serve up leds and switches
+// this is a different pidp8 panel than the one plugged into the console board
 
 // on raspi plugged into pidp8 panel:
-//  ./pidptcpserver [-verbose]
+//  ./pidptcpserver
 
-// on some other computer:
-//  export pidptcpaddr=<ip address of the pidptcpserver raspi>
-//  ./raspictl ... -pidp ...
+// on the zynq:
+//  ./pidptcpclient <hostname-of-raspi>
 
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include <pthread.h>
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -41,9 +41,11 @@
 
 #include "pidp.h"
 
+static bool volatile ctrlcflag;
 static PiDPMsg phymsg;
 static PiDPMsg tcpmsg;
 
+static void siginthand (int signum);
 static void *phythread (void *dummy);
 
 int main (int argc, char **argv)
@@ -69,6 +71,9 @@ int main (int argc, char **argv)
     if (listen (lisfd, 1) < 0) ABORT ();
 
     fprintf (stderr, "pidptcpserver: listening on %d\n", pidptcpport);
+
+    signal (SIGINT,  siginthand);
+    signal (SIGTERM, siginthand);
 
     pthread_t threadid;
     int rc = pthread_create (&threadid, NULL, phythread, NULL);
@@ -123,11 +128,18 @@ int main (int argc, char **argv)
     }
 }
 
+static void siginthand (int signum)
+{
+    if (ctrlcflag) exit (1);
+    ctrlcflag = true;
+}
+
 static void *phythread (void *dummy)
 {
     pidp_open (NULL);
-    while (true) {
+    while (! ctrlcflag) {
         pidp_proc (&phymsg);
     }
+    exit (0);
     return NULL;
 }

@@ -28,6 +28,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <netdb.h>
+#include <netinet/tcp.h>
 #include <poll.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -94,6 +95,7 @@ static struct sockaddr_in gpiotcpsa;
 static uint32_t rdcychz;    // actually cycles/0.131072sec
 static uint32_t volatile *gpiopage;
 
+static void reconnect ();
 static void *gpioopen (char const *devname);
 static uint32_t getnowns ();
 static void waitus (uint32_t us);
@@ -123,21 +125,10 @@ void pidp_open (char const *server)
             gpiotcpsa.sin_addr = *(struct in_addr *)he->h_addr;
         }
 
-        // create tcp socket
-        gpiotcpfd = socket (AF_INET, SOCK_STREAM, 0);
-        if (gpiotcpfd < 0) ABORT ();
-
-        // connect to server port
-        if (connect (gpiotcpfd, (struct sockaddr *) &gpiotcpsa, sizeof gpiotcpsa) < 0) {
-            fprintf (stderr, "pidp_proc: error connecting to %s:%d: %m\n", server, pidptcpport);
-            ABORT ();
-        }
-
-        fprintf (stderr, "pidp_proc: using %s:%d\n",
-            inet_ntoa (gpiotcpsa.sin_addr), ntohs (gpiotcpsa.sin_port));
+        reconnect ();
     } else {
 
-        // not using UDP, access gpio pins directly
+        // not using TCP, access gpio pins directly
         gpiopage = (uint32_t volatile *) gpioopen ("/dev/gpiomem");
         set_mode_input  (0xFF7FFF0U);   // set all pins we work with to inputs
         set_output_low  (0xFF00000U);   // lamp selects are active high
@@ -216,33 +207,63 @@ bool pidp_proc (PiDPMsg *pidpmsg)
             set_output_high (0x70000U);
         }
     } else {
-        int rc = write (gpiotcpfd, pidpmsg, sizeof *pidpmsg);
-        if (rc < (int) sizeof *pidpmsg) {
-            if (rc < 0) {
-                fprintf (stderr, "pidp_proc: error writing to server: %m\n");
-            } else {
-                fprintf (stderr, "pidp_proc: only wrote %d bytes of %d\n", rc, (int) sizeof *pidpmsg);
-            }
-            ABORT ();
-        }
-
-        // read in reply
         PiDPMsg recvbuf;
-        rc = read (gpiotcpfd, &recvbuf, sizeof recvbuf);
-        if (rc != sizeof recvbuf) {
-            if (rc < 0) {
-                fprintf (stderr, "pidp_proc: error reading from server: %m\n");
+        while (true) {
+            int rc = write (gpiotcpfd, pidpmsg, sizeof *pidpmsg);
+            if (rc != (int) sizeof *pidpmsg) {
+                if (rc < 0) {
+                    fprintf (stderr, "pidp_proc: error writing to server: %m\n");
+                } else {
+                    fprintf (stderr, "pidp_proc: only wrote %d bytes of %d\n", rc, (int) sizeof *pidpmsg);
+                }
             } else {
-                fprintf (stderr, "pidp_proc: only read %d bytes of %d\n", rc, (int) sizeof recvbuf);
+
+                // read in reply
+                rc = read (gpiotcpfd, &recvbuf, sizeof recvbuf);
+                if (rc == (int) sizeof recvbuf) break;
+                if (rc < 0) {
+                    fprintf (stderr, "pidp_proc: error reading from server: %m\n");
+                } else {
+                    fprintf (stderr, "pidp_proc: only read %d bytes of %d\n", rc, (int) sizeof recvbuf);
+                }
             }
-            ABORT ();
+            close (gpiotcpfd);
+            reconnect ();
         }
 
         // return the switch values
-        memcpy (pidpmsg->swrows, &recvbuf.swrows, sizeof pidpmsg->swrows);
+        memcpy (pidpmsg->swrows, recvbuf.swrows, sizeof pidpmsg->swrows);
     }
 
     return true;
+}
+
+static void reconnect ()
+{
+    // create tcp socket
+    gpiotcpfd = socket (AF_INET, SOCK_STREAM, 0);
+    if (gpiotcpfd < 0) ABORT ();
+
+    // timeout after 5 seconds trying to connect
+    static unsigned const timeoutms = 5000;
+    if (setsockopt (gpiotcpfd, IPPROTO_TCP, TCP_USER_TIMEOUT, &timeoutms, sizeof timeoutms) < 0) ABORT ();
+
+    // connect to server port
+    int lasterr = 0;
+    while (connect (gpiotcpfd, (struct sockaddr *) &gpiotcpsa, sizeof gpiotcpsa) < 0) {
+        int err = errno;
+        if (err != lasterr) {
+            fprintf (stderr, "pidp_proc: error connecting to %s:%d: %m\n",
+                inet_ntoa (gpiotcpsa.sin_addr), ntohs (gpiotcpsa.sin_port));
+            lasterr = err;
+        }
+        if (err != ETIMEDOUT) {
+            usleep (timeoutms * 1000);
+        }
+    }
+
+    fprintf (stderr, "pidp_proc: connected to %s:%d\n",
+        inet_ntoa (gpiotcpsa.sin_addr), ntohs (gpiotcpsa.sin_port));
 }
 
 static void *gpioopen (char const *devname)
