@@ -100,6 +100,7 @@ module pdp8ishad (
     localparam TS_S =  0;       // startup, shadow context invalid
     localparam TS_1 =  1;       // read memory (EA sampled at posedge TS1)
                                 // - TP1: sample BRK_RQST; inc PC (FETCH); clear ADDR_ACCEPT
+                                //   save IF,DF (INTAK)
     localparam TS_2 =  2;       // compute update to memory
                                 // - TP2: load IR (FETCH); load MB; load WC_OVERFLOW
     localparam TS_3 =  3;       // write memory, update registers
@@ -127,13 +128,16 @@ module pdp8ishad (
     wire error = (err1 != 0) | (err2 != 0);
     assign freeze = error & frzonerr;
 
-    assign armrdata = (armraddr == 0) ? 32'h53482004 : // [31:16] = 'SH'; [15:12] = (log2 nreg) - 1; [11:00] = version
+    reg lasttp1, lastts1, lastts2, lastts3, lastts4;
+    reg[1:0] extarstep;
+
+    assign armrdata = (armraddr == 0) ? 32'h53482006 : // [31:16] = 'SH'; [15:12] = (log2 nreg) - 1; [11:00] = version
                       (armraddr == 1) ? { frzonerr, clearit, err1 } :
                       (armraddr == 2) ? { majst, timestate, ireg, pctr } :
-                      (armraddr == 3) ? { intendly, intenabd, intinhuj, 4'b0, tp1datval, mbrd, madr } :
+                      (armraddr == 3) ? { intendly, intenabd, intinhuj, lastts1, lastts2, lastts3, lastts4, tp1datval, mbrd, madr } :
                       (armraddr == 4) ? { dfld, ifaj, mbwr, acum } :
                       (armraddr == 5) ? { pcknown, maknown, ifld, saveddf, savedif, link, sctr, mquo } :
-                      (armraddr == 6) ? { 15'b0, err2, tp1dat } :
+                      (armraddr == 6) ? { 10'b0, tp1fld, extarstep, err2, tp1dat } :
                       32'hDEADBEEF;
 
     wire [11:00] eadr = { mbrd[07] ? madr[11:07] : 5'b0, mbrd[06:00] };
@@ -205,14 +209,11 @@ module pdp8ishad (
 
     // misc state
 
-    reg lasttp1, lastts1, lastts2, lastts3, lastts4;
-
     wire[11:00] autoinc = (madr[11:03] == 1) ? 1 : 0;
 
     // extended arithmetic decoding
     reg ealn, eago;
     reg[11:00] eaac;
-    reg[1:0] extarstep;
     wire extar    = (ireg & 12'o7401) == 12'o7401;
     wire extarnom = extar & (ireg[02:01] == 0); // NOP,NMI
     wire extarmem = extar & (ireg[02:01] != 0); // SCL,MUY,DVI,SHL,ASR,LSR
@@ -266,6 +267,8 @@ module pdp8ishad (
             majst       <= MS_FETCH;
             maknown     <= 0;
             pcknown     <= 0;
+            saveddf     <= 8;
+            savedif     <= 8;
             timestate   <= TS_S;
         end
 
@@ -426,7 +429,13 @@ module pdp8ishad (
                         // also update delayed interrupt enable
                         if (majst == MS_FETCH) begin
                             intenabd <= intendly;
-                            ireg  <= oMBUF;
+                            ireg     <= oMBUF;
+                        end
+
+                        // if intak, save ifld,dfld
+                        if (majst == MS_INTAK) begin
+                            saveddf <= dfld;
+                            savedif <= ifld;
                         end
 
                         // in any case, save value read from memory

@@ -17,6 +17,8 @@ LIBOBJS := \
 	pidp_proc.$(MACH).o \
 	randbits.$(MACH).o \
 	readprompt.$(MACH).o \
+	shaderr.$(MACH).o \
+	strprintf.$(MACH).o \
 	tclmain.$(MACH).o \
 	z8iutil.$(MACH).o
 

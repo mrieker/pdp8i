@@ -194,6 +194,10 @@
 #define sh3_intendly  (1U      << 31)
 #define sh3_intenabd  (1U      << 30)
 #define sh3_intinhuj  (1U      << 29)
+#define sh3_lastts1   (1U      << 28)
+#define sh3_lastts2   (1U      << 27)
+#define sh3_lastts3   (1U      << 26)
+#define sh3_lastts4   (1U      << 25)
 #define sh3_tp1datval (1U      << 24)
 #define sh3_mbrd      (07777U  << 12)
 #define sh3_madr      (07777U  <<  0)
@@ -217,6 +221,8 @@
 #define sh5_sctr      (037U    << 12)
 #define sh5_mquo      (07777U  <<  0)
 
+#define sh6_tp1fld    (7U      << 19)
+#define sh6_extarstep (3U      << 17)
 #define sh6_err2      (037U    << 12)
 #define sh6_tp1dat    (07777U  <<  0)
 

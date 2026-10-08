@@ -817,10 +817,9 @@ proc rdmem {addr} {
         error "ifld dfld reg switches did not load"
     }
     domemcyc ldad
-    set mead [pin omead]
-    set madr [pin omadr]
-    if {($mead != $fld) || ($madr != $adr)} {
-        error [format "madr did not load, is %o%04o, expect %o%04o" $mead $madr $fld $adr]
+    set bus [getlb df if ma ms run]
+    if {$bus != "$fld $fld $adr EXAM 0"} {
+        error "rdmem bad bus is $bus, sb $fld $fld $adr EXAM 0"
     }
     return [pin ombuf]
 }
@@ -1039,12 +1038,20 @@ proc waitforttypr {msec str} {
 # write memory location
 # - does loadaddress, then deposit to write
 proc wrmem {addr data} {
-    setsw ifld [expr {$addr >> 12}] \
-          dfld [expr {$addr >> 12}] \
-         reg [expr {$addr & 07777}]
-    domemcyc ldad
+    set fld [expr {$addr >> 12}]
+    set adr [expr {$addr & 07777}]
+    set am1 [expr {$adr - 1}]
+    if {[getlb df if ma ms] != "$fld $fld $am1 DEPOS"} {
+        setsw ifld $fld dfld $fld reg $adr
+        domemcyc ldad
+    }
     setsw reg $data
     domemcyc depos
+    set bus [getlb df if ma mb ms run]
+    set dat [expr {$data + 0}]
+    if {$bus != "$fld $fld $adr $dat DEPOS 0"} {
+        error "wrmem bad bus is $bus, sb $fld $fld $adr $dat DEPOS 0"
+    }
 }
 
 # - direct access to externmem within zynq.v

@@ -30,6 +30,7 @@
 #include <unistd.h>
 
 #include "i2czlib.h"
+#include "shaderr.h"
 #include "z8idefs.h"
 #include "z8iutil.h"
 
@@ -331,4 +332,12 @@ static void dump_sh (uint32_t const *shat)
         EXT (sh4, sh4_mbwr),
         EXT (sh3, sh3_tp1datval) ? tp1datstr : "????",
         eol);
+
+    char sep[8];
+    snprintf (sep, sizeof sep, "%s  ", eol);
+    std::string err;
+    shaderr (&err, sep);
+    if (err.length () > 0) {
+        printf ("  %s%s", err.c_str (), eol);
+    }
 }
