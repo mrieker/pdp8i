@@ -71,6 +71,7 @@ int main (int argc, char **argv)
     }
 
     Z8IU32 *pdpat = z8ipage.findev ("8I", NULL, NULL, false);
+    z8ipage.locksubdev (&pdpat[ILACTL], 3, true);
 
     uint32_t ctl;
     if (asisflag) {

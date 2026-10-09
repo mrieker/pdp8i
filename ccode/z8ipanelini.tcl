@@ -909,17 +909,26 @@ proc simon {} {
 # preserves switchregister contents
 proc startat {addr} {
     set savesr [getsw reg]
-    setsw ifld [expr {$addr >> 12}] \
-          dfld [expr {$addr >> 12}] \
-         reg [expr {$addr & 07777}]
+
+    set fld [expr {$addr >> 12}]
+    set adr [expr {$addr & 07777}]
+    setsw ifld $fld dfld $fld reg $adr
+    if {[getsw ifld dfld reg] != "$fld $fld $adr"} {
+        error "ifld dfld reg switches did not load"
+    }
     domemcyc ldad
+    set bus [getlb df if ma ms run]
+    if {$bus != "$fld $fld $adr EXAM 0"} {
+        error "startat bad bus is $bus, sb $fld $fld $adr EXAM 0"
+    }
+
     setsw reg $savesr
     flicksw start
 }
 
 # step single cycle then dump front panel
 proc stepit {} {
-    setsw step 1
+    setsw sinst 1
     flicksw cont
     puts [dumpit]
 }

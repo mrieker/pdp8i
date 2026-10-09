@@ -42,7 +42,7 @@ module pdp8ifpi2c (
     input  i2cdai
 );
 
-    reg inmode, manual, startbit;
+    reg autorel, inmode, manual, startbit;
     reg[31:00] armlock;
     reg[31:00] commandlo;
     reg[63:00] command;
@@ -57,7 +57,7 @@ module pdp8ifpi2c (
     reg[22:00] mcpassno;
     reg[19:00] mcpltime;    // time for displaying light row
 
-    reg[11:00] lightrows[7:0], switchrows[2:0], switchovrs[2:0];
+    reg[11:00] lightrows[7:0], switchrows[2:0], switchovrs[2:0], switchphys[2:0];
 
     reg[19:00] ltspeed;
     reg[9:0] i2cspeed;
@@ -76,7 +76,7 @@ module pdp8ifpi2c (
                       (armraddr ==  2) ? { comand[63:32] } :
                       (armraddr ==  3) ? { status[31:00] } :
                       (armraddr ==  4) ? { status[63:32] } :
-                      (armraddr ==  5) ? { i2cclo, i2cdao, i2cdai, i2ccli, 6'b0, i2cstate, i2ccount, manual, 1'b0, inmode, 1'b0 } :
+                      (armraddr ==  5) ? { i2cclo, i2cdao, i2cdai, i2ccli, 6'b0, i2cstate, i2ccount, manual, 1'b0, inmode, autorel } :
                       (armraddr ==  6) ? armlock :
                       (armraddr ==  7) ? { mcpassno, mcpltrow, mcpswrow, mcpstate } :
 
@@ -125,7 +125,10 @@ module pdp8ifpi2c (
                       (armraddr == 14) ? { 12'b0,                   //20
                                            ltspeed } :              //00
 
-                       32'hDEADBEEF;
+                                         { 6'b0,                    //26
+                                           switchphys[2][11:04],    //18 { START, LDAD, DEP, EXAM, CONT, STOP, SSTEP, SINST }
+                                           switchphys[1][11:06],    //12 { DF[2:0], IF[2:0] }
+                                           switchphys[0] };         //00 REG[11:00]
 
     i2cmaster fpi2cintf (
         .CLOCK (CLOCK),
@@ -153,6 +156,7 @@ module pdp8ifpi2c (
         if (iRESET) begin           // processor power-on reset
             if (RESET) begin        // fpga power-on reset
                 armlock  <= 0;      // nothing using arm registers
+                autorel  <= 1;      // physical switch change releases all overrides
                 manual   <= 1;      // let console.kicad_sch clock itself
                 ltspeed  <= 19999;  // each light row stays on for 200uS
                 i2cspeed <= 29;     // operate i2c at 1.667MHz
@@ -176,8 +180,9 @@ module pdp8ifpi2c (
                     command  <= { armwdata, commandlo };
                 end
                 5: begin
-                    manual <= armwdata[03];     // 0=scan console automatically
+                    manual  <= armwdata[03];    // 0=scan console automatically
                                                 // 1=arm must issue i2c commands to scan
+                    autorel <= armwdata[00];    // 1=phys switch change releases all overrides
                 end
 
                 // test-and-set cell for arm processor use
@@ -449,6 +454,13 @@ module pdp8ifpi2c (
                 11: begin
                     if (status[63:60] == 0) begin
                         ////$display ("pdp8ifpi2c*: read switch row %o got data %o run=%b majst_3=%b", mcpswrow, _sts12, run, majst_3);
+                        if (autorel & (switchphys[mcpswrow] != _sts12)) begin       // check for physical switch change
+                            switchovrs[0] <= 0;                                     // if so, someone is using the physical switches
+                            switchovrs[1] <= 0;                                     // ...so clear overrides, though we will have to
+                            switchovrs[2] <= 0;                                     // ...wait for another pass to start using them
+                        end
+                        switchphys[mcpswrow] <= _sts12;                             // save physical switches regardless of overrides
+
                         if (mcpswrow != 2) begin
                             switchrows[mcpswrow] <= switchovrs[mcpswrow] & switchrows[mcpswrow] |   // overridden, ignore phys switch
                                                   ~ switchovrs[mcpswrow] & _sts12;                  // else save phys switch (active low)

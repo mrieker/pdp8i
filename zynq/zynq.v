@@ -1545,7 +1545,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
             end else begin
 
                 // capture signals while before trigger and for ilaafter cycles thereafter
-                if ((ilaarmed | (ilaafter != 0)) & lasticlock & dev_iCLOCK) begin
+                if ((ilaarmed | (ilaafter != 0)) & dev_oRUN & lasticlock & ~ dev_iCLOCK) begin
                     ilaarray[ilaindex] <= {
                         hdw_ioenabd_n,  //50
                         dev_iIOSEL,     //49
