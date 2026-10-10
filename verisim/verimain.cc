@@ -35,7 +35,9 @@
 
 #include "Vbackplane.h"
 #include "Vbackplane_console.h"
+#include "Vbackplane_extardata.h"
 #include "Vbackplane_extmemory.h"
+#include "Vbackplane_procalu.h"
 
 #include "assemble.h"
 #include "disassemble.h"
@@ -1009,6 +1011,48 @@ static void zynqclock ()
     // count the cycle if so
     // actual freq is determined by zynq.v regctld clkratm1 (normally 9 for 10MHz)
     if (lastoclock && ! vbkpl->oCLOCK) ++ cyclenum;
+
+#if 000
+    // check for multiple drivers of INBUS
+    // - console
+    // - extarith
+    // - arm
+    // - memory
+    // - zturn
+    static bool last_console_inbus, last_extarith_inbus, last_extmemio_inbus;
+    static bool last_extmemrd_inbus, last_zturn_inbus;
+
+    bool console_inbus  =   vbkpl->__PVT__backplane__DOT__aluboard->__PVT__readsr;
+    bool extarith_inbus = ! vbkpl->__PVT__backplane__DOT__eaedatbd->__PVT___enouts;
+    bool extmemio_inbus = ! vbkpl->__PVT__backplane__DOT__meminst->__PVT__Net___05FU18_G2_; // E83B-6
+    bool extmemrd_inbus = ! vbkpl->__PVT__backplane__DOT__meminst->__PVT___memoe &&
+                          ! vbkpl->__PVT__backplane__DOT__meminst->__PVT__memdis_E61p17;
+    bool zturn_inbus    = ! vbkpl->backplane__DOT__zturnboard__DOT__hdw_ioenabd_n;
+
+    if (true ||
+        (last_console_inbus  != console_inbus)  ||
+        (last_extarith_inbus != extarith_inbus) ||
+        (last_extmemio_inbus != extmemio_inbus) ||
+        (last_extmemrd_inbus != extmemrd_inbus) ||
+        (last_zturn_inbus    != zturn_inbus)) {
+
+        last_console_inbus  = console_inbus;
+        last_extarith_inbus = extarith_inbus;
+        last_extmemio_inbus = extmemio_inbus;
+        last_extmemrd_inbus = extmemrd_inbus;
+        last_zturn_inbus    = zturn_inbus;
+
+        int sum = (int) console_inbus + (int) extarith_inbus + (int) extmemio_inbus +
+                  (int) extmemrd_inbus + (int) zturn_inbus;
+        if (sum > 1) {
+            printf ("%12llu  con=%d xar=%d mio=%d mrd=%d ztn=%d",
+                (long long unsigned) simulationns,
+                    console_inbus, extarith_inbus, extmemio_inbus, extmemrd_inbus, zturn_inbus);
+            printf ("  sum=%d", sum);
+            printf ("\n");
+        }
+    }
+#endif
 }
 
 // do single step (10nS) of a write to an zynq arm page register
