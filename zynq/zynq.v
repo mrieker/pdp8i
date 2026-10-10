@@ -164,6 +164,8 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     reg[05:00] regctld, clkdiv, clkratm1;
     reg[31:00] regctlh, regctlk;
     reg[07:00] regctlj;
+    wire[31:00] regctlo;    // debug bits
+    assign regctlo = 0;
 
     wire[11:00] sim_oACUM;
     wire        sim_oBRKCYC;
@@ -421,11 +423,12 @@ module Zynq #(parameter BIDIRCONSDA=1) (
         (readaddr        == 10'b0000001010) ? { 24'b0, regctlj } :
         (readaddr        == 10'b0000001011) ? regctlk    :
         (readaddr        == 10'b0000001110) ? memcycctr  :
+        (readaddr        == 10'b0000001111) ? regctlo    :  // debug bits
         (readaddr        == 10'b0000010001) ? { ilaarmed, 3'b0, ilaafter, 4'b0, ilaindex } :
         (readaddr        == 10'b0000010010) ? {        ilardata[31:00] } :
         (readaddr        == 10'b0000010011) ? { 13'b0, ilardata[50:32] } :
         (readaddr        == 10'b0000011010) ? { 1'b0, regarmintena } : // ZG_INTENABS
-        (readaddr        == 10'b0000011011) ? zgintflags : // ZG_INTFLAGS
+        (readaddr        == 10'b0000011011) ? zgintflags :  // ZG_INTFLAGS
         (readaddr[11:06] ==  6'b000010)     ? fpi2crdata :
         (readaddr[11:05] ==  7'b0000110)    ? rkardata   :
         (readaddr[11:05] ==  7'b0000111)    ? vcardata   :

@@ -64,7 +64,7 @@ module pdp8ivc8 (
     reg videnaba, vidwrena, videnabb;
     wire[21:00] viddatab;
 
-    assign armrdata = (armraddr == 0) ? 32'h56432006 : // [31:16] = 'VC'; [15:12] = (log2 nreg) - 1; [11:00] = version
+    assign armrdata = (armraddr == 0) ? 32'h56432007 : // [31:16] = 'VC'; [15:12] = (log2 nreg) - 1; [11:00] = version
                       (armraddr == 1) ? { 1'b0, remove, 1'b0, insert } :
                       (armraddr == 2) ? { typee, 1'b0, intens, eflags, 16'b0 } :
                       (armraddr == 3) ? { 17'b0, vidaddrb } :   // address being read from
@@ -222,6 +222,7 @@ module pdp8ivc8 (
                 AC_CLEAR <= 0;
                 devtocpu <= 0;
                 IO_SKIP  <= 0;
+                SELECTED <= 0;
             end
         end
 
