@@ -10,7 +10,7 @@ if {($vt != "e") && ($vt != "i")} {
     exit 1
 }
 exec -ignorestderr make kaleid-$vt.bin
-set startaddr [loadbin kaleid-$vt.bin]
+set startaddr [loadbinptr kaleid-$vt.bin]
 set nowtv [clock microseconds]
 set initx [expr {$nowtv % 1000 + 1234}]
 set inity [expr {$nowtv / 1000 % 1000 + 2345}]
@@ -20,5 +20,4 @@ wrmem 021 $inity
 setsw reg 0
 startat $startaddr
 relsw reg
-exec -ignorestderr $Z8IHOME/z8ivc8 -killit -pms 120 -size [getenv vcsize 720] $vt
-exit
+exec -ignorestderr $Z8IHOME/z8ivc8 -killit -pms 120 -size [getenv vcsize 720] $vt &
