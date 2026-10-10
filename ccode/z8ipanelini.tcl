@@ -350,6 +350,8 @@ proc getrestofttyline {{tmsec 30000}} {
 proc hardreset {} {
     pin set arm_ireset 0                    ;# so we can set fp params
     pin set fp_manual 0                     ;# make sure pdp8ifpi2c.v is scanning so switches will be processed
+    pin set fp_setstart 0 fp_setldad  0 fp_setdepos 0 fp_setexam  0 ;# all control switches off
+    pin set fp_setcont  0 fp_setstop  0 fp_setsstep 0 fp_setsinst 0
     pin set arm_ireset 1                    ;# hold console mcp23017 and pdp8ifpi2c.v in reset state
     pin set sh_clearit 1                    ;# clear shadow so 10MHz clock will run
     pin set arm_ireset 0                    ;# let console 23017 communicate with pdp8ifpi2c
@@ -470,18 +472,11 @@ proc loadbin {fname} {
         # and it means the next byte is the first of a data pair
         if {$state == 4} {
             dict set verify $addr $data
-            puts -nonewline [format "  %05o / %04o\r" $addr $data]
+            puts -nonewline [format "\r  %05o / %04o  " $addr $data]
             flush stdout
 
             # deposit data
-            if {$addr != $nextaddr} {
-                setsw ifld [expr {$addr >> 12}] \
-                      dfld [expr {$addr >> 12}] \
-                     reg [expr {$addr & 07777}]
-                domemcyc ldad
-            }
-            setsw reg $data
-            domemcyc depos
+            wrmem $addr $data
 
             # set up for next byte
             set addr [expr {($addr & 070000) | (($addr + 1) & 007777)}]
@@ -575,6 +570,8 @@ proc loadbinptr {fname} {
         set exst [waitpid $ptrpid]
         if {$exst != ""} break
         if {[ctrlcflag]} {error "control-C"}
+        set sher [pin sh_err1 sh_err2]
+        if {$sher != "0 0"} {error "shadow error $sher"}
         after 100
     }
     if {$exst != 0} {error "error $exst reading binloader.rim"}
@@ -583,10 +580,12 @@ proc loadbinptr {fname} {
     puts "loadbinptr: reading in $fname"
     set ptrpid [exec $Z8IHOME/z8iptr -killit $fname &]
     after 123
-    setsw reg 07777 ; domemcyc ldad
-    setsw reg 00000 ; domemcyc start
+    setsw reg 0000
+    startat 07777
     while {[getlb run]} {
         if {[ctrlcflag]} {error "control-C"}
+        set sher [pin sh_err1 sh_err2]
+        if {$sher != "0 0"} {error "shadow error $sher"}
         after 100
     }
     exec kill $ptrpid
@@ -660,18 +659,11 @@ proc loadrim {fname} {
         set data [expr {$data | ($ch & 077)}]
 
         dict set verify $addr $data
-        puts -nonewline [format "  %04o / %04o\r" $addr $data]
+        puts -nonewline [format "\r  %04o / %04o  " $addr $data]
         flush stdout
 
-        # do 'load address' if not sequential
-        if {$nextaddr != $addr} {
-            setsw reg $addr
-            domemcyc ldad
-        }
-
         # deposit the data
-        setsw reg $data
-        domemcyc depos
+        wrmem $addr $data
 
         # verify resultant lights
         set actma [getlb ma]
@@ -701,7 +693,7 @@ proc loadverify {verify} {
             error "control-C"
         }
         set actual [rdmem $xaddr]
-        puts -nonewline [format "  %05o / %04o\r" $xaddr $actual]
+        puts -nonewline [format "\r  %05o / %04o  " $xaddr $actual]
         flush stdout
         if {$actual != $expect} {
             puts ""
@@ -817,9 +809,9 @@ proc rdmem {addr} {
         error "ifld dfld reg switches did not load"
     }
     domemcyc ldad
-    set bus [getlb df if ma ms run]
-    if {$bus != "$fld $fld $adr EXAM 0"} {
-        error "rdmem bad bus is $bus, sb $fld $fld $adr EXAM 0"
+    set bus [getlb df if ma ms pc run]
+    if {$bus != "$fld $fld $adr EXAM $adr 0"} {
+        error "rdmem bad bus is $bus, sb $fld $fld $adr EXAM $adr 0"
     }
     return [pin ombuf]
 }
@@ -917,9 +909,9 @@ proc startat {addr} {
         error "ifld dfld reg switches did not load"
     }
     domemcyc ldad
-    set bus [getlb df if ma ms run]
-    if {$bus != "$fld $fld $adr EXAM 0"} {
-        error "startat bad bus is $bus, sb $fld $fld $adr EXAM 0"
+    set bus [getlb df if ma ms pc run]
+    if {$bus != "$fld $fld $adr EXAM $adr 0"} {
+        error "startat bad bus is $bus, sb $fld $fld $adr EXAM $adr 0"
     }
 
     setsw reg $savesr
@@ -1056,10 +1048,10 @@ proc wrmem {addr data} {
     }
     setsw reg $data
     domemcyc depos
-    set bus [getlb df if ma mb ms run]
+    set bus [getlb df if ma mb ms pc run]
     set dat [expr {$data + 0}]
-    if {$bus != "$fld $fld $adr $dat DEPOS 0"} {
-        error "wrmem bad bus is $bus, sb $fld $fld $adr $dat DEPOS 0"
+    if {$bus != "$fld $fld $adr $dat DEPOS $adr 0"} {
+        error "wrmem bad bus is $bus, sb $fld $fld $adr $dat DEPOS $adr 0"
     }
 }
 
