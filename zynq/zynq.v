@@ -131,7 +131,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
 );
 
     // [31:16] = '8I'; [15:12] = (log2 len)-1; [11:00] = version
-    localparam VERSION = 32'h38494008;
+    localparam VERSION = 32'h38494009;
 
     assign ground = 0;
 
@@ -884,13 +884,6 @@ module Zynq #(parameter BIDIRCONSDA=1) (
         lastts3 <= dev_oTS3;
     end
 
-    // jam 0 onto inbus,acclear,ioskip when real processor is doing ION,IOF,WFI instructions
-    //  also for CDF, CIF instructions
-    wire procio = dev_oIOP & ((dev_oMBUF[8:0]           == 9'o001) |
-                              (dev_oMBUF[8:0]           == 9'o002) |
-                              (dev_oMBUF[8:0]           == 9'o313) |
-                             ((dev_oMBUF[8:0] & 9'o704) == 9'o200));
-
     // internal pio busses - wire-ored (active high) from device to processor
     assign dev_iACCLEAR = arm_iACCLEAR | ttacclr | rkacclr | vcacclr | tcacclr | pracclr | pbacclr | dcacclr | rcacclr | syacclr;
     assign dev_iBRKRQST = arm_iBRKRQST | cmbrkrqst;
@@ -900,7 +893,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
     assign dev_iDMAFLD  = arm_iDMAFLD  | cmbrkema;
     assign dev_iINBUS   = arm_iINBUS   | ttinbus | rkinbus | vcinbus | tcinbus | prinbus | pbinbus | dcinbus | rcinbus | syinbus | cmbrkinbus | xminbus;
     assign dev_iINTRQST = arm_iINTRQST | ttintrq | rkintrq | vcintrq | tcintrq | printrq | ppintrq | dcintrq | rcintrq | syintrq;
-    assign dev_iIOSEL   = procio       | ttiosel | rkiosel | vciosel | tciosel | priosel | ppiosel | dciosel | rciosel | syiosel | pbiosel;
+    assign dev_iIOSEL   =                ttiosel | rkiosel | vciosel | tciosel | priosel | ppiosel | dciosel | rciosel | syiosel | pbiosel;
     assign dev_iIOSKIP  = arm_iIOSKIP  | ttioskp | rkioskp | vcioskp | tcioskp | prioskp | ppioskp | dcioskp | rcioskp | syioskp | pbioskp;
     assign dev_iMEMDIS  = arm_iMEMDIS;
     assign dev_iPAUSE   = arm_iPAUSE   | pbpause | sypause;
