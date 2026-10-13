@@ -1,6 +1,15 @@
 #!/bin/bash
 set -e
 
+rm -f x.x
+sed 's;Path=".*/pdp8i.xpr";Path="pdp8i.xpr";g' pdp8i.xpr > x.x
+if diff -q x.x pdp8i.xpr
+then
+    rm x.x
+else
+    mv -v x.x pdp8i.xpr
+fi
+
 if [ SortJSon.jar -ot SortJSon.java ]
 then
     rm -f SortJSon*.class SortJSon.jar
