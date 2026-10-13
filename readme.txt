@@ -68,6 +68,8 @@ Directories:
     demos    - some PDP-8/I programs
     kicads   - circuit boards
     verisim  - Verilator for testing circuit design
-    zplin    - Zynq compatible Linux
+    zplin    - Zynq compatible Linux (softlink to pdp8l repo zplin)
     zynq     - Zynq Verilog code
+
+Website:  https://www.outerworldapps.com/8ipics/
 
