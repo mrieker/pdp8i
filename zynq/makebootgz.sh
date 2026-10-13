@@ -11,6 +11,14 @@ cd `dirname $0`
 mydir=`pwd`
 set -e
 
+if [ ! -d ../zplin ]
+then
+    echo ERROR: missing ../zplin directory
+    echo ERROR: clone pdp8l repo in parallel with pdp8i repo
+    echo ERROR: then cd pdp8i ; ln -s ../pdp8l/zplin zplin
+    exit 1
+fi
+
 rm -f $mydir/BOOT.BIN.gz
 
 cd ../zplin

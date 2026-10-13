@@ -1,6 +1,7 @@
 #!/bin/bash
 p=`pwd`
 cd `dirname $0`
+make VeriPCB.jar
 export CLASSPATH=`pwd`/VeriPCB.jar:`pwd`/PCB.jar:`pwd`/SCM.jar
 cd $p
 set -e
