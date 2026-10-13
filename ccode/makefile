@@ -81,15 +81,10 @@ lib.$(MACH).a: $(LIBOBJS)
 	rm -f lib.$(MACH).a
 	ar rc $@ $^
 
-binloader.rim: binloader.pal
+binloader.rim: binloader.pal pdp8v/asm/assemble pdp8v/asm/link pdp8v/asm/octtorim
 	pdp8v/asm/assemble -pal binloader.pal binloader.obj > binloader.lis
 	pdp8v/asm/link -o binloader.oct binloader.obj > binloader.map
 	pdp8v/asm/octtorim < binloader.oct > binloader.rim
-
-dttest.bin: dttest.asm
-	pdp8v/asm/assemble dttest.asm dttest.obj > dttest.lis
-	pdp8v/asm/link -o dttest.oct dttest.obj > dttest.map
-	pdp8v/asm/octtobin < dttest.oct > dttest.bin
 
 verizynq.$(MACH): verizynq.$(MACH).o verilated.$(MACH).o obj_dir/VZynq__ALL.a $(LIBS)
 	$(GPP) -o $@ $^ obj_dir/VZynq__ALL.a $(LNKFLG)
@@ -118,4 +113,10 @@ obj_dir/VZynq__ALL.a: obj_dir/VZynq.mk
 obj_dir/VZynq.cpp obj_dir/VZynq.h obj_dir/VZynq.mk: $(VFILES)
 	rm -rf obj_dir
 	verilator --cc --top-module Zynq $(VFILES)
+
+pdp8v/asm/%: pdp8v
+	make -C pdp8v/asm
+
+pdp8v:
+	git clone https://github.com/mrieker/pdp8v.git
 

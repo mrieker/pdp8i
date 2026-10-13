@@ -1,7 +1,7 @@
 
 ASMDIR := ../ccode/pdp8v/asm
 
-doubleroll.bin: doubleroll.asm
+doubleroll.bin: doubleroll.asm $(ASMDIR)
 	$(ASMDIR)/assemble doubleroll.asm doubleroll.obj > doubleroll.lis
 	$(ASMDIR)/link -o doubleroll.oct doubleroll.obj > doubleroll.map
 	$(ASMDIR)/octtobin < doubleroll.oct > doubleroll.bin
@@ -15,4 +15,9 @@ kaleid-i.bin: kaleid-i.pal kaleid.pal
 	$(ASMDIR)/assemble -pal kaleid-i.pal kaleid-i.obj > kaleid-i.lis
 	$(ASMDIR)/link -o kaleid-i.oct kaleid-i.obj > kaleid-i.map
 	$(ASMDIR)/octtobin < kaleid-i.oct > kaleid-i.bin
+
+$(ASMDIR):
+	make -C ../ccode pdp8v/asm/assemble
+	make -C ../ccode pdp8v/asm/link
+	make -C ../ccode pdp8v/asm/octtobin
 
