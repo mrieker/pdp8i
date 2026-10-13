@@ -3,19 +3,11 @@
 ; - uses only low 4K memory
 ; - tests interrupts, reverse reading
 
-; pdp8v/asm/assemble dttest.asm dttest.obj > dttest.lis
-; pdp8v/asm/link -o dttest.oct dttest.obj > dttest.map
-; pdp8v/asm/octtobin < dttest.oct > dttest.bin
-
-; on zynq with real pdp-8/i:
-;  ./z8ireal [-entty03] [-nobrk]
-;  ./z8ipanel dttest.tcl
-
-; on zynq with simulator:
-;  ./z8isim dttest.tcl
+; run with dttest.sh script:
+;  ./dttest.sh [-real/-sim]
 
 ; optional on another screen:
-;  ./z8itc08 -status
+;  ../ccode/z8itc08 -status
 
 	ion   = 06001
 	iof   = 06002
