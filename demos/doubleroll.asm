@@ -7,6 +7,9 @@
 	hasextar = 0	; 0=no extarith boards installed
 			; 1=has extarith boards installed
 
+	haswfi   = 1	; 0=no wfi instruction
+			; 1=has wfi instruction
+
 	ion  = 06001	; enable interrupts
 
 	cdf0 = 06201
@@ -27,52 +30,86 @@
 
 	. = 00000
 	.word	.-.
+.if haswfi
 	jmpi	0
+.else
+	jmp	intsrv
+.endif
 
-	. = 00002
-h0003:	wfi
+	. = 00003 - haswfi
+h0003:
+.if haswfi
+	wfi
+.else
+	jmp	.
+.endif
 	jmp	finish3
 
-	. = 00005
-h0006:	wfi
+	. = 00006 - haswfi
+h0006:
+.if haswfi
+	wfi
+.else
+	jmp	.
+.endif
 	jmsi	_step		; PC=0006; AC=3000
 	.word	h0014,01400	; up -> 0014; 1400
 	.word	h0003,06000	; dn -> 0003; 6000
-	.word	h0006,03000	; hold
 
-	. = 00013
-h0014:	wfi
+	. = 00014 - haswfi
+h0014:
+.if haswfi
+	wfi
+.else
+	jmp	.
+.endif
 	jmsi	_step		; PC=0014; AC=1400
 	.word	h0030,00600
 	.word	h0006,03000
-	.word	h0014,01400
 
-	. = 00027
-h0030:	wfi
+	. = 00030 - haswfi
+h0030:
+.if haswfi
+	wfi
+.else
+	jmp	.
+.endif
 	jmsi	_step		; PC=0030; AC=0600
 	.word	h0060,00300
 	.word	h0014,01400
-	.word	h0030,00600
 
-	. = 00057
-h0060:	wfi
+	. = 00060 - haswfi
+h0060:
+.if haswfi
+	wfi
+.else
+	jmp	.
+.endif
 	jmsi	_step		; PC=0060; AC=0300
 	.word	h0140,00140
 	.word	h0030,00600
-	.word	h0060,00300
 
-	. = 00137
-h0140:	wfi
+	. = 00140 - haswfi
+h0140:
+.if haswfi
+	wfi
+.else
+	jmp	.
+.endif
 	jmsi	_step		; PC=0140; AC=0140
 	.word	h0300,00060
 	.word	h0060,00300
-	.word	h0140,00140
+
+.if haswfi ^ 1
+intsrv:
+	isz	0		; skip over the 'jmp .'
+	jmpi	0		; return just past the 'jmp .'
+.endif
 
 finish3:
 	jmsi	_step		; PC=0003; AC=6000
 	.word	h0006,03000
 	.word	h4001,04001
-	.word	h0003,06000
 
 _step:	.word	step
 
@@ -82,54 +119,77 @@ _0070:	.word	00070
 _0077:	.word	00077
 _0100:	.word	00100
 _2001:	.word	02001
-_4000:	.word	04000
 _4001:	.word	04001
 _6201:	.word	06201
 _6202:	.word	06202
 _7776:	.word	07776
 _7777:	.word	07777
 
-	. = 00277
-h0300:	wfi
+	. = 00300 - haswfi
+h0300:
+.if haswfi
+	wfi
+.else
+	jmp	.
+.endif
 	jmsi	_step		; PC=0300; AC=0060
 	.word	h0600,00030
 	.word	h0140,00140
-	.word	h0300,00060
 
-	. = 00577
-h0600:	wfi
+	. = 00600 - haswfi
+h0600:
+.if haswfi
+	wfi
+.else
+	jmp	.
+.endif
 	jmsi	_step		; PC=0600; AC=0030
 	.word	h1400,00014
 	.word	h0300,00060
-	.word	h0600,00030
 
-	. = 01377
-h1400:	wfi
+	. = 01400 - haswfi
+h1400:
+.if haswfi
+	wfi
+.else
+	jmp	.
+.endif
 	jmsi	_step		; PC=1400; AC=0014
 	.word	h3000,00006
 	.word	h0600,00030
-	.word	h1400,00014
 
-	. = 02777
-h3000:	wfi
+	. = 03000 - haswfi
+h3000:
+.if haswfi
+	wfi
+.else
+	jmp	.
+.endif
 	jmsi	_step		; PC=3000; AC=0006
 	.word	h6000,00003
 	.word	h1400,00014
-	.word	h3000,00006
 
-	. = 05777
-h6000:	wfi
+	. = 06000 - haswfi
+h6000:
+.if haswfi
+	wfi
+.else
+	jmp	.
+.endif
 	jmsi	_step		; PC=6000; AC=0003
 	.word	h4001,04001
 	.word	h3000,00006
-	.word	h6000,00003
 
-	. = 04000
-h4001:	wfi
+	. = 04001 - haswfi
+h4001:
+.if haswfi
+	wfi
+.else
+	jmp	.
+.endif
 	jmsi	_step		; PC=4001; AC=4001
 	.word	h0003,06000
 	.word	h6000,00003
-	.word	h4001,04001
 
 	. = 02000
 	.global	__boot
@@ -160,6 +220,7 @@ dstcdf:	cdf1			; change to dest field
 	tad	intena		; set RTC enable bits
 	clde
 	cla cll
+	ion
 	jmpi	_4001		; start at 4001
 
 copyaddr: .word	.-.
@@ -172,7 +233,6 @@ period:	.word	-667		; interrupt every 66700uS (15Hz)
 ;   jmsi   _step
 ;   .word  pcleft,acright
 ;   .word  pcright,acleft
-;   .word  pchold,achold
 ; interrupts disabled
 ; saveddf,if = possibly one bit set
 ;      df,if = zero
@@ -222,7 +282,7 @@ countdn:
 	; 000001  100000000001  what it will be on return
 	; 000001  000000000011  what it will be step after that
 	tadi	step		; get what new PC will be
-	tad	_4000		; see if it will be 4000 (pausing at 4001)
+	tad	_mh4001		; see if it will be pausing at 4001
 	sza cla
 	jmp	loadit
 	tad	savdfif		; if so, rotate DFIF left one bit
@@ -232,6 +292,8 @@ countdn:
 	ral
 	dca	savdfif
 	jmp	loadit
+
+_mh4001: .word	-h4001
 
 	; change to counting up
 countdnend:
@@ -277,7 +339,7 @@ countup:
 	; 000000  110000000000  what it will be on return
 	; 000000  011000000000  what it will be step after that
 	tadi	step		; get what new PC will be
-	tad	_2001		; see if it will be 5777 (pausing at 6000)
+	tad	_mh6000		; see if it will be pausing at 6000
 	sza cla
 	jmp	loadit
 	tad	savdfif		; if so, rotate DFIF right one bit
@@ -312,6 +374,8 @@ loadit:
 	tad	newac		; load up new AC
 	ion			; allow RTC interrupt
 	jmpi	newpc		; load up new PC
+
+_mh6000: .word	-h6000
 
 	; change to counting down
 countupend:
