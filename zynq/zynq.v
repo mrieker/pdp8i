@@ -912,6 +912,7 @@ module Zynq #(parameter BIDIRCONSDA=1) (
 
     wire[3:0] sim_majst;
     wire sim_run, sim_swldad, sim_swdepos, sim_swexam, sim_swstart, sim_swcont;
+    wire sim_os8zap;
 
     pdp8isim siminst (
         .CLOCK          (CLOCK),
@@ -951,6 +952,8 @@ module Zynq #(parameter BIDIRCONSDA=1) (
         .oTS2           (sim_oTS2),
         .oTS3           (sim_oTS3),
         .oTS4           (sim_oTS4),
+
+        .os8zap         (sim_os8zap),
 
         .iCONSCK        (sim_iCONSCK),
         .iCONSDA        (sim_iCONSDA),
@@ -1146,6 +1149,8 @@ module Zynq #(parameter BIDIRCONSDA=1) (
         .oTS2       (dev_oTS2),
         .oTS3       (dev_oTS3),
         .oTS4       (dev_oTS4),
+
+        .os8zap     (sim_os8zap),
 
         // fpga outputs these signals conditionally
         // otherwise we do not know their state on the bus

@@ -53,6 +53,8 @@ module pdp8isim (
     output oTP1, oTP2, oTP3, oTP4,
     output oTS1, oTS2, oTS3, oTS4,
 
+    output os8zap,                  // asserted during TS1 saying we are forcing 7777 into MBUF
+
     input  iCONSCK,                 // console I2C
     input  iCONSDA,
     output oCONSDA
@@ -99,7 +101,7 @@ module pdp8isim (
     reg[14:00] os8zapiszdata, os8zapjmpaddr;
     wire[14:00] os8zapaddress = ~ { _busMEAD, _busMADR };
     wire[14:00] os8zapiszaddr = os8zapjmpaddr - 1;
-    wire os8zap = (os8zapstate == 3);
+    assign os8zap = (os8zapstate == 3);
     wire aa = (_busMAJST == 14);
     wire bb = (~ _busINBUS[11:07] == 5'b10101);
     wire cc = ({ 1'b0, ~ _busINBUS[06:00] } == { 1'b0, ~ _busMADR[06:00] } - 8'b1);
@@ -465,6 +467,7 @@ module pdp8isim (
         ._INBUS_4   (_busINBUS[4]),
         ._INBUS_5   (_busINBUS[5]),
         ._INBUS_6   (_busINBUS[6]),
+        ._INBUS_7   (_busINBUS[7]),
         ._INBUS_8   (_busINBUS[8]),
         ._INBUS_9   (_busINBUS[9]),
         ._INBUS_10  (_busINBUS[10]),
