@@ -139,13 +139,13 @@ int main (int argc, char **argv)
         fprintf (stderr, "missing filename\n");
         return 1;
     }
-    int filedes = open (filename, O_WRONLY | O_CREAT | O_TRUNC, 0666);
-    if (filedes < 0) {
+    FILE *fileptr = fopen (filename, "w");
+    if (fileptr == NULL) {
         fprintf (stderr, "error creating %s: %m\n", filename);
         return 1;
     }
     if (leader) {
-        int rc = write (filedes, nulls, sizeof nulls);
+        int rc = fwrite (nulls, 1, sizeof nulls, fileptr);
         if (rc < 0) {
             fprintf (stderr, "error punching leader: %m\n");
             ABORT ();
@@ -163,7 +163,8 @@ int main (int argc, char **argv)
         ptpat[1] |= PTP_ENAB;   // enable pdp8iptp.v to process io instructions
     }
 
-    signal (SIGINT, siginthand);
+    signal (SIGINT,  siginthand);
+    signal (SIGTERM, siginthand);
 
     uint32_t nbytes = 0;
     while (! ctrlcflag) {
@@ -176,11 +177,11 @@ int main (int argc, char **argv)
 
             uint8_t wrbyte = ptpreg & ~ mask;
             if ((! remcr || (wrbyte != '\r')) && (! remdel || (wrbyte != 127)) && (! remnul || (wrbyte != 0))) {
-                int rc = write (filedes, &wrbyte, 1);
-                if (rc <= 0) {
-                    if (rc == 0) errno = EPIPE;
+                int rc = fputc (wrbyte, fileptr);
+                if (rc < 0) {
                     fprintf (stderr, "error writing %s: %m\n", filename);
-                    return 1;
+                    fclose (fileptr);
+                    ABORT ();
                 }
             }
 
@@ -190,18 +191,20 @@ int main (int argc, char **argv)
     }
 
     if (trailer) {
-        int rc = write (filedes, nulls, sizeof nulls);
+        int rc = fwrite (nulls, 1, sizeof nulls, fileptr);
         if (rc < 0) {
             fprintf (stderr, "error punching trailer: %m\n");
+            fclose (fileptr);
             ABORT ();
         }
         if (rc < (int) sizeof nulls) {
             fprintf (stderr, "only punched %d of %d-byte trailer\n", rc, (int) sizeof nulls);
+            fclose (fileptr);
             ABORT ();
         }
     }
 
-    if (close (filedes) < 0) {
+    if (fclose (fileptr) < 0) {
         fprintf (stderr, "error closing file: %m\n");
         ABORT ();
     }
@@ -213,5 +216,5 @@ static void siginthand (int signum)
 {
     if (ctrlcflag) exit (1);
     ctrlcflag = true;
-    if (write (STDIN_FILENO, "\n", 1) < 0) { }
+    if ((signum == SIGINT) && (write (STDIN_FILENO, "\n", 1) < 0)) { }
 }
