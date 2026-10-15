@@ -121,7 +121,7 @@ static PinDef const pindefs[] = {
     { "CM_CAINC",        DEV_CM, 1, CM_CAINC,              true  },
     { "CM_3CYCL",        DEV_CM, 1, CM_3CYCL,              true  },
     { "CM_WCOVF",        DEV_CM, 1, CM_WCOVF,              false },
-    { "CM_BUSY",         DEV_CM, 1, CM_BUSY,               false },
+    { "CM_BUSY",         DEV_CM, 1, CM_BUSY,               true  },
     { "CM_BGNT",         DEV_CM, 2, CM2_BGNT,              false },
     { "CM_LOCK",         DEV_CM, 3, CM3_LOCK,              true  },
 

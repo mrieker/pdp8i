@@ -5,49 +5,50 @@
 # help for commands defined herein
 proc helpini {} {
     puts ""
-    puts "  alloff                  - flip all switches off"
-    puts "  assem <addr> <opcd> ... - assemble and write to memory"
-    puts "  chartoint               - convert character to integer"
-    puts "  checkttymatch           - check for matching tty printer characters"
-    puts "  checkttyprompt          - check tty for prompt and send reply string"
-    puts "  clearmem                - clear all 32KW memory"
-    puts "  disas <start> <stop>    - disassemble given range"
-    puts "  domemcyc <switch>       - do switch-initiated memory cycle"
-    puts "  dumpit                  - dump registers and switches"
-    puts "  dumpmem <start> <stop>  - dump memory in octal"
-    puts "  escapechr               - convert character to escape"
-    puts "  flicksw <switch>        - flick momentary switch on then off"
-    puts "  fpfpgascan              - enable fpga console i2c scanning counters"
-    puts "  fpselfscan              - enable console board self-scanning counters"
-    puts "  getenv                  - get environment variable"
-    puts "  getrestofttyline        - read rest of line from tty"
-    puts "  hardreset               - reset the processor"
-    puts "  inttochar               - convert integer to character"
-    puts "  isziactest              - deposit isz/iac test in memory"
-    puts "  loadbin <filename>      - load bin file via console, verify, return start address"
-    puts "  loadbinptr <filename>   - load bin file via paper tape reader, return start address"
-    puts "  loadrim <filename>      - load rim file via console, verify"
-    puts "  loop52                  - set up and start 5252: jmp 5252"
-    puts "  octal <val>             - convert value to 4-digit octal string"
-    puts "  postinc <var>           - increment var but return its previous value"
-    puts "  rdmem <addr>            - read memory at the given address"
-    puts "  readloop <addr> ...     - continuously read the addresses until CTRLC"
-    puts "  rimloader <lo|hi>       - deposit rim loader in memory"
-    puts "  sendchartottykb         - send char to tty kb, don't check for echo"
-    puts "  sendtottykb             - send string to tty keyboard and check echo"
-    puts "  shadowoff               - turn shadowing off"
-    puts "  shadowon                - turn shadowing on"
-    puts "  simoff                  - set to real mode"
-    puts "  simon                   - set to simulation mode"
-    puts "  startat <addr>          - load pc and start at given address"
-    puts "  stepit                  - step one cycle then dump"
-    puts "  steploop                - step one cycle, dump, then loop on enter key"
-    puts "  ttykbtest               - deposit simple tty keyboard test in memory"
-    puts "  ttyprtest               - deposit simple tty printer test in memory"
-    puts "  wait                    - wait for CTRLC or STOP"
-    puts "  waitforttypr            - wait for prompt string on tty"
-    puts "  wrmem <addr> <data>     - write memory at the given address"
-    puts "  zeromem <start> <stop>  - zero the given address range"
+    puts "  alloff                   - flip all switches off"
+    puts "  assem <addr> <opcd> ...  - assemble and write to memory"
+    puts "  chartoint                - convert character to integer"
+    puts "  checkttymatch            - check for matching tty printer characters"
+    puts "  checkttyprompt           - check tty for prompt and send reply string"
+    puts "  clearmem                 - clear all 32KW memory"
+    puts "  disas <start> <stop>     - disassemble given range"
+    puts "  dmacycle <addr> [<data>] - do dma cycle to access memory while running"
+    puts "  domemcyc <switch>        - do switch-initiated memory cycle"
+    puts "  dumpit                   - dump registers and switches"
+    puts "  dumpmem <start> <stop>   - dump memory in octal"
+    puts "  escapechr                - convert character to escape"
+    puts "  flicksw <switch>         - flick momentary switch on then off"
+    puts "  fpfpgascan               - enable fpga console i2c scanning counters"
+    puts "  fpselfscan               - enable console board self-scanning counters"
+    puts "  getenv                   - get environment variable"
+    puts "  getrestofttyline         - read rest of line from tty"
+    puts "  hardreset                - reset the processor"
+    puts "  inttochar                - convert integer to character"
+    puts "  isziactest               - deposit isz/iac test in memory"
+    puts "  loadbin <filename>       - load bin file via console, verify, return start address"
+    puts "  loadbinptr <filename>    - load bin file via paper tape reader, return start address"
+    puts "  loadrim <filename>       - load rim file via console, verify"
+    puts "  loop52                   - set up and start 5252: jmp 5252"
+    puts "  octal <val>              - convert value to 4-digit octal string"
+    puts "  postinc <var>            - increment var but return its previous value"
+    puts "  rdmem <addr>             - read memory at the given address"
+    puts "  readloop <addr> ...      - continuously read the addresses until CTRLC"
+    puts "  rimloader <lo|hi>        - deposit rim loader in memory"
+    puts "  sendchartottykb          - send char to tty kb, don't check for echo"
+    puts "  sendtottykb              - send string to tty keyboard and check echo"
+    puts "  shadowoff                - turn shadowing off"
+    puts "  shadowon                 - turn shadowing on"
+    puts "  simoff                   - set to real mode"
+    puts "  simon                    - set to simulation mode"
+    puts "  startat <addr>           - load pc and start at given address"
+    puts "  stepit                   - step one cycle then dump"
+    puts "  steploop                 - step one cycle, dump, then loop on enter key"
+    puts "  ttykbtest                - deposit simple tty keyboard test in memory"
+    puts "  ttyprtest                - deposit simple tty printer test in memory"
+    puts "  wait                     - wait for CTRLC or STOP"
+    puts "  waitforttypr             - wait for prompt string on tty"
+    puts "  wrmem <addr> <data>      - write memory at the given address"
+    puts "  zeromem <start> <stop>   - zero the given address range"
     puts ""
 }
 
@@ -194,6 +195,34 @@ proc clearmem {} {
     }
 }
 
+# get exclusive access (co-operative) to pdp8icmem.v device by the calling process
+proc cmlock {} {
+    set mypid [pid]
+    if {[pin cm_lock] == $mypid} {
+        error "cmlock: cmem already locked before lock"
+    }
+    while {[pin set cm_lock $mypid get cm_lock] != $mypid} {
+        if {[ctrlcflag]} {error "cmlock: control-C"}
+    }
+    if {[pin cm_busy]} {
+        error "cmlock: cmem controller already busy"
+    }
+}
+
+# release exclusive access to pdp8icmem.v device by the calling process
+proc cmunlk {} {
+    if {[pin cm_busy]} {
+        error "cmunlk: cmem controller still busy"
+    }
+    set mypid [pid]
+    if {[pin cm_lock] != $mypid} {
+        error "cmunlk: cmem locked by something else"
+    }
+    if {[pin set cm_lock $mypid get cm_lock] == $mypid} {
+        error "cmunlk: cmem still locked after unlock"
+    }
+}
+
 # disassemble block of memory
 # - disas addr         ;# disassemble in vacinity of given address
 # - disas start stop   ;# disassemble the given range
@@ -208,6 +237,44 @@ proc disas {start {stop ""}} {
         set op [rdmem $pc]
         set as [disasop $op $pc]
         puts [format "%04o  %04o  %s" $pc $op $as]
+    }
+}
+
+# do a dma cycle
+#  input:
+#     addr  = 15-bit address
+#     wdata = "" : do a read
+#           else : write data
+#  output:
+#     read/write data
+proc dmacycle {addr {wdata ""}} {
+    cmlock
+    if {$wdata == ""} {
+        pin set cm_write 0
+    } else {
+        pin set cm_write 1 cm_data $wdata
+    }
+    pin set cm_3cycl 0 cm_addr $addr cm_busy 1
+    set started [pin 10MHz]
+    while true {
+        set now [pin 10MHz]
+        if {! [pin cm_busy]} {
+            set rc [pin cm_data]
+            cmunlk
+            return $rc
+        }
+        if {! [pin orun]} {
+            cmunlk
+            error "dmacycle: processor halted"
+        }
+        set diff [expr {($now - $started) & 0xFFFFFFFF}]
+        if {$diff > 10000} {    ;# 1mS subject to d_clkratm1
+            error "dmacycle: cmem controller is stuck"
+        }
+        if {[ctrlcflag]} {
+            cmunlk
+            error "dmacycle: control-C"
+        }
     }
 }
 

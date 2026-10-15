@@ -20,6 +20,7 @@
 
 // generate string for current shadow error(s)
 
+#include "shaderr.h"
 #include "strprintf.h"
 #include "z8idefs.h"
 #include "z8iutil.h"
