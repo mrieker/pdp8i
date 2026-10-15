@@ -88,32 +88,19 @@ std::string disassemble (uint16_t opc, uint16_t pc)
                 if (opc &   2) str.append ("HLT ");
             } else {
                 if (opc & 00200) str.append ("CLA ");
-                if ((opc & 07577) == 07431) str.append ("SWAB ");  // MQL NMI
-                else {
-                    switch (opc & 00120) {
-                        case 00020: str.append ("MQL "); break;
-                        case 00100: str.append ("MQA "); break;
-                        case 00120: str.append ("SWP "); break;
-                    }
-                    if (opc & 00056) {
-                        switch ((opc >> 1) & 027) {
-                            case 001: if (opc & 00320) str.append (": "); str.append ("SCL ? ACS "); break;
-                            case 002: str.append ("MUY "); break;
-                            case 003: str.append ("DVI "); break;
-                            case 004: str.append ("NMI "); break;
-                            case 005: str.append ("SHL "); break;
-                            case 006: str.append ("ASR "); break;
-                            case 007: str.append ("LSR "); break;
-                            case 020: str.append ("SCA "); break;
-                            case 021: if (opc & 00320) str.append (": "); str.append ("SCA SCL ? DAD "); break;
-                            case 022: if (opc & 00320) str.append (": "); str.append ("SCA MUY ? DST "); break;
-                            case 023: str.append ("SWBA "); break;
-                            case 024: if (opc & 00320) str.append (": "); str.append ("SCA NMI ? DPSZ "); break;
-                            case 025: if (opc & 00320) str.append (": "); str.append ("SCA SHL ? DPIC "); break;
-                            case 026: if (opc & 00320) str.append (": "); str.append ("SCA ASR ? DCM "); break;
-                            case 027: if (opc & 00320) str.append (": "); str.append ("SCA LSR ? SAM "); break;
-                        }
-                    }
+                switch (opc & 00120) {
+                    case 00020: str.append ("MQL "); break;
+                    case 00100: str.append ("MQA "); break;
+                    case 00120: str.append ("SWP "); break;
+                }
+                switch ((opc >> 1) & 7) {
+                    case 1: str.append ("SCL "); break;
+                    case 2: str.append ("MUY "); break;
+                    case 3: str.append ("DVI "); break;
+                    case 4: str.append ("NMI "); break;
+                    case 5: str.append ("SHL "); break;
+                    case 6: str.append ("ASR "); break;
+                    case 7: str.append ("LSR "); break;
                 }
             }
             if (str.length () == 0) str.append ("NOP");
