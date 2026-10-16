@@ -45,8 +45,9 @@ module pdp8isys (
 
     reg enable;
     reg[14:00] counter;
+    reg[63:00] lfsr;
 
-    assign armrdata = (armraddr == 0) ? 32'h53590001 : // [31:16] = 'SY'; [15:12] = (log2 nreg) - 1; [11:00] = version
+    assign armrdata = (armraddr == 0) ? 32'h53590002 : // [31:16] = 'SY'; [15:12] = (log2 nreg) - 1; [11:00] = version
                       (armraddr == 1) ? { enable, counter, PAUSE, INT_RQST, IO_SKIP, AC_CLEAR, devtocpu } :
                       32'hDEADBEEF;
 
@@ -55,6 +56,7 @@ module pdp8isys (
             if (RESET) begin
                 enable  <= 1;
                 counter <= 0;
+                lfsr    <= 64'h123456789ABCDEF0;
             end
             INT_RQST <= 0;
             PAUSE    <= 0;
@@ -76,10 +78,20 @@ module pdp8isys (
 
             // signal the arm to process the opcode
             // it will clear PAUSE when it finishes
-            if (iopstart & enable & (ioopcode[08:03] == 6'o31) & (ioopcode[02:00] != 3)) begin
-                SELECTED <= 1;
-                PAUSE    <= 1;
-                counter  <= counter + 1;
+            if (iopstart & enable & (ioopcode[08:03] == 6'o31)) begin
+                case (ioopcode[02:00])
+                    3: begin end    // 6313 WFI: handled by processor board (procseq.kicad_pcb)
+                    5: begin        // 6315 GRN: get random number into AC
+                        AC_CLEAR <= 1;
+                        devtocpu <= lfsr[11:00];
+                        SELECTED <= 1;
+                    end
+                    default: begin
+                        PAUSE    <= 1;
+                        counter  <= counter + 1;
+                        SELECTED <= 1;
+                    end
+                endcase
             end
 
             // processor no longer sending an IOP, stop sending data over the bus so it doesn't jam other devices
@@ -89,6 +101,9 @@ module pdp8isys (
                 IO_SKIP  <= 0;
                 SELECTED <= 0;
             end
+
+            // https://www.xilinx.com/support/documentation/application_notes/xapp052.pdf
+            lfsr <= { lfsr[62:00], lfsr[63] ^ lfsr[62] ^ lfsr[60] ^ lfsr[59] ^ 1'b1 };
         end
     end
 endmodule

@@ -467,7 +467,6 @@ module pdp8isim (
         ._INBUS_4   (_busINBUS[4]),
         ._INBUS_5   (_busINBUS[5]),
         ._INBUS_6   (_busINBUS[6]),
-        ._INBUS_7   (_busINBUS[7]),
         ._INBUS_8   (_busINBUS[8]),
         ._INBUS_9   (_busINBUS[9]),
         ._INBUS_10  (_busINBUS[10]),
