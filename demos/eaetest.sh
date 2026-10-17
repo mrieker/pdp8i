@@ -11,4 +11,4 @@ then
     ../ccode/pdp8v/asm/octtobin < eaetest.oct > eaetest.bin
 fi
 ../ccode/z8ipanel "$@" eaetest.tcl
-exec ../ccode/z8idump
+exec ../ccode/z8itty -nokb -cps 960
