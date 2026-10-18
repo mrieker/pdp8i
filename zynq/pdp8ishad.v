@@ -155,6 +155,8 @@ module pdp8ishad (
     reg[11:00] g1acum, g1acumraw;
     reg g1link, g1linkraw;
 
+    wire trace = 0;
+
     always @(*) begin
 
         // handle cla, cll, cma, cll, iac bits
@@ -410,6 +412,78 @@ module pdp8ishad (
                                     (ireg[11:09] != 3) & (ireg[11:09] != 4));
                         end
                     end else if (oTS2) begin
+                        if (trace & (majst == MS_FETCH)) begin
+                            $write ("pdpi8shad*: pctr=%o ireg=%o l.acum=%o.%o", pctr, oMBUF, link, acum);
+                            case (oMBUF[11:09])
+                                0: $write (" AND");
+                                1: $write (" TAD");
+                                2: $write (" ISZ");
+                                3: $write (" DCA");
+                                4: $write (" JMS\n");
+                                5: $write (" JMP\n");
+                                6: $write (" IOT\n");
+                                7: begin
+                                    if (~ oMBUF[08]) begin
+                                        if (oMBUF[07]) $write (" CLA");
+                                        if (oMBUF[06]) $write (" CLL");
+                                        if (oMBUF[05]) $write (" CMA");
+                                        if (oMBUF[04]) $write (" CML");
+                                        if (oMBUF[00]) $write (" IAC");
+                                        case (oMBUF[03:01])
+                                            0: begin end
+                                            1: $write (" BSW");
+                                            2: $write (" RAL");
+                                            3: $write (" RTL");
+                                            4: $write (" RAR");
+                                            5: $write (" RTR");
+                                            6: $write (" ??6");
+                                            7: $write (" ??7");
+                                        endcase
+                                    end else if (~ oMBUF[00]) begin
+                                        case (oMBUF[06:03])
+                                             1: $write (" SKP");
+                                             2: $write (" SNL");
+                                             3: $write (" SZL");
+                                             4: $write (" SZA");
+                                             5: $write (" SNA");
+                                             6: $write (" SZA+SNL");
+                                             7: $write (" SNA*SZL");
+                                             8: $write (" SMA");
+                                             9: $write (" SPA");
+                                            10: $write (" SMA+SNL");
+                                            11: $write (" SPA*SZL");
+                                            12: $write (" SMA+SZA");
+                                            13: $write (" SPA*SNA");
+                                            14: $write (" SMA+SZA+SNL");
+                                            15: $write (" SPA*SNA*SZL");
+                                        endcase
+                                        if (oMBUF[07]) $write (" CLA");
+                                        if (oMBUF[02]) $write (" OSR");
+                                        if (oMBUF[01]) $write (" HLT");
+                                    end else begin
+                                        if (oMBUF[07]) $write (" CLA");
+                                        if (oMBUF[06]) $write (" MQA");
+                                        if (oMBUF[05]) $write (" SCA");
+                                        if (oMBUF[04]) $write (" MQL");
+                                        case (oMBUF[03:01])
+                                            0: $write (" NOP");
+                                            1: $write (" SCL");
+                                            2: $write (" MUY");
+                                            3: $write (" DVI");
+                                            4: $write (" NMI");
+                                            5: $write (" SHL");
+                                            6: $write (" ASR");
+                                            7: $write (" LSR");
+                                        endcase
+                                    end
+                                    $write ("\n");
+                                end
+                            endcase
+                        end
+                        if (trace & (majst == MS_EXEC)) begin
+                            if (ireg[11:09] <= 2) $write (" %o => %o\n", oMADR, oMBUF);
+                            if (ireg[11:09] == 3) $write (" %o <= %o\n", oMADR, oACUM);
+                        end
 
                         // make sure the processor latched the correct value in oMBUF
                         if (tp1datval & (oMBUF != tp1dat)) begin
@@ -1040,6 +1114,23 @@ module pdp8ishad (
                         else sctr <= sctr + 1;
                     end
                     3: begin                            // DVI
+                        ////matches D0BA maindec
+                        ////if (ealn) begin
+                        ////    eaac <= yreg + ~ eaac;
+                        ////    sctr <= 0;
+                        ////    extarstep <= 0;
+                        ////end else begin
+                        ////    eaac <= dviqbit ? dviacstep : { eaac[10:00], mquo[11] };
+                        ////    mquo <= dvimqstep;
+                        ////    if (sctr == 0) extarstep <= 0;
+                        ////    else sctr <= sctr + 1;
+                        ////end
+                        // what our board does
+                        // - same for non-overflow cases
+                        // - overflow case messed up
+                        //   D0BA expects MQ unchanged
+                        //                AC = YREG - AC - 1
+                        //                SC = 0
                         eaac <= _dviqbit ? { eaac[10:00], mquo[11] } : dviacstep;
                         mquo <= dvimqstep;
                         if (ealn | (sctr == 0)) extarstep <= 0;
