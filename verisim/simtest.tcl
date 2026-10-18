@@ -273,9 +273,9 @@ proc simtest {} {
                                     if {($opcode & 07770) == 06030} break       ;# tty keyboard opcodes
                                     if {($opcode & 07770) == 06040} break       ;# tty printer opcodes
                                     if {($opcode & 07400) == 07000} {           ;# group 1
-                                        ##if {($opcode & 016) == 002} continue    ;# bsw
-                                        if {($opcode & 014) == 014} continue    ;# 6,7
-                                        break
+                                        ##if {($opcode & 016) == 002} continue    ;# skip bsw
+                                        if {($opcode & 014) == 014} continue    ;# skip 6,7
+                                        break                                   ;# others ok
                                     }
                                     if {($opcode & 07401) == 07400} {           ;# group 2
                                         if {($opcode & 2) && (! $testcons || ([randbits 2] != 0))} {
@@ -298,11 +298,11 @@ proc simtest {} {
                             }
                         }
                         1 {
-                            set opcode 07501                                ;# CLA MQA - read MQ into AC
+                            set opcode 07701                                ;# CLA MQA - read MQ into AC
                             set needmqsca 2
                         }
                         2 {
-                            set opcode 07441                                ;# CLA SCA - read SC into AC
+                            set opcode 07641                                ;# CLA SCA - read SC into AC
                             set needmqsca 0
                         }
                     }
