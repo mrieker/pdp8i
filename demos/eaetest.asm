@@ -14,7 +14,7 @@ count:	.word	0,0,0	; number of eae instructions tested
 _0006:	.word	00006
 _0007:	.word	00007
 _0020:	.word	00020
-_0025:	.word	00025
+_0024:	.word	00024
 _0034:	.word	00034
 _0037:	.word	00037
 _0040:	.word	00040
@@ -760,18 +760,13 @@ step3_dvi: .word .-.
 	dca	linkwork	; set LINK = 0, no overflow
 	jmpi	step3_dvi
 
+	; AC >= Y, divide overlow
+	; the real 8/I EAE leaves AC = Y + ~ AC
+	; ...and leaves MQ alone and sets SC = 0
+	; but our board leaves both AC and MQ alone
+	; ...and sets SC = 0024 (didn't do any steps, 12. to go)
 dvi_ovrflo:
-	tad	mqwork		; AC >= Y, divide overlow
-	cll cml ral		; kerchunk ACMQ left, shifting in a 1 for quotient bit
-	dca	mqwork
-	tad	acwork
-	ral
-	dca	acwork
-	tad	memop		; subtract Y from AC
-	cll cma iac
-	tad	acwork
-	dca	acwork
-	tad	_0025		; set SC = 0025, only did 1 step, 11 to go
+	tad	_0024		; set SC = 0024
 	dca	scwork
 	iac			; set LINK = 1 for overflow
 	dca	linkwork

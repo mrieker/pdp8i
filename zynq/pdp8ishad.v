@@ -1037,8 +1037,7 @@ module pdp8ishad (
     //   eaac,ealn,mquo,sctr = possibly updated
     //   extarstep = possibly incremented
 
-    // PDP-8/I small computer handbook 1970
-    // pages 57..63
+    // PDP-8/I small computer handbook 1970 pages 57..63
     // also small computer handbook 1973 mode A (says it's 8/I compatible)
 
     // normalize is done
@@ -1053,11 +1052,13 @@ module pdp8ishad (
     assign { muyacstep, muymqstep[11] } = { 1'b0, eaac } + { 1'b0, muymbit ? yreg : 12'b0 };
     assign muymqstep[10:00] = mquo[11:01];
 
-    wire _dviqbit, dviover;
+    // each step in divide
+    wire _dviqbit;
     wire[11:00] dviacstep;
-    assign { _dviqbit, dviover, dviacstep } = { 1'b0, eaac, mquo[11] } - { 2'b0, yreg };
+    assign { _dviqbit, dviacstep } = { eaac, mquo[11] } - { 1'b0, yreg };
     wire[11:00] dvimqstep = { mquo[10:00], ~ _dviqbit };   // shift quotient bit into bottom of MQ
 
+    // accumulator at end of step 2
     wire[11:00] step2eaac = (ireg[04] ? 0 : eaac) |             // MQL - clear accumulator after loading into MQUO
                             (ireg[05] ? { 7'b0, sctr } : 0) |   // SCA - step counter load into accumulator
                             (ireg[06] ? mquo : 0);              // MQA - multiplier/quotient load into accumulator
@@ -1085,11 +1086,11 @@ module pdp8ishad (
                 case (ireg[03:01])
                     2: begin                                    // MUY
                         ealn <= 0;
-                        sctr <= -11;
+                        sctr <= -12;
                     end
                     3: begin                                    // DVI
                         ealn <= step2eaac >= yreg;
-                        sctr <= -11;
+                        sctr <= -12;
                     end
                     4: begin                                    // NMI
                         sctr <= 0;
@@ -1110,8 +1111,8 @@ module pdp8ishad (
                     2: begin                            // MUY
                         eaac <= muyacstep;
                         mquo <= muymqstep;
-                        if (sctr == 0) extarstep <= 0;
-                        else sctr <= sctr + 1;
+                        if (sctr == 5'o37) extarstep <= 0;
+                        sctr <= sctr + 1;
                     end
                     3: begin                            // DVI
                         ////matches D0BA maindec
@@ -1131,10 +1132,17 @@ module pdp8ishad (
                         //   D0BA expects MQ unchanged
                         //                AC = YREG - AC - 1
                         //                SC = 0
-                        eaac <= _dviqbit ? { eaac[10:00], mquo[11] } : dviacstep;
-                        mquo <= dvimqstep;
-                        if (ealn | (sctr == 0)) extarstep <= 0;
-                        else sctr <= sctr + 1;
+                        //  instead we do MQ unchanged
+                        //                AC unchanged
+                        //                SC = 24
+                        if (ealn) begin
+                            extarstep <= 0;
+                        end else begin
+                            eaac <= _dviqbit ? { eaac[10:00], mquo[11] } : dviacstep;
+                            mquo <= dvimqstep;
+                            if (sctr == 5'o37) extarstep <= 0;
+                            sctr <= sctr + 1;
+                        end
                     end
                     4: begin                            // NMI
                         if (nmidone) extarstep <= 0;

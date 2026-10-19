@@ -379,7 +379,7 @@ module backplane (
         ._MBUF_11   (_busMBUF[11]),
 
         ._TP1       (_busTP1),
-        ._TS2       (_busTS2),
+        ._TP2       (_busTP2),
         ._TS3       (_busTS3),
 
         .extop_1    (extop[1]),

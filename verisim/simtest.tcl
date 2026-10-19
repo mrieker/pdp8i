@@ -127,6 +127,7 @@ proc simtest {} {
     set shat0 [arm find SH]
     set shat1 [expr {$shat0 + 1}]
     arm set $shat1 0x80000000   ;# sh_frzonerr : freeze clocking on error
+                                ;# set shat1 = 0x40000000 to disable shadow
 
     set syat0 [arm find SY]
     set syat1 [expr {$syat0 + 1}]
@@ -1115,9 +1116,7 @@ proc extendedarithmetic {yreg} {
         3 {     ;# 7407 DVI - divide: AC,MQ / Y => MQ r AC
             set acmq [expr {($acum << 12) | $mquo}]
             if {$acum >= $yreg} {
-                set acum [expr {(($acmq >> 11) - $yreg) & 07777}]
-                set mquo [expr {(($acmq << 1) + 1) & 07777}]
-                set sctr 21
+                set sctr 20
                 set linc 1
             } else {
                 set acum [expr {$acmq % $yreg}]
