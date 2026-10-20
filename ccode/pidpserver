@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 #  runs on raspi plugged into a pidp8 panel
-#  makes the panel available to pidptcpclient running on the zynq
+#  makes the panel available to pidpclient running on the zynq
 #
 dbg=
 if [ "$1" == "-gdb" ]

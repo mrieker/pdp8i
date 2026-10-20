@@ -23,7 +23,7 @@
 
 #include <stdint.h>
 
-#define pidptcpport 1359
+#define pidpport 1359
 
 struct PiDPMsg {
     uint64_t seq;
@@ -31,7 +31,7 @@ struct PiDPMsg {
     uint32_t swrows[3];     // active high scrambled
 };
 
-void pidp_open (char const *server);
+void pidp_open (char const *server, bool usetcp);
 bool pidp_proc (PiDPMsg *pidpmsg);
 
 #endif

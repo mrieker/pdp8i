@@ -22,10 +22,10 @@
 // this is a different pidp8i panel than one plugged into console.kicad_sch board
 
 // on raspi:
-//  ./pidptcpserver
+//  ./pidpserver [-tcp]
 
 // on zynq:
-//  ./pidptcpclient [-nomqsc] <raspihostname>
+//  ./pidpclient [-nomqsc] [-tcp] <raspihostname>
 
 #include <signal.h>
 #include <string.h>
@@ -65,10 +65,15 @@ int main (int argc, char **argv)
     setlinebuf (stdout);
 
     bool nomqsc = false;
+    bool usetcp = false;
     char const *server = NULL;
     for (int i = 0; ++ i < argc;) {
         if (strcasecmp (argv[i], "-nomqsc") == 0) {
             nomqsc = true;
+            continue;
+        }
+        if (strcasecmp (argv[i], "-tcp") == 0) {
+            usetcp = true;
             continue;
         }
         if (argv[i][0] == '-') {
@@ -85,7 +90,7 @@ int main (int argc, char **argv)
         fprintf (stderr, "missing server hostname\n");
         return 1;
     }
-    pidp_open (server);
+    pidp_open (server, usetcp);
 
     opcodeleds[0] = 1 << COL1;
     opcodeleds[1] = 1 << COL2;
@@ -168,54 +173,57 @@ int main (int argc, char **argv)
             (pads.light.link ? (1 << COL7) : 0);
 
         // ... also receives switches from pidp panel
-        if (! pidp_proc (&pidpmsg)) continue;
+        bool good = pidp_proc (&pidpmsg);
 
         i2czlib.lockpads ();
 
-        // only send switches to fpga if there is a change
-        // - this allows other things (like tcl scripts) to use switches
-        // - and it takes over the switches only when someone is using them
-        if (! firstswrow && ((pidpmsg.swrows[0] != lastswrows[0]) ||
-                (pidpmsg.swrows[1] != lastswrows[1]) || (pidpmsg.swrows[2] != lastswrows[2]))) {
+        if (good) {
 
-            // send all switches to fpga
-            pads.togval.reg = swunscrams[pidpmsg.swrows[0]>>COLMIN];
-            uint32_t sr2 = swunscrams[pidpmsg.swrows[1]>>COLMIN];
-            pads.togval.dfld  = (sr2 >> 9) & 7;
-            pads.togval.ifld  = (sr2 >> 6) & 7;
-            pads.togval.sinst = (pidpmsg.swrows[2] >> COL8) & 1;
-            pads.togval.sstep = (pidpmsg.swrows[2] >> COL7) & 1;
-            pads.button.stop  = (pidpmsg.swrows[2] >> COL6) & 1;
-            pads.button.cont  = (pidpmsg.swrows[2] >> COL5) & 1;
-            pads.button.start = (pidpmsg.swrows[2] >> COL1) & 1;
-            pads.button.ldad  = (pidpmsg.swrows[2] >> COL2) & 1;
-            pads.button.exam  = (pidpmsg.swrows[2] >> COL4) & 1;
-            pads.button.depos = (pidpmsg.swrows[2] >> COL3) & 1;
-            pads.togovr.reg   = 07777;
-            pads.togovr.dfld  = 7;
-            pads.togovr.ifld  = 7;
-            pads.togovr.sinst = true;
-            pads.togovr.sstep = true;
+            // only send switches to fpga if there is a change
+            // - this allows other things (like tcl scripts) to use switches
+            // - and it takes over the switches only when someone is using them
+            if (! firstswrow && ((pidpmsg.swrows[0] != lastswrows[0]) ||
+                    (pidpmsg.swrows[1] != lastswrows[1]) || (pidpmsg.swrows[2] != lastswrows[2]))) {
 
-            uint32_t now = time (NULL);
-            printf ("%02u:%02u:%02u   %o %o  %04o  %s %s %s %s %s %s %s %s\n",
-                now / 3600 % 24, now / 60 % 60, now % 60,
-                pads.togval.dfld, pads.togval.ifld, pads.togval.reg,
-                pads.button.start ? "START" : "     ",
-                pads.button.ldad  ? "LDAD"  : "    ",
-                pads.button.depos ? "DEPOS" : "     ",
-                pads.button.exam  ? "EXAM"  : "    ",
-                pads.button.cont  ? "CONT"  : "    ",
-                pads.button.stop  ? "STOP"  : "    ",
-                pads.togval.sstep ? "SSTEP" : "     ",
-                pads.togval.sinst ? "SINST" : "     ");
+                // send all switches to fpga
+                pads.togval.reg = swunscrams[pidpmsg.swrows[0]>>COLMIN];
+                uint32_t sr2 = swunscrams[pidpmsg.swrows[1]>>COLMIN];
+                pads.togval.dfld  = (sr2 >> 9) & 7;
+                pads.togval.ifld  = (sr2 >> 6) & 7;
+                pads.togval.sinst = (pidpmsg.swrows[2] >> COL8) & 1;
+                pads.togval.sstep = (pidpmsg.swrows[2] >> COL7) & 1;
+                pads.button.stop  = (pidpmsg.swrows[2] >> COL6) & 1;
+                pads.button.cont  = (pidpmsg.swrows[2] >> COL5) & 1;
+                pads.button.start = (pidpmsg.swrows[2] >> COL1) & 1;
+                pads.button.ldad  = (pidpmsg.swrows[2] >> COL2) & 1;
+                pads.button.exam  = (pidpmsg.swrows[2] >> COL4) & 1;
+                pads.button.depos = (pidpmsg.swrows[2] >> COL3) & 1;
+                pads.togovr.reg   = 07777;
+                pads.togovr.dfld  = 7;
+                pads.togovr.ifld  = 7;
+                pads.togovr.sinst = true;
+                pads.togovr.sstep = true;
 
-            i2czlib.writepads (&pads);
+                uint32_t now = time (NULL);
+                printf ("%02u:%02u:%02u   %o %o  %04o  %s %s %s %s %s %s %s %s\n",
+                    now / 3600 % 24, now / 60 % 60, now % 60,
+                    pads.togval.dfld, pads.togval.ifld, pads.togval.reg,
+                    pads.button.start ? "START" : "     ",
+                    pads.button.ldad  ? "LDAD"  : "    ",
+                    pads.button.depos ? "DEPOS" : "     ",
+                    pads.button.exam  ? "EXAM"  : "    ",
+                    pads.button.cont  ? "CONT"  : "    ",
+                    pads.button.stop  ? "STOP"  : "    ",
+                    pads.togval.sstep ? "SSTEP" : "     ",
+                    pads.togval.sinst ? "SINST" : "     ");
+
+                i2czlib.writepads (&pads);
+            }
+            firstswrow = false;
+            lastswrows[0] = pidpmsg.swrows[0];
+            lastswrows[1] = pidpmsg.swrows[1];
+            lastswrows[2] = pidpmsg.swrows[2];
         }
-        firstswrow = false;
-        lastswrows[0] = pidpmsg.swrows[0];
-        lastswrows[1] = pidpmsg.swrows[1];
-        lastswrows[2] = pidpmsg.swrows[2];
     }
 
     i2czlib.unlkpads ();

@@ -7,7 +7,7 @@ EXECUTEABLES := z8idump.$(MACH) \
 	z8iptp.$(MACH) z8iptr.$(MACH) z8irk8je.$(MACH) \
 	z8isys.$(MACH) z8itc08.$(MACH) z8itrace.$(MACH) \
 	z8itty.$(MACH) z8ivc8.$(MACH) \
-	pidptcpclient.$(MACH) pidptcpserver.$(MACH)
+	pidpclient.$(MACH) pidpserver.$(MACH)
 
 LIBOBJS := \
 	assemble.$(MACH).o \

@@ -18,11 +18,11 @@
 //
 //    http://www.gnu.org/licenses/gpl-2.0.html
 
-// operate pidp panel via gpio connector or tcp connection to raspi plugged into pidp panel
+// operate pidp panel via gpio connector or udp/tcp connection to raspi plugged into pidp panel
 
 // if using remote pidp panel,
-//  on remote raspi: ./pidptcpserver
-//  on client:  export pidptcpaddr=<hostname of remote raspi>
+//  on remote raspi: ./pidpserver [-tcp]
+//  on client:  ./pidpclient [-tcp] <pidpserver-hostname>
 
 #include <arpa/inet.h>
 #include <errno.h>
@@ -90,12 +90,14 @@
 
 static uint16_t const swmasks[3] = { 0xFFF0, 0xC0F0, 0xC3F0 };
 
+static bool usingtcp;
 static int buttonindex;
-static int gpiotcpfd = -1;
-static struct sockaddr_in gpiotcpsa;
+static int gpionetfd = -1;
+static struct sockaddr_in gpionetsa;
 static uint32_t buttonring[8];
 static uint32_t rdcychz;    // actually cycles/0.131072sec
 static uint32_t volatile *gpiopage;
+static uint64_t sendseq;
 
 static void reconnect ();
 static void *gpioopen (char const *devname);
@@ -107,14 +109,15 @@ static void set_output_high (uint32_t bits);
 static void set_output_low (uint32_t bits);
 
 // open access to gpio
-void pidp_open (char const *server)
+void pidp_open (char const *server, bool usetcp)
 {
     if (server != NULL) {
+        usingtcp = usetcp;
 
         // set up server address and port number
-        gpiotcpsa.sin_family = AF_INET;
-        gpiotcpsa.sin_port = htons (pidptcpport);
-        if (!inet_aton (server, &gpiotcpsa.sin_addr)) {
+        gpionetsa.sin_family = AF_INET;
+        gpionetsa.sin_port = htons (pidpport);
+        if (!inet_aton (server, &gpionetsa.sin_addr)) {
             struct hostent *he = gethostbyname (server);
             if (he == NULL) {
                 fprintf (stderr, "pidp_proc: bad server address %s\n", server);
@@ -124,13 +127,13 @@ void pidp_open (char const *server)
                 fprintf (stderr, "pidp_proc: server %s not IP v4\n", server);
                 ABORT ();
             }
-            gpiotcpsa.sin_addr = *(struct in_addr *)he->h_addr;
+            gpionetsa.sin_addr = *(struct in_addr *)he->h_addr;
         }
 
         reconnect ();
     } else {
 
-        // not using TCP, access gpio pins directly
+        // not using network, access gpio pins directly
         gpiopage = (uint32_t volatile *) gpioopen ("/dev/gpiomem");
         set_mode_input  (0xFF7FFF0U);   // set all pins we work with to inputs
         set_output_low  (0xFF00000U);   // lamp selects are active high
@@ -218,7 +221,9 @@ bool pidp_proc (PiDPMsg *pidpmsg)
     } else {
         PiDPMsg recvbuf;
         while (true) {
-            int rc = write (gpiotcpfd, pidpmsg, sizeof *pidpmsg);
+            pidpmsg->seq = ++ sendseq;
+            int rc = usingtcp ? write (gpionetfd, pidpmsg, sizeof *pidpmsg) :
+                sendto (gpionetfd, pidpmsg, sizeof *pidpmsg, 0, (sockaddr *) &gpionetsa, sizeof gpionetsa);
             if (rc != (int) sizeof *pidpmsg) {
                 if (rc < 0) {
                     fprintf (stderr, "pidp_proc: error writing to server: %m\n");
@@ -228,15 +233,18 @@ bool pidp_proc (PiDPMsg *pidpmsg)
             } else {
 
                 // read in reply
-                rc = read (gpiotcpfd, &recvbuf, sizeof recvbuf);
+                do {
+                    rc = read (gpionetfd, &recvbuf, sizeof recvbuf);
+                } while (! usingtcp && (rc == (int) sizeof recvbuf) && (recvbuf.seq < sendseq));
                 if (rc == (int) sizeof recvbuf) break;
                 if (rc < 0) {
+                    if (errno == EAGAIN) return false;  // udp timed out
                     fprintf (stderr, "pidp_proc: error reading from server: %m\n");
                 } else {
                     fprintf (stderr, "pidp_proc: only read %d bytes of %d\n", rc, (int) sizeof recvbuf);
                 }
             }
-            close (gpiotcpfd);
+            close (gpionetfd);
             reconnect ();
         }
 
@@ -249,30 +257,59 @@ bool pidp_proc (PiDPMsg *pidpmsg)
 
 static void reconnect ()
 {
-    // create tcp socket
-    gpiotcpfd = socket (AF_INET, SOCK_STREAM, 0);
-    if (gpiotcpfd < 0) ABORT ();
+    if (usingtcp) {
 
-    // timeout after 5 seconds trying to connect
-    static unsigned const timeoutms = 5000;
-    if (setsockopt (gpiotcpfd, IPPROTO_TCP, TCP_USER_TIMEOUT, &timeoutms, sizeof timeoutms) < 0) ABORT ();
+        // create tcp socket
+        gpionetfd = socket (AF_INET, SOCK_STREAM, 0);
+        if (gpionetfd < 0) ABORT ();
 
-    // connect to server port
-    int lasterr = 0;
-    while (connect (gpiotcpfd, (struct sockaddr *) &gpiotcpsa, sizeof gpiotcpsa) < 0) {
-        int err = errno;
-        if (err != lasterr) {
-            fprintf (stderr, "pidp_proc: error connecting to %s:%d: %m\n",
-                inet_ntoa (gpiotcpsa.sin_addr), ntohs (gpiotcpsa.sin_port));
-            lasterr = err;
+        // timeout after 5 seconds trying to connect
+        static unsigned const timeoutms = 5000;
+        if (setsockopt (gpionetfd, IPPROTO_TCP, TCP_USER_TIMEOUT, &timeoutms, sizeof timeoutms) < 0) ABORT ();
+
+        // connect to server port
+        int lasterr = 0;
+        while (connect (gpionetfd, (struct sockaddr *) &gpionetsa, sizeof gpionetsa) < 0) {
+            int err = errno;
+            if (err != lasterr) {
+                fprintf (stderr, "pidp_proc: error connecting to %s:%d: %m\n",
+                    inet_ntoa (gpionetsa.sin_addr), ntohs (gpionetsa.sin_port));
+                lasterr = err;
+            }
+            if (err != ETIMEDOUT) {
+                usleep (timeoutms * 1000);
+            }
         }
-        if (err != ETIMEDOUT) {
-            usleep (timeoutms * 1000);
+    } else {
+
+        // create udp socket
+        gpionetfd = socket (AF_INET, SOCK_DGRAM, 0);
+        if (gpionetfd < 0) ABORT ();
+
+        // bind to ephemeral port so server knows what to reply to
+        struct sockaddr_in cliaddr;
+        memset (&cliaddr, 0, sizeof cliaddr);
+        cliaddr.sin_family = AF_INET;
+        if (bind (gpionetfd, (sockaddr *) &cliaddr, sizeof cliaddr) < 0) {
+            fprintf (stderr, "pidp_proc: bind error: %m\n");
+            ABORT ();
         }
+
+        // set timeout for receives
+        struct timeval tv;
+        memset (&tv, 0, sizeof tv);
+        tv.tv_usec = 123456;
+        if (setsockopt (gpionetfd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof tv) < 0) ABORT ();
+
+        // get sequence number higher than ever used before
+        struct timespec nowts;
+        if (clock_gettime (CLOCK_REALTIME, &nowts) < 0) ABORT ();
+        sendseq = nowts.tv_sec * 1000000000ULL + nowts.tv_nsec;
     }
 
-    fprintf (stderr, "pidp_proc: connected to %s:%d\n",
-        inet_ntoa (gpiotcpsa.sin_addr), ntohs (gpiotcpsa.sin_port));
+    fprintf (stderr, "pidp_proc: %s to %s:%d\n",
+        usingtcp ? "connected" : "sending",
+        inet_ntoa (gpionetsa.sin_addr), ntohs (gpionetsa.sin_port));
 }
 
 static void *gpioopen (char const *devname)
