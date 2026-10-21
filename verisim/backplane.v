@@ -346,7 +346,7 @@ module backplane (
     ///////////////////////////
 
     wire _eaeACCLEAR, _eaeIOSKIP, _eaePAUSE, _extop_dvi, _extop_muy, _s3clk;
-    wire dviover, extarex, majst_000x, sctr_5;
+    wire dviover, eaeclksel, extarex, majst_000x, sctr_5;
     wire[3:1] _extop;
     wire[4:1] extop;
     wire[11:00] _eaeINBUS, myac, myacstep2;
@@ -356,6 +356,13 @@ module backplane (
         .zreset (zreset),
         .GND    (1'b0),
         .VCC    (1'b1),
+
+        .clksel  (eaeclksel),
+        .clk2    (eaeclksel),   // ->CLKSEL: 200nS
+        .clk4    (),            // ->CLKSEL: 400nS
+        .clk6    (),            // ->CLKSEL: 600nS
+        .clk8    (),            // ->CLKSEL: 800nS
+        .clkp1   (1'b1),        // ->VCC: +0; ->_S3CLK: +100nS
 
         ._BUSINI    (_busBUSINI),
         ._CLOCK     (_busCLOCK),

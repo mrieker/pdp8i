@@ -1171,7 +1171,7 @@ proc extendedarithmetic {yreg} {
 }
 
 ;# wait up to 10uS for signal to assert
-proc waitassert {sig {n 100}} {
+proc waitassert {sig {n 300}} {
     for {set i 0} {! [bus o$sig]} {incr i} {
         if {$i > $n} {error "timed out waiting for $sig asserted"}
         runsimstep
@@ -1179,7 +1179,7 @@ proc waitassert {sig {n 100}} {
 }
 
 ;# wait up to 10uS for signal to negate
-proc waitnegate {sig {n 100}} {
+proc waitnegate {sig {n 300}} {
     for {set i 0} {[bus o$sig]} {incr i} {
         if {$i > $n} {error "timed out waiting for $sig negated"}
         runsimstep
