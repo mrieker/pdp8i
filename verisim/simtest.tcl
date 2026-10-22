@@ -352,7 +352,7 @@ proc simtest {} {
                         puts -nonewline [format " %o%04o" $xmem_ifld $pctr]
                     }
 
-                    6 {             ;# iot
+                    6 {             ;# iot (actual io done as part of fetch memorycycle)
                         puts -nonewline [format " / %04o" $acum]
                     }
 
@@ -703,7 +703,7 @@ proc memorycycle {state field addr rdata wdata} {
     incr memcycno
 
     ;# check for halted/running
-    if {$haltwhy != ""} {error "unprocessed haltwhy $haltwhy}
+    if {$haltwhy != ""} {error "unprocessed haltwhy $haltwhy"}
     set isrunning [bus oRUN]
     set newstate [bus majst]
     set sbhalted 0

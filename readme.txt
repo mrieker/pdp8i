@@ -36,9 +36,9 @@ cycles), giving an overall cycle time of 1.5uS.
     The corresponding TPn occurs during last 100nS of
     the TSn.
 
-If present, the ZTurn board provides the 10MHz signal.
-Otherwise it must be provided via crystal oscillator on
-the timing board.
+If present, the ZTurn board provides the 10MHz signal,
+allowing the Zynq full control of the clock for testing.
+Otherwise it must on a separate board.
 
 I/O instructions are also 1.5uS instead of being extended
 to 4.25uS.  There is just one io pulse regardless of the
@@ -46,7 +46,8 @@ low three opcode bits that occurs starting 100nS into TS2
 and ends at end of TS3.  I/O devices can use TP2 or TP3 to
 clock data coming from the processor (from ACUM bus lines).
 The processor clocks data from the I/O device (ACCLEAR,
-INBUS, IOSKIP bus lines) at TP3.
+INBUS, IOSKIP bus lines) at TP3.  An I/O device can extend
+TS3 by asserting PAUSE starting in TS2.
 
 The major states are the same (FETCH, DEFER, EXEC, WRDCT,
 CURAD, BREAK), but with the addition of:

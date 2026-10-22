@@ -19,8 +19,23 @@
 //    http://www.gnu.org/licenses/gpl-2.0.html
 
 // daemon for verilator zynq simulator
-// run on x86_64 as daemon - ./verizynq.x86_64
-// then run z8ictrl, z8idump, z8iila on same x86_64
+// run on x86_64 as daemon - ./verizynq.x86_64 &
+// ...will show output from $display() calls in verilog
+// then run z8ipanel, z8idump, z8iila, etc on same x86_64
+// first use of z8ipanel must include -sim option to put in simulator mode
+
+// $ ./verizynq.x86_64 &
+
+// $ cd ../demos
+// $ ../ccode/z8ipanel -sim doubleroll.tcl
+//    takes 40 sec to start loading
+//    takes 10 mins to complete loading and verify
+// $ ../ccode/z8ipanel -status
+//    takes a minute to copy itself to all fields
+//    takes 10 sec per step
+
+// stop any verizynq that might be runnung
+// $ ./verizynq.x86_64 -stop
 
 #include <errno.h>
 #include <fcntl.h>
@@ -107,6 +122,7 @@ int main (int argc, char **argv)
     pageptr->serverpid = getpid ();
     fprintf (stderr, "verizynq: pid %d\n", pageptr->serverpid);
 
+    // run a few cycles with power-on reset asserted
     VZynq vzynqobj;
     vzynq = &vzynqobj;
     vzynq->RESET_N = 0;
@@ -149,21 +165,31 @@ int main (int argc, char **argv)
 
                 // keep kerchunking until both transfers have completed
                 // capture read data on cycle where both RREADY and RVALID are set
+                // transfer happens on posedge CLOCK when both VALID and READY are set
                 for (int i = 0; vzynq->saxi_ARVALID | vzynq->saxi_RREADY; i ++) {
                     if (i > 10) ABORT ();
-                    bool arready = vzynq->saxi_ARREADY;
-                    kerchunk ();
-                    if (arready) vzynq->saxi_ARVALID = 0;
-                    bool rvalid  = vzynq->saxi_RVALID;
-                    if (rvalid & vzynq->saxi_RREADY) {
-                        pageptr->value = vzynq->saxi_RDATA;
-                        vzynq->saxi_RREADY = 0;
+                    bool arready = vzynq->saxi_ARREADY;     // zynq.v says it can accept address
+                    bool rvalid  = vzynq->saxi_RVALID;      // zynq.v says it is driving RDATA
+                    if (rvalid & vzynq->saxi_RREADY) {      // ...and we have not accepted it yet
+                        pageptr->value = vzynq->saxi_RDATA; // if so, grab data from zynq.v
 
                         if (debug > 1) printf ("verizynq:  read %03X > %08X\n", index, pageptr->value);
 
                         if (! atmcmpxchg (&pageptr->state, state, VERIZYNQ_DONE ^ VERIZYNQ_READ ^ state)) ABORT ();
                         if (futex (&pageptr->state, FUTEX_WAKE, 1000000000, NULL, NULL, 0) < 0) ABORT ();
                     }
+                    kerchunk ();                            // zynq.v clocks in address when it sees both ARREADY and
+                                                            //  ARVALID asserted just before posedge CLOCK then it
+                                                            //  negates ARREADY just after posedge CLOCK
+                                                            // when it sees RREADY asserted just before posedge
+                                                            //  CLOCK, it asserts RVALID and drives RDATA just after
+                                                            //  posedge CLOCK.
+                                                            // when it sees both RREADY and RVALID asserted just
+                                                            //  before posedge CLOCK, it knows we got the data, so it
+                                                            //  negates RVALID just after posedge CLOCK.
+                    if (arready) vzynq->saxi_ARVALID = 0;   // if zynq.v clocked in address, stop sending it so it
+                                                            //  doesn't start another read cycle
+                    if (rvalid)  vzynq->saxi_RREADY  = 0;   // zynq.v sent read data so stop waiting for it
                 }
                 break;
             }
@@ -187,15 +213,23 @@ int main (int argc, char **argv)
                 if (futex (&pageptr->state, FUTEX_WAKE, 1000000000, NULL, NULL, 0) < 0) ABORT ();
 
                 // keep kerchunking until all 3 transfers have completed
+                // transfer happens on posedge CLOCK when both VALID and READY are set
                 for (int i = 0; vzynq->saxi_AWVALID | vzynq->saxi_WVALID | vzynq->saxi_BREADY; i ++) {
                     if (i > 10) ABORT ();
-                    bool awready = vzynq->saxi_AWREADY;
-                    bool wready  = vzynq->saxi_WREADY;
-                    bool bvalid  = vzynq->saxi_BVALID;
-                    kerchunk ();
-                    if (awready) vzynq->saxi_AWVALID = 0;
-                    if (wready)  vzynq->saxi_WVALID  = 0;
-                    if (bvalid)  vzynq->saxi_BREADY  = 0;
+                    bool awready = vzynq->saxi_AWREADY;     // zynq.v says it can accept address
+                    bool wready  = vzynq->saxi_WREADY;      // zynq.v says it can accept data
+                    bool bvalid  = vzynq->saxi_BVALID;      // zynq.v says it has completed the write
+                    kerchunk ();                            // zynq.v clocks in address when it sees both AWREADY and
+                                                            //  AWVALID asserted just before posedge CLOCK then it
+                                                            //  negates AWREADY just after posedge CLOCK
+                                                            // likewise for WREADY and WVALID
+                                                            // it asserts BVALID just after posedge CLOCK.
+                                                            //  when it sees both BREADY and BVALID asserted just
+                                                            //  before posedge CLOCK, it negates BVALID just after
+                                                            //  posedge CLOCK.
+                    if (awready) vzynq->saxi_AWVALID = 0;   // zynq.v clocked in address so stop sending it
+                    if (wready)  vzynq->saxi_WVALID  = 0;   // zynq.v clocked in data so stop sending it
+                    if (bvalid)  vzynq->saxi_BREADY  = 0;   // zynq.v finished write so stop waiting for it
                 }
                 break;
             }
