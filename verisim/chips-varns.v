@@ -1546,63 +1546,6 @@ module X74HC175 (input zclock, zreset,
 
 endmodule
 
-module X74AC175 (input zclock, zreset,
-          input      p1
-        , output reg p2
-        , output     p3
-        , input      p4
-        , input      p5
-        , output     p6
-        , output reg p7
-        , input      p8
-        , input      p9
-        , output reg p10
-        , output     p11
-        , input      p12
-        , input      p13
-        , output     p14
-        , output reg p15
-        , input      p16
-);
-
-    assign p3  = ~ p2;
-    assign p6  = ~ p7;
-    assign p11 = ~ p10;
-    assign p14 = ~ p15;
-
-    reg lastt;
-
-    reg da, db, dc, dd;
-    reg pa, pb, pc, pd;    // prop delays
-
-    always @(posedge zclock) begin
-        if (~ p1) begin
-            { p2,  pa } <= { pa, 1'b0 };
-            { p7,  pb } <= { pb, 1'b0 };
-            { p10, pc } <= { pc, 1'b0 };
-            { p15, pd } <= { pd, 1'b0 };
-        end else if (~ lastt & p9) begin
-            { p2,  pa } <= { pa, da };
-            { p7,  pb } <= { pb, db };
-            { p10, pc } <= { pc, dc };
-            { p15, pd } <= { pd, dd };
-        end else begin
-            { p2,  pa } <= { pa, pa };
-            { p7,  pb } <= { pb, pb };
-            { p10, pc } <= { pc, pc };
-            { p15, pd } <= { pd, pd };
-        end
-
-        da <= p4;
-        db <= p5;
-        dc <= p12;
-        dd <= p13;
-
-        lastt <= p9;
-    end
-
-endmodule
-
 module X74HC193 (input zclock, zreset,
           input      p1     // db
         , output     p2     // qb
