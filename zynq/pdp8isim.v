@@ -396,7 +396,7 @@ module pdp8isim (
         .clk4    (),            // ->CLKSEL: 400nS
         .clk6    (),            // ->CLKSEL: 600nS
         .clk8    (),            // ->CLKSEL: 800nS
-        .clkp1   (1'b1),        // ->VCC: +0; ->_S3CLK: +100nS
+        .clkp1   (_s3clk),      // ->VCC: +0; ->_S3CLK: +100nS
 
         ._BUSINI    (_busBUSINI),
         ._CLOCK     (_busCLOCK),
