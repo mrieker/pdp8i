@@ -34,6 +34,15 @@
 
 	SWP   = 07521	/ swap MQ,AC
 
+	CLZE = 06130	/ (RTC) clear the given enable bits
+	CLSK = 06131	/ (RTC) skip if requesting interrupt
+	CLDE = 06132	/ (RTC) set the given enable bits
+	CLAB = 06133	/ (RTC) set buffer and counter to given value
+	CLEN = 06134	/ (RTC) read enable register
+	CLSA = 06135	/ (RTC) read status register and reset it
+	CLBA = 06136	/ (RTC) read buffer register
+	CLCA = 06137	/ (RTC) read counter into buffer and read buffer
+
 *0010
 AI10,	0
 AI11,	0
@@ -43,9 +52,11 @@ AI14,	0
 
 _0012,	0012
 _0015,	0015
+_0040,	0040
 _0060,	0060
 _0076,	0076
 _0177,	0177
+_0600,	0600
 _7720,	7720
 _7770,	7770
 _7772,	7772
@@ -53,6 +64,7 @@ _7774,	7774
 
 _IOCT36, IOCT36
 _MUL36,  MUL36
+_PDECML, PDECML
 _POCT72, POCT72
 _POCTAL, POCTAL
 _PRCHAR, PRCHAR
@@ -73,6 +85,8 @@ MUL2,	0
 MUL1,	0
 MUL0,	0	/ (msw)
 
+MULuS,	0
+
 *0200
 
 	.global	__boot
@@ -81,19 +95,28 @@ __boot,
 	KIE
 	TAD	_0177
 	TLS
+
+	CLA			/ set RTC to 1uS ticks
+	TAD	_0600
+	CLDE
+
 START,
 	CLA			/ prompt for number entry
-	TAD	_0076		/ >
+	TAD	_0076		/ '>'
 	JMS	PRCHAR
 	JMS I	_IOCT36		/ read in first number
-		0052		/ *
+		0052		/ '*'
 		AC1
 	JMS I	_IOCT36		/ read in second number
-		0075		/ =
+		0075		/ '='
 		OP1
 	JMS I	_MUL36		/ multiply
 	JMS I	_POCT72		/ print product
 		MUL1
+	TAD	_0040		/ ' '
+	JMS I	_PRCHAR
+	TAD	MULuS		/ print elapsed time
+	JMS I	_PDECML
 	JMS	PRCRLF
 	JMP	START		/ try again
 
@@ -251,6 +274,33 @@ POCTLP,
 
 POCTCT,	0
 
+/ print AC in decimal
+/  input:
+/   AC = number to print
+/  output:
+/   AC,MQ = zero
+PDECML,	0
+	MQL			/ stick number to print in MQ
+	DVI			/ divide by 1000.
+		1750
+	SWP			/ print quotient
+	TAD	_0060
+	JMS I	_PRCHAR
+	DVI			/ divide by 100.
+		0144
+	SWP
+	TAD	_0060
+	JMS I	_PRCHAR
+	DVI			/ divide by 10.
+		0012
+	SWP
+	TAD	_0060
+	JMS I	_PRCHAR
+	SWP
+	TAD	_0060
+	JMS I	_PRCHAR
+	JMP I	PDECML
+
 *2000
 
 	/        AC1,2,3  7777 7777 7777
@@ -278,10 +328,17 @@ POCTCT,	0
 /  output:
 /   MUL1,2,3,4,5,6 = product
 /   MUL0 = scratch (should still be zero)
+/   MULuS = execution time in uS
 /   AI11,12,13,14 = scratch
 /   AC = 0
 
+/ 620..650uS @ 1.5uS cycle time
+
 MUL36,	0 
+
+	CLCA			/ read 1uS counter
+	CMA IAC
+	DCA	MULuS
 
 	DCA	MUL1
 	DCA	MUL2
@@ -337,6 +394,11 @@ MULCAR,
 	DCA	MULPTR
 	ISZ	MULCT1		/ maybe more outer loop
 	JMP	MULOP1
+
+	CLCA			/ read 1uS counter
+	TAD	MULuS
+	DCA	MULuS
+
 	TAD	MUL0		/ shouldn't have carries this far
 	SZA
 	HLT

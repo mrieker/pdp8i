@@ -30,9 +30,11 @@
 #include "z8idefs.h"
 #include "z8iutil.h"
 
+static int testno;
 static Z8IU32 *ttyat;
 
 static bool findtt (void *param, Z8IU32 *ttyat);
+static void testcase (uint64_t rand1hi, uint64_t rand1lo, uint64_t rand2hi, uint64_t rand2lo);
 static char readwithecho ();
 static void sendchartottykb (char ch);
 static bool tt_getprchar (uint8_t *prchar_r);
@@ -46,69 +48,34 @@ int main (int argc, char **argv)
 
     setlinebuf (stdout);
 
-    int testno = 0;
+    // systematic carry testing (444889 iterations)
+    for (int iwidth = 0; iwidth <= 36; iwidth ++) {
+        for (int ibit = 0; ibit + iwidth <= 36; ibit ++) {
+            uint64_t ival = ((1ULL << iwidth) - 1) << ibit;
+            for (int jwidth = 0; jwidth <= 36; jwidth ++) {
+                for (int jbit = 0; jbit + jwidth <= 36; jbit ++) {
+                    uint64_t jval = ((1ULL << jwidth) - 1) << jbit;
+
+                    uint64_t rand1hi = ival >> 18;
+                    uint64_t rand1lo = ival & 0777777;
+                    uint64_t rand2hi = jval >> 18;
+                    uint64_t rand2lo = jval & 0777777;
+                    testcase (rand1hi, rand1lo, rand2hi, rand2lo);
+
+                    if (jwidth == 0) break;
+                }
+            }
+            if (iwidth == 0) break;
+        }
+    }
+
+    // random test cases
     while (true) {
-
-        // print test number then wait for mul36.pal '>' prompt char
-        printf ("%9u  ", ++ testno);
-        while (readwithecho () != '>') { }
-
-        // generate random test case then send numbers to mul36.pal
         uint64_t rand1hi = randbits (18);
         uint64_t rand1lo = randbits (18);
         uint64_t rand2hi = randbits (18);
         uint64_t rand2lo = randbits (18);
-
-        char ch, probstr[30];
-        snprintf (probstr, sizeof probstr, "%06o%06o*%06o%06o=",
-            (unsigned) rand1hi, (unsigned) rand1lo, (unsigned) rand2hi, (unsigned) rand2lo);
-        for (int i = 0; (ch = probstr[i]) != 0; i ++) {
-            sendchartottykb (ch);
-            char ec = readwithecho ();
-            if (ec != ch) {
-                fprintf (stderr, "char %c echoed as %c\n", ec, ch);
-                ABORT ();
-            }
-        }
-
-        // read reply that mul36.pal prints to the tty
-        uint64_t rephi = 0;
-        uint64_t replo = 0;
-        while (true) {
-            ch = readwithecho ();
-            if (ch == '\r') continue;
-            if (ch == '\n') break;
-            if ((ch < '0') || (ch > '7')) {
-                fprintf (stderr, "bad reply char %c\n", ch);
-                ABORT ();
-            }
-            rephi = (rephi << 3) | (replo >> 33);
-            replo = ((replo & 077777777777ULL) << 3) | (ch & 7);
-        }
-
-        // compute 72-bit product
-        uint64_t prod22bin = rand1lo * rand2lo;
-        uint64_t prod21bin = rand1lo * rand2hi;
-        uint64_t prod12bin = rand1hi * rand2lo;
-        uint64_t prod11bin = rand1hi * rand2hi;
-
-        uint64_t prod4bin = prod22bin & 0777777;
-        uint64_t prod3bin = (prod22bin >> 18) + prod21bin + prod12bin;
-        uint64_t prod2bin = (prod3bin >> 18) + prod11bin;
-        uint64_t prod1bin = prod2bin >> 18;
-
-        prod3bin = prod3bin & 0777777;
-        prod2bin = prod2bin & 0777777;
-
-        uint64_t prodhi = (prod1bin << 18) | prod2bin;
-        uint64_t prodlo = (prod3bin << 18) | prod4bin;
-
-        if ((rephi != prodhi) || (replo != prodlo)) {
-            fprintf (stderr, "BAD  expect=%012llo%012llo  received=%012llo%012llo\n",
-                (long long unsigned) prodhi, (long long unsigned) prodlo,
-                (long long unsigned) rephi, (long long unsigned) replo);
-            ABORT ();
-        }
+        testcase (rand1hi, rand1lo, rand2hi, rand2lo);
     }
 }
 
@@ -120,6 +87,69 @@ static bool findtt (void *param, Z8IU32 *ttyat)
         ABORT ();
     }
     return (ttyat[Z_TTYPN] & 077) == (uint32_t) port;
+}
+
+static void testcase (uint64_t rand1hi, uint64_t rand1lo, uint64_t rand2hi, uint64_t rand2lo)
+{
+
+    // print test number then wait for mul36.pal '>' prompt char
+    printf ("%9u  ", ++ testno);
+    while (readwithecho () != '>') { }
+
+    char ch, probstr[30];
+    snprintf (probstr, sizeof probstr, "%06o%06o*%06o%06o=",
+        (unsigned) rand1hi, (unsigned) rand1lo, (unsigned) rand2hi, (unsigned) rand2lo);
+    for (int i = 0; (ch = probstr[i]) != 0; i ++) {
+        sendchartottykb (ch);
+        char ec = readwithecho ();
+        if (ec != ch) {
+            fprintf (stderr, "char %c echoed as %c\n", ec, ch);
+            ABORT ();
+        }
+    }
+
+    // read reply that mul36.pal prints to the tty
+    bool hitsp = false;
+    uint64_t rephi = 0;
+    uint64_t replo = 0;
+    while (true) {
+        ch = readwithecho ();
+        if (ch == '\r') continue;
+        if (ch == '\n') break;
+        if (ch == ' ') hitsp = true;
+        if (! hitsp) {
+            if ((ch < '0') || (ch > '7')) {
+                fprintf (stderr, "bad reply char %c\n", ch);
+                ABORT ();
+            }
+            rephi = (rephi << 3) | (replo >> 33);
+            replo = ((replo & 077777777777ULL) << 3) | (ch & 7);
+        }
+    }
+
+    // compute 72-bit product
+    uint64_t prod22bin = rand1lo * rand2lo;
+    uint64_t prod21bin = rand1lo * rand2hi;
+    uint64_t prod12bin = rand1hi * rand2lo;
+    uint64_t prod11bin = rand1hi * rand2hi;
+
+    uint64_t prod4bin = prod22bin & 0777777;
+    uint64_t prod3bin = (prod22bin >> 18) + prod21bin + prod12bin;
+    uint64_t prod2bin = (prod3bin >> 18) + prod11bin;
+    uint64_t prod1bin = prod2bin >> 18;
+
+    prod3bin = prod3bin & 0777777;
+    prod2bin = prod2bin & 0777777;
+
+    uint64_t prodhi = (prod1bin << 18) | prod2bin;
+    uint64_t prodlo = (prod3bin << 18) | prod4bin;
+
+    if ((rephi != prodhi) || (replo != prodlo)) {
+        fprintf (stderr, "BAD  expect=%012llo%012llo  received=%012llo%012llo\n",
+            (long long unsigned) prodhi, (long long unsigned) prodlo,
+            (long long unsigned) rephi, (long long unsigned) replo);
+        ABORT ();
+    }
 }
 
 static char readwithecho ()
