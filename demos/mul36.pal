@@ -1,4 +1,24 @@
+//    Copyright (C) Mike Rieker, Beverly, MA USA
+//    www.outerworldapps.com
+//
+//    This program is free software; you can redistribute it and/or modify
+//    it under the terms of the GNU General Public License as published by
+//    the Free Software Foundation; version 2 of the License.
+//
+//    This program is distributed in the hope that it will be useful,
+//    but WITHOUT ANY WARRANTY; without even the implied warranty of
+//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//    GNU General Public License for more details.
+//
+//    EXPECT it to FAIL when someone's HeALTh or PROpeRTy is at RISk.
+//
+//    You should have received a copy of the GNU General Public License
+//    along with this program; if not, write to the Free Software
+//    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+//
+//    http://www.gnu.org/licenses/gpl-2.0.html
 
+// test a 36bit x 36bit => 72 bits multiply
 
 	KSF   = 06031	/ skip if kb char to be read
 	KCC   = 06032	/ clear kb flag, clear acc, start reader
@@ -16,6 +36,10 @@
 
 *0010
 AI10,	0
+AI11,	0
+AI12,	0
+AI13,	0
+AI14,	0
 
 _0012,	0012
 _0015,	0015
@@ -29,7 +53,7 @@ _7774,	7774
 
 _IOCT36, IOCT36
 _MUL36,  MUL36
-_POCT54, POCT54
+_POCT72, POCT72
 _POCTAL, POCTAL
 _PRCHAR, PRCHAR
 _PRCRLF, PRCRLF
@@ -41,13 +65,13 @@ AC3,	0
 OP1,	0	/ other number to multiply
 OP2,	0
 OP3,	0
-MUL0,	0	/ resultant product
-MUL1,	0
-MUL2,	0
-MUL3,	0
-MUL4,	0
+MUL6,	0	/ (lsw) resultant product
 MUL5,	0
-MUL6,	0
+MUL4,	0
+MUL3,	0
+MUL2,	0
+MUL1,	0
+MUL0,	0	/ (msw)
 
 *0200
 
@@ -68,7 +92,7 @@ START,
 		0075		/ =
 		OP1
 	JMS I	_MUL36		/ multiply
-	JMS I	_POCT54		/ print product
+	JMS I	_POCT72		/ print product
 		MUL1
 	JMS	PRCRLF
 	JMP	START		/ try again
@@ -185,38 +209,45 @@ IO36NT,	0
 
 *0600
 
-/ print a 54-bit octal number
-/	JMS	POCT54
+/ print a 72-bit octal number
+/	JMS	POCT72
 /		6wordbuff
-POCT54,	0
-	TAD I	POCT54		/ get buff pointer
-	ISZ	POCT54
-	DCA	PO54BP
+POCT72,	0
+	TAD I	POCT72		/ get buff pointer
+	ISZ	POCT72
+	DCA	PO72BP
 	TAD	_7772		/ print 6 words
-	DCA	PO54CT
-PO54LP,
-	TAD I	PO54BP
-	ISZ	PO54BP
+	DCA	PO72CT
+PO72LP,
+	TAD I	PO72BP
 	JMS	POCTAL
-	ISZ	PO54CT
-	JMP	PO54LP
-	JMP I	POCT54
+	CMA
+	TAD	PO72BP
+	DCA	PO72BP
+	ISZ	PO72CT
+	JMP	PO72LP
+	JMP I	POCT72
 
-PO54BP,	0
-PO54CT,	0
+PO72BP,	0
+PO72CT,	0
 
+/ print AC in octal
+/  input:
+/   AC = number to print
+/  output:
+/   AC,MQ = zero
 POCTAL,	0
-	MQL
-	TAD	_7774
+	MQL			/ stick number to print in MQ
+	TAD	_7774		/ set up num digits to print
 	DCA	POCTCT
 POCTLP,
-	SHL
+	SHL			/ get 3 bits from MQ into AC
 		0002
-	TAD	_0060
-	JMS I	_PRCHAR
-	ISZ	POCTCT
+	TAD	_0060		/ convert to ascii
+	JMS I	_PRCHAR		/ print
+	ISZ	POCTCT		/ go on to next
 	JMP	POCTLP
-	JMP I	POCTAL
+	JMP I	POCTAL		/ done
 
 POCTCT,	0
 
@@ -224,55 +255,19 @@ POCTCT,	0
 
 	/        AC1,2,3  7777 7777 7777
 	/     x  OP1,2,3  7777 7777 7777
-	/ --------------
-	/                     [AC3.OP3]                          7776  0001
-	/                                                        mul5
-	/                [AC2.OP3]                         7776  0001
-	/                                                  mul4  mul5
-	/                [AC3.OP2]                         7776  0001
-	/                                            mul3  mul4
-	/           [AC1.OP3]                        7776  0001
-	/           [AC3.OP1]                        7776  0001
-	/           [AC2.OP2]                        7776  0001
-	/      [AC1.OP2]                       7776  0001
-	/      [AC2.OP1]                       7776  0001
-	/ [AC1.OP1]                      7776  0001
-	/ -----------------------------  ----  ----  ----  ----  ----  ----
-	/ MUL1 MUL2 MUL3 MUL4 MUL5 MUL6  7777 27777 47774 47773 27774  0001
-	/ -----------------------------  ----  ----  ----  ----  ----  ----
-	/                                0000  0077  7777  7760  0000  0001
-	/                                      [    result    ]
-
-MULTBL,	AC3		/ MUL4,5,6 += AC3 * OP3
-	OP3
-	MUL6
-	AC2		/ MUL3,4,5 += AC2 * OP3
-	OP3
-	MUL5
-	AC3		/ MUL3,4,5 += AC3 * OP2
-	OP2
-	MUL5
-	AC1		/ MUL2,3,4 += AC1 * OP3
-	OP3
-	MUL4
-	AC3		/ MUL2,3,4 += AC3 * OP1
-	OP1
-	MUL4
-	AC2		/ MUL2,3,4 += AC2 * OP2
-	OP2
-	MUL4
-	AC1		/ MUL1,2,3 += AC1 * OP2
-	OP2
-	MUL3
-	AC2		/ MUL1,2,3 += AC2 * OP1
-	OP1
-	MUL3
-	AC1		/ MUL0,1,2 += AC1 * OP1
-	OP1
-	MUL2
-	0		/ end of MULTBL
-
-_MULTBLm1, MULTBL-1
+	/ ------------------------------
+	/                      [AC3.OP3]
+	/                 [AC2.OP3]
+	/                 [AC3.OP2]
+	/            [AC1.OP3]
+	/            [AC3.OP1]
+	/            [AC2.OP2]
+	/       [AC1.OP2]
+	/       [AC2.OP1]
+	/  [AC1.OP1]
+	/ ------------------------------
+	/  MUL1 MUL2 MUL3 MUL4 MUL5 MUL6
+	/ ------------------------------
 
 / multiply two 36-bit numbers
 / return 72-bit product
@@ -283,7 +278,7 @@ _MULTBLm1, MULTBL-1
 /  output:
 /   MUL1,2,3,4,5,6 = product
 /   MUL0 = scratch (should still be zero)
-/   AI10 = scratch
+/   AI11,12,13,14 = scratch
 /   AC = 0
 
 MUL36,	0 
@@ -295,46 +290,63 @@ MUL36,	0
 	DCA	MUL5
 	DCA	MUL6
 
-	TAD	_MULTBLm1
-	DCA	AI10
+	TAD	_MUL2m1
+	DCA	MULPTR
 
-MULOOP,
-
-	TAD I	AI10		/ point to ACi
-	SNA
-	JMP I	MUL36		/ end of MULTBL, done
-	DCA	MULTMP
-	TAD I	MULTMP		/ get ACn value
+	CLA CLL CMA RTL		/ reset ACi counter
+	DCA	MULCT1		/ ...to -3
+	TAD	_AC1m1		/ ...and pointer
+	DCA	AI13
+MULOP1,
+	TAD I	AI13		/ get ACi value
 	DCA	MULYYY		/ ...into YREG
 
-	TAD I	AI10		/ point to OPj
-	DCA	MULTMP
-	TAD I	MULTMP		/ get OPj value
+	CLA CLL CMA RTL		/ reset OPj counter
+	DCA	MULCT2		/ ...to -3
+	TAD	_OP1m1		/ ...and pointer
+	DCA	AI14
+
+	TAD	MULPTR		/ point just before MUL(i+j)
+MULOP2,
+				/ AC = addr of MUL(i+j)-1
+	DCA	AI11		/ set up two pointers to MUL(i+j)-1
+	TAD	AI11
+	DCA	AI12
+
+	TAD I	AI14		/ get OPj value
 	MQL			/ ...into MQ
-
-	TAD I	AI10		/ point to MUL(i+j)
-	DCA	MULTMP
-	CMA
-	TAD	MULTMP		/ point to MUL(i+j-1)
-	DCA	MULTMPm1
-	CMA
-	TAD	MULTMPm1	/ point to MUL(i+j-2)
-	DCA	MULTMPm2
-	TAD I	MULTMP		/ get previous product in MUL(i+j)
-	MUY
+	TAD I	AI11		/ get previous product from MUL(i+j)
+	MUY			/ multiply Y * MQ + AC => AC,MQ
 MULYYY,	0
-	TAD I	MULTMPm1	/ save most significant word in MUL(i+j-1)
-	DCA I	MULTMPm1
-	RAL			/ maybe it carries out to MUL(i+j-2)
-	TAD I	MULTMPm2
-	DCA I	MULTMPm2
-	SZL			/ should not have a carry out of that
+	SWP			/ save least signicant word in MUL(i+j)
+	DCA I	AI12
+	SWP
+	TAD I	AI11		/ save most significant word in MUL(i+j-1)
+	DCA I	AI12
+	SZL
+MULCAR,
+	ISZ I	AI11		/ maybe there is carry to MUL(i+j-2)
+	SKP
+	JMP	MULCAR
+	CLA CLL CMA RTL		/ reset MUL(i+j) pointer
+	TAD	AI12
+	ISZ	MULCT2		/ maybe more inner loop
+	JMP	MULOP2
+	CLA CMA
+	TAD	MULPTR		/ reset MUL(i) pointer
+	DCA	MULPTR
+	ISZ	MULCT1		/ maybe more outer loop
+	JMP	MULOP1
+	TAD	MUL0		/ shouldn't have carries this far
+	SZA
 	HLT
-	MQA			/ save least signicant word in MUL(i+j)
-	DCA I	MULTMP
-	JMP	MULOOP		/ process next entry in MULTBL
+	JMP I	MUL36
 
-MULTMP,   0	/ points to MUL(i+j)
-MULTMPm1, 0	/ points to MUL(i+j-1)
-MULTMPm2, 0	/ points to MUL(i+j-2)
+_AC1m1,	 AC1-1
+_OP1m1,	 OP1-1
+_MUL2m1, MUL2-1
+
+MULPTR,	0
+MULCT1,	0
+MULCT2,	0
 
