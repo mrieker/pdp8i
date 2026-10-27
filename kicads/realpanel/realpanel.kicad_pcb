@@ -593,7 +593,7 @@
 
   (footprint "MountingHole:MountingHole_4.5mm" (layer "F.Cu")
     (tstamp 16a6fa62-50d0-4638-9267-ee2a18eda5a1)
-    (at 15.875 101.6)
+    (at 17.145 101.6)
     (descr "Mounting Hole 4.5mm, no annular")
     (tags "mounting hole 4.5mm no annular")
     (property "Sheetfile" "realpanel.kicad_sch")
@@ -3591,7 +3591,7 @@
 
   (footprint "MountingHole:MountingHole_4.5mm" (layer "F.Cu")
     (tstamp 81a6d021-bbd1-4803-aabe-9c1ef1a7dcb6)
-    (at 187.325 101.6)
+    (at 188.595 101.6)
     (descr "Mounting Hole 4.5mm, no annular")
     (tags "mounting hole 4.5mm no annular")
     (property "Sheetfile" "realpanel.kicad_sch")
@@ -3621,7 +3621,7 @@
 
   (footprint "MountingHole:MountingHole_4.5mm" (layer "F.Cu")
     (tstamp 81f12886-0701-498b-b409-54e11d3527ec)
-    (at 158.75 23.8125)
+    (at 160.02 23.8125)
     (descr "Mounting Hole 4.5mm, no annular")
     (tags "mounting hole 4.5mm no annular")
     (property "Sheetfile" "realpanel.kicad_sch")
@@ -4547,7 +4547,7 @@
 
   (footprint "MountingHole:MountingHole_4.5mm" (layer "F.Cu")
     (tstamp a7b1f031-bfbd-4d1a-bfe0-ea8dc5e6b593)
-    (at 15.875 23.8125)
+    (at 17.145 23.8125)
     (descr "Mounting Hole 4.5mm, no annular")
     (tags "mounting hole 4.5mm no annular")
     (property "Sheetfile" "realpanel.kicad_sch")
@@ -5977,7 +5977,7 @@
 
   (footprint "MountingHole:MountingHole_4.5mm" (layer "F.Cu")
     (tstamp f25421da-f5cc-4d63-b987-d2d97a9b81ba)
-    (at 373.0625 23.8125)
+    (at 374.3325 23.8125)
     (descr "Mounting Hole 4.5mm, no annular")
     (tags "mounting hole 4.5mm no annular")
     (property "Sheetfile" "realpanel.kicad_sch")
@@ -6063,7 +6063,7 @@
 
   (footprint "MountingHole:MountingHole_4.5mm" (layer "F.Cu")
     (tstamp f99edce2-84e8-4ea3-a1c7-96752ff99efc)
-    (at 373.0625 101.6)
+    (at 374.3325 101.6)
     (descr "Mounting Hole 4.5mm, no annular")
     (tags "mounting hole 4.5mm no annular")
     (property "Sheetfile" "realpanel.kicad_sch")
@@ -12875,10 +12875,10 @@
 
   (gr_rect (start 0 0) (end 379.4125 147.6375)
     (stroke (width 0.05) (type default)) (fill none) (layer "Edge.Cuts") (tstamp 491b6374-b4fb-4266-9eab-5fd54b845ba7))
-  (gr_text "REALPANEL\n2026-09-21" (at 322.58 15.875) (layer "B.SilkS") (tstamp 3100c370-ad81-4d47-b1f2-b5df580120df)
+  (gr_text "REALPANEL\n2026-10-27" (at 322.58 15.875) (layer "B.SilkS") (tstamp 3100c370-ad81-4d47-b1f2-b5df580120df)
     (effects (font (size 2.54 2.54) (thickness 0.254)) (justify left bottom mirror))
   )
-  (gr_text "REALPANEL\n2026-09-21" (at 331.47 15.875) (layer "F.SilkS") (tstamp 5a4a972d-b744-4dbf-955e-c15f7798f1fb)
+  (gr_text "REALPANEL\n2026-10-27" (at 331.47 15.875) (layer "F.SilkS") (tstamp 5a4a972d-b744-4dbf-955e-c15f7798f1fb)
     (effects (font (size 2.54 2.54) (thickness 0.254)) (justify left bottom))
   )
 
