@@ -41,7 +41,8 @@ AC3,	0
 OP1,	0	/ other number to multiply
 OP2,	0
 OP3,	0
-MUL1,	0	/ resultant product
+MUL0,	0	/ resultant product
+MUL1,	0
 MUL2,	0
 MUL3,	0
 MUL4,	0
@@ -54,6 +55,8 @@ MUL6,	0
 __boot,
 	CLA
 	KIE
+	TAD	_0177
+	TLS
 START,
 	CLA			/ prompt for number entry
 	TAD	_0076		/ >
@@ -80,9 +83,9 @@ PRCRLF,	0
 
 / print char in AC then clear AC
 PRCHAR,	0
-	TLS
 	TSF
 	JMP	.-1
+	TLS
 	CLA
 	JMP I	PRCHAR
 
@@ -219,7 +222,7 @@ POCTCT,	0
 
 *2000
 
-	/      @OAC1,2,3  7777 7777 7777
+	/        AC1,2,3  7777 7777 7777
 	/     x  OP1,2,3  7777 7777 7777
 	/ --------------
 	/                     [AC3.OP3]                          7776  0001
@@ -240,8 +243,49 @@ POCTCT,	0
 	/                                0000  0077  7777  7760  0000  0001
 	/                                      [    result    ]
 
+MULTBL,	AC3		/ MUL4,5,6 += AC3 * OP3
+	OP3
+	MUL6
+	AC2		/ MUL3,4,5 += AC2 * OP3
+	OP3
+	MUL5
+	AC3		/ MUL3,4,5 += AC3 * OP2
+	OP2
+	MUL5
+	AC1		/ MUL2,3,4 += AC1 * OP3
+	OP3
+	MUL4
+	AC3		/ MUL2,3,4 += AC3 * OP1
+	OP1
+	MUL4
+	AC2		/ MUL2,3,4 += AC2 * OP2
+	OP2
+	MUL4
+	AC1		/ MUL1,2,3 += AC1 * OP2
+	OP2
+	MUL3
+	AC2		/ MUL1,2,3 += AC2 * OP1
+	OP1
+	MUL3
+	AC1		/ MUL0,1,2 += AC1 * OP1
+	OP1
+	MUL2
+	0		/ end of MULTBL
+
+_MULTBLm1, MULTBL-1
+
 / multiply two 36-bit numbers
 / return 72-bit product
+/  input:
+/   AC1,2,3 = one operand
+/   OP1,2,3 = other operand
+/   AC = 0
+/  output:
+/   MUL1,2,3,4,5,6 = product
+/   MUL0 = scratch (should still be zero)
+/   AI10 = scratch
+/   AC = 0
+
 MUL36,	0 
 
 	DCA	MUL1
@@ -251,172 +295,46 @@ MUL36,	0
 	DCA	MUL5
 	DCA	MUL6
 
-	/ AC3.OP3  =>  MUL5,6
-	TAD	AC3	/ load OAC3 into Y
-	DCA	MUY1
-	TAD	OP3	/ load OP3 into MQ
-	MQL		/ ...leaving AC clear
+	TAD	_MULTBLm1
+	DCA	AI10
+
+MULOOP,
+
+	TAD I	AI10		/ point to ACi
+	SNA
+	JMP I	MUL36		/ end of MULTBL, done
+	DCA	MULTMP
+	TAD I	MULTMP		/ get ACn value
+	DCA	MULYYY		/ ...into YREG
+
+	TAD I	AI10		/ point to OPj
+	DCA	MULTMP
+	TAD I	MULTMP		/ get OPj value
+	MQL			/ ...into MQ
+
+	TAD I	AI10		/ point to MUL(i+j)
+	DCA	MULTMP
+	CMA
+	TAD	MULTMP		/ point to MUL(i+j-1)
+	DCA	MULTMPm1
+	CMA
+	TAD	MULTMPm1	/ point to MUL(i+j-2)
+	DCA	MULTMPm2
+	TAD I	MULTMP		/ get previous product in MUL(i+j)
 	MUY
-MUY1,	0
-	TAD	MUL5
-	DCA	MUL5	/ top bits => MUL5
-	RAL
-	TAD	MUL4
-	DCA	MUL4
-	SZL
+MULYYY,	0
+	TAD I	MULTMPm1	/ save most significant word in MUL(i+j-1)
+	DCA I	MULTMPm1
+	RAL			/ maybe it carries out to MUL(i+j-2)
+	TAD I	MULTMPm2
+	DCA I	MULTMPm2
+	SZL			/ should not have a carry out of that
 	HLT
-	MQA		/ low bits
-	DCA	MUL6
+	MQA			/ save least signicant word in MUL(i+j)
+	DCA I	MULTMP
+	JMP	MULOOP		/ process next entry in MULTBL
 
-	/ AC2.OP3 + MUL4,5  => MUL4,5
-	TAD	AC2	/ load OAC2 into Y
-	DCA	MUY2
-	TAD	OP3	/ load OP3 into MQ
-	MQL		/ ...leaving AC clear
-	TAD	MUL5	/ add in upper result from previous multiply
-	MUY
-MUY2,	0
-	TAD	MUL4
-	DCA	MUL4	/ top bits => MUL4
-	RAL
-	TAD	MUL3
-	DCA	MUL3
-	SZL
-	HLT
-	MQA
-	DCA	MUL5	/ low bits => MUL5
-
-	/ AC3.OP2 + MUL4,5 => MUL4,5
-	TAD	AC3	/ load OAC3 into Y
-	DCA	MUY3
-	TAD	OP2	/ load OP2 into MQ
-	MQL		/ ...leaving AC clear
-	TAD	MUL5	/ add in upper result from previous multiply
-	MUY
-MUY3,	0
-	TAD	MUL4
-	DCA	MUL4
-	RAL
-	TAD	MUL3
-	DCA	MUL3
-	SZL
-	HLT
-	MQA
-	DCA	MUL5	/ low bits => MUL5
-
-	/ AC1.OP3 + MUL3,4 => MUL3,4
-	TAD	AC1	/ load OAC1 into Y
-	DCA	MUY4
-	TAD	OP3	/ load OP2 into MQ
-	MQL		/ ...leaving AC clear
-	TAD	MUL4	/ add in upper result from previous multiply
-	MUY
-MUY4,	0
-	TAD	MUL3
-	DCA	MUL3
-	RAL
-	TAD	MUL2
-	DCA	MUL2
-	SZL
-	HLT
-	MQA
-	DCA	MUL4
-
-	/ AC3.OP1 + MUL3,4 => MUL3,4
-	TAD	AC3	/ load OAC3 into Y
-	DCA	MUY5
-	TAD	OP1	/ load OP1 into MQ
-	MQL		/ ...leaving AC clear
-	TAD	MUL4	/ add in upper result from previous multiply
-	MUY
-MUY5,	0
-	TAD	MUL3
-	DCA	MUL3
-	RAL
-	TAD	MUL2
-	DCA	MUL2
-	SZL
-	HLT
-	MQA
-	DCA	MUL4
-
-	/ AC2.OP2 + MUL3,4 => MUL3,4
-	TAD	AC2	/ load OAC2 into Y
-	DCA	MUY6
-	TAD	OP2	/ load OP2 into MQ
-	MQL		/ ...leaving AC clear
-	TAD	MUL4	/ add in upper result from previous multiply
-	MUY
-MUY6,	0
-	TAD	MUL3
-	DCA	MUL3
-	RAL
-	TAD	MUL2
-	DCA	MUL2
-	SZL
-	HLT
-	MQA
-	DCA	MUL4
-
-	JMS I	_MUL36B
-	JMP I	MUL36
-
-_MUL36B, MUL36B
-
-*2200
-
-MUL36B,	0
-
-	/ AC1.OP2 + MUL2,3 => MUL2,3
-	TAD	AC1	/ load OAC1 into Y
-	DCA	MUY7
-	TAD	OP2	/ load OP2 into MQ
-	MQL		/ ...leaving AC clear
-	TAD	MUL3	/ add in upper result from previous multiply
-	MUY
-MUY7,	0
-	TAD	MUL2
-	DCA	MUL2
-	RAL
-	TAD	MUL1
-	DCA	MUL1
-	SZL
-	HLT
-	MQA
-	DCA	MUL3
-
-	/ AC2.OP1 + MUL2,3 => MUL2,3
-	TAD	AC2	/ load OAC2 into Y
-	DCA	MUY8
-	TAD	OP1	/ load OP1 into MQ
-	MQL		/ ...leaving AC clear
-	TAD	MUL3	/ add in upper result from previous multiply
-	MUY
-MUY8,	0
-	TAD	MUL2
-	DCA	MUL2
-	RAL
-	TAD	MUL1
-	DCA	MUL1
-	SZL
-	HLT
-	MQA
-	DCA	MUL3
-
-	/ AC1.OP1 + MUL1,2 => MUL1,2
-	TAD	AC1	/ load OAC1 into Y
-	DCA	MUY9
-	TAD	OP1	/ load OP1 into MQ
-	MQL		/ ...leaving AC clear
-	TAD	MUL2	/ add in upper result from previous multiply
-	MUY
-MUY9,	0
-	TAD	MUL1
-	DCA	MUL1	/ save upper bits
-	SZL
-	HLT
-	MQA
-	DCA	MUL2	/ save low bits
-
-	JMP I	MUL36B
+MULTMP,   0	/ points to MUL(i+j)
+MULTMPm1, 0	/ points to MUL(i+j-1)
+MULTMPm2, 0	/ points to MUL(i+j-2)
 
