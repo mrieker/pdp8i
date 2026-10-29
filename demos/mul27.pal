@@ -1,4 +1,24 @@
+//    Copyright (C) Mike Rieker, Beverly, MA USA
+//    www.outerworldapps.com
+//
+//    This program is free software; you can redistribute it and/or modify
+//    it under the terms of the GNU General Public License as published by
+//    the Free Software Foundation; version 2 of the License.
+//
+//    This program is distributed in the hope that it will be useful,
+//    but WITHOUT ANY WARRANTY; without even the implied warranty of
+//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//    GNU General Public License for more details.
+//
+//    EXPECT it to FAIL when someone's HeALTh or PROpeRTy is at RISk.
+//
+//    You should have received a copy of the GNU General Public License
+//    along with this program; if not, write to the Free Software
+//    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+//
+//    http://www.gnu.org/licenses/gpl-2.0.html
 
+// test a 36bit x 36bit => 72 bits multiply
 
 	KSF   = 06031	/ skip if kb char to be read
 	KCC   = 06032	/ clear kb flag, clear acc, start reader
@@ -14,26 +34,60 @@
 
 	SWP   = 07521	/ swap MQ,AC
 
+	CLZE = 06130	/ (RTC) clear the given enable bits
+	CLSK = 06131	/ (RTC) skip if requesting interrupt
+	CLDE = 06132	/ (RTC) set the given enable bits
+	CLAB = 06133	/ (RTC) set buffer and counter to given value
+	CLEN = 06134	/ (RTC) read enable register
+	CLSA = 06135	/ (RTC) read status register and reset it
+	CLBA = 06136	/ (RTC) read buffer register
+	CLCA = 06137	/ (RTC) read counter into buffer and read buffer
+
 *0010
 AI10,	0
+AI11,	0
+AI12,	0
+AI13,	0
+AI14,	0
 
+_0010,	0010
 _0012,	0012
 _0015,	0015
+_0040,	0040
 _0060,	0060
 _0076,	0076
 _0177,	0177
+_0600,	0600
 _7720,	7720
+_7745,	7745
 _7770,	7770
 _7772,	7772
 _7774,	7774
 
-_IOCT27, IOCT27
-_MUL27,  MUL27
-_POCT54, POCT54
+_IOCT36, IOCT36
+_MUL36,  MUL36
+_PDECML, PDECML
+_POCT72, POCT72
 _POCTAL, POCTAL
 _PRCHAR, PRCHAR
 _PRCRLF, PRCRLF
 _RDCHAR, RDCHAR
+
+AC1,	0	/ one number to multiply
+AC2,	0
+AC3,	0
+OP1,	0	/ other number to multiply
+OP2,	0
+OP3,	0
+MUL6,	0	/ (lsw) resultant product
+MUL5,	0
+MUL4,	0
+MUL3,	0
+MUL2,	0
+MUL1,	0
+MUL0,	0	/ (msw)
+
+MULuS,	0
 
 *0200
 
@@ -41,19 +95,30 @@ _RDCHAR, RDCHAR
 __boot,
 	CLA
 	KIE
+	TAD	_0177
+	TLS
+
+	CLA			/ set RTC to 1uS ticks
+	TAD	_0600
+	CLDE
+
 START,
 	CLA			/ prompt for number entry
-	TAD	_0076		/ >
+	TAD	_0076		/ '>'
 	JMS	PRCHAR
-	JMS I	_IOCT27		/ read in first number
-		0052		/ *
+	JMS I	_IOCT36		/ read in first number
+		0052		/ '*'
 		AC1
-	JMS I	_IOCT27		/ read in second number
-		0075		/ =
+	JMS I	_IOCT36		/ read in second number
+		0075		/ '='
 		OP1
-	JMS I	_MUL27		/ multiply
-	JMS I	_POCT54		/ print product
+	JMS I	_MUL36		/ multiply
+	JMS I	_POCT72		/ print product
 		MUL1
+	TAD	_0040		/ ' '
+	JMS I	_PRCHAR
+	TAD	MULuS		/ print elapsed time
+	JMS I	_PDECML
 	JMS	PRCRLF
 	JMP	START		/ try again
 
@@ -67,9 +132,9 @@ PRCRLF,	0
 
 / print char in AC then clear AC
 PRCHAR,	0
-	TLS
 	TSF
 	JMP	.-1
+	TLS
 	CLA
 	JMP I	PRCHAR
 
@@ -84,52 +149,52 @@ RDCHAR,	0
 
 *0400
 
-/ input a 27-bit number in octal up to the terminator char
+/ input a 36-bit number in octal up to the terminator char
 / echo the digits and the terminator
-/	JMS	IOCT27
+/	JMS	IOCT36
 /		termchar
 /		3wordbuff
-IOCT27,	0
-	TAD I	IOCT27		/ get term char
-	ISZ	IOCT27
+IOCT36,	0
+	TAD I	IOCT36		/ get term char
+	ISZ	IOCT36
 	CMA IAC			/ ...negative
-	DCA	IO27NT
-	DCA	IO27D1		/ clear temp output
-	DCA	IO27D2
-	DCA	IO27D3
-IO27RD,
+	DCA	IO36NT
+	DCA	IO36D1		/ clear temp output
+	DCA	IO36D2
+	DCA	IO36D3
+IO36RD,
 	CLA
 	JMS I	_RDCHAR		/ read keyboard char
-	DCA	IO27CH
-	TAD	IO27CH		/ check for terminator
-	TAD	IO27NT
+	DCA	IO36CH
+	TAD	IO36CH		/ check for terminator
+	TAD	IO36NT
 	SNA CLA
-	JMP	IO27EX		/ if so, we're done
-	TAD	IO27CH		/ check for octal digit
+	JMP	IO36EX		/ if so, we're done
+	TAD	IO36CH		/ check for octal digit
 	TAD	_7720
 	SPA
-	JMP	IO27RD		/ if not, ignore
-	DCA	IO27CH
-	TAD	IO27CH
+	JMP	IO36RD		/ if not, ignore
+	DCA	IO36CH
+	TAD	IO36CH
 	TAD	_7770
 	SMA CLA
-	JMP	IO27RD
+	JMP	IO36RD
 
-	TAD	IO27CH		/ ok, echo char
+	TAD	IO36CH		/ ok, echo char
 	TAD	_0060
 	JMS I	_PRCHAR
 
-	TAD	IO27D3		/ shift into bottom of IO27D1,2,3
+	TAD	IO36D3		/ shift into bottom of IO36D1,2,3
 	MQL
-	TAD	IO27CH
+	TAD	IO36CH
 	MUY
 		0010
 				/ AC,MQ = D3 shifted
 	SWP
 				/ MQ,AC = D3 shifted
-	DCA	IO27D3
+	DCA	IO36D3
 				/ MQ,AC = top D3 shifted, zero
-	TAD	IO27D2
+	TAD	IO36D2
 				/ MQ,AC = top D3 shifted, D2 unshifted
 	SWP
 				/ AC,MQ = top D3 shifted, D2 unshifted
@@ -137,280 +202,217 @@ IO27RD,
 		0010
 				/ AC,MQ = D2 shifted
 	SWP
-	DCA	IO27D2
-	TAD	IO27D1
+	DCA	IO36D2
+	TAD	IO36D1
 	SWP
 	MUY
 		0010
 	SWP
-	DCA	IO27D1
-	JMP	IO27RD
+	DCA	IO36D1
+	JMP	IO36RD
 
-IO27EX,
-	TAD	IO27CH		/ echo terminator
+IO36EX,
+	TAD	IO36CH		/ echo terminator
 	JMS I	_PRCHAR
 	CLA CMA			/ get output pointer
-	TAD I	IOCT27
-	ISZ	IOCT27
+	TAD I	IOCT36
+	ISZ	IOCT36
 	DCA	AI10
-	TAD	IO27D1		/ copy out result
+	TAD	IO36D1		/ copy out result
 	DCA I	AI10
-	TAD	IO27D2
+	TAD	IO36D2
 	DCA I	AI10
-	TAD	IO27D3
+	TAD	IO36D3
 	DCA I	AI10
-	JMP I	IOCT27		/ return
+	JMP I	IOCT36		/ return
 
-IO27CH,	0
-IO27D1,	0
-IO27D2,	0
-IO27D3,	0
-IO27NT,	0
+IO36CH,	0
+IO36D1,	0
+IO36D2,	0
+IO36D3,	0
+IO36NT,	0
 
 *0600
 
-/ print a 54-bit octal number
-/	JMS	POCT54
+/ print a 72-bit octal number
+/	JMS	POCT72
 /		6wordbuff
-POCT54,	0
-	TAD I	POCT54		/ get buff pointer
-	ISZ	POCT54
-	DCA	PO54BP
+POCT72,	0
+	TAD I	POCT72		/ get buff pointer
+	ISZ	POCT72
+	DCA	PO72BP
 	TAD	_7772		/ print 6 words
-	DCA	PO54CT
-PO54LP,
-	TAD I	PO54BP
-	ISZ	PO54BP
+	DCA	PO72CT
+PO72LP,
+	TAD I	PO72BP
 	JMS	POCTAL
-	ISZ	PO54CT
-	JMP	PO54LP
-	JMP I	POCT54
+	CMA
+	TAD	PO72BP
+	DCA	PO72BP
+	ISZ	PO72CT
+	JMP	PO72LP
+	JMP I	POCT72
 
-PO54BP,	0
-PO54CT,	0
+PO72BP,	0
+PO72CT,	0
 
+/ print AC in octal
+/  input:
+/   AC = number to print
+/  output:
+/   AC,MQ = zero
 POCTAL,	0
-	MQL
-	TAD	_7774
+	MQL			/ stick number to print in MQ
+	TAD	_7774		/ set up num digits to print
 	DCA	POCTCT
 POCTLP,
-	SHL
+	SHL			/ get 3 bits from MQ into AC
 		0002
-	TAD	_0060
-	JMS I	_PRCHAR
-	ISZ	POCTCT
+	TAD	_0060		/ convert to ascii
+	JMS I	_PRCHAR		/ print
+	ISZ	POCTCT		/ go on to next
 	JMP	POCTLP
-	JMP I	POCTAL
+	JMP I	POCTAL		/ done
 
 POCTCT,	0
 
+/ print AC in decimal
+/  input:
+/   AC = number to print
+/  output:
+/   AC,MQ = zero
+PDECML,	0
+	MQL			/ stick number to print in MQ
+	DVI			/ divide by 1000.
+		1750
+	SWP			/ print quotient
+	TAD	_0060
+	JMS I	_PRCHAR
+	DVI			/ divide by 100.
+		0144
+	SWP
+	TAD	_0060
+	JMS I	_PRCHAR
+	DVI			/ divide by 10.
+		0012
+	SWP
+	TAD	_0060
+	JMS I	_PRCHAR
+	SWP
+	TAD	_0060
+	JMS I	_PRCHAR
+	JMP I	PDECML
+
 *2000
 
-	/      @OAC1,2,3  7 7777 7777
-	/     x  OP1,2,3  7 7777 7777
-	/ --------------
-	/                     [AC3.OP3]                          7776  0001
-	/                                                        mul5
-	/                [AC2.OP3]                         7776  0001
-	/                                                  mul4  mul5
-	/                [AC3.OP2]                         7776  0001
-	/                                            mul3  mul4
-	/           [AC1.OP3]                        0006  7771
-	/           [AC3.OP1]                        0006  7771
-	/           [AC2.OP2]                        7776  0001
-	/      [AC1.OP2]                       0006  7771
-	/      [AC2.OP1]                       0006  7771
-	/ [AC1.OP1]                      0000  0061
-	/ -----------------------------  ----  ----  ----  ----  ----  ----
-	/ MUL1 MUL2 MUL3 MUL4 MUL5 MUL6  0000  0075 27774 37757 10000  0001
-	/ -----------------------------  ----  ----  ----  ----  ----  ----
-	/                                0000  0077  7777  7760  0000  0001
-	/                                      [    result    ]
+	/        AC1,2,3  7777 7777 7777
+	/     x  OP1,2,3  7777 7777 7777
+	/ ------------------------------
+	/                      [AC3.OP3]
+	/                 [AC2.OP3]
+	/                 [AC3.OP2]
+	/            [AC1.OP3]
+	/            [AC3.OP1]
+	/            [AC2.OP2]
+	/       [AC1.OP2]
+	/       [AC2.OP1]
+	/  [AC1.OP1]
+	/ ------------------------------
+	/  MUL1 MUL2 MUL3 MUL4 MUL5 MUL6
+	/ ------------------------------
 
-AC1,	0	/ one number to multiply
-AC2,	0
-AC3,	0
-OP1,	0	/ other number to multiply
-OP2,	0
-OP3,	0
-MUL1,	0	/ resultant product
-MUL2,	0
-MUL3,	0
-MUL4,	0
-MUL5,	0
-MUL6,	0
+/ multiply two 36-bit numbers
+/ return 72-bit product
+/  input:
+/   AC1,2,3 = one operand
+/   OP1,2,3 = other operand
+/   AC = 0
+/  output:
+/   MUL1,2,3,4,5,6 = product
+/   MUL0 = scratch (should still be zero)
+/   MULuS = execution time in uS
+/   AI11,12,13,14 = scratch
+/   AC = 0
 
-/ multiply two 27-bit numbers
-/ return 54-bit product
-MUL27,	0 
+/ 620..650uS @ 1.5uS cycle time
 
-	/ AC3.OP3  =>  MUL5,6
-	TAD	AC3	/ load OAC3 into Y
-	DCA	MUY1
-	TAD	OP3	/ load OP3 into MQ
-	MQL		/ ...leaving AC clear
-	MUY
-MUY1,	0
-	DCA	MUL5	/ top bits (max 7776) => MUL5
-	MQA		/ don't bother with MUL6
+MUL36,	0 
+
+	CLCA			/ read 1uS counter
+	CMA IAC
+	DCA	MULuS
+
+	DCA	MUL1
+	DCA	MUL2
+	DCA	MUL3
+	DCA	MUL4
+	DCA	MUL5
 	DCA	MUL6
 
-	/                     [AC3.OP3]                          7776  0001
-	/                                                        mul5
+	TAD	_7745		/ -27.
+	DCA	MULCT1
 
-	/ AC2.OP3 + MUL5  => MUL4,5
-	TAD	AC2	/ load OAC2 into Y
-	DCA	MUY2
-	TAD	OP3	/ load OP3 into MQ
-	MQL		/ ...leaving AC clear
-	TAD	MUL5	/ add in upper result from previous multiply
-	MUY
-MUY2,	0
-	DCA	MUL4	/ top bits (max 7776) => MUL4
-	MQA
-	DCA	MUL5	/ low bits (max 7777) => MUL5
-
-	/                     [AC3.OP3]                          7776  0001
-	/                [AC2.OP3]                         7776  0001
-	/                                                  ----  ----
-	/                                                  7776  7777
-	/                                                  mul4  mul5
-
-	/ AC3.OP2 + MUL4,5 => MUL4,5
-	TAD	AC3	/ load OAC3 into Y
-	DCA	MUY3
-	TAD	OP2	/ load OP2 into MQ
-	MQL		/ ...leaving AC clear
-	TAD	MUL5	/ add in upper result from previous multiply
-	MUY
-MUY3,	0
+MULOP1,
+	CLA CLL
+	TAD	MUL6
+	RAL
+	DCA	MUL6
+	TAD	MUL5
+	RAL
+	DCA	MUL5
 	TAD	MUL4
+	RAL
 	DCA	MUL4
+	TAD	MUL3
 	RAL
 	DCA	MUL3
-	MQA
-	DCA	MUL5	/ low bits (max 7777) => MUL5
-
-	/                                                  7776  7777
-	/                [AC3.OP2]                         7776  0001
-	/                                            ----  ----  ----
-	/                                               1  7776  0000
-	/                                            mul3  mul4  mul5
-
-	/ AC1.OP3 + MUL3,4 => MUL3,4
-	TAD	AC1	/ load OAC1 into Y
-	DCA	MUY4
-	TAD	OP3	/ load OP2 into MQ
-	MQL		/ ...leaving AC clear
-	TAD	MUL4	/ add in upper result from previous multiply
-	MUY
-MUY4,	0
-	TAD	MUL3
-	DCA	MUL3
-	MQA
-	DCA	MUL4
-
-	/                                               1  7776  0000
-	/           [AC1.OP3]                        0006  7771
-	/                                            ----  ----  ----
-	/                                            0010  7767  0000
-	/                                            mul3  mul4  mul5
-
-	/ AC3.OP1 + MUL3,4 => MUL3,4
-	TAD	AC3	/ load OAC3 into Y
-	DCA	MUY5
-	TAD	OP1	/ load OP1 into MQ
-	MQL		/ ...leaving AC clear
-	TAD	MUL4	/ add in upper result from previous multiply
-	MUY
-MUY5,	0
-	TAD	MUL3
-	DCA	MUL3
-	MQA
-	DCA	MUL4
-
-	/                                            0010  7767  0000
-	/           [AC3.OP1]                        0006  7771
-	/                                            ----  ----  ----
-	/                                            0017  7760  0000
-	/                                            mul3  mul4  mul5
-
-	/ AC2.OP2 + MUL3,4 => MUL3,4
-	TAD	AC2	/ load OAC2 into Y
-	DCA	MUY6
-	TAD	OP2	/ load OP2 into MQ
-	MQL		/ ...leaving AC clear
-	TAD	MUL4	/ add in upper result from previous multiply
-	MUY
-MUY6,	0
-	TAD	MUL3
-	DCA	MUL3
+	TAD	MUL2
 	RAL
 	DCA	MUL2
-	MQA
+	TAD	MUL1
+	RAL
+	DCA	MUL1
+	TAD	OP3
+	RAL
+	DCA	OP3
+	TAD	OP2
+	RAL
+	DCA	OP2
+	TAD	OP1
+	RAL
+	DCA	OP1
+	TAD	OP1
+	AND	_0010
+	SNA CLA
+	JMP	MULNAD
+	CLA CLL
+	TAD	MUL6
+	TAD	AC3
+	DCA	MUL6
+	RAL
+	TAD	MUL5
+	TAD	AC2
+	DCA	MUL5
+	RAL
+	TAD	MUL4
+	TAD	AC1
 	DCA	MUL4
+	SNL
+	JMP	MULNAD
+	ISZ	MUL3
+	JMP	MULNAD
+	ISZ	MUL2
+	JMP	MULNAD
+	ISZ	MUL1
+MULNAD,
+	ISZ	MULCT1
+	JMP	MULOP1
 
-	/                                            0017  7760  0000
-	/           [AC2.OP2]                        7776  0001
-	/                                      mul2  mul3  mul4  mul5
-	/                                      ----  ----  ----  ----
-	/                                         1  0015  7761  0000
+	CLCA			/ read 1uS counter
+	TAD	MULuS
+	DCA	MULuS
 
-	/ AC1.OP2 + MUL2,3 => MUL2,3
-	TAD	AC1	/ load OAC1 into Y
-	DCA	MUY7
-	TAD	OP2	/ load OP2 into MQ
-	MQL		/ ...leaving AC clear
-	TAD	MUL3	/ add in upper result from previous multiply
-	MUY
-MUY7,	0
-	TAD	MUL2
-	DCA	MUL2
-	MQA
-	DCA	MUL3
+	JMP I	MUL36
 
-	/                                         1  0015  7761  0000
-	/      [AC1.OP2]                       0006  7771
-	/                                      mul2  mul3  mul4  mul5
-	/                                      ----  ----  ----  ----
-	/                                      0010  0006  7761  0000
-
-	/ AC2.OP1 + MUL2,3 => MUL2,3
-	TAD	AC2	/ load OAC2 into Y
-	DCA	MUY8
-	TAD	OP1	/ load OP1 into MQ
-	MQL		/ ...leaving AC clear
-	TAD	MUL3	/ add in upper result from previous multiply
-	MUY
-MUY8,	0
-	TAD	MUL2
-	DCA	MUL2
-	MQA
-	DCA	MUL3
-
-	/                                      0010  0006  7761  0000
-	/      [AC2.OP1]                       0006  7771
-	/                                      mul2  mul3  mul4  mul5
-	/                                      ----  ----  ----  ----
-	/                                      0016  7777  7761  0000
-
-	/ AC1.OP1 + MUL2 => MUL1,2
-	TAD	AC1	/ load OAC1 into Y
-	DCA	MUY9
-	TAD	OP1	/ load OP1 into MQ
-	MQL		/ ...leaving AC clear
-	TAD	MUL2	/ add in upper result from previous multiply
-	MUY
-MUY9,	0
-	DCA	MUL1	/ upper bits always 0
-	MQA
-	DCA	MUL2	/ save low bits
-
-	/                                      0016  7777  7761  0000
-	/ [AC1.OP1]                      0000  0061
-	/                                      mul2  mul3  mul4  mul5
-	/                                      ----  ----  ----  ----
-	/                                      0077  7777  7761  0000
-
-	JMP I	MUL27
+MULCT1,	0
 
