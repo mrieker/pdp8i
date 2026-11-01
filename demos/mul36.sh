@@ -2,6 +2,9 @@
 #
 #  run mul36 for autotesting
 #
+#   ./mul36.sh -real   run on real boards
+#   ./mul36.sh -sim    run on simulator
+#
 set -e
 if [ mul36.bin -ot mul36.pal ]
 then
@@ -15,5 +18,5 @@ if [ mul36tst.$unamem -ot mul36tst.cc ]
 then
     g++ -O2 -Werror -std=c++11 -g -Wall -o mul36tst.$unamem -I../ccode mul36tst.cc ../ccode/lib.$unamem.a
 fi
-../ccode/z8ipanel -sim mul36.tcl
+../ccode/z8ipanel "$@" mul36.tcl
 exec ./mul36tst.$unamem

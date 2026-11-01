@@ -9,6 +9,7 @@ then
     ../ccode/pdp8v/asm/assemble eaetest.asm eaetest.obj > eaetest.lis
     ../ccode/pdp8v/asm/link -o eaetest.oct eaetest.obj > eaetest.map
     ../ccode/pdp8v/asm/octtobin < eaetest.oct > eaetest.bin
+    rm eaetest.lis eaetest.map eaetest.obj eaetest.oct
 fi
 ../ccode/z8ipanel "$@" eaetest.tcl
 exec ../ccode/z8itty -nokb -cps 960
