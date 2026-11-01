@@ -12,7 +12,7 @@ proc helpini {} {
     puts "  checkttyprompt           - check tty for prompt and send reply string"
     puts "  clearmem                 - clear all 32KW memory"
     puts "  disas <start> <stop>     - disassemble given range"
-    puts "  dmacycle <addr> [<data>] - do dma cycle to access memory while running"
+    puts "  dmacycle <addr> \[<data>\] - do dma cycle to access memory while running"
     puts "  domemcyc <switch>        - do switch-initiated memory cycle"
     puts "  dumpit                   - dump registers and switches"
     puts "  dumpmem <start> <stop>   - dump memory in octal"
@@ -30,6 +30,7 @@ proc helpini {} {
     puts "  loadrim <filename>       - load rim file via console, verify"
     puts "  loop52                   - set up and start 5252: jmp 5252"
     puts "  octal <val>              - convert value to 4-digit octal string"
+    puts "  poisonmem                - shadow freeze if read of non-initialized memory"
     puts "  postinc <var>            - increment var but return its previous value"
     puts "  rdmem <addr>             - read memory at the given address"
     puts "  readloop <addr> ...      - continuously read the addresses until CTRLC"
@@ -163,7 +164,7 @@ proc checkttyprompt {prompt reply {tmsec 30000}} {
     sendchartottykb "\r"
 }
 
-# set all 32KW memory to known values
+# set all 32KW memory to zeroes
 proc clearmem {} {
     hardreset
     assem 000 iot 06201 ;# CDF set DFLD
@@ -193,6 +194,7 @@ proc clearmem {} {
         if {$delmc > 250000} {error "clearmem: too many cycles"}
         after 100
     }
+    for {set i 0} {! [ctrlcflag] && ($i < 020)} {incr i} {wrmem $i 0}
 }
 
 # get exclusive access (co-operative) to pdp8icmem.v device by the calling process
@@ -314,9 +316,9 @@ proc dumpmem {start stop} {
 
 # dump light bulbs and switches
 proc dumpit {} {
-    set lbs [getlb ac ea ion ir link ma mb mq ms pc run sc]
+    set lbs [getlb ac if ion ir link ma mb mq ms pc run sc]
     set ac   [lindex $lbs  0]
-    set ea   [lindex $lbs  1]
+    set ifld [lindex $lbs  1]
     set ion  [lindex $lbs  2]
     set ir   [lindex $lbs  3]
     set link [lindex $lbs  4]
@@ -342,8 +344,13 @@ proc dumpit {} {
 
     set mne [string range "ANDTADISZDCAJMSJMPIOTOPR" [expr {$ir * 3}] [expr {$ir * 3 + 2}]]
 
-    return [format "%s %s MS=%-5s AC=%o.%04o MA=%o.%04o MB=%04o MQ=%04o PC=%04o SC=%02o IR=%s  %s" \
-        [expr {$run ? "RUN" : "   "}] [expr {$ion ? "ION" : "   "}] $ms $link $ac $ea $ma $mb $mq $pc $sc $mne $sw]
+    set rc [format "%s %s MS=%-5s AC=%o.%04o MA=%o.%04o MB=%04o MQ=%04o PC=%04o SC=%02o IR=%s  %s" \
+        [expr {$run ? "RUN" : "   "}] [expr {$ion ? "ION" : "   "}] $ms $link $ac $ifld $ma $mb $mq $pc $sc $mne $sw]
+
+    set se [shaderr]
+    if {$se != ""} {foreach s $se {append rc "\n$s"}}
+
+    return $rc
 }
 
 ;# convert given character to escaped form if necessary
@@ -786,6 +793,15 @@ proc octal {val} {
     return [format %04o $val]
 }
 
+# poison all 32KW memory
+# any subsequent read without a prior write will cause pdp8ishad.v to freeze processor
+proc poisonmem {} {
+    clearmem
+    for {set i 0} {! [ctrlcflag] && ($i < 077777)} {incr i} {
+        wrextmem $i 07777
+    }
+}
+
 # increment a variable but return its previous value
 # useful for doing series of assem commands
 # http://www.tcl.tk/man/tcl8.6/TclCmd/upvar.htm
@@ -885,7 +901,6 @@ proc rdmem {addr} {
 
 # - direct access to externmem within zynq.v
 proc rdextmem {addr} {
-    if {! [pin fpgamemen]} {error "external memory not enabled"}
     pin set extmemaddr $addr extmemread 1
     return [pin extmemrdat]
 }
@@ -1124,7 +1139,6 @@ proc wrmem {addr data} {
 
 # - direct access to externmem within zynq.v
 proc wrextmem {addr data} {
-    if {! [pin fpgamemen]} {error "external memory not enabled"}
     pin set extmemaddr $addr extmemwdat $data extmemwrite 1
 }
 

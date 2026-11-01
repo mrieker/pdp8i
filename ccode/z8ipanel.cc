@@ -39,6 +39,7 @@
 #include "disassemble.h"
 #include "i2czlib.h"
 #include "readprompt.h"
+#include "shaderr.h"
 #include "tclmain.h"
 #include "z8idefs.h"
 #include "z8iutil.h"
@@ -73,6 +74,7 @@ static Tcl_ObjCmdProc cmd_getsw;
 static Tcl_ObjCmdProc cmd_readchar;
 static Tcl_ObjCmdProc cmd_relsw;
 static Tcl_ObjCmdProc cmd_setsw;
+static Tcl_ObjCmdProc cmd_shaderr;
 
 static TclFunDef const fundefs[] = {
     { cmd_assemop,    "assemop",    "assemble instruction" },
@@ -83,6 +85,7 @@ static TclFunDef const fundefs[] = {
     { cmd_readchar,   "readchar",   "read character with timeout" },
     { cmd_relsw,      "relsw",      "release control of switch" },
     { cmd_setsw,      "setsw",      "set switch value" },
+    { cmd_shaderr,    "shaderr",    "read and decode shadow error" },
     { NULL, NULL, NULL }
 };
 
@@ -257,7 +260,6 @@ static int cmd_getlb (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_O
         puts ("   multi-bit lights:");
         puts ("      ac - accumulator");
         puts ("      df - data field 0..7");
-        puts ("      ea - extended address 0..7");
         puts ("      if - instruction field 0..7");
         puts ("      ir - instruction register 0..7");
         puts ("      ma - memory address");
@@ -292,6 +294,7 @@ static int cmd_getlb (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_O
         if (strcasecmp (regname, "if")   == 0) regval = pads.light.ifld;
         if (strcasecmp (regname, "ion")  == 0) regval = pads.light.ion;
         if (strcasecmp (regname, "link") == 0) regval = pads.light.link;
+        if (strcasecmp (regname, "pau")  == 0) regval = pads.light.pau;
         if (strcasecmp (regname, "pc")   == 0) regval = pads.light.pc;
         if (strcasecmp (regname, "run")  == 0) regval = pads.light.run;
         if (strcasecmp (regname, "sc")   == 0) regval = pads.light.sc;
@@ -444,7 +447,7 @@ static int cmd_setsw (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_O
         puts ("");
         puts (" setsw <switchname> <switchvalue>...");
         for (Switch const *sw = sws.list; sw->name != NULL; sw ++) {
-            printf ("      %s\n", sw->name);
+            printf ("      %-8s  0..0%o\n", sw->name, (1 << sw->nbits) - 1);
         }
         puts ("");
         return TCL_OK;
@@ -469,6 +472,24 @@ static int cmd_setsw (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_O
     gotit:;
     }
     return TCL_OK;
+}
+
+// read and decode shadow error
+static int cmd_shaderr (ClientData clientdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
+{
+    if (objc == 1) {
+        std::string str;
+        str.push_back ('{');
+        shaderr (&str, "} {");
+        if (str.length () > 1) {
+            str.push_back ('}');
+            Tcl_SetResultF (interp, "%s", str.c_str ());
+        }
+        return TCL_OK;
+    }
+
+    Tcl_SetResult (interp, (char *) "bad number of arguments", TCL_STATIC);
+    return TCL_ERROR;
 }
 
 
