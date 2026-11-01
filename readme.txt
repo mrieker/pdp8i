@@ -67,6 +67,7 @@ Directories:
 
     ccode    - C programs that run on the Zynq
     demos    - some PDP-8/I programs
+    edu20c   - edusystem 20 basic
     kicads   - circuit boards
     verisim  - Verilator for testing circuit design
     zplin    - Zynq compatible Linux (softlink to pdp8l repo zplin)
